@@ -2,132 +2,340 @@ import { auth, db } from "../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, doc, getDoc, setDoc, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const state = { user:null, profile:null };
+const state = { user: null, profile: null };
 const $ = id => document.getElementById(id);
-const toast = (m,t="success") => window.showFounderToast ? window.showFounderToast(m,t) : alert(m);
-const controlRef = () => doc(db,"platform_controls","global");
+const toast = (message, type = "success") => window.showFounderToast ? window.showFounderToast(message, type) : alert(message);
+const controlRef = () => doc(db, "platform_controls", "global");
 
-async function requireFounder(user){
- const s=await getDoc(doc(db,"founder",user.uid));
- if(!s.exists()) throw Error("Founder profile not found.");
- const p=s.data();
- if(p.role && p.role!=="founder") throw Error("Founder access required.");
- if(p.status && p.status!=="active") throw Error("Founder account is not active.");
- state.user=user; state.profile=p;
+async function requireFounder(user) {
+    const snapshot = await getDoc(doc(db, "founder", user.uid));
+    if (!snapshot.exists()) throw Error("Founder profile not found.");
+
+    const profile = snapshot.data();
+    if (profile.role && profile.role !== "founder") throw Error("Founder access required.");
+    if (profile.status && profile.status !== "active") throw Error("Founder account is not active.");
+
+    state.user = user;
+    state.profile = profile;
 }
 
-async function audit(message,action,details={}){
- return addDoc(collection(db,"audit_logs"),{actor_id:state.user.uid,actor_email:state.user.email||"",action,target_type:"platform",target_id:"global",details,message,created_at:serverTimestamp()});
+async function audit(message, action, details = {}) {
+    return addDoc(collection(db, "audit_logs"), {
+        actor_id: state.user.uid,
+        actor_email: state.user.email || "",
+        action,
+        target_type: "platform",
+        target_id: "global",
+        details,
+        message,
+        created_at: serverTimestamp()
+    });
 }
 
-async function setPortalState(target,suspended){
- const s=await getDoc(controlRef()), current=s.exists()?s.data():{};
- await setDoc(controlRef(),{...current,[target]:{...(current[target]||{}),suspended,updated_at:serverTimestamp(),updated_by:state.user.uid},updated_at:serverTimestamp()},{merge:true});
- await audit(`${target} portal ${suspended?"suspended":"restored"}`,suspended?"portal_suspended":"portal_restored",{target});
- toast(`${target==="student"?"Student":"Instructor"} portal ${suspended?"suspended":"restored"}.`);
+async function writeControls(patch, auditMessage, action, details = {}) {
+    await setDoc(controlRef(), {
+        ...patch,
+        updated_at: serverTimestamp(),
+        updated_by: state.user.uid
+    }, { merge: true });
+
+    await audit(auditMessage, action, details);
 }
 
-async function setLockdown(active){
- await setDoc(controlRef(),{lockdown:active,updated_at:serverTimestamp(),updated_by:state.user.uid},{merge:true});
- await audit(active?"Emergency lockdown activated":"Emergency lockdown lifted",active?"lockdown_enabled":"lockdown_disabled");
- toast(active?"Emergency lockdown activated.":"Lockdown lifted.");
+async function setPortalState(target, suspended) {
+    const snapshot = await getDoc(controlRef());
+    const current = snapshot.exists() ? snapshot.data() : {};
+    const label = target === "student" ? "Student" : "Instructor";
+
+    await writeControls(
+        {
+            [target]: {
+                ...(current[target] || {}),
+                suspended,
+                updated_at: serverTimestamp(),
+                updated_by: state.user.uid
+            }
+        },
+        `${label} portal ${suspended ? "suspended" : "restored"}`,
+        suspended ? "portal_suspended" : "portal_restored",
+        { target }
+    );
+
+    toast(`${label} portal ${suspended ? "suspended" : "restored"}.`);
 }
 
-function formatDate(v){const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleString();}
-function renderMaintenance(m){
- const el=$("scheduleInfo"); if(!el)return;
- if(!m?.scheduled){el.textContent="No maintenance window scheduled.";return;}
- const s=new Date(m.start).getTime(),e=new Date(m.end).getTime(),now=Date.now();
- if(!Number.isFinite(s)||!Number.isFinite(e)){el.textContent="Invalid maintenance schedule.";return;}
- const target=m.target==="all"?"Student + Instructor":m.target==="student"?"Student Portal":"Instructor Portal";
- const status=now>=e?"Expired":now>=s?"LIVE NOW":"Scheduled";
- el.innerHTML=`<strong>${status}</strong> · ${target}<br>${formatDate(m.start)} → ${formatDate(m.end)}<br><span>${m.message||"Scheduled maintenance."}</span>`;
+async function setLockdown(active) {
+    const snapshot = await getDoc(controlRef());
+    const current = snapshot.exists() ? snapshot.data() : {};
+
+    // Lockdown is deliberately authoritative: it updates both portal states
+    // so every consumer of platform_controls can enforce the emergency state.
+    await writeControls(
+        {
+            lockdown: active,
+            student: {
+                ...(current.student || {}),
+                suspended: active,
+                updated_at: serverTimestamp(),
+                updated_by: state.user.uid
+            },
+            instructor: {
+                ...(current.instructor || {}),
+                suspended: active,
+                updated_at: serverTimestamp(),
+                updated_by: state.user.uid
+            }
+        },
+        active ? "Emergency lockdown activated" : "Emergency lockdown lifted",
+        active ? "lockdown_enabled" : "lockdown_disabled",
+        { affects: ["student", "instructor"] }
+    );
+
+    toast(active ? "Emergency lockdown activated." : "Lockdown lifted.");
 }
 
-function renderControls(d={}){
- const ss=!!d.student?.suspended,is=!!d.instructor?.suspended,lock=!!d.lockdown;
- $("studentState").textContent=ss?"Suspended":"Online";
- $("instructorState").textContent=is?"Suspended":"Online";
- $("lockdownState").textContent=lock?"ACTIVE":"Inactive";
- $("studentToggle").textContent=ss?"Restore Student Portal":"Suspend Student Portal";
- $("instructorToggle").textContent=is?"Restore Instructor Portal":"Suspend Instructor Portal";
- $("lockdownToggle").textContent=lock?"Lift Lockdown":"Activate Lockdown";
- $("globalStatus").innerHTML=lock?"<span></span> Emergency Lockdown":ss||is?"<span></span> Limited Availability":"<span></span> All Systems Online";
- renderMaintenance(d.maintenance);
+function formatDate(value) {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
-function listenControls(){onSnapshot(controlRef(),s=>renderControls(s.exists()?s.data():{}));}
-function listenAuditLog(){
- const q=query(collection(db,"audit_logs"),orderBy("created_at","desc"),limit(30));
- onSnapshot(q,s=>{
-  const log=$("commandLog");
-  if(!s.docs.length){log.innerHTML='<div class="empty">No command activity yet.</div>';return;}
-  log.innerHTML=s.docs.map(x=>{const d=x.data();return `<div class="command-entry"><strong>${d.message||d.action||"Command executed"}</strong><small>${d.actor_email||"Founder"} · ${d.created_at?.toDate?d.created_at.toDate().toLocaleString():"Just now"}</small></div>`}).join("");
- });
+function renderMaintenance(maintenance) {
+    const element = $("scheduleInfo");
+    if (!element) return;
+
+    if (!maintenance?.scheduled) {
+        element.textContent = "No maintenance window scheduled.";
+        return;
+    }
+
+    const start = new Date(maintenance.start).getTime();
+    const end = new Date(maintenance.end).getTime();
+    const now = Date.now();
+
+    if (!Number.isFinite(start) || !Number.isFinite(end)) {
+        element.textContent = "Invalid maintenance schedule.";
+        return;
+    }
+
+    const target = maintenance.target === "all"
+        ? "Student + Instructor"
+        : maintenance.target === "student"
+            ? "Student Portal"
+            : "Instructor Portal";
+
+    const status = now >= end ? "Expired" : now >= start ? "LIVE NOW" : "Scheduled";
+
+    element.innerHTML = `
+        <strong>${status}</strong> · ${target}<br>
+        ${formatDate(maintenance.start)} → ${formatDate(maintenance.end)}<br>
+        <span>${maintenance.message || "Scheduled maintenance."}</span>
+    `;
 }
 
-async function scheduleMaintenance(){
- const target=$("maintenanceTarget").value,start=$("maintenanceStart").value,end=$("maintenanceEnd").value,message=$("maintenanceMessage").value.trim();
- if(!start||!end) throw Error("Choose both a start and end time.");
- const s=new Date(start),e=new Date(end);
- if(!Number.isFinite(s.getTime())||!Number.isFinite(e.getTime())) throw Error("Please enter valid maintenance dates.");
- if(e<=s) throw Error("End time must be after start time.");
- if(e<=new Date()) throw Error("Maintenance must end in the future.");
- const maintenance={scheduled:true,target,start:s.toISOString(),end:e.toISOString(),message:message||"SSA is temporarily offline for scheduled maintenance.",scheduled_by:state.user.uid,scheduled_by_email:state.user.email||"",scheduled_at:serverTimestamp()};
- await setDoc(controlRef(),{maintenance,updated_at:serverTimestamp(),updated_by:state.user.uid},{merge:true});
- await audit("Maintenance window scheduled","maintenance_scheduled",{target,start:maintenance.start,end:maintenance.end,message:maintenance.message});
- renderMaintenance(maintenance); toast("Maintenance window scheduled successfully.");
+function renderControls(data = {}) {
+    const studentSuspended = !!data.student?.suspended;
+    const instructorSuspended = !!data.instructor?.suspended;
+    const lockdown = !!data.lockdown;
+
+    if ($("studentState")) $("studentState").textContent = studentSuspended ? "Suspended" : "Online";
+    if ($("instructorState")) $("instructorState").textContent = instructorSuspended ? "Suspended" : "Online";
+    if ($("lockdownState")) $("lockdownState").textContent = lockdown ? "ACTIVE" : "Inactive";
+
+    if ($("studentToggle")) $("studentToggle").textContent = studentSuspended ? "Restore Student Portal" : "Suspend Student Portal";
+    if ($("instructorToggle")) $("instructorToggle").textContent = instructorSuspended ? "Restore Instructor Portal" : "Suspend Instructor Portal";
+    if ($("lockdownToggle")) $("lockdownToggle").textContent = lockdown ? "Lift Lockdown" : "Activate Lockdown";
+
+    if ($("globalStatus")) {
+        $("globalStatus").innerHTML = lockdown
+            ? "<span></span> Emergency Lockdown"
+            : studentSuspended || instructorSuspended
+                ? "<span></span> Limited Availability"
+                : "<span></span> All Systems Online";
+    }
+
+    renderMaintenance(data.maintenance);
 }
 
-async function cancelMaintenance(){
- await setDoc(controlRef(),{maintenance:{scheduled:false,cancelled_at:serverTimestamp(),cancelled_by:state.user.uid},updated_at:serverTimestamp(),updated_by:state.user.uid},{merge:true});
- await audit("Scheduled maintenance cancelled","maintenance_cancelled");
- $("scheduleInfo").textContent="No maintenance window scheduled."; toast("Scheduled maintenance cancelled.");
+function listenControls() {
+    onSnapshot(controlRef(), snapshot => {
+        renderControls(snapshot.exists() ? snapshot.data() : {});
+    }, error => {
+        console.error("Control listener failed:", error);
+        toast("Unable to read platform controls.", "error");
+    });
 }
 
-function bindEvents(){
- $("studentToggle").onclick=async()=>{try{const s=await getDoc(controlRef());await setPortalState("student",!s.data()?.student?.suspended)}catch(e){toast(e.message,"error")}};
- $("instructorToggle").onclick=async()=>{try{const s=await getDoc(controlRef());await setPortalState("instructor",!s.data()?.instructor?.suspended)}catch(e){toast(e.message,"error")}};
- $("lockdownToggle").onclick = async () => {
-    try {
-        const s = await getDoc(controlRef());
-        const active = !!s.data()?.lockdown;
+function listenAuditLog() {
+    const commandLog = $("commandLog");
+    if (!commandLog) return;
 
-        if (!active) {
-            const confirmed = confirm(
-                "⚠️ EMERGENCY LOCKDOWN\\n\\n" +
-                "This will immediately restrict BOTH the Student and Instructor portals.\\n\\n" +
-                "Continue?"
-            );
+    const q = query(
+        collection(db, "audit_logs"),
+        orderBy("created_at", "desc"),
+        limit(30)
+    );
 
-            if (!confirmed) return;
+    onSnapshot(q, snapshot => {
+        if (!snapshot.docs.length) {
+            commandLog.innerHTML = '<div class="empty">No command activity yet.</div>';
+            return;
         }
 
-        $("lockdownToggle").disabled = true;
-
-        await setLockdown(!active);
-
-    } catch (e) {
-
-        console.error("Lockdown error:", e);
-
-        toast(
-            e.message || "Unable to change lockdown status.",
-            "error"
-        );
-
-    } finally {
-
-        $("lockdownToggle").disabled = false;
-
-    }
-};
- $("scheduleBtn").onclick=async()=>{try{$("scheduleBtn").disabled=true;await scheduleMaintenance()}catch(e){toast(e.message,"error")}finally{$("scheduleBtn").disabled=false}};
- $("cancelScheduleBtn").onclick=async()=>{try{$("cancelScheduleBtn").disabled=true;await cancelMaintenance()}catch(e){toast(e.message,"error")}finally{$("cancelScheduleBtn").disabled=false}};
+        commandLog.innerHTML = snapshot.docs.map(item => {
+            const data = item.data();
+            return `
+                <div class="command-entry">
+                    <strong>${data.message || data.action || "Command executed"}</strong>
+                    <small>${data.actor_email || "Founder"} · ${data.created_at?.toDate ? data.created_at.toDate().toLocaleString() : "Just now"}</small>
+                </div>
+            `;
+        }).join("");
+    }, error => {
+        console.error("Audit listener failed:", error);
+        commandLog.innerHTML = '<div class="empty">Command history is temporarily unavailable.</div>';
+    });
 }
 
-onAuthStateChanged(auth,async user=>{
- if(!user){window.location.replace("../login.html");return;}
- try{await requireFounder(user);listenControls();listenAuditLog();bindEvents();console.log("🔥 Founder Command Center connected to Firebase.");}
- catch(e){console.error(e);toast(e.message,"error");setTimeout(()=>window.location.replace("../login.html"),1500);}
+async function scheduleMaintenance() {
+    const target = $("maintenanceTarget").value;
+    const start = $("maintenanceStart").value;
+    const end = $("maintenanceEnd").value;
+    const message = $("maintenanceMessage").value.trim();
+
+    if (!start || !end) throw Error("Choose both a start and end time.");
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (!Number.isFinite(startDate.getTime()) || !Number.isFinite(endDate.getTime())) {
+        throw Error("Please enter valid maintenance dates.");
+    }
+
+    if (endDate <= startDate) throw Error("End time must be after start time.");
+    if (endDate <= new Date()) throw Error("Maintenance must end in the future.");
+
+    const maintenance = {
+        scheduled: true,
+        target,
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+        message: message || "SSA is temporarily offline for scheduled maintenance.",
+        scheduled_by: state.user.uid,
+        scheduled_by_email: state.user.email || "",
+        scheduled_at: serverTimestamp()
+    };
+
+    await writeControls(
+        { maintenance },
+        "Maintenance window scheduled",
+        "maintenance_scheduled",
+        { target, start: maintenance.start, end: maintenance.end, message: maintenance.message }
+    );
+
+    renderMaintenance(maintenance);
+    toast("Maintenance window scheduled successfully.");
+}
+
+async function cancelMaintenance() {
+    await writeControls(
+        {
+            maintenance: {
+                scheduled: false,
+                cancelled_at: serverTimestamp(),
+                cancelled_by: state.user.uid
+            }
+        },
+        "Scheduled maintenance cancelled",
+        "maintenance_cancelled"
+    );
+
+    if ($("scheduleInfo")) $("scheduleInfo").textContent = "No maintenance window scheduled.";
+    toast("Scheduled maintenance cancelled.");
+}
+
+function bindEvents() {
+    $("studentToggle").onclick = async () => {
+        try {
+            const snapshot = await getDoc(controlRef());
+            await setPortalState("student", !snapshot.data()?.student?.suspended);
+        } catch (error) {
+            console.error("Student portal control failed:", error);
+            toast(error.message || "Unable to change student portal state.", "error");
+        }
+    };
+
+    $("instructorToggle").onclick = async () => {
+        try {
+            const snapshot = await getDoc(controlRef());
+            await setPortalState("instructor", !snapshot.data()?.instructor?.suspended);
+        } catch (error) {
+            console.error("Instructor portal control failed:", error);
+            toast(error.message || "Unable to change instructor portal state.", "error");
+        }
+    };
+
+    $("lockdownToggle").onclick = async () => {
+        try {
+            const snapshot = await getDoc(controlRef());
+            const active = !!snapshot.data()?.lockdown;
+
+            if (!active) {
+                const confirmed = confirm(
+                    "⚠️ EMERGENCY LOCKDOWN\n\n" +
+                    "This will immediately restrict BOTH the Student and Instructor portals.\n\n" +
+                    "Continue?"
+                );
+                if (!confirmed) return;
+            }
+
+            $("lockdownToggle").disabled = true;
+            await setLockdown(!active);
+        } catch (error) {
+            console.error("Lockdown error:", error);
+            toast(error.message || "Unable to change lockdown status.", "error");
+        } finally {
+            $("lockdownToggle").disabled = false;
+        }
+    };
+
+    $("scheduleBtn").onclick = async () => {
+        try {
+            $("scheduleBtn").disabled = true;
+            await scheduleMaintenance();
+        } catch (error) {
+            toast(error.message, "error");
+        } finally {
+            $("scheduleBtn").disabled = false;
+        }
+    };
+
+    $("cancelScheduleBtn").onclick = async () => {
+        try {
+            $("cancelScheduleBtn").disabled = true;
+            await cancelMaintenance();
+        } catch (error) {
+            toast(error.message || "Unable to cancel maintenance.", "error");
+        } finally {
+            $("cancelScheduleBtn").disabled = false;
+        }
+    };
+}
+
+onAuthStateChanged(auth, async user => {
+    if (!user) {
+        window.location.replace("../login.html");
+        return;
+    }
+
+    try {
+        await requireFounder(user);
+        listenControls();
+        listenAuditLog();
+        bindEvents();
+        console.log("🔥 Founder Command Center connected to Firebase.");
+    } catch (error) {
+        console.error(error);
+        toast(error.message || "Founder authorization failed.", "error");
+        setTimeout(() => window.location.replace("../login.html"), 1500);
+    }
 });
