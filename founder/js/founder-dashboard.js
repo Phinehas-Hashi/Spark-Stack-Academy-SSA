@@ -2,119 +2,19 @@ import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const currency = new Intl.NumberFormat("en-KE", {
-  style: "currency",
-  currency: "KES",
-  maximumFractionDigits: 0
-});
-
+const currency = new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", maximumFractionDigits: 0 });
 const state = { students: 0, courses: 0, instructors: 0, revenue: 0, payments: [] };
 const byId = (id) => document.getElementById(id);
-
-function setText(id, value) {
-  const element = byId(id);
-  if (element) element.textContent = value;
-}
-
-function paymentAmount(payment) {
-  const amount = Number(payment.amount || payment.total || payment.price || 0);
-  return Number.isFinite(amount) ? amount : 0;
-}
-
-function paymentDate(payment) {
-  const value = payment.paidAt || payment.createdAt || payment.updatedAt;
-  if (value?.toDate) return value.toDate();
-  if (value) return new Date(value);
-  return null;
-}
-
-function updateMetrics() {
-  setText("totalStudents", state.students.toLocaleString());
-  setText("activeCourses", state.courses.toLocaleString());
-  setText("totalInstructors", state.instructors.toLocaleString());
-  setText("totalRevenue", currency.format(state.revenue));
-  setText("platformActivity", state.students.toLocaleString());
-  setText("studentGrowth", state.students ? "Live academy total" : "No students yet");
-  setText("revenueGrowth", state.revenue ? "All recorded payments" : "No payments recorded");
-  setText("lastSystemSync", new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-  renderRevenueChart();
-  updateBrief();
-}
-
-function renderRevenueChart() {
-  const chart = byId("revenueChart");
-  if (!chart) return;
-  const days = Number(byId("revenuePeriod")?.value || 30);
-  const totals = Array.from({ length: Math.min(days, 30) }, () => 0);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  state.payments.forEach((payment) => {
-    const date = paymentDate(payment);
-    if (!date || Number.isNaN(date.getTime())) return;
-    date.setHours(0, 0, 0, 0);
-    const age = Math.floor((today - date) / 86400000);
-    if (age >= 0 && age < totals.length) totals[totals.length - 1 - age] += paymentAmount(payment);
-  });
-  const max = Math.max(...totals, 1);
-  chart.replaceChildren();
-  const bars = document.createElement("div");
-  bars.className = "founder-revenue-bars";
-  totals.forEach((total) => {
-    const bar = document.createElement("div");
-    bar.className = "founder-revenue-bar";
-    bar.style.height = `${Math.max(6, (total / max) * 100)}%`;
-    bar.title = currency.format(total);
-    bars.appendChild(bar);
-  });
-  chart.appendChild(bars);
-}
-
-function updateBrief() {
-  const brief = state.students
-    ? `${state.students.toLocaleString()} learners and ${state.courses.toLocaleString()} courses are currently under your command. ${state.revenue ? `Recorded revenue is ${currency.format(state.revenue)}.` : "Revenue tracking is ready for the first payment."}`
-    : "Your command center is connected. Add courses, invite instructors, and Spark AI will begin surfacing academy insights.";
-  setText("founderAiBrief", brief);
-}
-
-function renderActivity(items) {
-  const list = byId("founderActivityList");
-  if (!list) return;
-  list.replaceChildren();
-  if (!items.length) {
-    const empty = document.createElement("p");
-    empty.className = "founder-empty-state";
-    empty.textContent = "No recent platform activity yet.";
-    list.appendChild(empty);
-    return;
-  }
-  items.slice(0, 8).forEach((item) => {
-    const row = document.createElement("article"); row.className = "founder-activity-item";
-    const icon = document.createElement("span"); icon.className = "founder-activity-icon"; icon.textContent = item.icon || "✦";
-    const copy = document.createElement("div");
-    const title = document.createElement("strong"); title.textContent = item.title || item.type || "Platform activity";
-    const description = document.createElement("p"); description.textContent = item.message || item.description || "An academy event was recorded.";
-    copy.append(title, description); row.append(icon, copy); list.appendChild(row);
-  });
-}
-
+const setText = (id, value) => { const element = byId(id); if (element) element.textContent = value; };
+function paymentAmount(payment) { const amount = Number(payment.amount || payment.total || payment.price || 0); return Number.isFinite(amount) ? amount : 0; }
+function paymentDate(payment) { const value = payment.paidAt || payment.createdAt || payment.updatedAt; if (value?.toDate) return value.toDate(); if (value) return new Date(value); return null; }
+function updateMetrics() { setText("totalStudents", state.students.toLocaleString()); setText("activeCourses", state.courses.toLocaleString()); setText("totalInstructors", state.instructors.toLocaleString()); setText("totalRevenue", currency.format(state.revenue)); setText("platformActivity", state.students.toLocaleString()); setText("studentGrowth", state.students ? "Live academy total" : "No students yet"); setText("revenueGrowth", state.revenue ? "All recorded payments" : "No payments recorded"); setText("lastSystemSync", new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })); renderRevenueChart(); updateBrief(); }
+function renderRevenueChart() { const chart = byId("revenueChart"); if (!chart) return; const days = Number(byId("revenuePeriod")?.value || 30); const totals = Array.from({ length: Math.min(days, 30) }, () => 0); const today = new Date(); today.setHours(0, 0, 0, 0); state.payments.forEach((payment) => { const date = paymentDate(payment); if (!date || Number.isNaN(date.getTime())) return; date.setHours(0, 0, 0, 0); const age = Math.floor((today - date) / 86400000); if (age >= 0 && age < totals.length) totals[totals.length - 1 - age] += paymentAmount(payment); }); const max = Math.max(...totals, 1); chart.replaceChildren(); const bars = document.createElement("div"); bars.className = "founder-revenue-bars"; totals.forEach((total) => { const bar = document.createElement("div"); bar.className = "founder-revenue-bar"; bar.style.height = `${Math.max(6, (total / max) * 100)}%`; bar.title = currency.format(total); bars.appendChild(bar); }); chart.appendChild(bars); }
+function updateBrief() { const brief = state.students ? `${state.students.toLocaleString()} learners and ${state.courses.toLocaleString()} courses are currently under your command. ${state.revenue ? `Recorded revenue is ${currency.format(state.revenue)}.` : "Revenue tracking is ready for the first payment."}` : "Your command center is connected. Add courses, invite instructors, and Spark AI will begin surfacing academy insights."; setText("founderAiBrief", brief); }
+function renderActivity(items) { const list = byId("founderActivityList"); if (!list) return; list.replaceChildren(); if (!items.length) { const empty = document.createElement("p"); empty.className = "founder-empty-state"; empty.textContent = "No recent platform activity yet."; list.appendChild(empty); return; } items.slice(0, 8).forEach((item) => { const row = document.createElement("article"); row.className = "founder-activity-item"; const icon = document.createElement("span"); icon.className = "founder-activity-icon"; icon.textContent = item.icon || "✦"; const copy = document.createElement("div"); const title = document.createElement("strong"); title.textContent = item.title || item.type || "Platform activity"; const description = document.createElement("p"); description.textContent = item.message || item.description || "An academy event was recorded."; copy.append(title, description); row.append(icon, copy); list.appendChild(row); }); }
 function navigate(id, url) { byId(id)?.addEventListener("click", () => { window.location.href = url; }); }
-
-function bindActions() {
-  navigate("manageStudentsBtn", "students.html"); navigate("manageInstructorsBtn", "instructors.html");
-  navigate("manageCoursesBtn", "courses.html"); navigate("viewRevenueBtn", "revenue.html");
-  navigate("viewReportsBtn", "security.html"); navigate("openSettingsBtn", "platform-settings.html");
-  navigate("openSparkAiBtn", "spark-ai.html"); navigate("viewAllActivityBtn", "analytics.html");
-  byId("revenuePeriod")?.addEventListener("change", renderRevenueChart);
-}
-
-function loadProfile(user) {
-  getDoc(doc(db, "users", user.uid)).then((snapshot) => {
-    const profile = snapshot.exists() ? snapshot.data() : {};
-    const name = profile.fullName || profile.name || user.displayName || "Founder";
-    setText("founderName", name.split(" ")[0]); setText("founderDisplayName", name); setText("founderEmail", user.email || "—");
-    setText("founderAvatar", name.charAt(0).toUpperCase());
-  }).catch(() => {});
-}
-
+function bindActions() { navigate("manageStudentsBtn", "students.html"); navigate("manageInstructorsBtn", "instructors.html"); navigate("manageCoursesBtn", "courses.html"); navigate("viewRevenueBtn", "revenue.html"); navigate("viewReportsBtn", "reports.html"); navigate("openSettingsBtn", "platform-settings.html"); navigate("openSparkAiBtn", "spark-ai.html"); navigate("viewAllActivityBtn", "analytics.html"); byId("revenuePeriod")?.addEventListener("change", renderRevenueChart); }
+function loadProfile(user) { getDoc(doc(db, "users", user.uid)).then((snapshot) => { const profile = snapshot.exists() ? snapshot.data() : {}; const name = profile.fullName || profile.name || user.displayName || "Founder"; setText("founderName", name.split(" ")[0]); setText("founderDisplayName", name); setText("founderEmail", user.email || "—"); setText("founderAvatar", name.charAt(0).toUpperCase()); }).catch((error) => console.warn("Founder profile read failed:", error)); }
 onAuthStateChanged(auth, (user) => { if (user) loadProfile(user); });
 onSnapshot(collection(db, "students"), (snapshot) => { state.students = snapshot.size; updateMetrics(); });
 onSnapshot(collection(db, "courses"), (snapshot) => { state.courses = snapshot.docs.filter((entry) => entry.data().status !== "archived").length; updateMetrics(); });
@@ -122,5 +22,4 @@ onSnapshot(collection(db, "instructors"), (snapshot) => { state.instructors = sn
 onSnapshot(collection(db, "payments"), (snapshot) => { state.payments = snapshot.docs.map((entry) => entry.data()); state.revenue = state.payments.reduce((sum, payment) => sum + paymentAmount(payment), 0); updateMetrics(); });
 onSnapshot(collection(db, "reports"), (snapshot) => { setText("openReports", snapshot.docs.filter((entry) => !["resolved", "closed"].includes(entry.data().status)).length.toLocaleString()); });
 onSnapshot(collection(db, "activity"), (snapshot) => renderActivity(snapshot.docs.map((entry) => entry.data())));
-
 bindActions();
