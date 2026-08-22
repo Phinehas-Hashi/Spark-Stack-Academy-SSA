@@ -20,11 +20,19 @@
 <div class="welcome-badge"><i class="fa-solid fa-graduation-cap"></i> Welcome Back</div>
 <h1>Login to Your Account</h1>
 <p>Continue learning, building and innovating with Spark Stack Academy.</p>
-<form id="loginForm" autocomplete="on" aria-hidden="true">
-<input type="email" id="email"><input type="password" id="password"><button type="submit" id="loginBtn">Login</button>
+<form id="loginForm" autocomplete="on">
+<div class="input-group"><i class="fa-solid fa-envelope"></i><input type="email" id="email" name="email" placeholder="Email address" autocomplete="email" required></div>
+<div class="input-group password-group"><i class="fa-solid fa-lock"></i><input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required><i class="fa-solid fa-eye toggle-password" data-target="password" aria-label="Show password"></i></div>
+<div class="terms" style="margin:0 0 20px"><label><input type="checkbox" id="rememberMe"> <span>Remember me</span></label></div>
+<button type="submit" id="loginBtn" class="primary-btn"><i class="fa-solid fa-right-to-bracket"></i><span>Login</span></button>
 </form>
+<div class="divider"><span>OR</span></div>
+<button type="button" id="googleLogin" class="google-btn"><i class="fa-brands fa-google"></i><span>Continue with Google</span></button>
+<div class="links"><a href="#" id="forgotPassword">Forgot password?</a></div>
+<div class="links">Don't have an account? <a href="signup.html">Create one</a></div>
 </div>
 </main>
+<div id="resetModal" class="auth-loader"><div class="loader-box" style="max-width:440px"><h2>Reset your password</h2><p>Enter your email and we'll send you a password reset link.</p><div class="input-group"><i class="fa-solid fa-envelope"></i><input type="email" id="resetEmail" placeholder="Email address" autocomplete="email"></div><button type="button" id="sendReset" class="primary-btn">Send Reset Link</button><button type="button" id="cancelReset" class="google-btn" style="margin-top:12px">Cancel</button></div></div>
 <div id="authLoader" class="auth-loader"><div class="loader-box"><img src="assets/images/ssa-logo.png" alt="Spark Stack Academy Logo"><h2 id="loaderText">Securely signing you in...</h2><p>Verifying your secure session.</p><div class="progress-track"><div class="progress-energy"><span></span></div></div></div></div>
 <div id="toastContainer" class="toast-container"></div>
 <button id="scrollTopBtn" class="scroll-top" type="button" aria-label="Scroll to Top"><i class="fa-solid fa-arrow-up"></i></button>
