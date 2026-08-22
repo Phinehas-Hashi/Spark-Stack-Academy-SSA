@@ -1,135 +1,41 @@
 <header class="topbar">
-
-  <button class="menu-btn"
-          id="menuBtn"
-          aria-label="Open sidebar">
-
+  <button class="menu-btn" id="menuBtn" aria-label="Open sidebar">
     <i data-lucide="menu"></i>
-
   </button>
-
 
   <div class="topbar-left">
-
     <div class="search-box">
-
       <i data-lucide="search"></i>
-
-      <input 
-id="globalSearch"
-type="text"
-placeholder="Search Founder OS..."
->
-
-<div id="searchResults"></div>
-
+      <input id="globalSearch" type="text" placeholder="Search Founder OS..." autocomplete="off">
+      <div id="searchResults"></div>
     </div>
-
   </div>
-
 
   <div class="topbar-actions">
+    <div class="notification-wrapper">
+      <button class="icon-btn" id="notificationsBtn" aria-label="Notifications" type="button">
+        <i data-lucide="bell"></i>
+        <span class="notification-badge" id="notificationCount" style="display:none">0</span>
+      </button>
 
-    <button class="icon-btn"
-            id="themeBtn"
-            aria-label="Toggle theme">
-
-      <i data-lucide="moon"></i>
-
-    </button>
-
-
-  <div class="notification-wrapper">
-
-  <button class="icon-btn"
-          id="notificationsBtn"
-          aria-label="Notifications">
-
-    <i data-lucide="bell"></i>
-
-    <span class="notification-badge"
-          id="notificationCount"
-          style="display:none">
-
-      0
-
-    </span>
-
-  </button>
-
-
-
-  <!-- NOTIFICATION DROPDOWN -->
-
-  <div class="notification-dropdown"
-       id="notificationDropdown">
-
-
-    <div class="dropdown-header">
-
-      <h3>
-        Notifications
-      </h3>
-
-      <span id="dropdownUnread">
-        0
-      </span>
-
+      <div class="notification-dropdown" id="notificationDropdown">
+        <div class="dropdown-header">
+          <h3>Notifications</h3>
+          <span id="dropdownUnread">0</span>
+        </div>
+        <div id="topNotificationsList">
+          <p class="empty-notifications">No new notifications</p>
+        </div>
+        <button id="viewAllNotifications" type="button">View All Notifications</button>
+      </div>
     </div>
-
-
-
-    <div id="topNotificationsList">
-
-
-      <p class="empty-notifications">
-
-        No new notifications
-
-      </p>
-
-
-    </div>
-
-
-
-    <button
-    id="viewAllNotifications">
-
-      View All Notifications
-
-    </button>
-
-
-  </div>
-
-
-</div>
-
 
     <div class="profile-chip">
-
-      <div class="profile-avatar"
-           id="profileAvatar">
-
-        F
-
-      </div>
-
+      <div class="profile-avatar" id="profileAvatar">F</div>
       <div class="profile-info">
-
-        <strong id="profileName">
-          Loading...
-        </strong>
-
-        <span id="profileRole">
-          Founder
-        </span>
-
+        <strong id="profileName">Founder</strong>
+        <span id="profileRole">Founder</span>
       </div>
-
     </div>
-
   </div>
-
 </header>
