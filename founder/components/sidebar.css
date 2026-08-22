@@ -1,3 +1,5 @@
+@import url("../founder-unified.css");
+
 :root{--sidebar-width:268px;--nav-blue:#2563eb;--nav-blue-soft:#eff6ff;--nav-text:#334155;--nav-muted:#64748b;--nav-border:#e2e8f0;--nav-surface:#ffffff;--nav-bg:#f8fafc}
 .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-width);height:100vh;display:flex;flex-direction:column;background:var(--nav-surface);border-right:1px solid var(--nav-border);box-shadow:8px 0 30px rgba(15,23,42,.06);z-index:1000;overflow:hidden;color:var(--nav-text)}
 .sidebar-header{padding:20px 18px;border-bottom:1px solid var(--nav-border);flex-shrink:0}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#0f172a}.brand-icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;box-shadow:0 8px 20px rgba(37,99,235,.2)}.brand-icon svg{width:21px;height:21px}.brand-text h2{font-size:17px;font-weight:800;line-height:1.1}.brand-text p{margin-top:4px;font-size:11px;font-weight:700;color:var(--nav-muted);letter-spacing:.04em}
