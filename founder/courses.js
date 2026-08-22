@@ -1,219 +1,89 @@
 import { auth, db } from "../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, doc, getDocs, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const coursesRef = collection(db, "courses");
-let courses = [];
-let filteredCourses = [];
-let instructors = [];
-let categoryChart = null;
-let revenueChart = null;
+let courses = [], filteredCourses = [], instructors = [];
+const number = v => Number(v) || 0;
+const esc = v => String(v ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+const dateValue = v => v?.toDate ? v.toDate().getTime() : new Date(v || 0).getTime();
+const formatDate = v => { const d = v?.toDate ? v.toDate() : new Date(v || 0); return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}); };
+const money = v => number(v).toLocaleString(undefined,{style:"currency",currency:"USD",maximumFractionDigits:0});
+const titleCase = v => String(v || "").replace(/(^|[-_\s])([a-z])/g, (_,p,c)=>`${p}${c.toUpperCase()}`);
+const initials = n => String(n || "?").trim().split(/\s+/).slice(0,2).map(x=>x[0]?.toUpperCase()).join("") || "?";
+const notify = (m,t="success") => window.showFounderToast ? window.showFounderToast(m,t) : console[t === "error" ? "error" : "log"](m);
 
-const esc = value => String(value ?? "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
-const number = value => Number(value) || 0;
-const money = value => `$${number(value).toLocaleString()}`;
-const titleCase = value => String(value || "").replace(/(^|[-_\s])([a-z])/g, (_, p, c) => `${p}${c.toUpperCase()}`);
-const initials = name => String(name || "?").trim().split(/\s+/).filter(Boolean).slice(0,2).map(x => x[0].toUpperCase()).join("") || "?";
-const dateValue = value => value?.toDate ? value.toDate().getTime() : new Date(value || 0).getTime();
-const notify = (message, type = "success") => window.showFounderToast ? window.showFounderToast(message, type) : alert(message);
-
-function safeImage(url){
-    return url && /^https?:\/\//i.test(url) ? url : "https://placehold.co/900x500/eef4ff/2563eb?text=SSA+Course";
-}
-
-function currentTutor(course){
-    return course.tutorName || instructors.find(i => i.id === course.instructorId)?.name || "Unassigned";
-}
+function currentTutor(course){ return course.tutorName || instructors.find(i=>i.id===course.instructorId)?.name || "Unassigned"; }
 
 function applyFilters(){
     const search = ($("courseSearch")?.value || "").trim().toLowerCase();
-    const status = $("statusFilter")?.value || "all";
-    const category = $("categoryFilter")?.value || "all";
-    const tutor = $("tutorFilter")?.value || "all";
-    const level = $("levelFilter")?.value || "all";
-    const sort = $("sortCourses")?.value || "latest";
-
-    filteredCourses = courses.filter(course => {
-        const tutorName = currentTutor(course);
-        const haystack = [course.title, course.description, course.category, tutorName].map(v => String(v || "").toLowerCase()).join(" ");
-        return (!search || haystack.includes(search)) &&
-            (status === "all" || String(course.status || "draft").toLowerCase() === status) &&
-            (category === "all" || course.category === category) &&
-            (tutor === "all" || String(course.instructorId || "") === tutor) &&
-            (level === "all" || String(course.level || "") === level);
+    const status = $("statusFilter")?.value || "all", category=$("categoryFilter")?.value||"all", tutor=$("tutorFilter")?.value||"all", level=$("levelFilter")?.value||"all", sort=$("sortCourses")?.value||"latest";
+    filteredCourses=courses.filter(c=>{
+        const hay=[c.title,c.description,c.category,currentTutor(c)].join(" ").toLowerCase();
+        return (!search||hay.includes(search)) && (status==="all"||String(c.status||"draft").toLowerCase()===status) && (category==="all"||c.category===category) && (tutor==="all"||String(c.instructorId||"")===tutor) && (level==="all"||String(c.level||"")===level);
     });
-
-    filteredCourses.sort((a,b) => {
-        if(sort === "popular") return number(b.totalStudents) - number(a.totalStudents);
-        if(sort === "rating") return number(b.rating) - number(a.rating);
-        if(sort === "alphabetical") return String(a.title || "").localeCompare(String(b.title || ""));
-        return dateValue(b.createdAt || b.created_at) - dateValue(a.createdAt || a.created_at);
-    });
-
+    filteredCourses.sort((a,b)=>sort==="popular"?number(b.totalStudents)-number(a.totalStudents):sort==="rating"?number(b.rating)-number(a.rating):sort==="alphabetical"?String(a.title||"").localeCompare(String(b.title||"")):dateValue(b.createdAt||b.created_at)-dateValue(a.createdAt||a.created_at));
     renderCourses();
 }
 
 function renderCourses(){
-    const grid = $("coursesGrid");
-    const empty = $("emptyState");
-    if(!grid || !empty) return;
-    grid.innerHTML = filteredCourses.map(createCourseCard).join("");
-    empty.hidden = filteredCourses.length !== 0;
-    grid.style.display = filteredCourses.length ? "grid" : "none";
+    const grid=$("coursesGrid"), empty=$("emptyState"); if(!grid)return;
+    grid.innerHTML=`<div class="courses-table-wrap"><table class="courses-table"><thead><tr><th>Course</th><th>Category</th><th>Instructor</th><th>Level</th><th>Students</th><th>Lessons</th><th>Revenue</th><th>Rating</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead><tbody>${filteredCourses.map(courseRow).join("")}</tbody></table></div>`;
+    if(empty) empty.hidden=filteredCourses.length!==0;
+    if(filteredCourses.length===0) grid.innerHTML="";
+    grid.style.display=filteredCourses.length?"block":"none";
     refreshIcons();
 }
 
-function createCourseCard(course){
-    const status = String(course.status || "draft").toLowerCase();
-    const tutor = currentTutor(course);
-    const nextStatus = status === "published" ? "draft" : "published";
-    return `<article class="course-card">
-        <div class="course-thumbnail">
-            <img src="${esc(safeImage(course.thumbnail))}" alt="${esc(course.title || "Course")}" loading="lazy" onerror="this.src='https://placehold.co/900x500/eef4ff/2563eb?text=SSA+Course'">
-            <span class="course-status ${esc(status)}">${esc(titleCase(status))}</span>
-            <button class="course-menu-btn" data-menu-id="${esc(course.id)}" aria-label="Course actions"><i class="fas fa-ellipsis-vertical"></i></button>
-            <div class="course-menu" id="menu-${esc(course.id)}">
-                <button class="menu-item" data-action="view" data-id="${esc(course.id)}"><i class="fas fa-eye"></i> View Details</button>
-                <button class="menu-item" data-action="feature" data-id="${esc(course.id)}"><i class="fas fa-star"></i> ${course.featured ? "Unfeature" : "Feature"}</button>
-                <button class="menu-item" data-action="status" data-id="${esc(course.id)}" data-status="${nextStatus}"><i class="fas fa-power-off"></i> ${status === "published" ? "Unpublish" : "Publish"}</button>
-                ${status !== "archived" ? `<button class="menu-item warning" data-action="archive" data-id="${esc(course.id)}"><i class="fas fa-box-archive"></i> Archive</button>` : ""}
-            </div>
-        </div>
-        <div class="course-content">
-            <div class="course-category"><span>${esc(course.category || "General")}</span><strong>⭐ ${number(course.rating).toFixed(1)}</strong></div>
-            <h3>${esc(course.title || "Untitled Course")}</h3>
-            <p class="course-description">${esc(course.description || "No description available.")}</p>
-            <div class="course-tutor"><div class="tutor-avatar">${esc(initials(tutor))}</div><div><strong>${esc(tutor)}</strong><small>${esc(course.level || "Course Tutor")}</small></div></div>
-            <div class="course-stats"><div><i class="fas fa-users"></i><span>${number(course.totalStudents)} Students</span></div><div><i class="fas fa-book-open"></i><span>${number(course.lessonCount)} Lessons</span></div><div><i class="fas fa-dollar-sign"></i><span>${money(course.revenue)}</span></div></div>
-            <div class="course-footer"><strong class="course-price">${esc(course.price ?? "Free")}</strong><button class="view-course-btn" data-action="view" data-id="${esc(course.id)}">View Course</button></div>
-        </div>
-    </article>`;
-}
-
-function updateStats(){
-    $("totalCourses").textContent = courses.length;
-    $("publishedCourses").textContent = courses.filter(c => String(c.status || "draft").toLowerCase() === "published").length;
-    $("draftCourses").textContent = courses.filter(c => String(c.status || "draft").toLowerCase() === "draft").length;
-    $("archivedCourses").textContent = courses.filter(c => String(c.status || "draft").toLowerCase() === "archived").length;
-    $("totalStudents").textContent = courses.reduce((sum,c) => sum + number(c.totalStudents), 0).toLocaleString();
-    $("totalRevenue").textContent = money(courses.reduce((sum,c) => sum + number(c.revenue), 0));
-    const rated = courses.filter(c => number(c.rating) > 0);
-    $("averageRating").textContent = rated.length ? (rated.reduce((sum,c) => sum + number(c.rating), 0) / rated.length).toFixed(1) : "0.0";
-    $("totalTutors").textContent = new Set(courses.map(c => c.instructorId || currentTutor(c)).filter(Boolean)).size;
+function courseRow(c){
+    const status=String(c.status||"draft").toLowerCase(), tutor=currentTutor(c), next=status==="published"?"draft":"published";
+    return `<tr><td><div class="course-name-cell"><span class="course-initial">${esc(initials(c.title))}</span><div><strong>${esc(c.title||"Untitled Course")}</strong><small>${esc((c.description||"No description").slice(0,70))}</small></div></div></td><td>${esc(c.category||"—")}</td><td>${esc(tutor)}</td><td>${esc(c.level||"—")}</td><td>${number(c.totalStudents).toLocaleString()}</td><td>${number(c.lessonCount)}</td><td>${money(c.revenue)}</td><td>${number(c.rating)>0?`⭐ ${number(c.rating).toFixed(1)}`:"—"}</td><td><span class="course-status-text ${esc(status)}">${esc(titleCase(status))}</span></td><td>${esc(formatDate(c.updatedAt||c.updated_at||c.createdAt))}</td><td><div class="table-actions"><button class="action-btn" data-action="view" data-id="${esc(c.id)}" title="View"><i class="fas fa-eye"></i></button><button class="action-btn" data-action="status" data-id="${esc(c.id)}" data-status="${next}" title="${next==='published'?'Publish':'Unpublish'}"><i class="fas fa-power-off"></i></button><button class="action-btn" data-action="feature" data-id="${esc(c.id)}" title="Feature"><i class="fas fa-star"></i></button><button class="action-btn danger" data-action="archive" data-id="${esc(c.id)}" title="Archive"><i class="fas fa-box-archive"></i></button></div></td></tr>`;
 }
 
 function populateFilters(){
-    const category = $("categoryFilter");
-    const tutor = $("tutorFilter");
-    const oldCategory = category.value;
-    const oldTutor = tutor.value;
-    category.innerHTML = `<option value="all">All Categories</option>` + [...new Set(courses.map(c => c.category).filter(Boolean))].sort().map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
-    tutor.innerHTML = `<option value="all">All Tutors</option>` + instructors.map(i => `<option value="${esc(i.id)}">${esc(i.name || i.email || "Instructor")}</option>`).join("");
-    category.value = [...category.options].some(o => o.value === oldCategory) ? oldCategory : "all";
-    tutor.value = [...tutor.options].some(o => o.value === oldTutor) ? oldTutor : "all";
+    const category=$("categoryFilter"), tutor=$("tutorFilter"); if(!category||!tutor)return;
+    const oldC=category.value, oldT=tutor.value;
+    category.innerHTML=`<option value="all">All Categories</option>`+[...new Set(courses.map(c=>c.category).filter(Boolean))].sort().map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+    tutor.innerHTML=`<option value="all">All Tutors</option>`+instructors.map(i=>`<option value="${esc(i.id)}">${esc(i.name||i.email||"Instructor")}</option>`).join("");
+    category.value=[...category.options].some(o=>o.value===oldC)?oldC:"all"; tutor.value=[...tutor.options].some(o=>o.value===oldT)?oldT:"all";
 }
 
-function renderAnalytics(){
-    const popular = [...courses].sort((a,b) => number(b.totalStudents) - number(a.totalStudents)).slice(0,5);
-    const rated = [...courses].filter(c => number(c.rating) > 0).sort((a,b) => number(b.rating) - number(a.rating)).slice(0,5);
-    const list = (items, metric) => items.length ? items.map(c => `<div class="analytics-row"><div><strong>${esc(c.title || "Untitled")}</strong><small>${esc(currentTutor(c))}</small></div><b>${metric(c)}</b></div>`).join("") : `<div class="analytics-empty">No data available yet.</div>`;
-    $("popularCourses").innerHTML = list(popular, c => `${number(c.totalStudents).toLocaleString()} students`);
-    $("ratedCourses").innerHTML = list(rated, c => `⭐ ${number(c.rating).toFixed(1)}`);
+function renderDataSummary(){
+    const summary=$("courseDataSummary"); if(!summary)return;
+    const published=courses.filter(c=>String(c.status||"draft").toLowerCase()==="published").length;
+    const drafts=courses.filter(c=>String(c.status||"draft").toLowerCase()==="draft").length;
+    summary.textContent=`${courses.length} courses loaded from Firestore · ${published} published · ${drafts} drafts`;
 }
 
-function renderCharts(){
-    if(typeof Chart === "undefined") return;
-    const categoryCanvas = $("categoryChart");
-    const revenueCanvas = $("courseRevenueChart");
-    if(!categoryCanvas || !revenueCanvas) return;
-    categoryChart?.destroy(); revenueChart?.destroy();
-    const categories = {};
-    courses.forEach(c => { const key = c.category || "General"; categories[key] = (categories[key] || 0) + 1; });
-    categoryChart = new Chart(categoryCanvas, {type:"doughnut",data:{labels:Object.keys(categories),datasets:[{data:Object.values(categories),backgroundColor:["#2563eb","#7c3aed","#0891b2","#16a34a","#d97706","#dc2626"]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom"}}}});
-    const top = [...courses].sort((a,b) => number(b.revenue) - number(a.revenue)).slice(0,10);
-    revenueChart = new Chart(revenueCanvas, {type:"bar",data:{labels:top.map(c => String(c.title || "Untitled").slice(0,18)),datasets:[{label:"Revenue",data:top.map(c => number(c.revenue)),backgroundColor:"#2563eb",borderRadius:7}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+function openDrawer(id){
+    const c=courses.find(x=>x.id===id); if(!c||!$("courseDrawer"))return;
+    const status=String(c.status||"draft").toLowerCase();
+    $("drawerContent").innerHTML=`<div class="drawer-profile"><div class="drawer-course-icon">${esc(initials(c.title))}</div><span class="course-status-text ${esc(status)}">${esc(titleCase(status))}</span><h2 class="drawer-title">${esc(c.title||"Untitled Course")}</h2><p class="drawer-description">${esc(c.description||"No description available.")}</p><div class="drawer-meta"><div class="meta-card"><span>Category</span><strong>${esc(c.category||"—")}</strong></div><div class="meta-card"><span>Level</span><strong>${esc(c.level||"—")}</strong></div><div class="meta-card"><span>Students</span><strong>${number(c.totalStudents).toLocaleString()}</strong></div><div class="meta-card"><span>Lessons</span><strong>${number(c.lessonCount)}</strong></div><div class="meta-card"><span>Rating</span><strong>${number(c.rating)>0?`⭐ ${number(c.rating).toFixed(1)}`:"—"}</strong></div><div class="meta-card"><span>Revenue</span><strong>${money(c.revenue)}</strong></div></div><div class="drawer-tutor"><div class="tutor-avatar">${esc(initials(currentTutor(c)))}</div><div><h4>${esc(currentTutor(c))}</h4><p>Assigned instructor</p></div></div><label class="drawer-instructor-control"><span>Assigned instructor</span><select id="courseInstructorSelect"><option value="">Unassigned</option>${instructors.map(i=>`<option value="${esc(i.id)}" ${c.instructorId===i.id?"selected":""}>${esc(i.name||i.email||"Instructor")}</option>`).join("")}</select></label><div class="drawer-actions"><button class="secondary-btn" data-drawer-action="assign" data-id="${esc(c.id)}">Save Instructor</button><button class="secondary-btn" data-drawer-action="status" data-id="${esc(c.id)}" data-status="${status==='published'?'draft':'published'}">${status==='published'?'Unpublish':'Publish'}</button><button class="primary-btn" data-drawer-action="feature" data-id="${esc(c.id)}">${c.featured?'Unfeature':'Feature'}</button><button class="warning-btn" data-drawer-action="archive" data-id="${esc(c.id)}">Archive</button></div></div>`;
+    $("courseDrawer").classList.add("open"); $("courseDrawer").setAttribute("aria-hidden","false"); $("drawerBackdrop")?.classList.add("open"); refreshIcons();
 }
-
-function openDrawer(courseId){
-    const course = courses.find(c => c.id === courseId);
-    if(!course) return;
-    const drawer = $("courseDrawer");
-    $("drawerContent").innerHTML = `<div class="drawer-profile">
-        <img class="drawer-cover" src="${esc(safeImage(course.thumbnail))}" alt="${esc(course.title || "Course")}">
-        <span class="course-status ${esc(String(course.status || "draft"))}">${esc(titleCase(course.status || "draft"))}</span>
-        <h2 class="drawer-title">${esc(course.title || "Untitled Course")}</h2>
-        <p class="drawer-description">${esc(course.description || "No description available.")}</p>
-        <div class="drawer-meta">
-            <div class="meta-card"><span>Category</span><strong>${esc(course.category || "General")}</strong></div>
-            <div class="meta-card"><span>Level</span><strong>${esc(course.level || "Not set")}</strong></div>
-            <div class="meta-card"><span>Students</span><strong>${number(course.totalStudents).toLocaleString()}</strong></div>
-            <div class="meta-card"><span>Lessons</span><strong>${number(course.lessonCount)}</strong></div>
-            <div class="meta-card"><span>Rating</span><strong>⭐ ${number(course.rating).toFixed(1)}</strong></div>
-            <div class="meta-card"><span>Revenue</span><strong>${money(course.revenue)}</strong></div>
-        </div>
-        <div class="drawer-tutor"><div class="tutor-avatar">${esc(initials(currentTutor(course)))}</div><div><h4>${esc(currentTutor(course))}</h4><p>Assigned instructor</p></div></div>
-        <label class="drawer-instructor-control"><span>Assigned instructor</span><select id="courseInstructorSelect"><option value="">Unassigned</option>${instructors.map(i => `<option value="${esc(i.id)}" ${course.instructorId === i.id ? "selected" : ""}>${esc(i.name || i.email || "Instructor")}</option>`).join("")}</select></label>
-        <div class="drawer-actions"><button class="secondary-btn" data-drawer-action="assign" data-id="${esc(course.id)}"><i class="fas fa-user-check"></i> Save Instructor</button><button class="secondary-btn" data-drawer-action="status" data-id="${esc(course.id)}" data-status="${String(course.status || "draft") === "published" ? "draft" : "published"}"><i class="fas fa-power-off"></i> ${String(course.status || "draft") === "published" ? "Unpublish" : "Publish"}</button><button class="primary-btn" data-drawer-action="feature" data-id="${esc(course.id)}"><i class="fas fa-star"></i> ${course.featured ? "Unfeature" : "Feature"}</button><button class="warning-btn" data-drawer-action="archive" data-id="${esc(course.id)}"><i class="fas fa-box-archive"></i> Archive</button></div>
-    </div>`;
-    drawer.classList.add("open"); drawer.setAttribute("aria-hidden", "false"); $("drawerBackdrop").classList.add("open"); refreshIcons();
-}
-
 function closeDrawer(){ $("courseDrawer")?.classList.remove("open"); $("courseDrawer")?.setAttribute("aria-hidden","true"); $("drawerBackdrop")?.classList.remove("open"); }
 
-async function updateCourse(courseId, data, message){
-    try { await updateDoc(doc(db,"courses",courseId), {...data, updatedAt:serverTimestamp()}); notify(message); }
-    catch(error){ console.error(error); notify(error.message || "Unable to update course.", "error"); }
-}
+async function updateCourse(id,data,message){ try{await updateDoc(doc(db,"courses",id),{...data,updatedAt:serverTimestamp()});notify(message);}catch(e){console.error(e);notify(e.message||"Unable to update course.","error");} }
+async function toggleFeature(id){const c=courses.find(x=>x.id===id);if(c)await updateCourse(id,{featured:!c.featured,cupdatedAt:serverTimestamp()},c.featured?"Course unfeatured.":"Course featured.");}
+async function setStatus(id,status){await updateCourse(id,{status},`Course ${status==='published'?"published":"unpublished"}.`);closeDrawer();}
+async function archive(id){if(!confirm("Archive this course?"))return;await updateCourse(id,{status:"archived"},"Course archived.");closeDrawer();}
+async function assignInstructor(id){const select=$("courseInstructorSelect");if(!select)return;const i=instructors.find(x=>x.id===select.value);await updateCourse(id,{instructorId:i?.id||null,tutorName:i?.name||i?.email||"Unassigned"},"Instructor assignment saved.");closeDrawer();}
 
-async function toggleFeature(id){ const course = courses.find(c => c.id === id); if(course) await updateCourse(id,{featured:!course.featured},course.featured ? "Course unfeatured." : "Course featured."); }
-async function setStatus(id,status){ await updateCourse(id,{status},`Course ${status === "published" ? "published" : "unpublished"}.`); closeDrawer(); }
-async function archive(id){ if(!confirm("Archive this course?")) return; await updateCourse(id,{status:"archived"},"Course archived."); closeDrawer(); }
-async function assignInstructor(id){ const select=$("courseInstructorSelect"); if(!select) return; const instructor=instructors.find(i=>i.id===select.value); await updateCourse(id,{instructorId:instructor?.id || null,tutorName:instructor?.name || instructor?.email || "Unassigned"},"Instructor assignment saved."); closeDrawer(); }
-
-function exportCSV(){
-    if(!courses.length){ notify("No courses to export.","error"); return; }
-    const headers=["Title","Category","Tutor","Level","Students","Lessons","Revenue","Rating","Status","Featured"];
-    const quote=value => `"${String(value ?? "").replace(/"/g,'""')}"`;
-    const rows=courses.map(c=>[c.title,c.category,currentTutor(c),c.level,number(c.totalStudents),number(c.lessonCount),number(c.revenue),number(c.rating).toFixed(1),c.status,c.featured?"Yes":"No"].map(quote).join(","));
-    const blob=new Blob([[headers.map(quote).join(","),...rows].join("\n")],{type:"text/csv;charset=utf-8;"});
-    const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="ssa-courses-report.csv"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-}
-
-function refreshIcons(){ if(window.lucide?.createIcons) window.lucide.createIcons(); }
+function exportCSV(){if(!courses.length){notify("No courses to export.","error");return;}const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;const rows=[["Title","Category","Tutor","Level","Students","Lessons","Revenue","Rating","Status","Featured"],...courses.map(c=>[c.title,c.category,currentTutor(c),c.level,number(c.totalStudents),number(c.lessonCount),number(c.revenue),number(c.rating).toFixed(1),c.status,c.featured?"Yes":"No"])].map(r=>r.map(q).join(","));const blob=new Blob([rows.join("\n")],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="ssa-courses-report.csv";a.click();URL.revokeObjectURL(url);}
+function refreshIcons(){window.lucide?.createIcons?.();}
 
 function bindEvents(){
-    ["courseSearch","statusFilter","categoryFilter","tutorFilter","levelFilter","sortCourses"].forEach(id => $(id)?.addEventListener(id === "courseSearch" ? "input" : "change", applyFilters));
-    $("exportCourses")?.addEventListener("click", exportCSV);
-    $("closeDrawer")?.addEventListener("click", closeDrawer);
-    $("drawerBackdrop")?.addEventListener("click", closeDrawer);
-    document.addEventListener("keydown", e => { if(e.key === "Escape") { document.querySelectorAll(".course-menu").forEach(m=>m.classList.remove("open")); closeDrawer(); } });
-    document.addEventListener("click", async e => {
-        const menuButton=e.target.closest(".course-menu-btn");
-        if(menuButton){ e.stopPropagation(); document.querySelectorAll(".course-menu").forEach(m=>m.classList.remove("open")); $("menu-"+menuButton.dataset.menuId)?.classList.toggle("open"); return; }
-        const action=e.target.closest("[data-action]");
-        if(action){ e.stopPropagation(); document.querySelectorAll(".course-menu").forEach(m=>m.classList.remove("open")); const id=action.dataset.id; if(action.dataset.action==="view") openDrawer(id); if(action.dataset.action==="feature") await toggleFeature(id); if(action.dataset.action==="status") await setStatus(id,action.dataset.status); if(action.dataset.action==="archive") await archive(id); return; }
-        const drawerAction=e.target.closest("[data-drawer-action]");
-        if(drawerAction){ const id=drawerAction.dataset.id; if(drawerAction.dataset.drawerAction==="assign") await assignInstructor(id); if(drawerAction.dataset.drawerAction==="feature") await toggleFeature(id); if(drawerAction.dataset.drawerAction==="status") await setStatus(id,drawerAction.dataset.status); if(drawerAction.dataset.drawerAction==="archive") await archive(id); return; }
-        if(!e.target.closest(".course-menu")) document.querySelectorAll(".course-menu").forEach(m=>m.classList.remove("open"));
+    ["courseSearch","statusFilter","categoryFilter","tutorFilter","levelFilter","sortCourses"].forEach(id=>$(id)?.addEventListener(id==="courseSearch"?"input":"change",applyFilters));
+    $("exportCourses")?.addEventListener("click",exportCSV); $("closeDrawer")?.addEventListener("click",closeDrawer); $("drawerBackdrop")?.addEventListener("click",closeDrawer);
+    document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();});
+    document.addEventListener("click",async e=>{
+        const action=e.target.closest("[data-action]"); if(action){const id=action.dataset.id; if(action.dataset.action==="view")openDrawer(id); else if(action.dataset.action==="feature")await toggleFeature(id); else if(action.dataset.action==="status")await setStatus(id,action.dataset.status); else if(action.dataset.action==="archive")await archive(id); return;}
+        const drawerAction=e.target.closest("[data-drawer-action]"); if(drawerAction){const id=drawerAction.dataset.id;if(drawerAction.dataset.drawerAction==="assign")await assignInstructor(id);else if(drawerAction.dataset.drawerAction==="feature")await toggleFeature(id);else if(drawerAction.dataset.drawerAction==="status")await setStatus(id,drawerAction.dataset.status);else if(drawerAction.dataset.drawerAction==="archive")await archive(id);}
     });
 }
 
-async function loadInstructors(){
-    try { const snap=await getDocs(collection(db,"instructors")); instructors=snap.docs.map(d=>({id:d.id,...d.data()})).filter(i=>String(i.status||"").toLowerCase()!=="suspended"); }
-    catch(error){ console.error("Instructor load failed:",error); instructors=[]; }
-}
+async function loadInstructors(){try{const snap=await getDocs(collection(db,"instructors"));instructors=snap.docs.map(d=>({id:d.id,...d.data()})).filter(i=>String(i.status||"").toLowerCase()!=="suspended");}catch(e){console.error(e);instructors=[];}}
+function subscribeCourses(){onSnapshot(coursesRef,snap=>{courses=snap.docs.map(d=>({id:d.id,...d.data()}));populateFilters();renderDataSummary();applyFilters();$("loadingGrid")&&( $("loadingGrid").style.display="none");},e=>{console.error(e);$("loadingGrid")&&($("loadingGrid").style.display="none");notify("Unable to load courses from Firestore.","error");});}
 
-function subscribeCourses(){
-    onSnapshot(coursesRef, snap => {
-        courses=snap.docs.map(d=>({id:d.id,...d.data()}));
-        populateFilters(); updateStats(); renderAnalytics(); renderCharts(); applyFilters(); $("loadingGrid").style.display="none";
-    }, error => { console.error("Course Load Error:",error); $("loadingGrid").style.display="none"; notify("Unable to load courses from Firestore.","error"); });
-}
-
-onAuthStateChanged(auth, async user => {
-    if(!user){ location.href="../login.html"; return; }
-    bindEvents();
-    await loadInstructors();
-    subscribeCourses();
-});
+onAuthStateChanged(auth,async user=>{if(!user){location.href="../login.html";return;}bindEvents();await loadInstructors();subscribeCourses();});
