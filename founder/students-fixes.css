@@ -1,104 +1,148 @@
-/* Founder Students page finishing layer */
+/* ==========================================================
+   FOUNDER STUDENTS — READABLE PREMIUM FINISHING LAYER
+   Loaded after students.css and founder-unified.css.
+========================================================== */
 
-body.modal-open { overflow: hidden; }
-
-.students-table,
-.filter-bar,
-.page-hero,
-.stat-card { position: relative; z-index: 1; }
-
-.modal {
-    position: fixed;
-    inset: 0;
-    z-index: 5000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(15, 23, 42, .42);
-    backdrop-filter: blur(8px);
-    overflow-y: auto;
+:root {
+    --students-bg: #f5f7fb;
+    --students-surface: #ffffff;
+    --students-surface-soft: #f8fafc;
+    --students-text: #0f172a;
+    --students-muted: #64748b;
+    --students-border: #e2e8f0;
+    --students-blue: #2563eb;
+    --students-blue-soft: #eff6ff;
+    --students-shadow: 0 10px 30px rgba(15, 23, 42, .07);
 }
 
-.modal.active { display: flex; animation: studentsModalIn .18s ease-out; }
+body {
+    background: var(--students-bg) !important;
+    color: var(--students-text) !important;
+}
 
+.bg-orb { opacity: .08 !important; filter: blur(100px) !important; }
+
+.main-content {
+    background: transparent !important;
+    color: var(--students-text) !important;
+}
+
+.page-hero,
+.filter-bar,
+.students-table,
+.stat-card,
+.glass-card {
+    background: var(--students-surface) !important;
+    color: var(--students-text) !important;
+    border: 1px solid var(--students-border) !important;
+    box-shadow: var(--students-shadow) !important;
+    backdrop-filter: none !important;
+}
+
+.page-hero { padding: 30px !important; }
+.hero-badge { background: var(--students-blue-soft) !important; color: #1d4ed8 !important; }
+.hero-content h1,
+.hero-content p,
+.stat-card h2,
+.stat-card small,
+.table-header h3,
+.table-header span { color: inherit !important; }
+.hero-content p,
+.stat-top span,
+.stat-card small,
+.table-header span { color: var(--students-muted) !important; }
+
+.primary-btn {
+    background: var(--students-blue) !important;
+    color: #fff !important;
+    box-shadow: 0 5px 14px rgba(37, 99, 235, .18);
+}
+.primary-btn:hover { background: #1d4ed8 !important; }
+.secondary-btn {
+    background: #fff !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+.secondary-btn:hover { background: #f8fafc !important; border-color: #94a3b8 !important; }
+
+.search-box,
+.filter-right select {
+    background: #fff !important;
+    color: var(--students-text) !important;
+    border-color: var(--students-border) !important;
+}
+.search-box input { color: var(--students-text) !important; }
+.search-box input::placeholder { color: #94a3b8 !important; }
+.filter-right option { background: #fff !important; color: var(--students-text) !important; }
+
+.stat-card:hover { transform: translateY(-3px) !important; border-color: #bfdbfe !important; }
+.stat-icon { border-color: var(--students-border) !important; }
+
+.table-responsive { border: 1px solid var(--students-border); }
+thead { background: var(--students-surface-soft) !important; }
+th {
+    color: #64748b !important;
+    background: var(--students-surface-soft) !important;
+    border-color: var(--students-border) !important;
+}
+td { color: #334155 !important; border-color: #eef2f7 !important; background: #fff !important; }
+tbody tr:hover td { background: #f8fafc !important; }
+.student-details strong { color: var(--students-text) !important; }
+.student-details small { color: var(--students-muted) !important; }
+.student-avatar { background: linear-gradient(135deg, #2563eb, #60a5fa) !important; }
+
+.empty-state { color: var(--students-muted) !important; }
+.empty-content h3 { color: var(--students-text) !important; }
+.empty-content p { color: var(--students-muted) !important; }
+
+.pagination { color: var(--students-muted) !important; }
+.page-btn {
+    background: #fff !important;
+    color: #334155 !important;
+    border: 1px solid var(--students-border) !important;
+    border-radius: 10px !important;
+}
+.page-btn:hover:not(:disabled) { border-color: #93c5fd !important; color: var(--students-blue) !important; background: #eff6ff !important; }
+.page-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Student modal */
+body.modal-open { overflow: hidden; }
+.modal {
+    position: fixed; inset: 0; z-index: 5000; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: rgba(15, 23, 42, .42); backdrop-filter: blur(8px); overflow-y: auto;
+}
+.modal.active { display: flex; animation: studentsModalIn .18s ease-out; }
 .modal-content {
-    width: min(560px, 100%);
-    max-height: min(760px, calc(100vh - 40px));
-    overflow-y: auto;
-    padding: 26px;
-    background: #fff;
-    color: #0f172a;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
+    width: min(560px, 100%); max-height: min(760px, calc(100vh - 40px)); overflow-y: auto;
+    padding: 26px; background: #fff; color: #0f172a;
+    border: 1px solid #e2e8f0; border-radius: 20px;
     box-shadow: 0 28px 80px rgba(15, 23, 42, .22);
 }
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 22px;
-}
-
+.modal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
 .modal-header h3 { margin: 0; font-size: 1.25rem; color: #0f172a; }
-
 .modal-header button {
-    width: 38px;
-    height: 38px;
-    display: grid;
-    place-items: center;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    background: #f8fafc;
-    color: #475569;
-    cursor: pointer;
+    width: 38px; height: 38px; display: grid; place-items: center;
+    border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; color: #475569; cursor: pointer;
 }
-
 .modal-header button:hover { background: #f1f5f9; color: #0f172a; }
-
 #studentForm { display: grid; gap: 14px; }
-
-#studentForm input,
-#studentForm select {
-    width: 100%;
-    min-height: 48px;
-    padding: 12px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    outline: none;
-    background: #fff;
-    color: #0f172a;
-    font: inherit;
+#studentForm input, #studentForm select {
+    width: 100%; min-height: 48px; padding: 12px 14px;
+    border: 1px solid #cbd5e1; border-radius: 12px; outline: none;
+    background: #fff; color: #0f172a; font: inherit;
 }
-
-#studentForm input:focus,
-#studentForm select:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
-}
-
+#studentForm input:focus, #studentForm select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
 #saveStudentBtn { width: 100%; margin-top: 4px; }
 
+.action-buttons { display: flex; align-items: center; gap: 8px; }
 .action-btn {
-    width: 38px;
-    height: 38px;
-    display: inline-grid;
-    place-items: center;
-    padding: 0;
-    border: 1px solid #dbe3ef;
-    border-radius: 10px;
-    background: #fff;
-    color: #475569;
-    cursor: pointer;
+    width: 38px; height: 38px; display: inline-grid; place-items: center; padding: 0;
+    border: 1px solid #dbe3ef; border-radius: 10px; background: #fff; color: #475569; cursor: pointer;
 }
-
-.action-btn:hover { background: #f8fafc; color: #2563eb; border-color: #bfdbfe; }
+.action-btn:hover { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
 .action-btn:disabled { opacity: .5; cursor: wait; }
 .action-btn svg { width: 17px; height: 17px; }
-
-.action-buttons { display: flex; align-items: center; gap: 8px; }
 
 .status { display: inline-flex; align-items: center; }
 .status.active { background: #ecfdf3; color: #15803d; border-color: #bbf7d0; }
@@ -111,13 +155,7 @@ body.modal-open { overflow: hidden; }
 .progress-fill { height: 100%; border-radius: inherit; background: #2563eb; }
 .progress > span { min-width: 36px; font-size: .78rem; font-weight: 700; color: #475569; }
 
-.page-btn:disabled { opacity: .45; cursor: not-allowed; }
-
-@keyframes studentsModalIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
+@keyframes studentsModalIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 640px) {
     .modal { padding: 12px; align-items: flex-end; }
     .modal-content { max-height: calc(100vh - 24px); border-radius: 18px 18px 0 0; padding: 22px 18px; }
