@@ -1,467 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>
-Security Settings | Founder OS
-</title>
-
-
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
-
-
-<link rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
-
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-rel="stylesheet">
-
-
-<link rel="stylesheet"
-href="security.css">
-
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Settings | Founder OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="security.css">
 <link rel="stylesheet" href="founder-unified.css">
 </head>
-
-
 <body>
-
-
-<div class="bg-orb orb-1"></div>
-
-<div class="bg-orb orb-2"></div>
-
-<div class="bg-orb orb-3"></div>
-
-
-
 <div class="dashboard-layout">
-
-
 <aside id="sidebarContainer"></aside>
-
-
 <div id="sidebarOverlay"></div>
-
-
-
 <main class="main-content">
-
-
 <header id="topbarContainer"></header>
-
-
-
-
-<!-- ==========================
-PAGE HEADER
-========================== -->
-
-
-<section class="page-header glass-card">
-
-
-<h1>
-
-🔒 Security Settings
-
-</h1>
-
-
-<p>
-
-Manage founder authentication, session security and platform protection.
-
-</p>
-
-
-</section>
-
-
-
-
-<!-- ==========================
-PASSWORD
-========================== -->
-
-
+<section class="page-header glass-card"><h1>🔒 Security Settings</h1><p>Manage founder authentication, session security and platform protection.</p></section>
 <section class="glass-card section-card">
-
-
-<h2>
-
-Password
-
-</h2>
-
-
-
+<h2>Password</h2>
 <div class="form-grid">
-
-
-
-<div class="input-group">
-
-
-<label>
-
-Current Password
-
-</label>
-
-
-<input
-
-type="password"
-
-id="currentPassword"
-
-placeholder="••••••••">
-
-
+<div class="input-group"><label>Current Password</label><input type="password" id="currentPassword" autocomplete="current-password" placeholder="••••••••"></div>
+<div class="input-group"><label>New Password</label><input type="password" id="newPassword" autocomplete="new-password"></div>
+<div class="input-group"><label>Confirm Password</label><input type="password" id="confirmPassword" autocomplete="new-password"></div>
 </div>
-
-
-
-
-
-<div class="input-group">
-
-
-<label>
-
-New Password
-
-</label>
-
-
-<input
-
-type="password"
-
-id="newPassword">
-
-
-</div>
-
-
-
-
-
-<div class="input-group">
-
-
-<label>
-
-Confirm Password
-
-</label>
-
-
-<input
-
-type="password"
-
-id="confirmPassword">
-
-
-</div>
-
-
-
-</div>
-
-
+<div class="action-bar"><button class="primary-btn" id="changePasswordBtn">🔑 Change Password</button></div>
 </section>
-
-
-
-
-
-<!-- ==========================
-SECURITY OPTIONS
-========================== -->
-
-
 <section class="glass-card section-card">
-
-
-<h2>
-
-Security Options
-
-</h2>
-
-
-
+<h2>Security Options</h2>
 <div class="toggle-list">
-
-
-
-<div class="toggle-item">
-
-
-<span>
-
-Two Factor Authentication
-
-</span>
-
-
-<input
-
-type="checkbox"
-
-id="twoFactor">
-
-
+<div class="toggle-item"><span>Two Factor Authentication</span><input type="checkbox" id="twoFactor"></div>
+<div class="toggle-item"><span>Email Login Alerts</span><input type="checkbox" id="loginAlerts"></div>
+<div class="toggle-item"><span>Remember Trusted Devices</span><input type="checkbox" id="trustedDevices"></div>
+<div class="toggle-item"><span>Maintenance Mode</span><input type="checkbox" id="maintenanceMode"></div>
 </div>
-
-
-
-
-<div class="toggle-item">
-
-
-<span>
-
-Email Login Alerts
-
-</span>
-
-
-<input
-
-type="checkbox"
-
-id="loginAlerts">
-
-
-</div>
-
-
-
-
-<div class="toggle-item">
-
-
-<span>
-
-Remember Trusted Devices
-
-</span>
-
-
-<input
-
-type="checkbox"
-
-id="trustedDevices">
-
-
-</div>
-
-
-
-
-<div class="toggle-item">
-
-
-<span>
-
-Maintenance Mode
-
-</span>
-
-
-<input
-
-type="checkbox"
-
-id="maintenanceMode">
-
-
-</div>
-
-
-
-</div>
-
-
 </section>
-
-<!-- ==========================
-ACTIVE SESSIONS
-========================== -->
-
-
 <section class="glass-card section-card">
-
-
-<h2>
-
-🖥️ Sessions
-
-</h2>
-
-
-
-<div class="session-card">
-
-
-<div class="session-info">
-
-
-<h3>
-
-Current Device
-
-</h3>
-
-
-<p>
-
-Android • Active Now
-
-</p>
-
-
-</div>
-
-
-<span class="status-online">
-
-Online
-
-</span>
-
-
-</div>
-
-
-
-
-<button
-
-class="primary-btn"
-
-id="logoutAllBtn">
-
-
-🚪 Logout All Devices
-
-
-</button>
-
-
+<h2>🖥️ Sessions</h2>
+<div class="session-card"><div class="session-info"><h3>Current Device</h3><p id="currentSessionInfo">Authenticated session • Active now</p></div><span class="status-online">Online</span></div>
+<button class="secondary-btn" id="logoutAllBtn">🚪 Sign Out</button>
+<p class="empty-state" style="margin-top:14px">Firebase client sessions cannot revoke other devices from the browser. This signs out the current device safely.</p>
 </section>
-
-
-
-
-
-<!-- ==========================
-SECURITY ACTIVITY
-========================== -->
-
-
 <section class="glass-card section-card">
-
-
-<h2>
-
-📋 Security Activity
-
-</h2>
-
-
-
-<div id="securityActivity">
-
-
-<p class="empty-state">
-
-No recent security activity.
-
-</p>
-
-
-</div>
-
-
+<h2>📋 Security Activity</h2>
+<div id="securityActivity"><p class="empty-state">No recent security activity.</p></div>
 </section>
-
-
-
-
-
-<!-- ==========================
-ACTIONS
-========================== -->
-
-
-<div class="action-bar">
-
-
-<button
-
-class="primary-btn"
-
-id="saveSecurityBtn">
-
-
-💾 Save Changes
-
-
-</button>
-
-
-</div>
-
-
-
+<div class="action-bar"><button class="primary-btn" id="saveSecurityBtn">💾 Save Security Settings</button></div>
 </main>
-
-
 </div>
-
-
-
-
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
-
-<script
-
-type="module"
-
-src="./js/founder-app.js">
-
-</script>
-
-
-<script
-
-type="module"
-
-src="security.js">
-
-</script>
-
-
-
+<script type="module" src="./js/founder-app.js"></script>
+<script type="module" src="security.js"></script>
 </body>
-
-
 </html>
