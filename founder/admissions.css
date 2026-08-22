@@ -1,946 +1,138 @@
-/* ===================================
-   SSA FOUNDER OS
-   ADMISSIONS MANAGEMENT
-=================================== */
-
-
-:root{
-
---primary:#3b82f6;
---primary-dark:#2563eb;
-
---success:#22c55e;
---danger:#ef4444;
---warning:#f59e0b;
---blue:#60a5fa;
-
---bg:#071426;
---surface:#0f1f35;
-
---text:#ffffff;
---muted:#9ca3af;
-
---border:rgba(255,255,255,.08);
-
---radius:20px;
-
---shadow:
-0 20px 50px rgba(0,0,0,.25);
-
---transition:.3s ease;
-
-}
-
-
-
-/* ===================================
-   RESET
-=================================== */
-
-
-*{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-
-}
-
-
-
-body{
-
-font-family:"Inter",sans-serif;
-
-background:
-
-linear-gradient(
-135deg,
-#071426,
-#0f1f35
-);
-
-color:var(--text);
-
-min-height:100vh;
-
-overflow-x:hidden;
-
-}
-
-
-
-/* ===================================
-   BACKGROUND
-=================================== */
-
-
-.bg-orb{
-
-position:fixed;
-
-border-radius:50%;
-
-filter:blur(120px);
-
-opacity:.35;
-
-z-index:-1;
-
-}
-
-
-.orb-1{
-
-width:320px;
-height:320px;
-
-background:#2563eb;
-
-top:-100px;
-left:-80px;
-
-}
-
-
-.orb-2{
-
-width:280px;
-height:280px;
-
-background:#8b5cf6;
-
-right:-100px;
-top:35%;
-
-}
-
-
-.orb-3{
-
-width:260px;
-height:260px;
-
-background:#06b6d4;
-
-bottom:-100px;
-left:40%;
-
-}
-
-
-
-/* ===================================
-   LAYOUT
-=================================== */
-
-
-.dashboard-layout{
-
-display:flex;
-
-min-height:100vh;
-
-}
-
-
-.main-content{
-
-flex:1;
-
-padding:24px;
-
-display:flex;
-
-flex-direction:column;
-
-gap:24px;
-
-}
-
-
-
-
-
-/* ===================================
-   GLASS
-=================================== */
-
-
-.glass-card{
-
-background:
-
-rgba(15,31,53,.72);
-
-backdrop-filter:blur(20px);
-
-border:
-
-1px solid var(--border);
-
-border-radius:var(--radius);
-
-box-shadow:var(--shadow);
-
-}
-
-
-
-
-
-/* ===================================
-   BUTTONS
-=================================== */
-
-
-.primary-btn,
-.secondary-btn{
-
-padding:14px 22px;
-
-border-radius:14px;
-
-font-weight:700;
-
-cursor:pointer;
-
-border:none;
-
-transition:var(--transition);
-
-}
-
-
-
-.primary-btn{
-
-background:
-
-linear-gradient(
-135deg,
-var(--primary),
-var(--primary-dark)
-);
-
-color:white;
-
-}
-
-
-.primary-btn:hover{
-
-transform:translateY(-2px);
-
-}
-
-
-
-.secondary-btn{
-
-background:
-
-rgba(255,255,255,.05);
-
-border:
-
-1px solid var(--border);
-
-color:white;
-
-}
-
-
-
-
-
-/* ===================================
-   HERO
-=================================== */
-
-
-.page-hero{
-
-padding:30px;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-gap:25px;
-
-}
-
-
-
-.hero-content{
-
-display:flex;
-
-flex-direction:column;
-
-gap:15px;
-
-}
-
-
-
-.hero-badge{
-
-width:max-content;
-
-padding:8px 16px;
-
-border-radius:999px;
-
-background:
-
-rgba(59,130,246,.12);
-
-color:#7dd3fc;
-
-font-size:13px;
-
-font-weight:700;
-
-}
-
-
-
-.hero-content h1{
-
-font-size:2.2rem;
-
-font-weight:800;
-
-}
-
-
-
-.hero-content p{
-
-max-width:650px;
-
-color:var(--muted);
-
-line-height:1.7;
-
-}
-
-
-
-
-/* ===================================
-   STATS
-=================================== */
-
-
-.stats-grid{
-
-display:grid;
-
-grid-template-columns:
-
-repeat(4,1fr);
-
-gap:20px;
-
-}
-
-
-
-.stat-card{
-
-padding:24px;
-
-background:
-
-rgba(15,31,53,.72);
-
-border:
-
-1px solid var(--border);
-
-border-radius:20px;
-
-transition:var(--transition);
-
-}
-
-
-
-.stat-card:hover{
-
-transform:translateY(-5px);
-
-}
-
-
-
-.stat-top{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-}
-
-
-
-.stat-top span{
-
-color:var(--muted);
-
-font-weight:600;
-
-}
-
-
-
-.stat-card h2{
-
-font-size:2.2rem;
-
-margin:18px 0 8px;
-
-}
-
-
-
-.stat-card small{
-
-color:var(--muted);
-
-}
-
-
-
-.stat-icon{
-
-width:52px;
-
-height:52px;
-
-border-radius:16px;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:22px;
-
-}
-
-
-
-.gold{
-
-background:rgba(245,158,11,.12);
-
-}
-
-
-
-.green{
-
-background:rgba(34,197,94,.12);
-
-}
-
-
-
-.red{
-
-background:rgba(239,68,68,.12);
-
-}
-
-
-
-.blue{
-
-background:rgba(59,130,246,.12);
-
-}
-
-
-
-
-
-/* ===================================
-   TABLE
-=================================== */
-
-
-.students-table{
-
-padding:24px;
-
-overflow:hidden;
-
-}
-
-
-
-.table-header{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-margin-bottom:20px;
-
-}
-
-
-
-.table-header h3{
-
-font-size:1.2rem;
-
-}
-
-
-
-.table-header span{
-
-color:var(--muted);
-
-}
-
-
-
-.table-responsive{
-
-overflow-x:auto;
-
-}
-
-
-
-table{
-
-width:100%;
-
-min-width:900px;
-
-border-collapse:collapse;
-
-}
-
-
-
-thead th{
-
-padding:16px;
-
-text-align:left;
-
-font-size:.82rem;
-
-text-transform:uppercase;
-
-color:var(--muted);
-
-border-bottom:
-
-1px solid var(--border);
-
-}
-
-
-
-tbody td{
-
-padding:18px 16px;
-
-border-bottom:
-
-1px solid rgba(255,255,255,.05);
-
-}
-
-
-
-
-
-/* ===================================
-   STATUS
-=================================== */
-
-
-.status{
-
-padding:7px 14px;
-
-border-radius:999px;
-
-font-size:.8rem;
-
-font-weight:700;
-
-}
-
-
-
-.status.pending{
-
-background:rgba(245,158,11,.12);
-
-color:#fbbf24;
-
-}
-
-
-
-.status.approved{
-
-background:rgba(34,197,94,.12);
-
-color:#4ade80;
-
-}
-
-
-
-.status.rejected{
-
-background:rgba(239,68,68,.12);
-
-color:#f87171;
-
-}
-
-
-
-
-
-/* ===================================
-   ACTION BUTTONS
-=================================== */
-
-
-.action-buttons{
-
-display:flex;
-
-gap:8px;
-
-}
-
-
-
-.action-btn{
-
-width:38px;
-
-height:38px;
-
-border-radius:12px;
-
-border:none;
-
-cursor:pointer;
-
-background:
-
-rgba(255,255,255,.06);
-
-color:white;
-
-transition:.3s;
-
-}
-
-
-
-.action-btn:hover{
-
-transform:translateY(-2px);
-
-}
-
-
-
-.approve:hover{
-
-background:#22c55e;
-
-}
-
-
-
-.reject:hover{
-
-background:#ef4444;
-
-}
-
-/* ===================================
-   RESPONSIVE SYSTEM
-   SSA FOUNDER OS STANDARD
-=================================== */
-
-
-/* TABLET */
-
-@media(max-width:1024px){
-
-
-.main-content{
-
-padding:20px;
-
-}
-
-
-.page-hero{
-
-flex-direction:column;
-
-align-items:flex-start;
-
-}
-
-
-.hero-actions{
-
-width:100%;
-
-}
-
-
-.hero-actions button{
-
-width:100%;
-
-}
-
-
-
-.stats-grid{
-
-grid-template-columns:
-repeat(2,1fr);
-
-}
-
-
-
-.table-responsive{
-
-overflow-x:auto;
-
-}
-
-
-
-}
-
-
-
-/* MOBILE */
-
-@media(max-width:768px){
-
-
-.dashboard-layout{
-
-display:block;
-
-}
-
-
-
-.main-content{
-
-padding:16px;
-
-}
-
-
-
-.page-hero{
-
-padding:22px;
-
-gap:18px;
-
-}
-
-
-
-.hero-content h1{
-
-font-size:26px;
-
-}
-
-
-
-.hero-content p{
-
-font-size:14px;
-
-}
-
-
-
-.hero-actions{
-
-display:flex;
-
-flex-direction:column;
-
-width:100%;
-
-}
-
-
-
-.primary-btn,
-.secondary-btn{
-
-width:100%;
-
-}
-
-
-
-.stats-grid{
-
-grid-template-columns:1fr;
-
-gap:16px;
-
-}
-
-
-
-.stat-card{
-
-padding:20px;
-
-}
-
-
-
-.table-header{
-
-flex-direction:column;
-
-align-items:flex-start;
-
-gap:10px;
-
-}
-
-
-
-.students-table{
-
-padding:16px;
-
-}
-
-
-
-table{
-
-min-width:650px;
-
-}
-
-
-
-}
-
-
-
-/* SMALL PHONES */
-
-@media(max-width:480px){
-
-
-.main-content{
-
-padding:12px;
-
-}
-
-
-
-.page-hero{
-
-padding:18px;
-
-}
-
-
-
-.hero-content h1{
-
-font-size:22px;
-
-}
-
-
-
-.hero-content p{
-
-line-height:1.5;
-
-}
-
-
-
-.hero-badge{
-
-font-size:12px;
-
-}
-
-
-
-.stat-card h2{
-
-font-size:28px;
-
-}
-
-
-
-.stat-icon{
-
-width:44px;
-
-height:44px;
-
-}
-
-
-
-.students-table{
-
-padding:12px;
-
-}
-
-
-
-table{
-
-min-width:600px;
-
-}
-
-
+/* SSA FOUNDER OS — ADMISSIONS PAGE */
+:root {
+    --ad-primary: #2563eb;
+    --ad-primary-soft: #eff6ff;
+    --ad-success: #15803d;
+    --ad-success-soft: #ecfdf3;
+    --ad-danger: #b91c1c;
+    --ad-danger-soft: #fef2f2;
+    --ad-warning: #a16207;
+    --ad-warning-soft: #fffbeb;
+    --ad-text: #172033;
+    --ad-muted: #667085;
+    --ad-border: #e5e7eb;
+    --ad-surface: #ffffff;
+    --ad-page: #f7f8fc;
+    --ad-radius: 18px;
+    --ad-shadow: 0 12px 32px rgba(16, 24, 40, .07);
+}
+
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ad-page);
+    color: var(--ad-text);
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.bg-orb { display: none; }
+.dashboard-layout { min-height: 100vh; }
+.main-content { min-width: 0; padding: 24px; gap: 22px; }
+
+.glass-card,
+.stat-card {
+    background: var(--ad-surface);
+    border: 1px solid var(--ad-border);
+    border-radius: var(--ad-radius);
+    box-shadow: var(--ad-shadow);
+    backdrop-filter: none;
+}
+
+.page-hero {
+    padding: 28px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+.hero-content { min-width: 0; }
+.hero-badge {
+    display: inline-flex;
+    width: max-content;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: var(--ad-primary-soft);
+    color: var(--ad-primary);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+.hero-content h1 { margin: 14px 0 8px; font-size: clamp(1.7rem, 3vw, 2.25rem); color: var(--ad-text); }
+.hero-content p { max-width: 700px; margin: 0; color: var(--ad-muted); line-height: 1.65; }
+
+.primary-btn {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--ad-primary);
+    border-radius: 12px;
+    background: var(--ad-primary);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 14px rgba(37, 99, 235, .18);
+    transition: .2s ease;
+}
+.primary-btn:hover { transform: translateY(-1px); background: #1d4ed8; }
+.primary-btn:disabled { opacity: .65; cursor: wait; transform: none; }
+.primary-btn.is-loading { position: relative; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.stat-card { padding: 20px; transition: transform .2s ease, box-shadow .2s ease; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(16, 24, 40, .09); }
+.stat-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.stat-top span { color: var(--ad-muted); font-size: 13px; font-weight: 700; }
+.stat-card h2 { margin: 16px 0 5px; color: var(--ad-text); font-size: 30px; line-height: 1; }
+.stat-card small { color: var(--ad-muted); }
+.stat-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; }
+.gold { background: var(--ad-warning-soft); }
+.green { background: var(--ad-success-soft); }
+.red { background: var(--ad-danger-soft); }
+.blue { background: var(--ad-primary-soft); }
+
+.students-table { padding: 22px; overflow: hidden; }
+.table-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.table-header h3 { margin: 0; font-size: 16px; }
+.table-header span { color: var(--ad-muted); font-size: 13px; font-weight: 600; }
+.table-responsive { overflow-x: auto; border: 1px solid var(--ad-border); border-radius: 14px; }
+table { width: 100%; min-width: 900px; border-collapse: separate; border-spacing: 0; background: #fff; }
+thead th { padding: 13px 16px; background: #f8fafc; color: #667085; border-bottom: 1px solid var(--ad-border); text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+tbody td { padding: 15px 16px; border-bottom: 1px solid #eef0f3; color: #344054; font-size: 13px; vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: #fbfcff; }
+.applicant-cell { display: grid; gap: 3px; }
+.applicant-cell strong { color: var(--ad-text); }
+.applicant-cell span { color: var(--ad-muted); font-size: 12px; }
+.email-link { color: var(--ad-primary); text-decoration: none; }
+.email-link:hover { text-decoration: underline; }
+.status { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: capitalize; }
+.status.pending { background: var(--ad-warning-soft); color: var(--ad-warning); }
+.status.approved { background: var(--ad-success-soft); color: var(--ad-success); }
+.status.rejected { background: var(--ad-danger-soft); color: var(--ad-danger); }
+.action-buttons { display: flex; align-items: center; gap: 7px; }
+.action-btn { width: 34px; height: 34px; border: 1px solid var(--ad-border); border-radius: 10px; background: #fff; cursor: pointer; font-weight: 900; transition: .2s ease; }
+.action-btn:disabled { opacity: .5; cursor: wait; }
+.action-btn.approve { color: var(--ad-success); }
+.action-btn.approve:hover { background: var(--ad-success-soft); border-color: #bbf7d0; }
+.action-btn.reject { color: var(--ad-danger); }
+.action-btn.reject:hover { background: var(--ad-danger-soft); border-color: #fecaca; }
+.action-complete { color: var(--ad-muted); font-size: 12px; font-weight: 700; }
+.empty-state { min-height: 150px; display: grid; place-content: center; gap: 6px; text-align: center; color: var(--ad-muted); }
+.empty-state strong { color: var(--ad-text); }
+.empty-state.error strong { color: var(--ad-danger); }
+
+@media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 768px) {
+    .main-content { padding: 16px; }
+    .page-hero { align-items: flex-start; flex-direction: column; padding: 22px; }
+    .hero-actions, .hero-actions .primary-btn { width: 100%; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .students-table { padding: 16px; }
+}
+@media (max-width: 520px) {
+    .main-content { padding: 12px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .page-hero { padding: 18px; }
+    .students-table { padding: 12px; }
+    .table-header { align-items: flex-start; flex-direction: column; }
 }
