@@ -359,7 +359,6 @@ currentRole
 
 
 
-initializeWalletSystem();
 
 
 
@@ -2948,8 +2947,6 @@ showToast(
 
 await Promise.all([
 
-loadWallets(),
-
 loadInstructorWallets(),
 
 loadTransactions(),
@@ -3637,35 +3634,28 @@ return "-";
 =================================== */
 
 
-async function initWalletSystem(){
+async function initWalletSystem() {
+    try {
+        await verifyFounderAccess();
 
+        await initializeTreasury();
+        await loadInstructorWallets();
+        await loadTransactions();
+        await loadAuditLogs();
+        await loadSecuritySettings();
 
-console.log(
-"🏦 Founder OS Wallet System Started"
-);
+        await calculateCashFlow();
 
+        console.log("💰 Founder Wallet System initialized");
 
+    } catch (error) {
+        console.error("Wallet initialization failed:", error);
 
-await refreshFinanceData();
-
-
-
+        showToast(
+            "Unable to initialize wallet system.",
+            "error"
+        );
+    }
 }
-
-
-
-
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
 
 initWalletSystem();
-
-
-}
-
-);
