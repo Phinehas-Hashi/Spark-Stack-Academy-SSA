@@ -2,187 +2,54 @@ import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const currency = new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", maximumFractionDigits: 0 });
-const state = { students: 0, courses: 0, instructors: 0, revenue: 0, payments: [], activityToday: 0 };
-const byId = (id) => document.getElementById(id);
-const setText = (id, value) => { const element = byId(id); if (element) element.textContent = value; };
+const money = new Intl.NumberFormat("en-KE", { style:"currency", currency:"KES", maximumFractionDigits:0 });
+const state = { students:0, instructors:0, courses:0, revenue:0, payments:[], activity:[] };
+const $ = id => document.getElementById(id);
+const text = (id,value) => { const el=$(id); if(el) el.textContent=value; };
+const amount = p => Number(p.amount ?? p.total ?? p.price ?? 0) || 0;
+const dateOf = v => v?.toDate ? v.toDate() : (v ? new Date(v) : null);
+const completed = p => ["completed","success","successful","paid","succeeded"].includes(String(p.status ?? p.paymentStatus ?? "completed").toLowerCase());
 
-function paymentAmount(payment) {
-    const amount = Number(payment.amount ?? payment.total ?? payment.price ?? 0);
-    return Number.isFinite(amount) ? amount : 0;
+function refresh(){
+  text("totalStudents",state.students.toLocaleString());
+  text("totalInstructors",state.instructors.toLocaleString());
+  text("activeCourses",state.courses.toLocaleString());
+  text("totalRevenue",money.format(state.revenue));
+  text("platformActivity",state.activity.length.toLocaleString());
+  text("studentGrowth",state.students ? "Live academy total" : "No students yet");
+  text("revenueGrowth",state.revenue ? "Completed recorded payments" : "No completed payments");
+  text("lastSystemSync",new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}));
+  renderChart(); renderBrief(); renderActivity();
 }
-
-function paymentDate(payment) {
-    const value = payment.paidAt || payment.createdAt || payment.updatedAt;
-    if (value?.toDate) return value.toDate();
-    if (value) {
-        const date = new Date(value);
-        return Number.isNaN(date.getTime()) ? null : date;
-    }
-    return null;
+function renderBrief(){
+  const message = state.students ? `${state.students.toLocaleString()} learners, ${state.instructors.toLocaleString()} instructors and ${state.courses.toLocaleString()} active courses are currently under your command.` : "Your Founder Console is connected. Student and instructor records will appear here as soon as they exist.";
+  text("founderAiBrief",message);
 }
-
-function isCompletedPayment(payment) {
-    const status = String(payment.status || payment.paymentStatus || payment.state || "completed").toLowerCase();
-    return ["completed", "success", "successful", "paid", "succeeded"].includes(status);
+function renderChart(){
+  const chart=$("revenueChart"); if(!chart) return;
+  const days=Math.min(365,Math.max(7,Number($("revenuePeriod")?.value||30)));
+  const today=new Date(); today.setHours(0,0,0,0);
+  const totals=Array.from({length:days},()=>0);
+  state.payments.filter(completed).forEach(p=>{const d=dateOf(p.paidAt||p.createdAt||p.updatedAt); if(!d||Number.isNaN(d.getTime())) return; d.setHours(0,0,0,0); const age=Math.floor((today-d)/86400000); if(age>=0&&age<days) totals[days-1-age]+=amount(p);});
+  const max=Math.max(...totals,1); chart.replaceChildren(); const bars=document.createElement("div"); bars.className="founder-revenue-bars";
+  totals.forEach((v,i)=>{const bar=document.createElement("div");bar.className="founder-revenue-bar";bar.style.height=`${Math.max(v?6:2,(v/max)*100)}%`;bars.appendChild(bar);}); chart.appendChild(bars);
 }
-
-function updateMetrics() {
-    setText("totalStudents", state.students.toLocaleString());
-    setText("activeCourses", state.courses.toLocaleString());
-    setText("totalInstructors", state.instructors.toLocaleString());
-    setText("totalRevenue", currency.format(state.revenue));
-    setText("platformActivity", state.activityToday.toLocaleString());
-    setText("studentGrowth", state.students ? "Live academy total" : "No students yet");
-    setText("revenueGrowth", state.revenue ? "Completed recorded payments" : "No completed payments");
-    setText("lastSystemSync", new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-    renderRevenueChart();
-    updateBrief();
+function renderActivity(){
+  const list=$("founderActivityList"); if(!list)return; list.replaceChildren();
+  if(!state.activity.length){const empty=document.createElement("p");empty.className="founder-empty-state";empty.textContent="No recent platform activity yet.";list.appendChild(empty);return;}
+  state.activity.slice(0,8).forEach(item=>{const row=document.createElement("article");row.className="founder-activity-item";row.innerHTML=`<span class="founder-activity-icon">${item.icon||"✦"}</span><div><strong>${item.title||item.type||"Platform activity"}</strong><p>${item.message||item.description||"An academy event was recorded."}</p></div>`;list.appendChild(row);});
 }
+function bind(id,url){ $(id)?.addEventListener("click",()=>location.href=url); }
+function bindActions(){bind("manageStudentsBtn","students.html");bind("manageInstructorsBtn","instructors.html");bind("manageCoursesBtn","courses.html");bind("viewRevenueBtn","revenue.html");bind("viewReportsBtn","reports.html");bind("openSettingsBtn","platform-settings.html");bind("openSparkAiBtn","spark-ai.html");bind("viewAllActivityBtn","analytics.html");$("revenuePeriod")?.addEventListener("change",renderChart);}
+function listen(path,callback){return onSnapshot(collection(db,path),callback,error=>console.error(`Founder ${path} listener failed`,error));}
+function loadProfile(user){getDoc(doc(db,"users",user.uid)).then(s=>{const p=s.exists()?s.data():{};const name=p.fullName||p.name||user.displayName||"Founder";text("founderName",name.split(" ")[0]);text("founderDisplayName",name);text("founderEmail",user.email||"—");text("founderAvatar",name.charAt(0).toUpperCase());}).catch(console.warn);}
 
-function renderRevenueChart() {
-    const chart = byId("revenueChart");
-    if (!chart) return;
-    const requestedDays = Number(byId("revenuePeriod")?.value || 30);
-    const days = Math.min(Math.max(requestedDays, 7), 365);
-    const totals = Array.from({ length: days }, () => 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    state.payments.forEach((payment) => {
-        if (!isCompletedPayment(payment)) return;
-        const date = paymentDate(payment);
-        if (!date) return;
-        date.setHours(0, 0, 0, 0);
-        const age = Math.floor((today - date) / 86400000);
-        if (age >= 0 && age < days) totals[days - 1 - age] += paymentAmount(payment);
-    });
-
-    const max = Math.max(...totals, 1);
-    chart.replaceChildren();
-    const bars = document.createElement("div");
-    bars.className = "founder-revenue-bars";
-
-    totals.forEach((total, index) => {
-        const bar = document.createElement("div");
-        bar.className = "founder-revenue-bar";
-        bar.style.height = `${Math.max(total ? 6 : 2, (total / max) * 100)}%`;
-        const offset = days - 1 - index;
-        const date = new Date(today);
-        date.setDate(today.getDate() - offset);
-        bar.title = `${date.toLocaleDateString()} · ${currency.format(total)}`;
-        bars.appendChild(bar);
-    });
-
-    chart.appendChild(bars);
-}
-
-function updateBrief() {
-    const brief = state.students
-        ? `${state.students.toLocaleString()} learners and ${state.courses.toLocaleString()} courses are currently under your command. ${state.revenue ? `Recorded completed revenue is ${currency.format(state.revenue)}.` : "Revenue tracking is ready for the first completed payment."}`
-        : "Your command center is connected. Add courses, invite instructors, and Spark AI will begin surfacing academy insights.";
-    setText("founderAiBrief", brief);
-}
-
-function renderActivity(items) {
-    const list = byId("founderActivityList");
-    if (!list) return;
-    list.replaceChildren();
-
-    if (!items.length) {
-        const empty = document.createElement("p");
-        empty.className = "founder-empty-state";
-        empty.textContent = "No recent platform activity yet.";
-        list.appendChild(empty);
-        return;
-    }
-
-    items.slice(0, 8).forEach((item) => {
-        const row = document.createElement("article");
-        row.className = "founder-activity-item";
-        const icon = document.createElement("span");
-        icon.className = "founder-activity-icon";
-        icon.textContent = item.icon || "✦";
-        const copy = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = item.title || item.type || "Platform activity";
-        const description = document.createElement("p");
-        description.textContent = item.message || item.description || "An academy event was recorded.";
-        copy.append(title, description);
-        row.append(icon, copy);
-        list.appendChild(row);
-    });
-}
-
-function navigate(id, url) {
-    byId(id)?.addEventListener("click", () => { window.location.href = url; });
-}
-
-function bindActions() {
-    navigate("manageStudentsBtn", "students.html");
-    navigate("manageInstructorsBtn", "instructors.html");
-    navigate("manageCoursesBtn", "courses.html");
-    navigate("viewRevenueBtn", "revenue.html");
-    navigate("viewReportsBtn", "reports.html");
-    navigate("openSettingsBtn", "platform-settings.html");
-    navigate("openSparkAiBtn", "spark-ai.html");
-    navigate("viewAllActivityBtn", "analytics.html");
-    byId("revenuePeriod")?.addEventListener("change", renderRevenueChart);
-}
-
-function loadProfile(user) {
-    getDoc(doc(db, "users", user.uid)).then((snapshot) => {
-        const profile = snapshot.exists() ? snapshot.data() : {};
-        const name = profile.fullName || profile.name || user.displayName || "Founder";
-        setText("founderName", name.split(" ")[0]);
-        setText("founderDisplayName", name);
-        setText("founderEmail", user.email || "—");
-        setText("founderAvatar", name.charAt(0).toUpperCase());
-    }).catch((error) => console.warn("Founder profile read failed:", error));
-}
-
-onAuthStateChanged(auth, (user) => {
-    if (user) loadProfile(user);
-});
-
-onSnapshot(collection(db, "students"), (snapshot) => {
-    state.students = snapshot.size;
-    updateMetrics();
-});
-
-onSnapshot(collection(db, "courses"), (snapshot) => {
-    state.courses = snapshot.docs.filter((entry) => entry.data().status !== "archived").length;
-    updateMetrics();
-});
-
-onSnapshot(collection(db, "instructors"), (snapshot) => {
-    state.instructors = snapshot.size;
-    updateMetrics();
-});
-
-onSnapshot(collection(db, "payments"), (snapshot) => {
-    state.payments = snapshot.docs.map((entry) => entry.data());
-    state.revenue = state.payments
-        .filter(isCompletedPayment)
-        .reduce((sum, payment) => sum + paymentAmount(payment), 0);
-    updateMetrics();
-});
-
-onSnapshot(collection(db, "reports"), (snapshot) => {
-    setText("openReports", snapshot.docs.filter((entry) => !["resolved", "closed"].includes(String(entry.data().status || "").toLowerCase())).length.toLocaleString());
-});
-
-onSnapshot(collection(db, "activity"), (snapshot) => {
-    const items = snapshot.docs.map((entry) => entry.data());
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    state.activityToday = items.filter((item) => {
-        const value = item.createdAt || item.timestamp || item.date;
-        const date = value?.toDate ? value.toDate() : (value ? new Date(value) : null);
-        return date && !Number.isNaN(date.getTime()) && date >= start;
-    }).length;
-    updateMetrics();
-    renderActivity(items);
-});
-
+onAuthStateChanged(auth,user=>{if(user)loadProfile(user);});
+listen("users",snap=>{const docs=snap.docs.map(d=>d.data());state.students=docs.filter(d=>d.role==="student").length;state.instructors=docs.filter(d=>d.role==="instructor").length;refresh();});
+listen("students",snap=>{const n=snap.size;if(n>state.students)state.students=n;refresh();});
+listen("instructors",snap=>{const n=snap.size;if(n>state.instructors)state.instructors=n;refresh();});
+listen("courses",snap=>{state.courses=snap.docs.filter(d=>d.data().status!=="archived").length;refresh();});
+listen("payments",snap=>{state.payments=snap.docs.map(d=>d.data());state.revenue=state.payments.filter(completed).reduce((s,p)=>s+amount(p),0);refresh();});
+listen("activity",snap=>{state.activity=snap.docs.map(d=>d.data());refresh();});
+listen("reports",snap=>text("openReports",snap.docs.filter(d=>!["resolved","closed"].includes(String(d.data().status||"").toLowerCase())).length.toLocaleString()));
 bindActions();
