@@ -14,8 +14,8 @@ const firebaseConfig = {
     projectId: "spark-stack-academy",
     storageBucket: "spark-stack-academy.firebasestorage.app",
     messagingSenderId: "691304828755",
-    appId: "1:691304828755:web:dcb92043eb1a308ce39ba6",
-    measurementId: "G-GYS3P7ZVYJ"
+    appId: "1:691304828755:web:41ef7a43d5e5a51ce39ba6",
+    measurementId: "G-RLXKD9EB4Z"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -23,6 +23,8 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
-setPersistence(auth, browserLocalPersistence);
+setPersistence(auth, browserLocalPersistence).catch(error => {
+    console.error("Firebase Auth persistence:", error);
+});
 
 export { auth, db, storage };
