@@ -19,73 +19,22 @@
 <div class="student-layout">
     <aside id="sidebarContainer" class="sidebar-container"></aside>
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
-
     <main class="student-main">
         <div id="topbarContainer" class="topbar-container"></div>
-
         <section class="dashboard-content">
-            <section class="welcome-card">
-                <div class="welcome-content">
-                    <span class="welcome-badge"><i data-lucide="sparkles"></i> Student Portal</span>
-                    <h1>Welcome back, <span id="studentName">Student</span> 👋</h1>
-                    <p>Continue learning, build your skills, and move closer to your technology goals.</p>
-                    <div class="learning-meta">
-                        <div class="meta-item"><i data-lucide="flame"></i><span id="learningStreak">0 Day Streak</span></div>
-                        <div class="meta-item"><i data-lucide="calendar"></i><span id="todayDate">Today</span></div>
-                    </div>
-                </div>
-                <div class="welcome-icon"><i data-lucide="graduation-cap"></i></div>
-            </section>
-
-            <section class="stats-grid">
-                <div class="stat-card"><div class="stat-icon"><i data-lucide="book-open"></i></div><div class="stat-info"><h3>Courses</h3><strong id="courseCount">0</strong></div></div>
-                <div class="stat-card"><div class="stat-icon"><i data-lucide="play-circle"></i></div><div class="stat-info"><h3>Lessons</h3><strong id="lessonCount">0</strong></div></div>
-                <div class="stat-card"><div class="stat-icon"><i data-lucide="chart-line"></i></div><div class="stat-info"><h3>Progress</h3><strong id="progressPercent">0%</strong></div></div>
-                <div class="stat-card"><div class="stat-icon"><i data-lucide="award"></i></div><div class="stat-info"><h3>Certificates</h3><strong id="certificateCount">0</strong></div></div>
-            </section>
-
-            <section class="gamification-grid">
-                <div class="gamification-card streak-card"><div class="card-icon glow-fire"><i data-lucide="flame"></i></div><div><span>Learning Streak</span><h2 id="streakDays">0 Days</h2><p>Keep showing up daily 🔥</p></div></div>
-                <div class="gamification-card xp-card"><div class="card-icon"><i data-lucide="zap"></i></div><div class="xp-content"><span>Current Level</span><h2>Level <span id="studentLevel">1</span></h2><div class="xp-bar"><span id="xpProgress"></span></div><small><span id="studentXP">0</span> XP earned</small></div></div>
-                <div class="gamification-card badges-card"><div class="card-icon"><i data-lucide="trophy"></i></div><div><span>Achievements</span><h2 id="badgeCount">0 Badges</h2><a href="achievements.html">View Rewards</a></div></div>
-            </section>
-
-            <section class="dashboard-section">
-                <div class="section-header"><h2>Continue Learning</h2><a href="courses.html">View All</a></div>
-                <div class="course-grid" id="continueCourses"><div class="course-loading"><div class="loading-icon"><i data-lucide="book-open"></i></div><div><h3>Loading courses...</h3><p>Fetching your learning progress</p></div></div></div>
-            </section>
-
-            <section class="dashboard-section">
-                <div class="section-header"><h2>Learning Progress</h2></div>
-                <div class="progress-card"><div class="progress-top"><div><h3>Overall Completion</h3><p>Keep pushing forward 🚀</p></div><strong id="overallProgress">0%</strong></div><div class="progress-track"><div class="progress-fill" id="progressBarFill"></div></div></div>
-            </section>
-
-            <section class="community-grid">
-                <div class="community-card"><div class="section-header"><h2>Announcements 📢</h2><a href="announcements.html">View All</a></div><div id="announcementPreview"><p>Loading announcements...</p></div></div>
-                <div class="community-card"><div class="section-header"><h2>Messages 💬</h2><a href="messages.html">Open Chat</a></div><div id="messagePreview"><p>No new messages</p></div></div>
-            </section>
-
-            <section class="dashboard-section">
-                <div class="section-header"><h2>Recent Activity</h2><a href="notifications.html">View All</a></div>
-                <div class="activity-list" id="recentActivity"><div class="activity-item"><div class="activity-icon"><i data-lucide="bell"></i></div><div><h4>Welcome to Spark Stack Academy</h4><p>Your learning journey starts here.</p></div></div></div>
-            </section>
-
-            <section class="dashboard-section">
-                <div class="section-header"><h2>My Profile</h2><a href="settings.html">Edit Profile</a></div>
-                <div class="profile-card"><div class="profile-avatar" id="profileAvatar">S</div><div class="profile-details"><h3 id="studentFullName">Student Name</h3><p id="studentEmail">student@email.com</p><span class="student-status">Active Student</span><p id="studentAdmission">Admission: Pending</p></div></div>
-            </section>
-
-            <section class="quick-actions">
-                <a href="courses.html" class="action-card"><i data-lucide="search"></i><span>Browse Courses</span></a>
-                <a href="certificates.html" class="action-card"><i data-lucide="award"></i><span>Certificates</span></a>
-                <a href="payments.html" class="action-card"><i data-lucide="credit-card"></i><span>Payments</span></a>
-            </section>
+            <section class="welcome-card"><div class="welcome-content"><span class="welcome-badge"><i data-lucide="sparkles"></i> Student Portal</span><h1>Welcome back, <span id="studentName">Student</span> 👋</h1><p>Continue learning, build your skills, and move closer to your technology goals.</p><div class="learning-meta"><div class="meta-item"><i data-lucide="flame"></i><span id="learningStreak">0 Day Streak</span></div><div class="meta-item"><i data-lucide="calendar"></i><span id="todayDate">Today</span></div></div></div><div class="welcome-icon"><i data-lucide="graduation-cap"></i></div></section>
+            <section class="stats-grid"><div class="stat-card"><div class="stat-icon"><i data-lucide="book-open"></i></div><div class="stat-info"><h3>Courses</h3><strong id="courseCount">0</strong></div></div><div class="stat-card"><div class="stat-icon"><i data-lucide="play-circle"></i></div><div class="stat-info"><h3>Lessons</h3><strong id="lessonCount">0</strong></div></div><div class="stat-card"><div class="stat-icon"><i data-lucide="chart-line"></i></div><div class="stat-info"><h3>Progress</h3><strong id="progressPercent">0%</strong></div></div><div class="stat-card"><div class="stat-icon"><i data-lucide="award"></i></div><div class="stat-info"><h3>Certificates</h3><strong id="certificateCount">0</strong></div></div></section>
+            <section class="gamification-grid"><div class="gamification-card streak-card"><div class="card-icon glow-fire"><i data-lucide="flame"></i></div><div><span>Learning Streak</span><h2 id="streakDays">0 Days</h2><p>Keep showing up daily 🔥</p></div></div><div class="gamification-card xp-card"><div class="card-icon"><i data-lucide="zap"></i></div><div class="xp-content"><span>Current Level</span><h2>Level <span id="studentLevel">1</span></h2><div class="xp-bar"><span id="xpProgress"></span></div><small><span id="studentXP">0</span> XP earned</small></div></div><div class="gamification-card badges-card"><div class="card-icon"><i data-lucide="trophy"></i></div><div><span>Achievements</span><h2 id="badgeCount">0 Badges</h2><a href="achievements.html">View Rewards</a></div></div></section>
+            <section class="dashboard-section"><div class="section-header"><h2>Continue Learning</h2><a href="courses.html">View All</a></div><div class="course-grid" id="continueCourses"><div class="course-loading"><div class="loading-icon"><i data-lucide="book-open"></i></div><div><h3>Loading courses...</h3><p>Fetching your learning progress</p></div></div></div></section>
+            <section class="dashboard-section"><div class="section-header"><h2>Learning Progress</h2></div><div class="progress-card"><div class="progress-top"><div><h3>Overall Completion</h3><p>Keep pushing forward 🚀</p></div><strong id="overallProgress">0%</strong></div><div class="progress-track"><div class="progress-fill" id="progressBarFill"></div></div></div></section>
+            <section class="community-grid"><div class="community-card"><div class="section-header"><h2>Announcements 📢</h2><a href="announcements.html">View All</a></div><div id="announcementPreview"><p>Loading announcements...</p></div></div><div class="community-card"><div class="section-header"><h2>Messages 💬</h2><a href="messages.html">Open Chat</a></div><div id="messagePreview"><p>No new messages</p></div></div></section>
+            <section class="dashboard-section"><div class="section-header"><h2>Recent Activity</h2><a href="notifications.html">View All</a></div><div class="activity-list" id="recentActivity"><div class="activity-item"><div class="activity-icon"><i data-lucide="bell"></i></div><div><h4>Welcome to Spark Stack Academy</h4><p>Your learning journey starts here.</p></div></div></div></section>
+            <section class="dashboard-section"><div class="section-header"><h2>My Profile</h2><a href="settings.html">Edit Profile</a></div><div class="profile-card"><div class="profile-avatar" id="profileAvatar">S</div><div class="profile-details"><h3 id="studentFullName">Student Name</h3><p id="studentEmail">student@email.com</p><span class="student-status">Active Student</span><p id="studentAdmission">Admission: Pending</p></div></div></section>
+            <section class="quick-actions"><a href="courses.html" class="action-card"><i data-lucide="search"></i><span>Browse Courses</span></a><a href="certificates.html" class="action-card"><i data-lucide="award"></i><span>Certificates</span></a><a href="payments.html" class="action-card"><i data-lucide="credit-card"></i><span>Payments</span></a></section>
         </section>
     </main>
 </div>
-
 <script type="module" src="js/student-app.js"></script>
-<script type="module" src="js/dashboard-identity.js"></script>
 <script>document.addEventListener('DOMContentLoaded',()=>window.lucide?.createIcons());</script>
 </body>
 </html>
