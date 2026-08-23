@@ -6,7 +6,7 @@
 import { db } from "../js/firebase.js";
 import {
     collection,
-    getDocs,
+    onSnapshot,
     addDoc,
     doc,
     updateDoc,
@@ -14,7 +14,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
-
 const tableBody = $("studentsTableBody");
 const studentCount = $("studentCount");
 const activeCount = $("activeStudentCount");
@@ -39,6 +38,8 @@ let students = [];
 let editingStudentId = null;
 let currentPage = 1;
 const PAGE_SIZE = 10;
+let unsubscribeStudents = null;
+let isLoading = true;
 
 function normalizedStatus(value = "active") {
     return String(value).charAt(0).toUpperCase() + String(value).slice(1).toLowerCase();
@@ -66,46 +67,42 @@ function escapeHtml(value = "") {
         .replaceAll("'", "&#039;");
 }
 
-function generateAdmissionNumber(index) {
-    return `SSA-${new Date().getFullYear()}-${String(index + 1).padStart(4, "0")}`;
-}
-
-async function loadStudents() {
-    setLoading(true);
-    try {
-        const snap = await getDocs(collection(db, "students"));
-        students = snap.docs.map(item => ({ id: item.id, ...item.data() }));
-        updateStats();
-        populateCourseFilter();
-        currentPage = 1;
-        renderStudents();
-    } catch (error) {
-        console.error("Loading students failed:", error);
-        tableBody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-content"><div class="empty-icon">⚠️</div><h3>Unable to Load Students</h3><p>Check your Firestore connection and try again.</p></div></td></tr>`;
-    } finally {
-        setLoading(false);
+function generateAdmissionNumber() {
+    const year = new Date().getFullYear();
+    const used = new Set(students.map(student => String(student.admissionNumber || "")));
+    let index = students.length + 1;
+    let number = `SSA-${year}-${String(index).padStart(4, "0")}`;
+    while (used.has(number)) {
+        index += 1;
+        number = `SSA-${year}-${String(index).padStart(4, "0")}`;
     }
+    return number;
 }
 
 function setLoading(loading) {
-    if (!tableBody) return;
-    if (loading) {
+    isLoading = loading;
+    if (refreshButton) refreshButton.disabled = loading;
+    if (loading && tableBody) {
         tableBody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-content"><div class="empty-icon">⏳</div><h3>Loading Students</h3><p>Fetching the latest student records...</p></div></td></tr>`;
     }
-    if (refreshButton) refreshButton.disabled = loading;
+}
+
+function showLoadError() {
+    if (!tableBody) return;
+    tableBody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-content"><div class="empty-icon">⚠️</div><h3>Unable to Load Students</h3><p>Check your Firestore connection and try again.</p><button type="button" class="secondary-btn" id="retryStudents">Retry</button></div></td></tr>`;
+    $("retryStudents")?.addEventListener("click", () => subscribeStudents(true));
 }
 
 function updateStats() {
     const active = students.filter(s => String(s.status || "").toLowerCase() === "active").length;
     const graduated = students.filter(s => String(s.status || "").toLowerCase() === "graduated").length;
     const suspended = students.filter(s => String(s.status || "").toLowerCase() === "suspended").length;
-    const month = new Date().getMonth();
-    const year = new Date().getFullYear();
+    const now = new Date();
     const newThisMonth = students.filter(s => {
         const time = timestampMillis(s.createdAt);
         if (!time) return false;
         const date = new Date(time);
-        return date.getMonth() === month && date.getFullYear() === year;
+        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
     }).length;
     const progress = students.reduce((sum, s) => sum + Math.max(0, Math.min(100, Number(s.progress) || 0)), 0);
 
@@ -121,8 +118,10 @@ function updateStats() {
 function populateCourseFilter() {
     if (!courseFilter) return;
     const current = courseFilter.value;
-    const courses = [...new Set(students.map(s => s.courseName || s.course).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
-    courseFilter.innerHTML = `<option value="">All Courses</option>` + courses.map(course => `<option value="${escapeHtml(course)}">${escapeHtml(course)}</option>`).join("");
+    const courses = [...new Set(students.map(s => s.courseName || s.course).filter(Boolean))]
+        .sort((a, b) => String(a).localeCompare(String(b)));
+    courseFilter.innerHTML = `<option value="">All Courses</option>` +
+        courses.map(course => `<option value="${escapeHtml(course)}">${escapeHtml(course)}</option>`).join("");
     if (courses.includes(current)) courseFilter.value = current;
 }
 
@@ -130,7 +129,7 @@ function getFilteredStudents() {
     const search = String(searchInput?.value || "").trim().toLowerCase();
     const course = String(courseFilter?.value || "").toLowerCase();
     const status = String(statusFilter?.value || "").toLowerCase();
-    let result = students.filter(student => {
+    const result = students.filter(student => {
         const name = String(student.name || "").toLowerCase();
         const email = String(student.email || "").toLowerCase();
         const admission = String(student.admissionNumber || "").toLowerCase();
@@ -149,7 +148,7 @@ function getFilteredStudents() {
 }
 
 function renderStudents() {
-    if (!tableBody) return;
+    if (!tableBody || isLoading) return;
     const filtered = getFilteredStudents();
     const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
     currentPage = Math.min(currentPage, totalPages);
@@ -173,13 +172,11 @@ function renderStudents() {
             const actionIcon = statusClass === "suspended" ? "play" : "pause";
             return `<tr>
                 <td><div class="student-info"><div class="student-avatar">${initial}</div><div class="student-details"><strong>${name}</strong><small>${admission}</small></div></div></td>
-                <td>${course}</td>
-                <td>${email}</td>
-                <td>${phone}</td>
+                <td>${course}</td><td>${email}</td><td>${phone}</td>
                 <td><span class="status status-badge ${statusClass}">${escapeHtml(status)}</span></td>
                 <td><div class="progress"><div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div><span>${progress}%</span></div></td>
                 <td>${formatDate(student.createdAt)}</td>
-                <td><div class="action-buttons"><button type="button" class="action-btn view" title="View / edit student" aria-label="View / edit ${name}" data-student-action="edit" data-id="${student.id}"><i data-lucide="eye"></i></button><button type="button" class="action-btn" title="${actionLabel}" aria-label="${actionLabel}" data-student-action="toggle-status" data-id="${student.id}"><i data-lucide="${actionIcon}"></i></button></div></td>
+                <td><div class="action-buttons"><button type="button" class="action-btn view" title="View / edit student" aria-label="View / edit ${name}" data-student-action="edit" data-id="${escapeHtml(student.id)}"><i data-lucide="eye"></i></button><button type="button" class="action-btn" title="${actionLabel}" aria-label="${actionLabel}" data-student-action="toggle-status" data-id="${escapeHtml(student.id)}"><i data-lucide="${actionIcon}"></i></button></div></td>
             </tr>`;
         }).join("");
     }
@@ -188,6 +185,23 @@ function renderStudents() {
     if (prevPage) prevPage.disabled = currentPage <= 1;
     if (nextPage) nextPage.disabled = currentPage >= totalPages;
     if (window.lucide) window.lucide.createIcons();
+}
+
+function subscribeStudents(showLoading = true) {
+    if (unsubscribeStudents) unsubscribeStudents();
+    if (showLoading) setLoading(true);
+    unsubscribeStudents = onSnapshot(collection(db, "students"), snapshot => {
+        students = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+        updateStats();
+        populateCourseFilter();
+        currentPage = 1;
+        setLoading(false);
+        renderStudents();
+    }, error => {
+        console.error("Students realtime listener failed:", error);
+        setLoading(false);
+        showLoadError();
+    });
 }
 
 function openStudentModal(student = null) {
@@ -234,21 +248,10 @@ studentForm?.addEventListener("submit", async event => {
     const course = $("studentCourse")?.value.trim();
     const status = normalizedStatus($("studentStatus")?.value || "active");
     const record = { name, email, phone, courseName: course, course, status, updatedAt: serverTimestamp() };
-
     try {
-        if (editingStudentId) {
-            await updateDoc(doc(db, "students", editingStudentId), record);
-        } else {
-            await addDoc(collection(db, "students"), {
-                ...record,
-                admissionNumber: generateAdmissionNumber(students.length),
-                role: "student",
-                progress: 0,
-                createdAt: serverTimestamp()
-            });
-        }
+        if (editingStudentId) await updateDoc(doc(db, "students", editingStudentId), record);
+        else await addDoc(collection(db, "students"), { ...record, admissionNumber: generateAdmissionNumber(), role: "student", progress: 0, createdAt: serverTimestamp() });
         closeStudentModal();
-        await loadStudents();
     } catch (error) {
         console.error("Saving student failed:", error);
         alert("Unable to save this student. Please check your Firestore permissions.");
@@ -262,17 +265,14 @@ tableBody?.addEventListener("click", async event => {
     if (!button) return;
     const student = students.find(item => item.id === button.dataset.id);
     if (!student) return;
-
     if (button.dataset.studentAction === "edit") {
         openStudentModal(student);
         return;
     }
-
     const nextStatus = String(student.status || "").toLowerCase() === "suspended" ? "Active" : "Suspended";
     button.disabled = true;
     try {
         await updateDoc(doc(db, "students", student.id), { status: nextStatus, updatedAt: serverTimestamp() });
-        await loadStudents();
     } catch (error) {
         console.error("Updating student status failed:", error);
         alert("Unable to update this student.");
@@ -286,15 +286,13 @@ tableBody?.addEventListener("click", async event => {
     control?.addEventListener("change", () => { currentPage = 1; renderStudents(); });
 });
 
-refreshButton?.addEventListener("click", loadStudents);
+refreshButton?.addEventListener("click", () => subscribeStudents(true));
 prevPage?.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderStudents(); } });
 nextPage?.addEventListener("click", () => { const totalPages = Math.max(1, Math.ceil(getFilteredStudents().length / PAGE_SIZE)); if (currentPage < totalPages) { currentPage++; renderStudents(); } });
 
 $("exportStudentsBtn")?.addEventListener("click", () => {
     const rows = [["Name", "Email", "Phone", "Course", "Status", "Admission Number"]];
-    getFilteredStudents().forEach(student => rows.push([
-        student.name || "", student.email || "", student.phone || "", student.courseName || student.course || "", student.status || "", student.admissionNumber || ""
-    ]));
+    getFilteredStudents().forEach(student => rows.push([student.name || "", student.email || "", student.phone || "", student.courseName || student.course || "", student.status || "", student.admissionNumber || ""]));
     const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
@@ -306,4 +304,5 @@ $("exportStudentsBtn")?.addEventListener("click", () => {
     URL.revokeObjectURL(url);
 });
 
-loadStudents();
+window.addEventListener("beforeunload", () => unsubscribeStudents?.());
+subscribeStudents(true);
