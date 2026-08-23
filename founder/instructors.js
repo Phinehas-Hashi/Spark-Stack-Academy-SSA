@@ -39,7 +39,7 @@ const esc = value => String(value ?? "")
 
 function showMessage(message, type = "success") {
     if (window.showFounderToast) window.showFounderToast(message, type);
-    else alert(message);
+    else window.showToast?.(message, type);
 }
 
 function refreshIcons() {
@@ -288,7 +288,17 @@ async function handleTableAction(event) {
     if (button.classList.contains("delete-instructor")) {
         const currentlySuspended = String(instructor.status || "").toLowerCase() === "suspended";
         const next = currentlySuspended ? "active" : "suspended";
-        if (!confirm(`${currentlySuspended ? "Restore" : "Suspend"} ${instructor.name || "this instructor"}?`)) return;
+        const confirmed = await window.ssaConfirm?.(
+            `${currentlySuspended ? "Restore" : "Suspend"} ${instructor.name || "this instructor"}?`,
+            {
+                title: currentlySuspended ? "Restore instructor" : "Suspend instructor",
+                confirmText: currentlySuspended ? "Restore" : "Suspend",
+                cancelText: "Keep as is",
+                tone: currentlySuspended ? "info" : "danger",
+                icon: currentlySuspended ? "↻" : "🚫"
+            }
+        );
+        if (!confirmed) return;
         try {
             await updateDoc(doc(db, "instructors", id), { status: next, updatedAt: serverTimestamp() });
             showMessage(next === "suspended" ? "Instructor suspended." : "Instructor restored.");
