@@ -19,7 +19,9 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if signedIn() && (request.auth.uid == userId || staff());
       allow list: if staff();
-      allow create: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.get('role', 'student') in ['student', 'instructor'];
       allow update: if signedIn() && request.auth.uid == userId
         && request.resource.data.get('role', resource.data.get('role', 'student')) == resource.data.get('role', 'student');
       allow delete: if staff();
@@ -28,11 +30,9 @@ service cloud.firestore {
     match /founder/{founderId} {
       allow get: if signedIn() && (request.auth.uid == founderId || isFounder());
       allow list: if isFounder();
-      allow create: if signedIn() && request.auth.uid == founderId;
-      allow update: if signedIn() && request.auth.uid == founderId
-        && request.resource.data.get('role', 'founder') == resource.data.get('role', 'founder')
-        && request.resource.data.get('status', 'active') == resource.data.get('status', 'active');
-      allow delete: if false;
+      // Founder identities cannot be created or modified from the client.
+      // Provision founder accounts through trusted backend/admin tooling.
+      allow create, update, delete: if false;
     }
 
     match /platform_controls/{controlId} { allow read, write: if isFounder(); }
