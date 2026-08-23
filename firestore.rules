@@ -9,21 +9,12 @@ service cloud.firestore {
     function isAdmin(){return userExists()&&role()=='admin';}
     function isFounder(){return signedIn()&&exists(/databases/$(database)/documents/founder/$(request.auth.uid))&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('role','founder')=='founder'&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('status','active')=='active';}
     function staff(){return isAdmin()||isFounder();}
-
     match /users/{userId}{allow get:if signedIn()&&(request.auth.uid==userId||staff());allow list:if staff();allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.get('role','student') in ['student','instructor'];allow update:if signedIn()&&request.auth.uid==userId&&request.resource.data.get('role',resource.data.get('role','student'))==resource.data.get('role','student');allow delete:if staff();}
     match /founder/{founderId}{allow get:if signedIn()&&(request.auth.uid==founderId||isFounder());allow list:if isFounder();allow create,update,delete:if false;}
-
-    match /students/{studentId}{
-      allow get:if staff()||(isStudent()&&request.auth.uid==studentId);
-      allow list:if staff();
-      allow create:if staff();
-      allow update:if staff()||(isStudent()&&request.auth.uid==studentId&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','updatedAt']));
-      allow delete:if staff();
-    }
+    match /students/{studentId}{allow get:if staff()||(isStudent()&&request.auth.uid==studentId);allow list:if staff();allow create:if staff();allow update:if staff()||(isStudent()&&request.auth.uid==studentId&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','updatedAt']));allow delete:if staff();}
     match /students/{studentId}/enrollments/{enrollmentId}{allow get,list:if staff()||(isStudent()&&request.auth.uid==studentId);allow create,update,delete:if staff();}
     match /studentSettings/{userId}{allow get,write:if signedIn()&&request.auth.uid==userId;allow list:if staff();}
     match /accountDeletionRequests/{userId}{allow get:if signedIn()&&(request.auth.uid==userId||staff());allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.userId==request.auth.uid&&request.resource.data.status=='pending';allow update:if staff();allow list:if staff();allow delete:if staff();}
-
     match /instructors/{instructorId}{allow read,write:if staff();}
     match /applications/{applicationId}{allow create:if signedIn()&&request.resource.data.studentUid==request.auth.uid;allow read,update,delete:if staff();}
     match /payments/{paymentId}{allow read:if staff();allow create:if signedIn();allow update,delete:if staff();}
@@ -45,7 +36,7 @@ service cloud.firestore {
     match /platformSettings/{settingsId}{allow read,write:if isFounder();}
     function roleFor(uid){return get(/databases/$(database)/documents/users/$(uid)).data.get('role','unknown');}
     function allowedPair(a,b){return (a=='founder')||(b=='founder')||(a=='student'&&b=='instructor')||(a=='instructor'&&b=='student')||(a=='instructor'&&b=='admin')||(a=='admin'&&b=='instructor');}
-    match /chats/{chatId}{allow get:if signedIn()&&resource.data.participants.hasAny([request.auth.uid]);allow list:if signedIn();allow create:if signedIn()&&request.resource.data.participants is list&&request.resource.data.participants.size()==2&&request.resource.data.participants.hasAny([request.auth.uid])&&allowedPair(roleFor(request.auth.uid),roleFor(request.resource.data.participants[0]==request.auth.uid?request.resource.data.participants[1]:request.resource.data.participants[0]));allow update:if signedIn()&&resource.data.participants.hasAny([request.auth.uid])&&request.resource.data.participants==resource.data.participants;allow delete:if isFounder();match /messages/{messageId}{allow read:if signedIn()&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow create:if signedIn()&&request.resource.data.senderId==request.auth.uid&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow update:if signedIn()&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow delete:if isFounder();}}
+    match /chats/{chatId}{allow get:if signedIn()&&resource.data.participants.hasAny([request.auth.uid]);allow list:if staff()||(signedIn()&&resource.data.participants.hasAny([request.auth.uid]));allow create:if signedIn()&&request.resource.data.participants is list&&request.resource.data.participants.size()==2&&request.resource.data.participants.hasAny([request.auth.uid])&&allowedPair(roleFor(request.auth.uid),roleFor(request.resource.data.participants[0]==request.auth.uid?request.resource.data.participants[1]:request.resource.data.participants[0]));allow update:if signedIn()&&resource.data.participants.hasAny([request.auth.uid])&&request.resource.data.participants==resource.data.participants;allow delete:if isFounder();match /messages/{messageId}{allow read:if signedIn()&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow create:if signedIn()&&request.resource.data.senderId==request.auth.uid&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow update:if signedIn()&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow delete:if isFounder();}}
     match /{document=**}{allow read,write:if false;}
   }
 }
