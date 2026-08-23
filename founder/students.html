@@ -1,119 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Students | Spark Stack Academy</title>
-    <link rel="stylesheet" href="students.css">
-    <link rel="stylesheet" href="founder-unified.css">
-    <link rel="stylesheet" href="students-fixes.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Students | Spark Stack Academy</title>
+<link rel="stylesheet" href="students.css"><link rel="stylesheet" href="founder-unified.css"><link rel="stylesheet" href="students-fixes.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
-
-    <div class="dashboard-layout">
-        <aside id="sidebarContainer"></aside>
-        <div id="sidebarOverlay"></div>
-
-        <main class="main-content">
-            <header id="topbarContainer"></header>
-
-            <section class="page-hero glass-card">
-                <div class="hero-content">
-                    <div class="hero-badge">👨‍🎓 Student Management</div>
-                    <h1>Students</h1>
-                    <p>Manage student records, monitor enrollment, track learning progress and oversee every learner from one centralized dashboard.</p>
-                </div>
-                <div class="hero-actions">
-                    <button class="primary-btn" id="addStudentBtn" type="button">➕ Add Student</button>
-                    <button class="secondary-btn" id="exportStudentsBtn" type="button">📥 Export CSV</button>
-                </div>
-            </section>
-
-            <section class="stats-grid">
-                <div class="stat-card"><div class="stat-top"><span>Total Students</span><div class="stat-icon cyan">👨‍🎓</div></div><h2 id="studentCount">0</h2><small>Registered Students</small></div>
-                <div class="stat-card"><div class="stat-top"><span>Active</span><div class="stat-icon green">🟢</div></div><h2 id="activeStudentCount">0</h2><small>Currently Learning</small></div>
-                <div class="stat-card"><div class="stat-top"><span>New This Month</span><div class="stat-icon blue">✨</div></div><h2 id="newStudentCount">0</h2><small>New Enrollments</small></div>
-                <div class="stat-card"><div class="stat-top"><span>Graduated</span><div class="stat-icon purple">🎓</div></div><h2 id="graduatedCount">0</h2><small>Completed Programs</small></div>
-                <div class="stat-card"><div class="stat-top"><span>Suspended</span><div class="stat-icon red">🚫</div></div><h2 id="suspendedCount">0</h2><small>Suspended Accounts</small></div>
-                <div class="stat-card"><div class="stat-top"><span>Completion Rate</span><div class="stat-icon gold">📈</div></div><h2 id="completionRate">0%</h2><small>Overall Progress</small></div>
-            </section>
-
-            <section class="filter-bar glass-card">
-                <div class="filter-left">
-                    <div class="search-box">
-                        <i data-lucide="search"></i>
-                        <input type="search" id="studentSearch" placeholder="Search students..." autocomplete="off">
-                    </div>
-                </div>
-                <div class="filter-right">
-                    <select id="courseFilter" aria-label="Filter by course"><option value="">All Courses</option></select>
-                    <select id="statusFilter" aria-label="Filter by status">
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="graduated">Graduated</option>
-                        <option value="suspended">Suspended</option>
-                    </select>
-                    <select id="sortStudents" aria-label="Sort students">
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                        <option value="name">A - Z</option>
-                    </select>
-                    <button class="secondary-btn" id="refreshStudents" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
-                </div>
-            </section>
-
-            <section class="students-table glass-card">
-                <div class="table-header">
-                    <h3>👨‍🎓 Students Directory</h3>
-                    <span id="studentTotal">0 Students</span>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead><tr><th>Student</th><th>Course</th><th>Email</th><th>Phone</th><th>Status</th><th>Progress</th><th>Joined</th><th>Actions</th></tr></thead>
-                        <tbody id="studentsTableBody">
-                            <tr><td colspan="8" class="empty-state"><div class="empty-content"><div class="empty-icon">🎓</div><h3>No Students Found</h3><p>Students will appear here after registration.</p></div></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="pagination">
-                <button class="page-btn" id="prevPage" type="button">← Previous</button>
-                <div class="page-info" id="pageInfo">Page 1 of 1</div>
-                <button class="page-btn" id="nextPage" type="button">Next →</button>
-            </section>
-        </main>
-    </div>
-
-    <div class="modal" id="studentModal" role="dialog" aria-modal="true" aria-labelledby="studentModalTitle">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="studentModalTitle">Add New Student</h3>
-                <button id="closeStudentModal" type="button" aria-label="Close student form">✕</button>
-            </div>
-            <form id="studentForm">
-                <input type="text" id="studentName" placeholder="Full Name" autocomplete="name" required>
-                <input type="email" id="studentEmail" placeholder="Email" autocomplete="email" required>
-                <input type="tel" id="studentPhone" placeholder="Phone Number" autocomplete="tel">
-                <input type="text" id="studentCourse" placeholder="Course" required>
-                <select id="studentStatus" aria-label="Student status">
-                    <option value="active">Active</option>
-                    <option value="graduated">Graduated</option>
-                    <option value="suspended">Suspended</option>
-                </select>
-                <button class="primary-btn" id="saveStudentBtn" type="submit">Save Student</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script type="module" src="./js/founder-app.js"></script>
-    <script type="module" src="students.js"></script>
-</body>
-</html>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div><div class="bg-orb orb-3"></div>
+<div class="dashboard-layout"><aside id="sidebarContainer"></aside><div id="sidebarOverlay"></div><main class="main-content">
+<header id="topbarContainer"></header>
+<section class="page-hero glass-card"><div class="hero-content"><div class="hero-badge">👨‍🎓 Student Management</div><h1>Students</h1><p>Manage student records, monitor enrollment, track learning progress and oversee every learner from one centralized dashboard.</p></div><div class="hero-actions"><button class="primary-btn" id="addStudentBtn" type="button">➕ Add Student</button><button class="secondary-btn" id="exportStudentsBtn" type="button">📥 Export CSV</button></div></section>
+<section class="stats-grid"><div class="stat-card"><div class="stat-top"><span>Total Students</span><div class="stat-icon cyan">👨‍🎓</div></div><h2 id="studentCount">0</h2><small>Registered Students</small></div><div class="stat-card"><div class="stat-top"><span>Active</span><div class="stat-icon green">🟢</div></div><h2 id="activeStudentCount">0</h2><small>Currently Learning</small></div><div class="stat-card"><div class="stat-top"><span>New This Month</span><div class="stat-icon blue">✨</div></div><h2 id="newStudentCount">0</h2><small>New Enrollments</small></div><div class="stat-card"><div class="stat-top"><span>Graduated</span><div class="stat-icon purple">🎓</div></div><h2 id="graduatedCount">0</h2><small>Completed Programs</small></div><div class="stat-card"><div class="stat-top"><span>Suspended</span><div class="stat-icon red">🚫</div></div><h2 id="suspendedCount">0</h2><small>Suspended Accounts</small></div><div class="stat-card"><div class="stat-top"><span>Completion Rate</span><div class="stat-icon gold">📈</div></div><h2 id="completionRate">0%</h2><small>Overall Progress</small></div></section>
+<section class="filter-bar glass-card"><div class="filter-left"><div class="search-box"><i data-lucide="search"></i><input type="search" id="studentSearch" placeholder="Search students..." autocomplete="off"></div></div><div class="filter-right"><select id="courseFilter" aria-label="Filter by course"><option value="">All Courses</option></select><select id="statusFilter" aria-label="Filter by status"><option value="">All Status</option><option value="active">Active</option><option value="graduated">Graduated</option><option value="suspended">Suspended</option></select><select id="sortStudents" aria-label="Sort students"><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="name">A - Z</option></select><button class="secondary-btn" id="refreshStudents" type="button"><i data-lucide="refresh-cw"></i> Refresh</button></div></section>
+<section class="students-table glass-card"><div class="table-header"><h3>👨‍🎓 Students Directory</h3><span id="studentTotal">0 Students</span></div><div class="table-responsive"><table><thead><tr><th>Student</th><th>Course</th><th>Email</th><th>Phone</th><th>Status</th><th>Progress</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="studentsTableBody"><tr><td colspan="8" class="empty-state"><div class="empty-content"><div class="empty-icon">🎓</div><h3>No Students Found</h3><p>Students will appear here after registration.</p></div></td></tr></tbody></table></div></section>
+<section class="pagination"><button class="page-btn" id="prevPage" type="button">← Previous</button><div class="page-info" id="pageInfo">Page 1 of 1</div><button class="page-btn" id="nextPage" type="button">Next →</button></section>
+</main></div>
+<div class="modal" id="studentModal" role="dialog" aria-modal="true" aria-labelledby="studentModalTitle"><div class="modal-content"><div class="modal-header"><h3 id="studentModalTitle">Add New Student</h3><button id="closeStudentModal" type="button" aria-label="Close student form">✕</button></div><form id="studentForm"><input type="text" id="studentName" placeholder="Full Name" autocomplete="name" required><input type="email" id="studentEmail" placeholder="Email" autocomplete="email" required><input type="tel" id="studentPhone" placeholder="Phone Number" autocomplete="tel"><input type="text" id="studentCourse" placeholder="Course" required><select id="studentStatus" aria-label="Student status"><option value="active">Active</option><option value="graduated">Graduated</option><option value="suspended">Suspended</option></select><button class="primary-btn" id="saveStudentBtn" type="submit">Save Student</button></form></div></div>
+<script src="https://unpkg.com/lucide@latest"></script><script src="../js/ui-runtime.js"></script><script type="module" src="./js/founder-app.js"></script><script type="module" src="students.js"></script>
+</body></html>
