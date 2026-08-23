@@ -4,7 +4,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/fi
 
 const securityRef = doc(db, "settings", "security");
 const $ = id => document.getElementById(id);
-const notify = (message, type = "success") => window.showFounderToast?.(message, type) ?? alert(message);
+const notify = (message, type = "success") => window.ssaToast?.(message, type) ?? console.log(message);
 
 async function loadSecuritySettings() {
   try {
@@ -65,7 +65,16 @@ async function changePassword() {
 }
 
 async function signOutCurrentDevice() {
-  if (!confirm("Sign out from this device?")) return;
+  const confirmed = await (window.ssaConfirm?.("Sign out from this device?", {
+    title: "Sign out",
+    confirmText: "Sign out",
+    cancelText: "Stay signed in",
+    tone: "danger",
+    icon: "↪"
+  }) ?? Promise.resolve(false));
+
+  if (!confirmed) return;
+
   try {
     await signOut(auth);
     window.location.href = "../login.html";
