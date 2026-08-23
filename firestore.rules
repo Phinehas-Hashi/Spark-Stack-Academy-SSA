@@ -9,7 +9,6 @@ service cloud.firestore {
     function isAdmin(){return userExists()&&role()=='admin';}
     function isFounder(){return signedIn()&&exists(/databases/$(database)/documents/founder/$(request.auth.uid))&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('role','founder')=='founder'&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('status','active')=='active';}
     function staff(){return isAdmin()||isFounder();}
-
     match /users/{userId}{
       allow get:if signedIn()&&(request.auth.uid==userId||staff());
       allow list:if staff();
@@ -22,18 +21,13 @@ service cloud.firestore {
         &&(!request.resource.data.diff(resource.data).affectedKeys().hasAny(['xp','level','badges','lastReward']) || request.resource.data.get('role',resource.data.get('role'))=='student')
         &&request.resource.data.get('xp',resource.data.get('xp',0))>=resource.data.get('xp',0)
         &&request.resource.data.get('xp',resource.data.get('xp',0))<=resource.data.get('xp',0)+100
-        &&request.resource.data.get('level',resource.data.get('level',1))==int(request.resource.data.get('xp',resource.data.get('xp',0))/250)+1
+        &&request.resource.data.get('level',resource.data.get('level',1))>=resource.data.get('level',1)
+        &&request.resource.data.get('level',resource.data.get('level',1))<=resource.data.get('level',1)+1
         &&request.resource.data.get('badges',resource.data.get('badges',[])).hasAll(resource.data.get('badges',[]));
       allow delete:if staff();
     }
     match /founder/{founderId}{allow get:if signedIn()&&(request.auth.uid==founderId||isFounder());allow list:if isFounder();allow create,update,delete:if false;}
-    match /students/{studentId}{
-      allow get:if staff()||(isStudent()&&request.auth.uid==studentId);
-      allow list:if staff();
-      allow create:if signedIn()&&request.auth.uid==studentId&&request.resource.data.uid==request.auth.uid&&request.resource.data.role=='student'&&request.resource.data.status=='Pending'&&request.resource.data.onboardingStatus=='awaiting_admission'&&request.resource.data.admissionNumber=='Pending'&&request.resource.data.level==1&&request.resource.data.xp==0&&request.resource.data.streak==0;
-      allow update:if staff()||(isStudent()&&request.auth.uid==studentId&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','updatedAt']));
-      allow delete:if staff();
-    }
+    match /students/{studentId}{allow get:if staff()||(isStudent()&&request.auth.uid==studentId);allow list:if staff();allow create:if signedIn()&&request.auth.uid==studentId&&request.resource.data.uid==request.auth.uid&&request.resource.data.role=='student'&&request.resource.data.status=='Pending'&&request.resource.data.onboardingStatus=='awaiting_admission'&&request.resource.data.admissionNumber=='Pending'&&request.resource.data.level==1&&request.resource.data.xp==0&&request.resource.data.streak==0;allow update:if staff()||(isStudent()&&request.auth.uid==studentId&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','updatedAt']));allow delete:if staff();}
     match /students/{studentId}/enrollments/{enrollmentId}{allow get,list:if staff()||(isStudent()&&request.auth.uid==studentId);allow create,update,delete:if staff();}
     match /studentSettings/{userId}{allow get,write:if signedIn()&&request.auth.uid==userId;allow list:if staff();}
     match /accountDeletionRequests/{userId}{allow get:if signedIn()&&(request.auth.uid==userId||staff());allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.userId==request.auth.uid&&request.resource.data.status=='pending';allow update:if staff();allow list:if staff();allow delete:if staff();}
