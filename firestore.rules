@@ -17,7 +17,7 @@ service cloud.firestore {
     match /accountDeletionRequests/{userId}{allow get:if signedIn()&&(request.auth.uid==userId||staff());allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.userId==request.auth.uid&&request.resource.data.status=='pending';allow update:if staff();allow list:if staff();allow delete:if staff();}
     match /instructors/{instructorId}{allow read,write:if staff();}
     match /applications/{applicationId}{allow create:if signedIn()&&request.resource.data.studentUid==request.auth.uid;allow read,update,delete:if staff();}
-    match /payments/{paymentId}{allow read:if staff();allow create:if signedIn();allow update,delete:if staff();}
+    match /payments/{paymentId}{allow get,list:if staff()||(signedIn()&&resource.data.userId==request.auth.uid);allow create:if signedIn()&&request.resource.data.userId==request.auth.uid;allow update,delete:if staff();}
     match /withdrawals/{withdrawalId}{allow read,write:if staff();}
     match /activity/{activityId}{allow read,create:if staff();allow update,delete:if isFounder();}
     match /platform_controls/{controlId}{allow read,write:if isFounder();}
