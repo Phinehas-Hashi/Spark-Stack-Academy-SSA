@@ -1,87 +1,82 @@
 // ============================================================
 // SPARK STACK ACADEMY — STUDENT PORTAL CORE
-// Auth + shell + Founder platform-control enforcement only.
-// Dashboard/page data belongs to each page controller.
+// Auth + student identity + shell + Founder platform controls.
 // ============================================================
 
 import { auth, db } from "../../js/firebase.js";
 import { watchPortalControl } from "../../js/portal-control.js";
 import { loadSidebar, updateSidebar } from "../components/sidebar.js";
 import { loadTopbar } from "../components/topbar.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const state = { user: null, profile: null };
+const state = { user: null, userProfile: null, profile: null, controlUnsubscribe: null };
+const page = () => location.pathname.split("/").pop() || "dashboard.html";
 
 function highlightActivePage() {
-    const current = location.pathname.split("/").pop() || "dashboard.html";
+    const current = page();
     document.querySelectorAll("#sidebar a, .student-sidebar a, [data-page], [data-nav]").forEach(link => {
         const target = link.getAttribute("href") || link.dataset.page || link.dataset.nav || "";
         const active = target.split("?")[0].split("#")[0] === current;
         link.classList.toggle("active", active);
-        if (active) link.setAttribute("aria-current", "page");
-        else link.removeAttribute("aria-current");
+        if (active) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current");
     });
 }
 
-async function loadStudentProfile(uid) {
-    try {
-        const snap = await getDoc(doc(db, "students", uid));
-        state.profile = snap.exists() ? { id: uid, ...snap.data() } : { id: uid };
-        if (!snap.exists()) console.warn("[SSA] Student profile document not found:", uid);
-        return state.profile;
-    } catch (error) {
-        console.error("[SSA] Student profile read failed:", error);
-        state.profile = { id: uid };
-        return state.profile;
-    }
+async function loadIdentity(uid) {
+    const [userSnap, studentSnap] = await Promise.all([
+        getDoc(doc(db, "users", uid)),
+        getDoc(doc(db, "students", uid))
+    ]);
+
+    if (!userSnap.exists()) throw new Error("Student account profile is missing.");
+    const userProfile = userSnap.data();
+    if (userProfile.role !== "student") throw new Error("This account is not registered as a student.");
+    if (userProfile.status !== "active") throw new Error("Student admission is still pending Founder approval.");
+    if (!studentSnap.exists()) throw new Error("Student admission profile is missing.");
+
+    state.userProfile = { id: uid, ...userProfile };
+    state.profile = { id: uid, ...studentSnap.data() };
+    return state.profile;
 }
 
 async function initializeShell() {
-    try { await loadSidebar(); }
-    catch (error) { console.error("[SSA] Sidebar failed:", error); }
-
-    try { await loadTopbar(); }
-    catch (error) { console.error("[SSA] Topbar failed:", error); }
-
+    await loadSidebar().catch(error => console.error("[SSA] Sidebar failed:", error));
+    await loadTopbar().catch(error => console.error("[SSA] Topbar failed:", error));
     highlightActivePage();
 
-    const profile = await loadStudentProfile(state.user.uid);
+    const profile = await loadIdentity(state.user.uid);
     updateSidebar?.(profile);
 
     window.ssaStudent = Object.freeze({
         get user() { return state.user; },
+        get userProfile() { return state.userProfile; },
         get profile() { return state.profile; }
     });
-
     document.documentElement.classList.add("student-portal-ready");
 }
 
 function startPortalControl() {
+    if (state.controlUnsubscribe) return;
+    try { state.controlUnsubscribe = watchPortalControl("student"); }
+    catch (error) { console.error("[SSA] Platform control listener failed:", error); }
+}
+
+async function boot(user) {
+    if (!user) { window.location.replace("../login.html"); return; }
+    state.user = user;
     try {
-        // Keep Founder controls independent from page-data loading.
-        watchPortalControl("student");
+        await initializeShell();
+        startPortalControl();
+        console.log("🔥 SSA Student Portal ready:", user.email || user.uid);
     } catch (error) {
-        console.error("[SSA] Platform control listener failed:", error);
+        console.error("[SSA] Portal authorization failed:", error);
+        try { sessionStorage.setItem("ssaPortalNotice", error.message || "Student access is not active yet."); } catch {}
+        try { await signOut(auth); } catch {}
+        window.location.replace("../login.html");
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    startPortalControl();
-
-    onAuthStateChanged(auth, async user => {
-        if (!user) {
-            window.location.replace("../login.html");
-            return;
-        }
-
-        state.user = user;
-
-        try {
-            await initializeShell();
-            console.log("🔥 SSA Student Portal ready:", user.email || user.uid);
-        } catch (error) {
-            console.error("[SSA] Portal initialization failed:", error);
-        }
-    });
+    onAuthStateChanged(auth, boot);
 });
