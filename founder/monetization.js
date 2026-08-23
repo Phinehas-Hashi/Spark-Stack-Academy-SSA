@@ -1,397 +1,240 @@
-/* ===================================
-   SPARK STACK ACADEMY
-   MONETIZATION CENTER
-=================================== */
-
 import { db } from "../js/firebase.js";
-
 import {
-
-doc,
-getDoc,
-setDoc,
-serverTimestamp
-
+  doc, getDoc, setDoc, serverTimestamp,
+  collection, query, orderBy, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
-/* ===================================
-   DOCUMENT
-=================================== */
-
-const monetizationRef =
-doc(db,"settings","monetization");
-
-const minimumWithdrawal =
-document.getElementById("minimumWithdrawal");
-
-const withdrawalFee =
-document.getElementById("withdrawalFee");
-
-const withdrawalTime =
-document.getElementById("withdrawalTime");
-
-const enableWithdrawals =
-document.getElementById("enableWithdrawals");
-
-const withdrawalApproval =
-document.getElementById("withdrawalApproval");
-
-
-/* ===================================
-   DEFAULT SETTINGS
-=================================== */
-
-const defaultMonetization={
-
-/* Revenue */
-
-totalRevenue:0,
-monthlyRevenue:0,
-todayRevenue:0,
-pendingWithdrawals:0,
-
-/* Course Pricing */
-
-courseFee:5000,
-registrationFee:1000,
-examinationFee:500,
-certificateFee:1000,
-
-/* Instructor */
-
-instructorCommission:70,
-
-/* Platform */
-
-platformCommission:30,
-
-/* Currency */
-
-currency:"KES",
-
-/* Payments */
-
-enablePayments:true,
-
-allowRefunds:false,
-
-refundDays:7,
-
-/* Withdrawals */
-
-minimumWithdrawal:1000,
-
-withdrawalFeePercent:2,
-
-withdrawalTime:"24 Hours",
-
-enableWithdrawals:true,
-
-withdrawalApproval:true,
-
-/* Discounts */
-
-allowCoupons:true,
-
-allowScholarships:true,
-
-/* Metadata */
-
-createdAt:serverTimestamp(),
-
-updatedAt:serverTimestamp()
-
-};
-/* ===================================
-   LOAD MONETIZATION SETTINGS
-=================================== */
-
-document.addEventListener(
-"DOMContentLoaded",
-loadMonetization
-);
-
-async function loadMonetization(){
-
-try{
-
-const snapshot =
-await getDoc(monetizationRef);
-
-
-/* -------------------------------
-CREATE DOCUMENT IF MISSING
--------------------------------- */
-
-if(!snapshot.exists()){
-
-await setDoc(
-
-monetizationRef,
-
-defaultMonetization
-
-);
-
-populateMonetization(
-defaultMonetization
-);
-
-console.log(
-"✅ Default monetization created."
-);
-
-return;
-
-}
-
-
-/* -------------------------------
-LOAD SETTINGS
--------------------------------- */
-
-const data =
-snapshot.data();
-
-populateMonetization(data);
-
-console.log(
-"✅ Monetization loaded."
-);
-
-}
-
-catch(error){
-
-console.error(
-"Failed loading monetization:",
-error
-);
-
-}
-
-}
-
-
-/* ===================================
-   POPULATE UI
-=================================== */
-
-function populateMonetization(data){
-
-/* ---------- KPI ---------- */
-
-document.getElementById("totalRevenue").textContent =
-`${data.currency} ${Number(data.totalRevenue).toLocaleString()}`;
-
-document.getElementById("monthlyRevenue").textContent =
-`${data.currency} ${Number(data.monthlyRevenue).toLocaleString()}`;
-
-document.getElementById("todayRevenue").textContent =
-`${data.currency} ${Number(data.todayRevenue).toLocaleString()}`;
-
-document.getElementById("pendingWithdrawals").textContent =
-`${data.currency} ${Number(data.pendingWithdrawals).toLocaleString()}`;
-
-
-/* ---------- COURSE FEES ---------- */
-
-courseFee.value =
-data.courseFee ?? 5000;
-
-registrationFee.value =
-data.registrationFee ?? 1000;
-
-examinationFee.value =
-data.examinationFee ?? 500;
-
-certificateFee.value =
-data.certificateFee ?? 1000;
-
-
-/* ---------- COMMISSION ---------- */
-
-platformCommission.value =
-data.platformCommission ?? 30;
-
-instructorCommission.value =
-data.instructorCommission ?? 70;
-
-
-/* ---------- PAYMENT ---------- */
-
-currency.value =
-data.currency ?? "KES";
-
-enablePayments.checked =
-data.enablePayments ?? true;
-
-allowRefunds.checked =
-data.allowRefunds ?? false;
-
-refundDays.value =
-data.refundDays ?? 7;
-
-/* ---------- WITHDRAWALS ---------- */
-
-minimumWithdrawal.value =
-data.minimumWithdrawal ?? 1000;
-
-withdrawalFee.value =
-data.withdrawalFeePercent ?? 2;
-
-withdrawalTime.value =
-data.withdrawalTime ?? "24 Hours";
-
-enableWithdrawals.checked =
-data.enableWithdrawals ?? true;
-
-withdrawalApproval.checked =
-data.withdrawalApproval ?? true;
-
-
-/* ---------- DISCOUNTS ---------- */
-
-allowCoupons.checked =
-data.allowCoupons ?? true;
-
-allowScholarships.checked =
-data.allowScholarships ?? true;
-
-}
-/* ===================================
-   SAVE MONETIZATION
-=================================== */
-
-document
-.getElementById("saveMonetization")
-.addEventListener(
-"click",
-saveMonetization
-);
-
-async function saveMonetization(){
-
-try{
-
-const data={
-
-/* ---------- COURSE FEES ---------- */
-
-courseFee:
-Number(courseFee.value),
-
-registrationFee:
-Number(registrationFee.value),
-
-examinationFee:
-Number(examinationFee.value),
-
-certificateFee:
-Number(certificateFee.value),
-
-/* ---------- COMMISSION ---------- */
-
-platformCommission:
-Number(platformCommission.value),
-
-instructorCommission:
-Number(instructorCommission.value),
-
-/* ---------- PAYMENT ---------- */
-
-currency:
-currency.value,
-
-enablePayments:
-enablePayments.checked,
-
-allowRefunds:
-allowRefunds.checked,
-
-refundDays:
-Number(refundDays.value),
-
-/* ---------- WITHDRAWALS ---------- */
-
-minimumWithdrawal:
-Number(minimumWithdrawal.value),
-
-withdrawalFeePercent:
-Number(withdrawalFee.value),
-
-withdrawalTime:
-withdrawalTime.value,
-
-enableWithdrawals:
-enableWithdrawals.checked,
-
-withdrawalApproval:
-withdrawalApproval.checked,
-
-/* ---------- DISCOUNTS ---------- */
-
-allowCoupons:
-allowCoupons.checked,
-
-allowScholarships:
-allowScholarships.checked,
-
-/* ---------- KEEP EXISTING REVENUE ---------- */
-
-updatedAt:
-serverTimestamp()
-
+const ref = doc(db, "settings", "monetization");
+const $ = id => document.getElementById(id);
+const num = (id, fallback = 0) => Math.max(0, Number($(id)?.value ?? fallback) || 0);
+const money = (value, currency = "KES") => `${currency} ${Number(value || 0).toLocaleString()}`;
+
+const defaults = {
+  courseFee: 5000,
+  registrationFee: 1000,
+  examinationFee: 500,
+  certificateFee: 1000,
+  premiumMonthly: 500,
+  premiumQuarterly: 1350,
+  premiumYearly: 4500,
+  enablePremium: true,
+  premiumCertificates: true,
+  enableMpesa: true,
+  enableCards: false,
+  enablePaypal: false,
+  enableBank: false,
+  instructorCommission: 70,
+  platformCommission: 30,
+  enableInstructorEarnings: true,
+  automaticPayouts: false,
+  maxDiscount: 50,
+  couponExpiry: 30,
+  allowCoupons: true,
+  allowScholarships: true,
+  minimumWithdrawal: 1000,
+  withdrawalFeePercent: 2,
+  withdrawalTime: "24 Hours",
+  enableWithdrawals: true,
+  withdrawalApproval: true,
+  enableRevenueDashboard: true,
+  trackStudentPurchases: true,
+  trackInstructorRevenue: true,
+  monthlyRevenueReports: true,
+  vatRate: 16,
+  billingCycle: "Monthly",
+  invoicePrefix: "SSA-INV",
+  currency: "KES",
+  currencySymbol: "KSh",
+  decimalPlaces: 2,
+  enablePayments: true,
+  allowRefunds: false,
+  refundDays: 7,
+  allowCoupons: true,
+  allowScholarships: true
 };
 
+function setValue(id, value) { if ($(id)) $(id).value = value ?? ""; }
+function setChecked(id, value) { if ($(id)) $(id).checked = Boolean(value); }
 
-await setDoc(
+function populate(data) {
+  const d = { ...defaults, ...data };
+  [
+    "courseFee","registrationFee","examFee","certificateFee","premiumMonthly",
+    "premiumQuarterly","premiumYearly","instructorShare","platformCommission",
+    "maxDiscount","couponExpiry","minimumWithdrawal","withdrawalFee","vatRate",
+    "refundDays","currencySymbol","decimalPlaces","invoicePrefix","withdrawalTime",
+    "billingCycle","defaultCurrency"
+  ].forEach(id => {
+    const map = {
+      examFee: d.examinationFee, instructorShare: d.instructorCommission,
+      withdrawalFee: d.withdrawalFeePercent, defaultCurrency: d.currency
+    };
+    setValue(id, map[id] !== undefined ? map[id] : d[id]);
+  });
 
-monetizationRef,
-
-data,
-
-{merge:true}
-
-);
-
-/* Instructor withdrawal requests read this shared platform record. */
-await setDoc(
-doc(db,"platformSettings","earnings"),
-{
-minimumWithdrawal:data.minimumWithdrawal,
-withdrawalFeePercent:data.withdrawalFeePercent,
-withdrawalsEnabled:data.enableWithdrawals,
-withdrawalApproval:data.withdrawalApproval,
-withdrawalProcessingTime:data.withdrawalTime,
-updatedAt:serverTimestamp()
-},
-{merge:true}
-);
-
-
-alert(
-"✅ Monetization settings saved successfully."
-);
-
-console.log(
-"Monetization updated."
-);
-
+  [
+    "enablePremium","premiumCertificates","enableMpesa","enableCards","enablePaypal","enableBank",
+    "enableInstructorEarnings","automaticPayouts","enableCoupons","scholarships","enableWithdrawals",
+    "withdrawalApproval","enableRevenueDashboard","trackStudentPurchases","trackInstructorRevenue",
+    "monthlyRevenueReports"
+  ].forEach(id => {
+    const map = { enableCoupons: d.allowCoupons, scholarships: d.allowScholarships };
+    setChecked(id, map[id] !== undefined ? map[id] : d[id]);
+  });
 }
 
-catch(error){
-
-console.error(
-"Save failed:",
-error
-);
-
-alert(
-"❌ Failed to save monetization settings."
-);
-
+async function load() {
+  try {
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, { ...defaults, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      populate(defaults);
+    } else populate(snap.data());
+    setStatus("Settings loaded from Firestore.", "success");
+  } catch (error) {
+    console.error("Monetization load failed", error);
+    setStatus("Could not load monetization settings.", "error");
+  }
 }
 
+function validate() {
+  const errors = [];
+  const instructor = num("instructorShare");
+  const platform = num("platformCommission");
+  if (instructor > 100 || platform > 100) errors.push("Commission percentages cannot exceed 100%.");
+  if (Math.round((instructor + platform) * 100) / 100 !== 100) errors.push("Instructor share + platform commission must equal 100%.");
+  if (num("minimumWithdrawal") < 0) errors.push("Minimum withdrawal cannot be negative.");
+  if (num("withdrawalFee") > 100) errors.push("Withdrawal fee cannot exceed 100%.");
+  if (num("maxDiscount") > 100) errors.push("Maximum discount cannot exceed 100%.");
+  if (num("vatRate") > 100) errors.push("VAT cannot exceed 100%.");
+  if (num("decimalPlaces") > 6) errors.push("Decimal places must be 0–6.");
+  return errors;
 }
+
+function collect() {
+  return {
+    courseFee: num("defaultCourseFee"),
+    registrationFee: num("registrationFee"),
+    examinationFee: num("examFee"),
+    certificateFee: num("certificateFee"),
+    premiumMonthly: num("premiumMonthly"),
+    premiumQuarterly: num("premiumQuarterly"),
+    premiumYearly: num("premiumYearly"),
+    enablePremium: $("enablePremium")?.checked ?? false,
+    premiumCertificates: $("premiumCertificates")?.checked ?? false,
+    enableMpesa: $("enableMpesa")?.checked ?? false,
+    enableCards: $("enableCards")?.checked ?? false,
+    enablePaypal: $("enablePaypal")?.checked ?? false,
+    enableBank: $("enableBank")?.checked ?? false,
+    instructorCommission: num("instructorShare"),
+    platformCommission: num("platformCommission"),
+    enableInstructorEarnings: $("enableInstructorEarnings")?.checked ?? false,
+    automaticPayouts: $("automaticPayouts")?.checked ?? false,
+    maxDiscount: num("maxDiscount"),
+    couponExpiry: num("couponExpiry"),
+    allowCoupons: $("enableCoupons")?.checked ?? false,
+    allowScholarships: $("scholarships")?.checked ?? false,
+    minimumWithdrawal: num("minimumWithdrawal"),
+    withdrawalFeePercent: num("withdrawalFee"),
+    withdrawalTime: $("withdrawalTime")?.value || "24 Hours",
+    enableWithdrawals: $("enableWithdrawals")?.checked ?? false,
+    withdrawalApproval: $("withdrawalApproval")?.checked ?? false,
+    enableRevenueDashboard: $("enableRevenueDashboard")?.checked ?? false,
+    trackStudentPurchases: $("trackStudentPurchases")?.checked ?? false,
+    trackInstructorRevenue: $("trackInstructorRevenue")?.checked ?? false,
+    monthlyRevenueReports: $("monthlyRevenueReports")?.checked ?? false,
+    vatRate: num("vatRate"),
+    billingCycle: $("billingCycle")?.value || "Monthly",
+    invoicePrefix: String($("invoicePrefix")?.value || "SSA-INV").trim().slice(0, 30),
+    currency: $("defaultCurrency")?.value || "KES",
+    currencySymbol: String($("currencySymbol")?.value || "KSh").trim().slice(0, 10),
+    decimalPlaces: Math.min(6, Math.floor(num("decimalPlaces", 2))),
+    enablePayments: ($( "enableMpesa")?.checked || $("enableCards")?.checked || $("enablePaypal")?.checked || $("enableBank")?.checked),
+    allowRefunds: false,
+    refundDays: 7,
+    updatedAt: serverTimestamp()
+  };
+}
+
+async function save() {
+  const errors = validate();
+  if (errors.length) return setStatus(errors.join(" "), "error");
+  const button = $("saveMonetization");
+  if (button) { button.disabled = true; button.textContent = "Saving…"; }
+  try {
+    const data = collect();
+    await setDoc(ref, data, { merge: true });
+    await setDoc(doc(db, "platformSettings", "earnings"), {
+      minimumWithdrawal: data.minimumWithdrawal,
+      withdrawalFeePercent: data.withdrawalFeePercent,
+      withdrawalsEnabled: data.enableWithdrawals,
+      withdrawalApproval: data.withdrawalApproval,
+      withdrawalProcessingTime: data.withdrawalTime,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    setStatus("Monetization settings saved successfully.", "success");
+  } catch (error) {
+    console.error("Monetization save failed", error);
+    setStatus("Save failed. Check your Firebase permissions and try again.", "error");
+  } finally {
+    if (button) { button.disabled = false; button.textContent = "💾 Save Changes"; }
+  }
+}
+
+function setStatus(message, type) {
+  let el = $("monetizationStatus");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "monetizationStatus";
+    el.setAttribute("role", "status");
+    document.querySelector(".page-header")?.appendChild(el);
+  }
+  el.textContent = message;
+  el.className = `settings-status ${type}`;
+}
+
+function exportSettings() {
+  const data = collect();
+  delete data.updatedAt;
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SSA-monetization-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function restoreDefaults() { if (confirm("Restore the recommended monetization defaults? Changes are not saved until you click Save.")) populate(defaults); }
+function resetMonetization() { if (confirm("Reset monetization settings to defaults and save them?")) { populate(defaults); save(); } }
+function disablePayments() { if (confirm("Disable all payment gateways and save this change?")) { ["enableMpesa","enableCards","enablePaypal","enableBank"].forEach(id => setChecked(id, false)); save(); } }
+
+$("saveMonetization")?.addEventListener("click", save);
+$("exportMonetization")?.addEventListener("click", exportSettings);
+$("exportRevenue")?.addEventListener("click", exportSettings);
+$("restoreDefaults")?.addEventListener("click", restoreDefaults);
+$("resetMonetization")?.addEventListener("click", resetMonetization);
+$("disablePayments")?.addEventListener("click", disablePayments);
+$("clearTransactions")?.addEventListener("click", () => setStatus("Transaction deletion is intentionally disabled here. Use the Revenue module for reporting and reconciliation.", "error"));
+
+onSnapshot(query(collection(db, "payments"), orderBy("createdAt", "desc")), snap => {
+  const payments = snap.docs.map(d => d.data());
+  const completed = payments.filter(p => ["success", "completed"].includes(String(p.status || "").toLowerCase()));
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const month = today.slice(0, 7);
+  const amount = p => Number(p.amount || 0);
+  const date = p => { try { return p.createdAt?.toDate?.() || new Date(p.createdAt); } catch { return null; } };
+  const total = completed.reduce((s,p) => s + amount(p), 0);
+  const monthly = completed.filter(p => date(p)?.toISOString().slice(0,7) === month).reduce((s,p) => s + amount(p), 0);
+  const daily = completed.filter(p => date(p)?.toISOString().slice(0,10) === today).reduce((s,p) => s + amount(p), 0);
+  const currency = $("defaultCurrency")?.value || "KES";
+  $("totalRevenue") && ($("totalRevenue").textContent = money(total, currency));
+  $("monthlyRevenue") && ($("monthlyRevenue").textContent = money(monthly, currency));
+  $("todayRevenue") && ($("todayRevenue").textContent = money(daily, currency));
+}, error => {
+  console.error("Monetization revenue stream failed", error);
+  ["totalRevenue","monthlyRevenue","todayRevenue"].forEach(id => $(id) && ($(id).textContent = "—"));
+});
+
+load();
