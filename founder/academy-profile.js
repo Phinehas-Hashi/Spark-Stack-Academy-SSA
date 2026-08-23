@@ -1,10 +1,8 @@
 // ===================================
-// SPARK STACK ACADEMY
-// ACADEMY PROFILE
+// SPARK STACK ACADEMY — ACADEMY PROFILE
 // ===================================
 
 import { db, storage } from "../../js/firebase.js";
-
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
@@ -19,12 +17,21 @@ const imageFields = [
     ["founderPhoto", "founderPreview", "founderPhoto"]
 ];
 
+const notify = (message, type = "success") => {
+    if (window.showFounderToast) return window.showFounderToast(message, type);
+    console[type === "error" ? "error" : "log"](message);
+};
+
+const confirmAction = (message, options = {}) => {
+    if (window.ssaConfirm) return window.ssaConfirm(message, options);
+    return Promise.resolve(false);
+};
+
 async function loadProfile(){
     try{
         const snap = await getDoc(profileRef);
         if(!snap.exists()) return;
         const data = snap.data();
-
         [
             ["academyName",data.academyName],["academyTagline",data.tagline],["academyDescription",data.description],
             ["founderName",data.founderName],["founderTitle",data.founderTitle],["founderBio",data.founderBio],
@@ -35,9 +42,8 @@ async function loadProfile(){
             ["language",data.language],["currency",data.currency],["timezone",data.timezone],
             ["studentPrefix",data.studentPrefix],["certificatePrefix",data.certificatePrefix]
         ].forEach(([id,value]) => setValue(id,value));
-
         imageFields.forEach(([,preview,key]) => setImage(preview,data[key]));
-    }catch(error){ console.error("Profile load failed:",error); }
+    }catch(error){ console.error("Profile load failed:",error); notify(error.message || "Unable to load academy profile.","error"); }
 }
 
 function setValue(id,value){ const el=document.getElementById(id); if(el) el.value=value||""; }
@@ -77,8 +83,7 @@ async function saveProfile(){
             youtube:getValue("youtube"), tiktok:getValue("tiktok"), github:getValue("github"),
             language:getValue("language"), currency:getValue("currency"), timezone:getValue("timezone"),
             studentPrefix:getValue("studentPrefix"), certificatePrefix:getValue("certificatePrefix"),
-            ...uploaded,
-            updatedAt:serverTimestamp()
+            ...uploaded, updatedAt:serverTimestamp()
         };
         imageFields.forEach(([,preview,field])=>{
             if(!uploaded[field] && existing[field]) profile[field]=existing[field];
@@ -86,10 +91,10 @@ async function saveProfile(){
             if(uploaded[field] && img) img.src=uploaded[field];
         });
         await setDoc(profileRef,profile,{merge:true});
-        alert("✅ Academy profile saved.");
+        notify("Academy profile saved successfully.");
     }catch(error){
         console.error("Profile save failed:",error);
-        alert(`❌ ${error.message||"Failed to save profile."}`);
+        notify(error.message||"Failed to save profile.","error");
     }finally{
         if(saveBtn){ saveBtn.disabled=false; saveBtn.textContent="Save Profile"; }
     }
@@ -100,13 +105,21 @@ imageFields.forEach(([inputId,previewId])=>{
     input?.addEventListener("change",()=>{
         const file=input.files?.[0];
         if(!file || !preview) return;
-        if(!file.type.startsWith("image/")){ alert("Please select an image file."); input.value=""; return; }
-        if(file.size>5*1024*1024){ alert("Image must be 5MB or smaller."); input.value=""; return; }
+        if(!file.type.startsWith("image/")){ notify("Please select an image file.","error"); input.value=""; return; }
+        if(file.size>5*1024*1024){ notify("Image must be 5MB or smaller.","error"); input.value=""; return; }
         preview.src=URL.createObjectURL(file); preview.classList.add("has-image");
     });
 });
 
-document.getElementById("resetProfileBtn")?.addEventListener("click",()=>{ if(confirm("Reset all unsaved changes?")) location.reload(); });
+document.getElementById("resetProfileBtn")?.addEventListener("click",async()=>{
+    const confirmed = await confirmAction("Reset all unsaved academy profile changes?", {
+        title: "Reset profile changes",
+        confirmText: "Reset changes",
+        cancelText: "Keep editing",
+        danger: true
+    });
+    if(confirmed) location.reload();
+});
 
 async function loadStatistics(){
     try{
@@ -117,7 +130,7 @@ async function loadStatistics(){
         document.getElementById("totalInstructors").textContent=instructors.size.toLocaleString();
         document.getElementById("totalCourses").textContent=courses.size.toLocaleString();
         document.getElementById("totalCertificates").textContent=certificates.size.toLocaleString();
-    }catch(error){ console.error("Statistics Error:",error); }
+    }catch(error){ console.error("Statistics Error:",error); notify("Unable to load academy statistics.","error"); }
 }
 
 window.addEventListener("DOMContentLoaded",()=>{ loadProfile(); loadStatistics(); });
