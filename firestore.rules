@@ -18,7 +18,12 @@ service cloud.firestore {
         &&request.resource.data.get('role',resource.data.get('role','student'))==resource.data.get('role','student')
         &&request.resource.data.get('status',resource.data.get('status','pending_admission'))==resource.data.get('status','pending_admission')
         &&request.resource.data.get('verified',resource.data.get('verified',false))==resource.data.get('verified',false)
-        &&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName','bio','expertise','profilePhoto','phone','lastLogin','updatedAt']);
+        &&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName','bio','expertise','profilePhoto','phone','lastLogin','updatedAt','xp','level','badges','lastReward'])
+        &&(!request.resource.data.diff(resource.data).affectedKeys().hasAny(['xp','level','badges','lastReward']) || request.resource.data.get('role',resource.data.get('role'))=='student')
+        &&request.resource.data.get('xp',resource.data.get('xp',0))>=resource.data.get('xp',0)
+        &&request.resource.data.get('xp',resource.data.get('xp',0))<=resource.data.get('xp',0)+100
+        &&request.resource.data.get('level',resource.data.get('level',1))==int(request.resource.data.get('xp',resource.data.get('xp',0))/250)+1
+        &&request.resource.data.get('badges',resource.data.get('badges',[])).hasAll(resource.data.get('badges',[]));
       allow delete:if staff();
     }
     match /founder/{founderId}{allow get:if signedIn()&&(request.auth.uid==founderId||isFounder());allow list:if isFounder();allow create,update,delete:if false;}
