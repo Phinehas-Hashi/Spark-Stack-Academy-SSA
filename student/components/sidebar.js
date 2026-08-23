@@ -1,93 +1,53 @@
 // =====================================
 // SPARK STACK ACADEMY
-// STUDENT SIDEBAR V2
+// STUDENT SIDEBAR V3
 // =====================================
 
-console.log("🚀 SSA Sidebar Loaded");
-
-// =====================================
-// LOAD SIDEBAR
-// =====================================
+console.log("🚀 SSA Student Sidebar Loaded");
 
 export async function loadSidebar() {
-
-    const container =
-        document.getElementById("sidebarContainer");
-
+    const container = document.getElementById("sidebarContainer");
     if (!container) return;
 
     try {
-
         const response = await fetch(new URL("./sidebar.html", import.meta.url));
+        if (!response.ok) throw new Error(`Failed to load sidebar: ${response.status}`);
 
-console.log(response.url);
-console.log(response.status);
-
-        container.innerHTML =
-            await response.text();
-
-console.log("Sidebar inserted:", container.innerHTML.length);
-
+        container.innerHTML = await response.text();
         initializeSidebar();
-
-        if (typeof lucide !== "undefined") {
-            lucide.createIcons();
-        }
-
+        window.lucide?.createIcons();
     } catch (error) {
-
-        console.error(
-            "Sidebar loading failed:",
-            error
-        );
-
+        console.error("Sidebar loading failed:", error);
     }
-
 }
-// =====================================
-// INITIALIZE SIDEBAR
-// =====================================
 
 function initializeSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const overlay = document.getElementById("sidebarOverlay");
 
-    const sidebar =
-        document.getElementById("sidebar");
-
-
-
-    // =========================
-    // LOGOUT
-    // =========================
-
-    if (logoutBtn) {
-
-        logoutBtn.addEventListener("click", async () => {
-
-            const { auth } =
-                await import("../../js/firebase.js");
-
-            const { signOut } =
-                await import(
-                    "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"
-                );
-
+    logoutBtn?.addEventListener("click", async () => {
+        try {
+            const { auth } = await import("../../js/firebase.js");
+            const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
             await signOut(auth);
+        } catch (error) {
+            console.error("Student logout failed:", error);
+        } finally {
+            window.location.replace("../login.html");
+        }
+    });
 
-            window.location.href = "/login.html";
-
+    document.querySelectorAll("#sidebar a").forEach(link => {
+        link.addEventListener("click", () => {
+            sidebar?.classList.remove("open");
+            overlay?.classList.remove("show");
         });
-
-    }
-
+    });
 }
-// =====================================
-// UPDATE SIDEBAR
-// =====================================
 
-export function updateSidebar(student) {
-
+export function updateSidebar(student = {}) {
     const name = student.name || student.fullName || "Student";
-
     const initial = name.charAt(0).toUpperCase();
 
     const sidebarName = document.getElementById("sidebarName");
@@ -95,20 +55,17 @@ export function updateSidebar(student) {
     const sidebarLevel = document.getElementById("sidebarLevel");
 
     if (sidebarName) {
-
-    sidebarName.innerHTML = `
-        ${name}
-
-        ${
-            student.premium === true
-                ? `<span class="premium-badge" title="SSA Premium Verified">✓</span>`
-                : ""
+        sidebarName.textContent = name;
+        if (student.premium === true) {
+            const badge = document.createElement("span");
+            badge.className = "premium-badge";
+            badge.title = "SSA Premium Verified";
+            badge.textContent = "✓";
+            sidebarName.appendChild(document.createTextNode(" "));
+            sidebarName.appendChild(badge);
         }
-    `;
-
-}
+    }
 
     if (sidebarAvatar) sidebarAvatar.textContent = initial;
-
     if (sidebarLevel) sidebarLevel.textContent = student.level || 1;
 }
