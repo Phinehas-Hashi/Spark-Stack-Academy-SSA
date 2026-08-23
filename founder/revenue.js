@@ -1,48 +1,363 @@
 import { db } from "../../js/firebase.js";
-import { collection, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const money = n => `KES ${Number(n || 0).toLocaleString()}`;
-let payments = [], withdrawals = [], chart, allDays = [];
+const esc = value => String(value ?? "").replace(/[&<>\"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#039;"}[c]));
 
-function dateOf(v){ try{return v?.toDate?.() || (v ? new Date(v) : null)}catch{return null} }
-function statusOk(s){return ["success","completed"].includes(String(s||"").toLowerCase())}
-function typeOf(d){return String(d.type || d.paymentType || "course").toLowerCase()}
-function methodOf(d){return String(d.method || d.paymentMethod || "m-pesa").toLowerCase()}
+let payments = [];
+let withdrawals = [];
+let chart = null;
+let paymentError = false;
+let withdrawalError = false;
 
-function renderPayments(){
- const search=String($("transactionSearch")?.value||"").toLowerCase();
- const filter=$("transactionFilter")?.value||"all";
- const rows=payments.filter(d=>{
-   const s=String(d.status||"").toLowerCase();
-   const hay=[d.receipt,d.studentName,d.name,d.admissionNo,d.type,d.method,d.course].join(" ").toLowerCase();
-   return (filter==="all" || s===filter || (filter==="completed"&&s==="success")) && hay.includes(search);
- });
- const table=$("transactionsTable"); if(!table)return; table.innerHTML="";
- if(!rows.length){table.innerHTML='<tr><td colspan="9" class="empty-table">No matching transactions.</td></tr>';return}
- rows.forEach(d=>{const dt=dateOf(d.createdAt);const tr=document.createElement("tr");tr.innerHTML=`<td>${d.receipt||d.reference||"--"}</td><td>${d.studentName||d.name||d.email||"Unknown"}</td><td>${d.admissionNo||"--"}</td><td>${d.type||d.paymentType||"Course"}</td><td>${d.method||d.paymentMethod||"M-Pesa"}</td><td>${money(d.amount)}</td><td><span class="status ${d.status||"unknown"}">${d.status||"unknown"}</span></td><td>${dt?dt.toLocaleString():"--"}</td><td><button class="table-action" data-view="${d.id}">View</button></td>`;table.appendChild(tr)})
+function dateOf(v) {
+  try { return v?.toDate?.() || (v ? new Date(v) : null); } catch { return null; }
 }
 
-function renderMetrics(){
- let total=0,month=0,today=0,success=0,pending=0,failed=0,course=0,registration=0,certificate=0,exam=0,mpesa=0,card=0,bank=0,paypal=0,highest=0;const daily={};const now=new Date();const mk=now.toISOString().slice(0,7),tk=now.toISOString().slice(0,10);
- payments.forEach(d=>{const a=Number(d.amount||0),s=String(d.status||"").toLowerCase(),dt=dateOf(d.createdAt),k=dt?.toISOString().slice(0,10);if(s==="pending")pending++;else if(statusOk(s)){success++;total+=a;highest=Math.max(highest,a);if(k)daily[k]=(daily[k]||0)+a;if(k===tk)today+=a;if(k?.startsWith(mk))month+=a;switch(typeOf(d)){case"registration":registration+=a;break;case"certificate":certificate+=a;break;case"exam":exam+=a;break;default:course+=a}switch(methodOf(d)){case"card":card+=a;break;case"bank":case"bank transfer":bank+=a;break;case"paypal":paypal+=a;break;default:mpesa+=a}}else failed++});
- $("totalRevenue")&&( $("totalRevenue").textContent=money(total));$("monthlyRevenue")&&($("monthlyRevenue").textContent=money(month));$("todayRevenue")&&($("todayRevenue").textContent=money(today));
- [ ["transactionCount",payments.length],["successfulPayments",success],["pendingPayments",pending],["failedPayments",failed],["courseRevenue",money(course)],["registrationRevenue",money(registration)],["certificateRevenue",money(certificate)],["examRevenue",money(exam)],["breakdownTotal",money(total)],["mpesaRevenue",money(mpesa)],["cardRevenue",money(card)],["bankRevenue",money(bank)],["paypalRevenue",money(paypal)],["highestTransaction",money(highest)] ].forEach(([id,v])=>{if($(id))$(id).textContent=v});
- const days=Object.keys(daily).sort();const vals=days.map(k=>daily[k]);const avg=days.length?total/days.length:0;const best=days.length?days.reduce((a,b)=>daily[b]>daily[a]?b:a):null;$("dailyAverage")&&($("dailyAverage").textContent=money(avg));$("bestRevenueDay")&&($("bestRevenueDay").textContent=best?`${best} (${money(daily[best])})`:"--");
- drawChart(days,vals); renderPayments();
+function statusOf(v) { return String(v || "").toLowerCase().trim(); }
+function statusOk(v) { return ["success", "completed"].includes(statusOf(v)); }
+function typeOf(d) { return String(d.type || d.paymentType || "course").toLowerCase().trim(); }
+function methodOf(d) { return String(d.method || d.paymentMethod || "m-pesa").toLowerCase().trim(); }
+function paymentAmount(d) { return Number(d.amount || 0); }
+
+function setText(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
 }
-function drawChart(days,vals){const c=$("revenueChart");if(!c||typeof Chart==="undefined")return;chart?.destroy();chart=new Chart(c,{type:"line",data:{labels:days,datasets:[{label:"Revenue (KES)",data:vals,tension:.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}})}
-function renderWithdrawals(){const t=$("withdrawalsTable");if(!t)return;t.innerHTML="";let pending=0;if(!withdrawals.length){t.innerHTML='<tr><td colspan="6" class="empty-table">No withdrawal requests found.</td></tr>';return}withdrawals.forEach(d=>{if(d.status==="pending")pending+=Number(d.amount||0);const dt=dateOf(d.requestedAt);const tr=document.createElement("tr");tr.innerHTML=`<td>${d.instructor||d.instructorName||"Unknown"}</td><td>${d.method||"--"}</td><td>${money(d.amount)}</td><td><span class="status ${d.status||"unknown"}">${d.status||"unknown"}</span></td><td>${dt?dt.toLocaleDateString():"--"}</td><td><button class="withdraw-action approve" data-id="${d.id}">Approve</button> <button class="withdraw-action reject" data-id="${d.id}">Reject</button></td>`;t.appendChild(tr)});$("pendingWithdrawals")&&($("pendingWithdrawals").textContent=money(pending))}
 
-onSnapshot(query(collection(db,"payments"),orderBy("createdAt","desc")),snap=>{payments=snap.docs.map(x=>({id:x.id,...x.data()}));renderMetrics()},e=>console.error("Payments:",e));
-onSnapshot(query(collection(db,"withdrawals"),orderBy("requestedAt","desc")),snap=>{withdrawals=snap.docs.map(x=>({id:x.id,...x.data()}));renderWithdrawals()},e=>console.error("Withdrawals:",e));
+function renderPayments() {
+  const table = $("transactionsTable");
+  if (!table) return;
+  if (paymentError) {
+    table.innerHTML = '<tr><td colspan="9" class="empty-table error-state">Unable to load payments. Refresh and try again.</td></tr>';
+    return;
+  }
 
-$("transactionSearch")?.addEventListener("input",renderPayments);$("transactionFilter")?.addEventListener("change",renderPayments);
-$("refreshRevenue")?.addEventListener("click",()=>renderMetrics());$("refreshRevenueDashboard")?.addEventListener("click",()=>renderMetrics());$("refreshWithdrawals")?.addEventListener("click",renderWithdrawals);
-document.addEventListener("click",async e=>{const id=e.target?.dataset?.id;if(!id)return;const status=e.target.classList.contains("approve")?"completed":e.target.classList.contains("reject")?"failed":null;if(!status)return;if(!confirm(`Mark this withdrawal as ${status}?`))return;try{await updateDoc(doc(db,"withdrawals",id),{status,processedAt:new Date()})}catch(err){console.error(err);alert("Could not update withdrawal.")}});
+  const search = String($("transactionSearch")?.value || "").toLowerCase().trim();
+  const filter = $("transactionFilter")?.value || "all";
+  const rows = payments.filter(d => {
+    const status = statusOf(d.status);
+    const haystack = [
+      d.receipt, d.reference, d.studentName, d.name, d.email,
+      d.admissionNo, d.type, d.paymentType, d.method, d.paymentMethod, d.course
+    ].join(" ").toLowerCase();
+    const matchesFilter = filter === "all" || status === filter || (filter === "completed" && status === "success");
+    return matchesFilter && haystack.includes(search);
+  });
 
-$("exportCSV")?.addEventListener("click",()=>{const rows=payments.map(d=>[d.receipt||d.reference||"",d.studentName||d.name||d.email||"",d.admissionNo||"",d.type||"Course",d.method||"M-Pesa",d.amount||0,d.status||"",dateOf(d.createdAt)?.toISOString()||""]);const csv=[["Receipt","Student","Admission","Type","Method","Amount","Status","Date"],...rows].map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`SSA-revenue-${new Date().toISOString().slice(0,10)}.csv`;a.click()});
-$("printReport")?.addEventListener("click",()=>window.print());
-$("monthlyReport")?.addEventListener("click",()=>alert(`Current month revenue: ${$("monthlyRevenue")?.textContent||"KES 0"}`));
-$("annualReport")?.addEventListener("click",()=>alert("Annual report is ready from the transaction data shown on this page."));
-$("forecastReport")?.addEventListener("click",()=>{const m=payments.filter(d=>statusOk(d.status)&&dateOf(d.createdAt)?.getMonth()===new Date().getMonth()).reduce((s,d)=>s+Number(d.amount||0),0);alert(`Simple forecast: ${money(m*12)} annualized from this month's revenue.`)});
+  if (!rows.length) {
+    table.innerHTML = '<tr><td colspan="9" class="empty-table">No matching transactions.</td></tr>';
+    return;
+  }
+
+  table.innerHTML = rows.map(d => {
+    const dt = dateOf(d.createdAt);
+    const status = statusOf(d.status) || "unknown";
+    return `<tr>
+      <td>${esc(d.receipt || d.reference || "--")}</td>
+      <td>${esc(d.studentName || d.name || d.email || "Unknown")}</td>
+      <td>${esc(d.admissionNo || "--")}</td>
+      <td>${esc(d.type || d.paymentType || "Course")}</td>
+      <td>${esc(d.method || d.paymentMethod || "M-Pesa")}</td>
+      <td>${money(paymentAmount(d))}</td>
+      <td><span class="status ${esc(status)}">${esc(status)}</span></td>
+      <td>${dt && !Number.isNaN(dt.getTime()) ? esc(dt.toLocaleString()) : "--"}</td>
+      <td><button class="table-action" data-view="${esc(d.id)}">View</button></td>
+    </tr>`;
+  }).join("");
+}
+
+function completedPayments() { return payments.filter(d => statusOk(d.status)); }
+
+function getRevenueSeries(period) {
+  const completed = completedPayments();
+  const now = new Date();
+  const daily = {};
+
+  if (period === 365) {
+    completed.forEach(d => {
+      const dt = dateOf(d.createdAt);
+      if (!dt || Number.isNaN(dt.getTime())) return;
+      const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+      daily[key] = (daily[key] || 0) + paymentAmount(d);
+    });
+    const keys = Object.keys(daily).sort().slice(-12);
+    return { labels: keys, values: keys.map(k => daily[k]) };
+  }
+
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (period - 1));
+
+  for (let i = 0; i < period; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const key = d.toISOString().slice(0, 10);
+    daily[key] = 0;
+  }
+
+  completed.forEach(d => {
+    const dt = dateOf(d.createdAt);
+    if (!dt || Number.isNaN(dt.getTime())) return;
+    const key = dt.toISOString().slice(0, 10);
+    if (key in daily) daily[key] += paymentAmount(d);
+  });
+
+  const labels = Object.keys(daily);
+  return { labels, values: labels.map(k => daily[k]) };
+}
+
+function drawChart() {
+  const canvas = $("revenueChart");
+  if (!canvas || typeof Chart === "undefined") return;
+  const period = Number($("chartPeriod")?.value || 30);
+  const { labels, values } = getRevenueSeries(period);
+  chart?.destroy();
+  chart = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Revenue (KES)",
+        data: values,
+        tension: 0.35,
+        fill: true,
+        pointRadius: period === 365 ? 3 : 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: value => `KES ${Number(value).toLocaleString()}` } },
+        x: { ticks: { maxTicksLimit: period === 365 ? 12 : 8 } }
+      }
+    }
+  });
+}
+
+function renderMetrics() {
+  if (paymentError) {
+    ["totalRevenue","monthlyRevenue","todayRevenue","courseRevenue","registrationRevenue","certificateRevenue","examRevenue","breakdownTotal","mpesaRevenue","cardRevenue","bankRevenue","paypalRevenue","highestTransaction","dailyAverage","bestRevenueDay","monthlyGrowth"].forEach(id => setText(id, id === "monthlyGrowth" ? "—" : "—"));
+    setText("transactionCount", "—");
+    setText("successfulPayments", "—");
+    setText("pendingPayments", "—");
+    setText("failedPayments", "—");
+    renderPayments();
+    return;
+  }
+
+  const now = new Date();
+  const currentMonth = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+  const previousMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const previousMonth = previousMonthDate.getFullYear() + "-" + String(previousMonthDate.getMonth() + 1).padStart(2, "0");
+  const todayKey = now.toISOString().slice(0, 10);
+
+  let total = 0, month = 0, previousMonthTotal = 0, today = 0;
+  let success = 0, pending = 0, failed = 0;
+  let course = 0, registration = 0, certificate = 0, exam = 0;
+  let mpesa = 0, card = 0, bank = 0, paypal = 0, highest = 0;
+  const daily = {};
+
+  payments.forEach(d => {
+    const amount = paymentAmount(d);
+    const status = statusOf(d.status);
+    const dt = dateOf(d.createdAt);
+    const dayKey = dt && !Number.isNaN(dt.getTime()) ? dt.toISOString().slice(0, 10) : null;
+    const monthKey = dayKey?.slice(0, 7);
+
+    if (status === "pending") pending++;
+    else if (statusOk(status)) {
+      success++;
+      total += amount;
+      highest = Math.max(highest, amount);
+      if (dayKey) daily[dayKey] = (daily[dayKey] || 0) + amount;
+      if (dayKey === todayKey) today += amount;
+      if (monthKey === currentMonth) month += amount;
+      if (monthKey === previousMonth) previousMonthTotal += amount;
+
+      switch (typeOf(d)) {
+        case "registration": registration += amount; break;
+        case "certificate": certificate += amount; break;
+        case "exam": case "examination": exam += amount; break;
+        default: course += amount;
+      }
+
+      switch (methodOf(d)) {
+        case "card": case "credit card": case "debit card": card += amount; break;
+        case "bank": case "bank transfer": case "bank_transfer": bank += amount; break;
+        case "paypal": paypal += amount; break;
+        default: mpesa += amount;
+      }
+    } else failed++;
+  });
+
+  const dayKeys = Object.keys(daily).sort();
+  const avg = dayKeys.length ? total / dayKeys.length : 0;
+  const best = dayKeys.length ? dayKeys.reduce((a, b) => daily[b] > daily[a] ? b : a) : null;
+  const growth = previousMonthTotal === 0 ? (month > 0 ? 100 : 0) : ((month - previousMonthTotal) / previousMonthTotal) * 100;
+
+  setText("totalRevenue", money(total));
+  setText("monthlyRevenue", money(month));
+  setText("todayRevenue", money(today));
+  setText("transactionCount", payments.length.toLocaleString());
+  setText("successfulPayments", success.toLocaleString());
+  setText("pendingPayments", pending.toLocaleString());
+  setText("failedPayments", failed.toLocaleString());
+  setText("courseRevenue", money(course));
+  setText("registrationRevenue", money(registration));
+  setText("certificateRevenue", money(certificate));
+  setText("examRevenue", money(exam));
+  setText("breakdownTotal", money(total));
+  setText("mpesaRevenue", money(mpesa));
+  setText("cardRevenue", money(card));
+  setText("bankRevenue", money(bank));
+  setText("paypalRevenue", money(paypal));
+  setText("monthlyGrowth", `${growth >= 0 ? "+" : ""}${growth.toFixed(1)}%`);
+  setText("dailyAverage", money(avg));
+  setText("bestRevenueDay", best ? `${best} (${money(daily[best])})` : "--");
+  setText("highestTransaction", money(highest));
+
+  drawChart();
+  renderPayments();
+}
+
+function renderWithdrawals() {
+  const table = $("withdrawalsTable");
+  if (!table) return;
+  if (withdrawalError) {
+    table.innerHTML = '<tr><td colspan="6" class="empty-table error-state">Unable to load withdrawals. Refresh and try again.</td></tr>';
+    setText("pendingWithdrawals", "—");
+    return;
+  }
+  if (!withdrawals.length) {
+    table.innerHTML = '<tr><td colspan="6" class="empty-table">No withdrawal requests found.</td></tr>';
+    setText("pendingWithdrawals", money(0));
+    return;
+  }
+
+  let pendingAmount = 0;
+  table.innerHTML = withdrawals.map(d => {
+    const status = statusOf(d.status) || "unknown";
+    if (status === "pending") pendingAmount += paymentAmount(d);
+    const dt = dateOf(d.requestedAt);
+    return `<tr>
+      <td>${esc(d.instructor || d.instructorName || d.name || "Unknown")}</td>
+      <td>${esc(d.method || "--")}</td>
+      <td>${money(paymentAmount(d))}</td>
+      <td><span class="status ${esc(status)}">${esc(status)}</span></td>
+      <td>${dt && !Number.isNaN(dt.getTime()) ? esc(dt.toLocaleDateString()) : "--"}</td>
+      <td>${status === "pending" ? `<button class="withdraw-action approve" data-id="${esc(d.id)}">Approve</button> <button class="withdraw-action reject" data-id="${esc(d.id)}">Reject</button>` : "—"}</td>
+    </tr>`;
+  }).join("");
+  setText("pendingWithdrawals", money(pendingAmount));
+}
+
+function showLoadingState() {
+  setText("totalRevenue", "Loading…");
+  setText("monthlyRevenue", "Loading…");
+  setText("todayRevenue", "Loading…");
+  setText("pendingWithdrawals", "Loading…");
+  if ($("transactionsTable")) $("transactionsTable").innerHTML = '<tr><td colspan="9" class="empty-table">Loading live payment data…</td></tr>';
+  if ($("withdrawalsTable")) $("withdrawalsTable").innerHTML = '<tr><td colspan="6" class="empty-table">Loading live withdrawal requests…</td></tr>';
+}
+
+showLoadingState();
+
+onSnapshot(
+  query(collection(db, "payments"), orderBy("createdAt", "desc")),
+  snap => { paymentError = false; payments = snap.docs.map(x => ({ id: x.id, ...x.data() })); renderMetrics(); },
+  error => { paymentError = true; console.error("Revenue payments:", error); renderMetrics(); }
+);
+
+onSnapshot(
+  query(collection(db, "withdrawals"), orderBy("requestedAt", "desc")),
+  snap => { withdrawalError = false; withdrawals = snap.docs.map(x => ({ id: x.id, ...x.data() })); renderWithdrawals(); },
+  error => { withdrawalError = true; console.error("Revenue withdrawals:", error); renderWithdrawals(); }
+);
+
+$("transactionSearch")?.addEventListener("input", renderPayments);
+$("transactionFilter")?.addEventListener("change", renderPayments);
+$("chartPeriod")?.addEventListener("change", drawChart);
+$("refreshRevenue")?.addEventListener("click", () => renderMetrics());
+$("refreshRevenueDashboard")?.addEventListener("click", () => renderMetrics());
+$("refreshWithdrawals")?.addEventListener("click", renderWithdrawals);
+
+async function updateWithdrawal(id, status) {
+  if (!id || !status) return;
+  if (!confirm(`Mark this withdrawal as ${status}?`)) return;
+  try {
+    await updateDoc(doc(db, "withdrawals", id), { status, processedAt: new Date() });
+  } catch (error) {
+    console.error("Withdrawal update:", error);
+    alert("Could not update withdrawal. Check permissions and try again.");
+  }
+}
+
+document.addEventListener("click", async event => {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) return;
+  const id = target.dataset.id;
+  if (target.classList.contains("approve")) await updateWithdrawal(id, "completed");
+  if (target.classList.contains("reject")) await updateWithdrawal(id, "failed");
+});
+
+$("exportCSV")?.addEventListener("click", () => {
+  const rows = payments.map(d => [
+    d.receipt || d.reference || "",
+    d.studentName || d.name || d.email || "",
+    d.admissionNo || "",
+    d.type || d.paymentType || "Course",
+    d.method || d.paymentMethod || "M-Pesa",
+    paymentAmount(d),
+    d.status || "",
+    dateOf(d.createdAt)?.toISOString() || ""
+  ]);
+  const csv = [["Receipt","Student","Admission","Type","Method","Amount","Status","Date"], ...rows]
+    .map(row => row.map(value => `"${String(value).replaceAll('"','""')}"`).join(","))
+    .join("\n");
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  link.download = `SSA-revenue-${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+$("printReport")?.addEventListener("click", () => window.print());
+$("exportPDF")?.addEventListener("click", () => {
+  document.title = `SSA Revenue Report ${new Date().toISOString().slice(0,10)}`;
+  window.print();
+  setTimeout(() => { document.title = "Revenue Analytics | Founder OS"; }, 1000);
+});
+
+$("monthlyReport")?.addEventListener("click", () => {
+  const month = $("monthlyRevenue")?.textContent || "KES 0";
+  alert(`Current month completed revenue: ${month}`);
+});
+
+$("annualReport")?.addEventListener("click", () => {
+  const year = new Date().getFullYear();
+  const total = completedPayments().filter(d => dateOf(d.createdAt)?.getFullYear() === year).reduce((sum, d) => sum + paymentAmount(d), 0);
+  alert(`${year} completed revenue: ${money(total)}`);
+});
+
+$("forecastReport")?.addEventListener("click", () => {
+  const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - 29);
+  const last30Days = completedPayments().filter(d => {
+    const dt = dateOf(d.createdAt);
+    return dt && dt >= cutoff;
+  }).reduce((sum, d) => sum + paymentAmount(d), 0);
+  alert(`30-day run-rate estimate: ${money(last30Days)} based on completed revenue from the last 30 days.`);
+});
