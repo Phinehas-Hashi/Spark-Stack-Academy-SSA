@@ -3,6 +3,7 @@
 // ANNOUNCEMENTS
 // ===================================
 
+import "../js/ui-runtime.js";
 import { db } from "../../js/firebase.js";
 import {
   collection, addDoc, doc, deleteDoc, updateDoc,
@@ -51,16 +52,17 @@ function formData(status) {
 async function save(status) {
   const data = formData(status);
   if (!data.title || !data.message) {
-    alert("Please enter an announcement title and message.");
+    window.ssaToast?.("Add an announcement title and message first.", "warning");
     return;
   }
+
   try {
     await addDoc(announcementsRef, data);
-    alert(status === "published" ? "✅ Announcement published." : "💾 Draft saved.");
+    window.ssaToast?.(status === "published" ? "Announcement published." : "Draft saved.", "success");
     clearForm();
   } catch (error) {
     console.error("Announcement save failed:", error);
-    alert("Failed to save announcement. Please try again.");
+    window.ssaToast?.("Failed to save announcement. Please try again.", "error");
   }
 }
 
@@ -105,19 +107,29 @@ function loadAnnouncements() {
 async function togglePin(id, current) {
   try {
     await updateDoc(doc(db, "announcements", id), { pinned: !current });
+    window.ssaToast?.(current ? "Announcement unpinned." : "Announcement pinned.", "success");
   } catch (error) {
     console.error("Pin update failed:", error);
-    alert("Unable to update pinned status.");
+    window.ssaToast?.("Unable to update pinned status.", "error");
   }
 }
 
 async function removeAnnouncement(id) {
-  if (!confirm("Delete announcement?")) return;
+  const confirmed = await (window.ssaConfirm?.("Delete this announcement? This cannot be undone.", {
+    title: "Delete announcement",
+    confirmText: "Delete",
+    cancelText: "Keep announcement",
+    tone: "danger",
+    icon: "🗑"
+  }) ?? false);
+  if (!confirmed) return;
+
   try {
     await deleteDoc(doc(db, "announcements", id));
+    window.ssaToast?.("Announcement deleted.", "success");
   } catch (error) {
     console.error("Delete failed:", error);
-    alert("Unable to delete announcement.");
+    window.ssaToast?.("Unable to delete announcement.", "error");
   }
 }
 
