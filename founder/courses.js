@@ -65,7 +65,7 @@ function openDrawer(id){
 function closeDrawer(){ $("courseDrawer")?.classList.remove("open"); $("courseDrawer")?.setAttribute("aria-hidden","true"); $("drawerBackdrop")?.classList.remove("open"); }
 
 async function updateCourse(id,data,message){ try{await updateDoc(doc(db,"courses",id),{...data,updatedAt:serverTimestamp()});notify(message);}catch(e){console.error(e);notify(e.message||"Unable to update course.","error");} }
-async function toggleFeature(id){const c=courses.find(x=>x.id===id);if(c)await updateCourse(id,{featured:!c.featured,cupdatedAt:serverTimestamp()},c.featured?"Course unfeatured.":"Course featured.");}
+async function toggleFeature(id){const c=courses.find(x=>x.id===id);if(c)await updateCourse(id,{featured:!c.featured},c.featured?"Course unfeatured.":"Course featured.");}
 async function setStatus(id,status){await updateCourse(id,{status},`Course ${status==='published'?"published":"unpublished"}.`);closeDrawer();}
 async function archive(id){if(!confirm("Archive this course?"))return;await updateCourse(id,{status:"archived"},"Course archived.");closeDrawer();}
 async function assignInstructor(id){const select=$("courseInstructorSelect");if(!select)return;const i=instructors.find(x=>x.id===select.value);await updateCourse(id,{instructorId:i?.id||null,tutorName:i?.name||i?.email||"Unassigned"},"Instructor assignment saved.");closeDrawer();}
