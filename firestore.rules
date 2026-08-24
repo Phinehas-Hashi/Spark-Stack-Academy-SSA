@@ -9,9 +9,16 @@ service cloud.firestore {
     function isAdmin(){return userExists()&&role()=='admin';}
     function isFounder(){return signedIn()&&exists(/databases/$(database)/documents/founder/$(request.auth.uid))&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('role','founder')=='founder'&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('status','active')=='active';}
     function staff(){return isAdmin()||isFounder();}
+    function directoryList(){
+      return (isStudent()&&resource.data.get('role','unknown')=='instructor')
+        || (isInstructor()&&resource.data.get('role','unknown') in ['student','admin'])
+        || (isAdmin()&&resource.data.get('role','unknown')=='instructor')
+        || (isFounder()&&resource.data.get('role','unknown') in ['student','instructor','admin']);
+    }
+
     match /users/{userId}{
       allow get:if signedIn()&&(request.auth.uid==userId||staff());
-      allow list:if staff();
+      allow list:if (staff()||directoryList())&&request.query.limit<=50;
       allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.get('role','student') in ['student','instructor'];
       allow update:if signedIn()&&request.auth.uid==userId
         &&request.resource.data.get('role',resource.data.get('role','student'))==resource.data.get('role','student')
