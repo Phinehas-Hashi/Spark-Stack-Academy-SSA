@@ -1,414 +1,168 @@
-// ============================================
-// SPARK STACK ACADEMY
-// SIGNUP CONTROLLER V2
-// FIREBASE AUTH + SUPABASE BACKEND PROVISIONING
-// ============================================
-
 import { auth, db } from "./firebase.js";
-import { supabase } from "./supabase.js";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, setDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-    createUserWithEmailAndPassword,
-    GoogleAuthProvider,
-    signInWithPopup,
-    updateProfile
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-    doc,
-    setDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const signupForm = document.getElementById("signupForm");
-const nameInput = document.getElementById("name");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const confirmPasswordInput = document.getElementById("confirmPassword");
-const roleSelect = document.getElementById("role");
-const bioInput = document.getElementById("bio");
-const expertiseInput = document.getElementById("expertise");
-const termsCheckbox = document.getElementById("terms");
-const signupBtn = document.getElementById("signupBtn");
-const googleSignupBtn = document.getElementById("googleSignup");
-const instructorFields = document.getElementById("instructorFields");
-const toastContainer = document.getElementById("toastContainer");
-const loader = document.getElementById("authLoader");
-const loaderText = document.getElementById("loaderText");
-const strengthBar = document.getElementById("strengthBar");
-const strengthText = document.getElementById("strengthText");
+const $ = id => document.getElementById(id);
+const signupForm = $("signupForm");
+const nameInput = $("name");
+const emailInput = $("email");
+const passwordInput = $("password");
+const confirmPasswordInput = $("confirmPassword");
+const roleSelect = $("role");
+const bioInput = $("bio");
+const expertiseInput = $("expertise");
+const termsCheckbox = $("terms");
+const signupBtn = $("signupBtn");
+const googleSignupBtn = $("googleSignup");
+const instructorFields = $("instructorFields");
+const toastContainer = $("toastContainer");
+const loader = $("authLoader");
+const loaderText = $("loaderText");
+const strengthBar = $("strengthBar");
+const strengthText = $("strengthText");
 
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
 function showLoader(message) {
-    if (!loader) return;
-    loader.classList.add("active");
+    loader?.classList.add("active");
     if (loaderText) loaderText.textContent = message;
 }
-
-function hideLoader() {
-    if (loader) loader.classList.remove("active");
-}
-
+function hideLoader() { loader?.classList.remove("active"); }
 function showToast(message, type = "success") {
     if (!toastContainer) return;
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<strong>${escapeHtml(message)}</strong>`;
+    toast.textContent = message;
     toastContainer.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateX(40px)"; setTimeout(() => toast.remove(), 300); }, 3500);
+}
+function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+function strongPassword(v) { return v.length >= 8 && /[A-Z]/.test(v) && /[a-z]/.test(v) && /\d/.test(v); }
+function setButtons(disabled) { if (signupBtn) signupBtn.disabled = disabled; if (googleSignupBtn) googleSignupBtn.disabled = disabled; }
 
-    setTimeout(() => {
-        toast.style.opacity = "0";
-        toast.style.transform = "translateX(40px)";
-        setTimeout(() => toast.remove(), 300);
-    }, 3500);
+async function createStudentApplication({ uid, fullName, email, providerName = "email" }) {
+    await setDoc(doc(db, "users", uid), {
+        uid, fullName, email, role: "student", bio: "", expertise: "", profilePhoto: "",
+        active: true, verified: false, status: "pending_admission", provider: providerName,
+        createdAt: serverTimestamp(), lastLogin: serverTimestamp()
+    }, { merge: true });
+
+    await setDoc(doc(db, "students", uid), {
+        uid, name: fullName, email, role: "student", status: "Pending",
+        onboardingStatus: "awaiting_admission", admissionNumber: "Pending",
+        level: 1, xp: 0, streak: 0, badges: [],
+        stats: { coursesEnrolled: 0, lessonsCompleted: 0, progress: 0, certificates: 0 },
+        createdAt: serverTimestamp()
+    }, { merge: true });
+
+    await addDoc(collection(db, "applications"), {
+        studentUid: uid,
+        name: fullName,
+        email,
+        phone: "",
+        course: $("course")?.value?.trim() || "",
+        role: "student",
+        status: "Pending",
+        source: "signup",
+        createdAt: serverTimestamp()
+    });
 }
 
-function escapeHtml(value = "") {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+async function createInstructorProfile({ uid, fullName, email, bio, expertise }) {
+    await setDoc(doc(db, "users", uid), {
+        uid, fullName, email, role: "instructor", bio, expertise, profilePhoto: "",
+        active: true, verified: false, status: "pending_review", createdAt: serverTimestamp(), lastLogin: serverTimestamp()
+    }, { merge: true });
 }
 
-function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-function hasUpperCase(password) { return /[A-Z]/.test(password); }
-function hasLowerCase(password) { return /[a-z]/.test(password); }
-function hasNumber(password) { return /\d/.test(password); }
-function hasMinimumLength(password) { return password.length >= 8; }
+signupForm?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const fullName = nameInput?.value.trim() || "";
+    const email = emailInput?.value.trim() || "";
+    const password = passwordInput?.value || "";
+    const confirmPassword = confirmPasswordInput?.value || "";
+    const role = roleSelect?.value || "";
+    const bio = bioInput?.value.trim() || "";
+    const expertise = expertiseInput?.value.trim() || "";
 
-function disableButtons() {
-    if (signupBtn) signupBtn.disabled = true;
-    if (googleSignupBtn) googleSignupBtn.disabled = true;
-}
-function enableButtons() {
-    if (signupBtn) signupBtn.disabled = false;
-    if (googleSignupBtn) googleSignupBtn.disabled = false;
-}
+    if (!fullName) return showToast("Enter your full name", "error");
+    if (!validEmail(email)) return showToast("Enter a valid email", "error");
+    if (!strongPassword(password)) return showToast("Password must contain uppercase, lowercase, number and 8 characters", "error");
+    if (password !== confirmPassword) return showToast("Passwords do not match", "error");
+    if (!role) return showToast("Select account type", "error");
+    if (!termsCheckbox?.checked) return showToast("Accept Terms & Conditions", "warning");
 
-// ============================================================
-// SUPABASE ACCOUNT PROVISIONING
-// Firebase Auth remains the authentication source.
-// Supabase stores the backend profile + role-specific record.
-// ============================================================
+    try {
+        setButtons(true);
+        showLoader(role === "student" ? "Creating your application..." : "Creating account...");
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = credential.user;
+        await updateProfile(user, { displayName: fullName });
 
-async function provisionSupabaseAccount({
-    firebaseUid,
-    email = "",
-    fullName = "",
-    role = "student",
-    avatarUrl = ""
-}) {
-    if (!firebaseUid) throw new Error("Missing Firebase UID.");
-
-    const { data: existingProfile, error: findError } = await supabase
-        .from("profiles")
-        .select("id, role, status")
-        .eq("firebase_uid", firebaseUid)
-        .maybeSingle();
-
-    if (findError) throw findError;
-
-    let profileId = existingProfile?.id;
-
-    if (profileId) {
-        const { error } = await supabase
-            .from("profiles")
-            .update({
-                email: email || null,
-                full_name: fullName || null,
-                avatar_url: avatarUrl || null,
-                role,
-                status: existingProfile.status || "active",
-                updated_at: new Date().toISOString()
-            })
-            .eq("id", profileId);
-
-        if (error) throw error;
-    } else {
-        const { data, error } = await supabase
-            .from("profiles")
-            .insert({
-                firebase_uid: firebaseUid,
-                email: email || null,
-                full_name: fullName || null,
-                avatar_url: avatarUrl || null,
-                role,
-                status: "active"
-            })
-            .select("id")
-            .single();
-
-        if (error) throw error;
-        profileId = data.id;
-    }
-
-    if (role === "student") {
-        const { error } = await supabase
-            .from("students")
-            .upsert({
-                id: profileId,
-                xp: 0,
-                level: 1,
-                verified: false,
-                premium: false
-            }, { onConflict: "id" });
-
-        if (error) throw error;
-    }
-
-    if (role === "instructor") {
-        const { error } = await supabase
-            .from("instructors")
-            .upsert({
-                id: profileId,
-                verified: false
-            }, { onConflict: "id" });
-
-        if (error) throw error;
-    }
-
-    return profileId;
-}
-
-// ============================================
-// EMAIL SIGNUP
-// ============================================
-
-if (signupForm) {
-    signupForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const fullName = nameInput?.value.trim() || "";
-        const email = emailInput?.value.trim() || "";
-        const password = passwordInput?.value || "";
-        const confirmPassword = confirmPasswordInput?.value || "";
-        const role = roleSelect?.value || "";
-        const bio = bioInput?.value.trim() || "";
-        const expertise = expertiseInput?.value.trim() || "";
-
-        if (!fullName) return showToast("Enter your full name", "error");
-        if (!isValidEmail(email)) return showToast("Enter a valid email", "error");
-        if (!hasMinimumLength(password) || !hasUpperCase(password) || !hasLowerCase(password) || !hasNumber(password)) {
-            return showToast("Password must contain uppercase, lowercase, number and 8 characters", "error");
-        }
-        if (password !== confirmPassword) return showToast("Passwords do not match", "error");
-        if (!role) return showToast("Select account type", "error");
-        if (termsCheckbox && !termsCheckbox.checked) return showToast("Accept Terms & Conditions", "warning");
-
-        try {
-            disableButtons();
-            showLoader("Creating account...");
-
-            const credential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = credential.user;
-
-            await updateProfile(user, { displayName: fullName });
-
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                fullName,
-                email,
-                role,
-                bio: role === "instructor" ? bio : "",
-                expertise: role === "instructor" ? expertise : "",
-                profilePhoto: "",
-                active: true,
-                verified: false,
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp()
-            });
-
-            if (role === "student") {
-                await setDoc(doc(db, "students", user.uid), {
-                    uid: user.uid,
-                    name: fullName,
-                    email,
-                    level: 1,
-                    xp: 0,
-                    streak: 0,
-                    badges: [],
-                    stats: {
-                        coursesEnrolled: 0,
-                        lessonsCompleted: 0,
-                        progress: 0,
-                        certificates: 0
-                    },
-                    admissionNumber: "Pending",
-                    createdAt: serverTimestamp()
-                });
-            }
-
-            await provisionSupabaseAccount({
-                firebaseUid: user.uid,
-                email,
-                fullName,
-                role,
-                avatarUrl: user.photoURL || ""
-            });
-
-            showToast("Account created successfully!", "success");
-
-            setTimeout(() => {
-                hideLoader();
-                window.location.href = role === "student"
-                    ? "student/dashboard.html"
-                    : "login.html";
-            }, 1500);
-        } catch (error) {
-            console.error("Signup Error:", error);
+        if (role === "student") {
+            await createStudentApplication({ uid: user.uid, fullName, email });
+            await signOut(auth);
             hideLoader();
-            enableButtons();
-            showToast(error.message || "Signup failed.", "error");
+            showToast("Application submitted! Wait for Founder approval before accessing your student portal.", "success");
+            setTimeout(() => { window.location.href = "login.html"; }, 1800);
+            return;
         }
-    });
-}
 
-// ============================================
-// GOOGLE SIGNUP
-// ============================================
-
-if (googleSignupBtn) {
-    googleSignupBtn.addEventListener("click", async () => {
-        try {
-            disableButtons();
-            showLoader("Signing in with Google...");
-
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-
-            // Google signup always uses the student role in the current UI.
-            const role = "student";
-            const fullName = user.displayName || "Student";
-            const email = user.email || "";
-            const avatarUrl = user.photoURL || "";
-
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                fullName,
-                email,
-                role,
-                bio: "",
-                expertise: "",
-                profilePhoto: avatarUrl,
-                active: true,
-                verified: user.emailVerified,
-                provider: "google",
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp()
-            }, { merge: true });
-
-            await setDoc(doc(db, "students", user.uid), {
-                uid: user.uid,
-                name: fullName,
-                email,
-                level: 1,
-                xp: 0,
-                streak: 0,
-                badges: [],
-                stats: {
-                    coursesEnrolled: 0,
-                    lessonsCompleted: 0,
-                    progress: 0,
-                    certificates: 0
-                },
-                admissionNumber: "Pending",
-                createdAt: serverTimestamp()
-            }, { merge: true });
-
-            await provisionSupabaseAccount({
-                firebaseUid: user.uid,
-                email,
-                fullName,
-                role,
-                avatarUrl
-            });
-
-            showToast("Welcome to Spark Stack Academy!", "success");
-
-            setTimeout(() => {
-                hideLoader();
-                window.location.href = "student/dashboard.html";
-            }, 1500);
-        } catch (error) {
-            console.error("Google Signup Error:", error);
-            hideLoader();
-            enableButtons();
-            showToast(error.message || "Google signup failed.", "error");
-        }
-    });
-}
-
-console.log("🚀 SSA Signup Controller Loaded");
-console.log("✅ Google Signup Ready");
-
-// ============================================
-// PASSWORD TOGGLE
-// ============================================
-
-document.querySelectorAll(".toggle-password").forEach(toggle => {
-    toggle.addEventListener("click", () => {
-        const target = document.getElementById(toggle.dataset.target);
-        if (!target) return;
-
-        if (target.type === "password") {
-            target.type = "text";
-            toggle.classList.remove("fa-eye");
-            toggle.classList.add("fa-eye-slash");
-        } else {
-            target.type = "password";
-            toggle.classList.remove("fa-eye-slash");
-            toggle.classList.add("fa-eye");
-        }
-    });
+        await createInstructorProfile({ uid: user.uid, fullName, email, bio, expertise });
+        await signOut(auth);
+        hideLoader();
+        showToast("Instructor application created. Please wait for review.", "success");
+        setTimeout(() => { window.location.href = "login.html"; }, 1800);
+    } catch (error) {
+        console.error("Signup Error:", error);
+        hideLoader();
+        setButtons(false);
+        showToast(error.code === "auth/email-already-in-use" ? "An account already exists with this email." : (error.message || "Unable to create account."), "error");
+    }
 });
 
-// ============================================
-// ROLE CHANGE
-// ============================================
-
-if (roleSelect) {
-    roleSelect.addEventListener("change", () => {
-        const instructor = roleSelect.value === "instructor";
-
-        if (instructorFields) instructorFields.style.display = instructor ? "block" : "none";
-
-        if (!instructor) {
-            if (bioInput) bioInput.value = "";
-            if (expertiseInput) expertiseInput.value = "";
-        }
-    });
-}
-
-// ============================================
-// PASSWORD STRENGTH LIVE
-// ============================================
-
-if (passwordInput) {
-    passwordInput.addEventListener("input", () => {
-        let score = 0;
-        if (hasMinimumLength(passwordInput.value)) score++;
-        if (hasUpperCase(passwordInput.value)) score++;
-        if (hasLowerCase(passwordInput.value)) score++;
-        if (hasNumber(passwordInput.value)) score++;
-
-        if (strengthBar) strengthBar.style.width = `${score * 25}%`;
-        if (strengthText) strengthText.textContent = ["Enter password", "Weak", "Fair", "Good", "Strong"][score];
-    });
-}
-
-window.addEventListener("load", () => {
-    hideLoader();
-    if (nameInput) nameInput.focus();
+googleSignupBtn?.addEventListener("click", async () => {
+    try {
+        setButtons(true);
+        showLoader("Connecting your Google account...");
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const fullName = user.displayName || "Student";
+        const email = user.email || "";
+        await createStudentApplication({ uid: user.uid, fullName, email, providerName: "google" });
+        await signOut(auth);
+        hideLoader();
+        showToast("Application submitted! Your account is waiting for Founder approval.", "success");
+        setTimeout(() => { window.location.href = "login.html"; }, 1800);
+    } catch (error) {
+        console.error("Google Signup Error:", error);
+        hideLoader();
+        setButtons(false);
+        showToast(error.message || "Google signup failed.", "error");
+    }
 });
 
-auth.onAuthStateChanged(user => {
-    if (user) console.log("Logged in:", user.email);
+document.querySelectorAll(".toggle-password").forEach(toggle => toggle.addEventListener("click", () => {
+    const target = $(toggle.dataset.target);
+    if (!target) return;
+    target.type = target.type === "password" ? "text" : "password";
+    toggle.classList.toggle("fa-eye");
+    toggle.classList.toggle("fa-eye-slash");
+}));
+
+roleSelect?.addEventListener("change", () => {
+    const instructor = roleSelect.value === "instructor";
+    if (instructorFields) instructorFields.style.display = instructor ? "block" : "none";
+    if (!instructor) { if (bioInput) bioInput.value = ""; if (expertiseInput) expertiseInput.value = ""; }
 });
 
-console.log("%cSpark Stack Academy Signup Ready 🚀", "color:#2979FF;font-size:16px;font-weight:bold;");
+passwordInput?.addEventListener("input", () => {
+    const value = passwordInput.value;
+    const score = [value.length >= 8, /[A-Z]/.test(value), /[a-z]/.test(value), /\d/.test(value)].filter(Boolean).length;
+    if (strengthBar) strengthBar.style.width = `${score * 25}%`;
+    if (strengthText) strengthText.textContent = ["Enter password", "Weak", "Fair", "Good", "Strong"][score];
+});
+
+window.addEventListener("load", () => { hideLoader(); nameInput?.focus(); });
+console.log("🚀 Spark Stack Academy Signup — Admission Flow Ready");

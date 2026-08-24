@@ -1,0 +1,3 @@
+import {auth,db} from "./firebase.js";import{onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";import{doc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+export function watchPremium(callback){return onAuthStateChanged(auth,user=>{if(!user){callback({active:false});return}return onSnapshot(doc(db,"premiumSubscriptions",user.uid),s=>{const d=s.exists()?s.data():{};callback({active:d.status==="active",plan:d.plan||"none",expiresAt:d.expiresAt||null})})})}
+export function requirePremium(onDenied=()=>{}){return watchPremium(state=>{if(!state.active)onDenied(state);document.documentElement.dataset.premium=state.active?"active":"inactive"})}

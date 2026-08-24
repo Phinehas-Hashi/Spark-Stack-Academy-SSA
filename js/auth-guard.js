@@ -1,14 +1,6 @@
 import { auth, db } from "./firebase.js";
-
-import {
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const DASHBOARDS = {
     founder: "/founder/dashboard.html",
@@ -17,93 +9,38 @@ const DASHBOARDS = {
     student: "/student/dashboard.html"
 };
 
-export function protectPage(requiredRole = null) {
-
-    onAuthStateChanged(auth, async (user) => {
-
-        if (!user) {
-            window.location.replace("/login.html");
-            return;
-        }
-
-        try {
-
-            const profileSnap =
-                await getDoc(doc(db, "profiles", user.uid));
-
-            if (!profileSnap.exists()) {
-                await signOut(auth);
-                window.location.replace("/login.html");
-                return;
-            }
-
-            const profile = profileSnap.data();
-
-            if (profile.status && profile.status !== "active") {
-                await signOut(auth);
-                window.location.replace("/login.html");
-                return;
-            }
-
-            const role = profile.role || "student";
-
-            if (requiredRole && role !== requiredRole) {
-                showAccessToast(
-                    "You don't have permission to open this page."
-                );
-
-                setTimeout(() => {
-                    window.location.replace(
-                        DASHBOARDS[role] || "/login.html"
-                    );
-                }, 500);
-
-                return;
-            }
-
-            document.documentElement.classList.add("auth-ready");
-
-            console.log(
-                "🔥 Firebase authorized:",
-                user.uid,
-                role
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Firebase auth guard error:",
-                error
-            );
-
-            window.location.replace("/login.html");
-        }
-    });
+function showGuardMessage(message, type="error") {
+    if (window.showSSAModal) return window.showSSAModal({ title: type === "pending" ? "Admission pending" : "Access denied", message, type, confirmText: "Continue" });
+    if (window.ssaConfirm) return window.ssaConfirm(message, { title: type === "pending" ? "Admission pending" : "Access denied", confirmText: "Continue", cancelText: "" });
+    console.warn(message);
 }
 
-function showAccessToast(message) {
-
-    let container =
-        document.getElementById("toastContainer");
-
-    if (!container) {
-
-        container =
-            document.createElement("div");
-
-        container.id = "toastContainer";
-
-        document.body.appendChild(container);
-    }
-
-    const toast =
-        document.createElement("div");
-
-    toast.className = "toast error";
-
-    toast.textContent = message;
-
-    container.appendChild(toast);
-
-    setTimeout(() => toast.remove(), 2500);
+export function protectPage(requiredRole) {
+    onAuthStateChanged(auth, async user => {
+        if (!user) { window.location.href="/login.html"; return; }
+        try {
+            const userSnap=await getDoc(doc(db,"users",user.uid));
+            if(!userSnap.exists()){ window.location.href="/login.html"; return; }
+            const userData=userSnap.data();
+            if(userData.role!==requiredRole){
+                await showGuardMessage("You do not have permission to access this portal.");
+                window.location.href=DASHBOARDS[userData.role]||"/login.html";
+                return;
+            }
+            if(requiredRole==="student" && userData.status!=="active"){
+                await showGuardMessage("Your account was created successfully, but you must be approved by the Founder before you can access the Student Portal.","pending");
+                window.location.href="/login.html";
+                return;
+            }
+            if(requiredRole==="instructor" && userData.status && userData.status!=="active"){
+                await showGuardMessage("Your instructor account is still waiting for approval.","pending");
+                window.location.href="/login.html";
+                return;
+            }
+            console.log("Authorized:",userData.role);
+        } catch(error) {
+            console.error("Guard error:",error);
+            window.location.href="/login.html";
+        }
+    });
 }

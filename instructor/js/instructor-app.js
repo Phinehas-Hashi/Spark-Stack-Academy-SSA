@@ -21,6 +21,10 @@ import {
     getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+import {
+    watchPortalControl
+} from "../../js/portal-control.js";
+
 
 // ============================================================
 // CONFIG
@@ -615,6 +619,9 @@ async function boot() {
     await loadShell();
 
     initAuth();
+
+    // Listen for Founder Command Center controls
+    watchPortalControl("instructor");
 
 }
 

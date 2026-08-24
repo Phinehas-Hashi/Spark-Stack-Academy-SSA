@@ -1,401 +1,92 @@
-// ===================================
-// SPARK STACK ACADEMY
-// SECURITY SETTINGS
-// ===================================
-
 import { auth, db } from "../../js/firebase.js";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-    EmailAuthProvider,
-    reauthenticateWithCredential,
-    updatePassword,
-    signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+const securityRef = doc(db, "settings", "security");
+const $ = id => document.getElementById(id);
+const notify = (message, type = "success") => window.ssaToast?.(message, type) ?? console.log(message);
 
-import {
-    doc,
-    getDoc,
-    setDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-console.log("🔒 Security Module Loaded");
-
-
-// ===================================
-// FIRESTORE REFERENCE
-// ===================================
-
-const securityRef = doc(
-    db,
-    "settings",
-    "security"
-);
-
-
-// ===================================
-// HELPERS
-// ===================================
-
-const $ = (id)=>document.getElementById(id);
-
-
-function notify(message){
-
-    alert(message);
-
+async function loadSecuritySettings() {
+  try {
+    const snapshot = await getDoc(securityRef);
+    const data = snapshot.exists() ? snapshot.data() : {};
+    ["twoFactor", "loginAlerts", "trustedDevices", "maintenanceMode"].forEach(id => {
+      if ($(id)) $(id).checked = Boolean(data[id]);
+    });
+  } catch (error) {
+    console.error("Load Security Error:", error);
+    notify("Could not load security settings.", "error");
+  }
 }
 
-
-
-// ===================================
-// LOAD SECURITY SETTINGS
-// ===================================
-
-async function loadSecuritySettings(){
-
-    try{
-
-        const snapshot =
-        await getDoc(securityRef);
-
-
-        if(!snapshot.exists()) return;
-
-
-        const data =
-        snapshot.data();
-
-
-        if($("twoFactor"))
-            $("twoFactor").checked =
-            data.twoFactor ?? false;
-
-
-        if($("loginAlerts"))
-            $("loginAlerts").checked =
-            data.loginAlerts ?? false;
-
-
-        if($("trustedDevices"))
-            $("trustedDevices").checked =
-            data.trustedDevices ?? false;
-
-
-        if($("maintenanceMode"))
-            $("maintenanceMode").checked =
-            data.maintenanceMode ?? false;
-
-
-    }
-
-    catch(error){
-
-        console.error(
-            "Load Security Error:",
-            error
-        );
-
-    }
-
+async function saveSecuritySettings() {
+  try {
+    await setDoc(securityRef, {
+      twoFactor: $("twoFactor")?.checked ?? false,
+      loginAlerts: $("loginAlerts")?.checked ?? false,
+      trustedDevices: $("trustedDevices")?.checked ?? false,
+      maintenanceMode: $("maintenanceMode")?.checked ?? false,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    notify("Security settings saved successfully.");
+  } catch (error) {
+    console.error("Save Security Error:", error);
+    notify("Failed to save security settings.", "error");
+  }
 }
 
+async function changePassword() {
+  const user = auth.currentUser;
+  const current = $("currentPassword")?.value.trim();
+  const next = $("newPassword")?.value || "";
+  const confirmPassword = $("confirmPassword")?.value || "";
 
+  if (!user?.email) return notify("No authenticated founder session found.", "error");
+  if (!current || !next || !confirmPassword) return notify("Fill all password fields.", "error");
+  if (next.length < 8) return notify("Password must be at least 8 characters.", "error");
+  if (next !== confirmPassword) return notify("Passwords do not match.", "error");
 
-// ===================================
-// SAVE SECURITY SETTINGS
-// ===================================
-
-async function saveSecuritySettings(){
-
-    try{
-
-
-        await setDoc(
-
-            securityRef,
-
-            {
-
-
-                twoFactor:
-                $("twoFactor")?.checked || false,
-
-
-                loginAlerts:
-                $("loginAlerts")?.checked || false,
-
-
-                trustedDevices:
-                $("trustedDevices")?.checked || false,
-
-
-                maintenanceMode:
-                $("maintenanceMode")?.checked || false,
-
-
-                updatedAt:
-                serverTimestamp()
-
-
-            },
-
-            {
-                merge:true
-            }
-
-        );
-
-
-        notify(
-            "✅ Security settings saved."
-        );
-
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-        notify(
-            "❌ Failed to save security settings."
-        );
-
-    }
-
+  const btn = $("changePasswordBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Updating..."; }
+  try {
+    const credential = EmailAuthProvider.credential(user.email, current);
+    await reauthenticateWithCredential(user, credential);
+    await updatePassword(user, next);
+    $("currentPassword").value = "";
+    $("newPassword").value = "";
+    $("confirmPassword").value = "";
+    notify("Password updated successfully.");
+  } catch (error) {
+    console.error("Password update failed:", error);
+    notify(error.code === "auth/wrong-password" ? "Current password is incorrect." : (error.message || "Password update failed."), "error");
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "🔑 Change Password"; }
+  }
 }
 
-
-
-// ===================================
-// CHANGE PASSWORD
-// ===================================
-
-async function changePassword(){
-
-    const user =
-    auth.currentUser;
-
-
-    if(!user){
-
-        notify(
-            "No authenticated user found."
-        );
-
-        return;
-
-    }
-
-
-    const current =
-    $("currentPassword")?.value;
-
-
-    const newPassword =
-    $("newPassword")?.value;
-
-
-    const confirmPassword =
-    $("confirmPassword")?.value;
-
-
-
-    if(!current || !newPassword || !confirmPassword){
-
-        notify(
-            "Fill all password fields."
-        );
-
-        return;
-
-    }
-
-
-
-    if(newPassword !== confirmPassword){
-
-        notify(
-            "Passwords do not match."
-        );
-
-        return;
-
-    }
-
-
-
-    if(newPassword.length < 8){
-
-        notify(
-            "Password must be at least 8 characters."
-        );
-
-        return;
-
-    }
-
-
-
-    try{
-
-
-        const credential =
-        EmailAuthProvider.credential(
-
-            user.email,
-
-            current
-
-        );
-
-
-        await reauthenticateWithCredential(
-
-            user,
-
-            credential
-
-        );
-
-
-        await updatePassword(
-
-            user,
-
-            newPassword
-
-        );
-
-
-        notify(
-            "✅ Password updated successfully."
-        );
-
-
-        $("currentPassword").value="";
-        $("newPassword").value="";
-        $("confirmPassword").value="";
-
-
-    }
-
-
-    catch(error){
-
-        console.error(error);
-
-
-        notify(
-            error.message
-        );
-
-    }
-
+async function signOutCurrentDevice() {
+  const confirmed = await (window.ssaConfirm?.("Sign out from this device?", {
+    title: "Sign out",
+    confirmText: "Sign out",
+    cancelText: "Stay signed in",
+    tone: "danger",
+    icon: "↪"
+  }) ?? Promise.resolve(false));
+
+  if (!confirmed) return;
+
+  try {
+    await signOut(auth);
+    window.location.href = "../login.html";
+  } catch (error) {
+    console.error("Logout failed:", error);
+    notify("Logout failed.", "error");
+  }
 }
 
-
-
-// ===================================
-// LOGOUT ALL DEVICES
-// ===================================
-
-async function logoutAllDevices(){
-
-
-    const confirmLogout =
-    confirm(
-        "Logout from this device?"
-    );
-
-
-    if(!confirmLogout)
-        return;
-
-
-    try{
-
-
-        await signOut(auth);
-
-
-        window.location.href =
-        "../login.html";
-
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-        notify(
-            "Logout failed."
-        );
-
-    }
-
-
-}
-
-
-
-
-// ===================================
-// INITIALIZE
-// ===================================
-
-window.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
-
-    loadSecuritySettings();
-
-
-
-    $("saveSecurityBtn")
-    ?.addEventListener(
-
-        "click",
-
-        async()=>{
-
-            await saveSecuritySettings();
-
-        }
-
-    );
-
-
-
-    $("saveSecurityBtn")
-    ?.addEventListener(
-
-        "dblclick",
-
-        async()=>{
-
-            await changePassword();
-
-        }
-
-    );
-
-
-
-    $("logoutAllBtn")
-    ?.addEventListener(
-
-        "click",
-
-        logoutAllDevices
-
-    );
-
-
+document.addEventListener("DOMContentLoaded", () => {
+  loadSecuritySettings();
+  $("saveSecurityBtn")?.addEventListener("click", saveSecuritySettings);
+  $("changePasswordBtn")?.addEventListener("click", changePassword);
+  $("logoutAllBtn")?.addEventListener("click", signOutCurrentDevice);
 });

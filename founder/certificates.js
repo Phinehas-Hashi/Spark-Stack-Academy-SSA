@@ -1,215 +1,132 @@
-// ===================================
-// SPARK STACK ACADEMY
-// CERTIFICATE SETTINGS
-// ===================================
+import { db } from "../js/firebase.js";
+import { collection, doc, getDoc, onSnapshot, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { db } from "../../js/firebase.js";
+const certificateRef = doc(db, "settings", "certificates");
+const certificatesRef = collection(db, "certificates");
+const $ = id => document.getElementById(id);
 
-import {
-    doc,
-    getDoc,
-    setDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-console.log("📜 Certificates Loaded");
-
-const certificateRef =
-doc(db,"settings","certificates");
-
-// ===================================
-// LOAD SETTINGS
-// ===================================
-
-async function loadCertificateSettings(){
-
-    try{
-
-        const snapshot =
-        await getDoc(certificateRef);
-
-        if(!snapshot.exists()) return;
-
-        const data = snapshot.data();
-
-        document.getElementById(
-            "certificateTitle"
-        ).value =
-        data.certificateTitle || "";
-
-        document.getElementById(
-            "certificatePrefix"
-        ).value =
-        data.certificatePrefix || "SSA";
-
-        document.getElementById(
-            "founderName"
-        ).value =
-        data.founderName || "";
-
-        document.getElementById(
-            "founderTitle"
-        ).value =
-        data.founderTitle || "";
-
-        document.getElementById(
-            "enableQR"
-        ).checked =
-        data.enableQR || false;
-
-        document.getElementById(
-            "autoIssue"
-        ).checked =
-        data.autoIssue || false;
-
-        document.getElementById(
-            "allowDownloads"
-        ).checked =
-        data.allowDownloads || false;
-
-    }
-
-    catch(error){
-
-        console.error(
-            "Certificate Load Error:",
-            error
-        );
-
-    }
-
+async function loadCertificateSettings() {
+    const snapshot = await getDoc(certificateRef);
+    if (!snapshot.exists()) return;
+    const data = snapshot.data();
+    $("certificateTitle").value = data.certificateTitle || "";
+    $("certificatePrefix").value = data.certificatePrefix || "SSA";
+    $("founderName").value = data.founderName || "";
+    $("founderTitle").value = data.founderTitle || "";
+    $("enableQR").checked = Boolean(data.enableQR);
+    $("autoIssue").checked = Boolean(data.autoIssue);
+    $("allowDownloads").checked = Boolean(data.allowDownloads);
 }
 
-// ===================================
-// SAVE SETTINGS
-// ===================================
-
-async function saveCertificateSettings(){
-
-    try{
-
-        const settings = {
-
-            certificateTitle:
-            document.getElementById(
-                "certificateTitle"
-            ).value.trim(),
-
-            certificatePrefix:
-            document.getElementById(
-                "certificatePrefix"
-            ).value.trim().toUpperCase(),
-
-            founderName:
-            document.getElementById(
-                "founderName"
-            ).value.trim(),
-
-            founderTitle:
-            document.getElementById(
-                "founderTitle"
-            ).value.trim(),
-
-            enableQR:
-            document.getElementById(
-                "enableQR"
-            ).checked,
-
-            autoIssue:
-            document.getElementById(
-                "autoIssue"
-            ).checked,
-
-            allowDownloads:
-            document.getElementById(
-                "allowDownloads"
-            ).checked,
-
-            updatedAt:
-            serverTimestamp()
-
-        };
-
-        await setDoc(
-
-            certificateRef,
-
-            settings,
-
-            { merge:true }
-
-        );
-
-        alert(
-            "✅ Certificate settings saved."
-        );
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-        alert(
-            "Failed to save certificate settings."
-        );
-
-    }
-
+async function saveCertificateSettings() {
+    const settings = {
+        certificateTitle: $("certificateTitle").value.trim(),
+        certificatePrefix: ($("certificatePrefix").value.trim() || "SSA").toUpperCase(),
+        founderName: $("founderName").value.trim(),
+        founderTitle: $("founderTitle").value.trim(),
+        enableQR: $("enableQR").checked,
+        autoIssue: $("autoIssue").checked,
+        allowDownloads: $("allowDownloads").checked,
+        updatedAt: serverTimestamp()
+    };
+    if (!settings.certificateTitle) throw new Error("Certificate title is required.");
+    await setDoc(certificateRef, settings, { merge: true });
+    showNotice("Certificate settings saved successfully.");
 }
 
-// ===================================
-// GENERATE SAMPLE NUMBER
-// ===================================
-
-function generateSampleNumber(){
-
-    const prefix =
-    document.getElementById(
-        "certificatePrefix"
-    ).value.trim().toUpperCase() || "SSA";
-
-    return `${prefix}-000001`;
-
+function statusOf(data) {
+    return String(data.status || data.verificationStatus || "issued").toLowerCase();
 }
 
-// ===================================
-// EVENTS
-// ===================================
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#039;" }[c]));
+}
 
-window.addEventListener(
+function formatDate(value) {
+    const date = value?.toDate?.() || (value instanceof Date ? value : null);
+    if (date) return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    return value ? escapeHtml(value) : "—";
+}
 
-    "DOMContentLoaded",
-
-    ()=>{
-
-        loadCertificateSettings();
-
-        document
-        .getElementById(
-            "saveCertificateSettings"
-        )
-        ?.addEventListener(
-            "click",
-            saveCertificateSettings
-        );
-
-        document
-        .getElementById(
-            "certificatePrefix"
-        )
-        ?.addEventListener(
-            "input",
-            ()=>{
-
-                console.log(
-                    "Sample Certificate:",
-                    generateSampleNumber()
-                );
-
-            }
-        );
-
+function renderCertificates(records) {
+    $("certificateCount").textContent = `${records.length} Certificate${records.length === 1 ? "" : "s"}`;
+    if (!records.length) {
+        $("certificateList").innerHTML = '<p class="empty-state">No certificates have been issued yet.</p>';
+        return;
     }
 
-);
+    $("certificateList").innerHTML = records.slice(0, 30).map(({ id, data }) => {
+        const recipient = data.studentName || data.recipientName || data.userName || data.email || "Unknown recipient";
+        const number = data.certificateNumber || data.number || id;
+        const course = data.courseName || data.courseTitle || "Course completion";
+        const status = statusOf(data);
+        const issued = data.issuedAt || data.createdAt;
+        return `<article class="certificate-item">
+            <div class="certificate-main">
+                <div>
+                    <h4>${escapeHtml(recipient)}</h4>
+                    <p>${escapeHtml(course)} · ${escapeHtml(number)}</p>
+                </div>
+                <span class="status-pill ${escapeHtml(status)}">${escapeHtml(status)}</span>
+            </div>
+            <small>Issued: ${formatDate(issued)}</small>
+        </article>`;
+    }).join("");
+}
+
+function renderStats(records) {
+    const issued = records.filter(({ data }) => ["issued", "verified", "completed"].includes(statusOf(data))).length;
+    const verified = records.filter(({ data }) => statusOf(data) === "verified" || data.verified === true).length;
+    const pending = records.filter(({ data }) => ["pending", "processing", "requested"].includes(statusOf(data))).length;
+    const downloads = records.reduce((total, { data }) => total + Number(data.downloads || data.downloadCount || 0), 0);
+
+    $("issuedCertificates").textContent = issued;
+    $("verifiedCertificates").textContent = verified;
+    $("pendingCertificates").textContent = pending;
+    $("certificateDownloads").textContent = downloads;
+}
+
+function showNotice(message, type = "success") {
+    const notice = document.createElement("div");
+    notice.className = `founder-notice ${type}`;
+    notice.textContent = message;
+    document.body.appendChild(notice);
+    setTimeout(() => notice.remove(), 3000);
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+    const list = $("certificateList");
+    try {
+        await loadCertificateSettings();
+    } catch (error) {
+        console.error("Certificate settings load error:", error);
+        showNotice("Could not load certificate settings.", "error");
+    }
+
+    onSnapshot(certificatesRef, snapshot => {
+        const records = snapshot.docs.map(item => ({ id: item.id, data: item.data() }));
+        records.sort((a, b) =>
+            (b.data.issuedAt?.toMillis?.() || b.data.createdAt?.toMillis?.() || 0) -
+            (a.data.issuedAt?.toMillis?.() || a.data.createdAt?.toMillis?.() || 0)
+        );
+        renderStats(records);
+        renderCertificates(records);
+    }, error => {
+        console.error("Certificate realtime error:", error);
+        list.innerHTML = '<p class="empty-state">Certificate data is temporarily unavailable.</p>';
+        showNotice("Live certificate data could not be loaded.", "error");
+    });
+
+    $("saveCertificateSettings")?.addEventListener("click", async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+            await saveCertificateSettings();
+        } catch (error) {
+            console.error(error);
+            showNotice(error.message || "Failed to save settings.", "error");
+        } finally {
+            button.disabled = false;
+        }
+    });
+});

@@ -8,51 +8,34 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="revenue.css">
+<link rel="stylesheet" href="founder-unified.css">
+<link rel="stylesheet" href="revenue-premium.css">
 </head>
 <body>
-<div class="bg-orb orb-1"></div>
-<div class="bg-orb orb-2"></div>
-<div class="bg-orb orb-3"></div>
+<div id="loadingOverlay" class="loading-overlay"><div class="loader"></div><p>Loading Revenue Analytics...</p></div>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div><div class="bg-orb orb-3"></div>
 <div class="dashboard-layout">
-<aside id="sidebarContainer"></aside>
-<div id="sidebarOverlay"></div>
+<aside id="sidebarContainer"></aside><div id="sidebarOverlay"></div>
 <main class="main-content">
 <header id="topbarContainer"></header>
-<section class="page-header glass-card"><div><h1>💰 Revenue Analytics</h1><p>Live academy income, payments, withdrawals, financial growth and revenue performance from Firestore.</p></div><button class="primary-btn" id="refreshRevenue">🔄 Refresh</button></section>
+<section class="page-header glass-card"><div><h1>💰 Revenue Analytics</h1><p>Live academy income, payments, withdrawals and financial performance.</p></div><button class="primary-btn" id="refreshRevenue">🔄 Refresh</button></section>
 <section class="stats-grid">
-<div class="stat-card glass-card"><div class="stat-icon blue">💵</div><div><h4>Total Revenue</h4><h2 id="totalRevenue">Loading…</h2><small>Completed payments only</small></div></div>
-<div class="stat-card glass-card"><div class="stat-icon green">📈</div><div><h4>Monthly Revenue</h4><h2 id="monthlyRevenue">Loading…</h2><small>Current month · completed</small></div></div>
-<div class="stat-card glass-card"><div class="stat-icon gold">☀️</div><div><h4>Today's Revenue</h4><h2 id="todayRevenue">Loading…</h2><small>Today · completed</small></div></div>
-<div class="stat-card glass-card"><div class="stat-icon red">💸</div><div><h4>Pending Withdrawals</h4><h2 id="pendingWithdrawals">Loading…</h2><small>Awaiting payout</small></div></div>
+<div class="stat-card glass-card"><div class="stat-icon blue">💵</div><div><h4>Total Revenue</h4><h2 id="totalRevenue">KES 0</h2><small>Completed payments</small></div></div>
+<div class="stat-card glass-card"><div class="stat-icon green">📈</div><div><h4>Monthly Revenue</h4><h2 id="monthlyRevenue">KES 0</h2><small>Current month</small></div></div>
+<div class="stat-card glass-card"><div class="stat-icon gold">☀️</div><div><h4>Today's Revenue</h4><h2 id="todayRevenue">KES 0</h2><small>Today</small></div></div>
+<div class="stat-card glass-card"><div class="stat-icon red">💸</div><div><h4>Pending Withdrawals</h4><h2 id="pendingWithdrawals">KES 0</h2><small>Awaiting approval</small></div></div>
 </section>
 <section class="analytics-grid">
-<div class="glass-card chart-card"><div class="card-header"><h2>📈 Revenue Overview</h2><select id="chartPeriod" aria-label="Revenue chart period"><option value="7">Last 7 Days</option><option value="30" selected>Last 30 Days</option><option value="365">Last 12 Months</option></select></div><canvas id="revenueChart"></canvas></div>
-<div class="glass-card breakdown-card"><h2>💳 Revenue Breakdown</h2><div class="breakdown-list">
-<div class="breakdown-item"><span>Course Fees</span><strong id="courseRevenue">KES 0</strong></div>
-<div class="breakdown-item"><span>Registration Fees</span><strong id="registrationRevenue">KES 0</strong></div>
-<div class="breakdown-item"><span>Certificate Fees</span><strong id="certificateRevenue">KES 0</strong></div>
-<div class="breakdown-item"><span>Examination Fees</span><strong id="examRevenue">KES 0</strong></div>
-<div class="breakdown-item total"><span>Total Revenue</span><strong id="breakdownTotal">KES 0</strong></div>
-</div></div>
+<div class="glass-card chart-card"><div class="card-header"><h2>📈 Revenue Overview</h2><select id="chartPeriod"><option value="7">Last 7 Days</option><option value="30" selected>Last 30 Days</option><option value="365">Last 12 Months</option></select></div><canvas id="revenueChart"></canvas></div>
+<div class="glass-card breakdown-card"><h2>💳 Revenue Breakdown</h2><div class="breakdown-list"><div class="breakdown-item"><span>Course Fees</span><strong id="courseRevenue">KES 0</strong></div><div class="breakdown-item"><span>Registration Fees</span><strong id="registrationRevenue">KES 0</strong></div><div class="breakdown-item"><span>Certificate Fees</span><strong id="certificateRevenue">KES 0</strong></div><div class="breakdown-item"><span>Examination Fees</span><strong id="examRevenue">KES 0</strong></div><div class="breakdown-item total"><span>Total Revenue</span><strong id="breakdownTotal">KES 0</strong></div></div></div>
 </section>
-<section class="payment-grid">
-<div class="glass-card payment-card"><h2>💳 Payment Methods</h2><div class="payment-method"><span>M-Pesa</span><strong id="mpesaRevenue">KES 0</strong></div><div class="payment-method"><span>Card Payments</span><strong id="cardRevenue">KES 0</strong></div><div class="payment-method"><span>Bank Transfer</span><strong id="bankRevenue">KES 0</strong></div><div class="payment-method"><span>PayPal</span><strong id="paypalRevenue">KES 0</strong></div></div>
-<div class="glass-card growth-card"><h2>🚀 Growth Metrics</h2><div class="growth-item"><span>Monthly Growth</span><strong id="monthlyGrowth">0%</strong></div><div class="growth-item"><span>Average Daily Revenue</span><strong id="dailyAverage">KES 0</strong></div><div class="growth-item"><span>Best Revenue Day</span><strong id="bestRevenueDay">--</strong></div><div class="growth-item"><span>Highest Transaction</span><strong id="highestTransaction">KES 0</strong></div></div>
-</section>
-<section class="glass-card transactions-section"><div class="section-header"><h2>💳 Recent Transactions</h2><div class="header-actions"><input type="search" id="transactionSearch" placeholder="Search transaction..." aria-label="Search transactions"><select id="transactionFilter" aria-label="Filter transactions"><option value="all">All</option><option value="completed">Completed</option><option value="pending">Pending</option><option value="failed">Failed</option></select></div></div><div class="table-responsive"><table><thead><tr><th>Receipt</th><th>Student</th><th>Admission No.</th><th>Payment Type</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody id="transactionsTable"><tr><td colspan="9" class="empty-table">Loading live payment data…</td></tr></tbody></table></div></section>
-<section class="summary-grid">
-<div class="glass-card summary-card"><h3>🧾 Total Transactions</h3><h2 id="transactionCount">0</h2><p>All payment records</p></div>
-<div class="glass-card summary-card"><h3>✅ Successful Payments</h3><h2 id="successfulPayments">0</h2><p>Completed successfully</p></div>
-<div class="glass-card summary-card"><h3>⌛ Pending Payments</h3><h2 id="pendingPayments">0</h2><p>Awaiting confirmation</p></div>
-<div class="glass-card summary-card"><h3>❌ Failed Payments</h3><h2 id="failedPayments">0</h2><p>Unsuccessful payments</p></div>
-</section>
-<section class="glass-card withdrawals-section"><div class="section-header"><h2>💸 Withdrawal Requests</h2><button class="secondary-btn" id="refreshWithdrawals">Refresh</button></div><div class="table-responsive"><table><thead><tr><th>Instructor</th><th>Method</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead><tbody id="withdrawalsTable"><tr><td colspan="6" class="empty-table">Loading live withdrawal requests…</td></tr></tbody></table></div></section>
-<section class="reports-grid"><div class="glass-card report-card"><h3>📊 Monthly Report</h3><p>Read the current month's completed revenue directly from live transactions.</p><button class="secondary-btn" id="monthlyReport">Generate</button></div><div class="glass-card report-card"><h3>📅 Annual Report</h3><p>Read the current year's completed revenue directly from live transactions.</p><button class="secondary-btn" id="annualReport">Generate</button></div><div class="glass-card report-card"><h3>📈 30-Day Run-Rate</h3><p>Estimate the run rate using completed revenue from the latest 30 days.</p><button class="secondary-btn" id="forecastReport">View Estimate</button></div></section>
-<div class="action-bar"><button class="secondary-btn" id="exportCSV">📄 Export CSV</button><button class="secondary-btn" id="exportPDF">📑 Save as PDF</button><button class="secondary-btn" id="printReport">🖨 Print</button><button class="primary-btn" id="refreshRevenueDashboard">🔄 Refresh Dashboard</button></div>
+<section class="payment-grid"><div class="glass-card payment-card"><h2>💳 Payment Methods</h2><div class="payment-method"><span>M-Pesa</span><strong id="mpesaRevenue">KES 0</strong></div><div class="payment-method"><span>Card Payments</span><strong id="cardRevenue">KES 0</strong></div><div class="payment-method"><span>Bank Transfer</span><strong id="bankRevenue">KES 0</strong></div><div class="payment-method"><span>PayPal</span><strong id="paypalRevenue">KES 0</strong></div></div>
+<div class="glass-card growth-card"><h2>🚀 Growth Metrics</h2><div class="growth-item"><span>Monthly Growth</span><strong id="monthlyGrowth">0%</strong></div><div class="growth-item"><span>Average Daily Revenue</span><strong id="dailyAverage">KES 0</strong></div><div class="growth-item"><span>Best Revenue Day</span><strong id="bestRevenueDay">--</strong></div><div class="growth-item"><span>Highest Transaction</span><strong id="highestTransaction">KES 0</strong></div></div></section>
+<section class="glass-card transactions-section"><div class="section-header"><h2>💳 Recent Transactions</h2><div class="header-actions"><input type="search" id="transactionSearch" placeholder="Search transaction..."><select id="transactionFilter"><option value="all">All</option><option value="completed">Completed</option><option value="pending">Pending</option><option value="failed">Failed</option></select></div></div><div class="table-responsive"><table><thead><tr><th>Receipt</th><th>Student</th><th>Admission No.</th><th>Payment Type</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody id="transactionsTable"><tr><td colspan="9" class="empty-table">Loading transactions...</td></tr></tbody></table></div></section>
+<section class="summary-grid"><div class="glass-card summary-card"><h3>🧾 Total Transactions</h3><h2 id="transactionCount">0</h2><p>Payments received</p></div><div class="glass-card summary-card"><h3>✅ Successful Payments</h3><h2 id="successfulPayments">0</h2><p>Completed</p></div><div class="glass-card summary-card"><h3>⌛ Pending Payments</h3><h2 id="pendingPayments">0</h2><p>Awaiting confirmation</p></div><div class="glass-card summary-card"><h3>❌ Failed Payments</h3><h2 id="failedPayments">0</h2><p>Unsuccessful</p></div></section>
+<section class="glass-card withdrawals-section"><div class="section-header"><h2>💸 Withdrawal Requests</h2><button class="secondary-btn" id="refreshWithdrawals">Refresh</button></div><div class="table-responsive"><table><thead><tr><th>Instructor</th><th>Method</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead><tbody id="withdrawalsTable"><tr><td colspan="6" class="empty-table">Loading withdrawals...</td></tr></tbody></table></div></section>
+<section class="reports-grid"><div class="glass-card report-card"><h3>📊 Monthly Report</h3><p>Export current monthly financial performance.</p><button class="secondary-btn" id="monthlyReport">Generate</button></div><div class="glass-card report-card"><h3>📅 Annual Report</h3><p>Export yearly academy financial performance.</p><button class="secondary-btn" id="annualReport">Generate</button></div><div class="glass-card report-card"><h3>📈 Revenue Forecast</h3><p>Estimate future revenue from completed payment history.</p><button class="secondary-btn" id="forecastReport">View Forecast</button></div></section>
+<div class="action-bar"><button class="secondary-btn" id="exportCSV">📄 Export CSV</button><button class="secondary-btn" id="exportPDF">📑 Export PDF</button><button class="secondary-btn" id="printReport">🖨 Print</button><button class="primary-btn" id="refreshRevenueDashboard">🔄 Refresh Dashboard</button></div>
 </main></div>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module" src="./js/founder-app.js"></script>
-<script type="module" src="revenue.js"></script>
-</body>
-</html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script type="module" src="./js/founder-app.js"></script><script type="module" src="revenue.js"></script>
+</body></html>

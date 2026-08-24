@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn(){return request.auth!=null;}
+    function userExists(){return signedIn()&&exists(/databases/$(database)/documents/users/$(request.auth.uid));}
+    function role(){return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role','unknown');}
+    function isStudent(){return userExists()&&role()=='student';}
+    function isInstructor(){return userExists()&&role()=='instructor';}
+    function isAdmin(){return userExists()&&role()=='admin';}
+    function isFounder(){return signedIn()&&exists(/databases/$(database)/documents/founder/$(request.auth.uid))&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('role','founder')=='founder'&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('status','active')=='active';}
+    function staff(){return isAdmin()||isFounder();}
+    match /users/{userId}{
+      allow get:if signedIn()&&(request.auth.uid==userId||staff());
+      allow list:if staff();
+      allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.get('role','student') in ['student','instructor'];
+      allow update:if signedIn()&&request.auth.uid==userId
+        &&request.resource.data.get('role',resource.data.get('role','student'))==resource.data.get('role','student')
+        &&request.resource.data.get('status',resource.data.get('status','pending_admission'))==resource.data.get('status','pending_admission')
+        &&request.resource.data.get('verified',resource.data.get('verified',false))==resource.data.get('verified',false)
+        &&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName','bio','expertise','profilePhoto','phone','lastLogin','updatedAt','xp','level','badges','lastReward'])
+        &&(!request.resource.data.diff(resource.data).affectedKeys().hasAny(['xp','level','badges','lastReward']) || request.resource.data.get('role',resource.data.get('role'))=='student')
+        &&request.resource.data.get('xp',resource.data.get('xp',0))>=resource.data.get('xp',0)
+        &&request.resource.data.get('xp',resource.data.get('xp',0))<=resource.data.get('xp',0)+100
+        &&request.resource.data.get('level',resource.data.get('level',1))>=resource.data.get('level',1)
+        &&request.resource.data.get('level',resource.data.get('level',1))<=resource.data.get('level',1)+1
+        &&request.resource.data.get('badges',resource.data.get('badges',[])).hasAll(resource.data.get('badges',[]));
+      allow delete:if staff();
+    }
+    match /founder/{founderId}{allow get:if signedIn()&&(request.auth.uid==founderId||isFounder());allow list:if isFounder();allow create,update,delete:if false;}
+    match /students/{studentId}{allow get:if staff()||(isStudent()&&request.auth.uid==studentId);allow list:if staff();allow create:if signedIn()&&request.auth.uid==studentId&&request.resource.data.uid==request.auth.uid&&request.resource.data.role=='student'&&request.resource.data.status=='Pending'&&request.resource.data.onboardingStatus=='awaiting_admission'&&request.resource.data.admissionNumber=='Pending'&&request.resource.data.level==1&&request.resource.data.xp==0&&request.resource.data.streak==0;allow update:if staff()||(isStudent()&&request.auth.uid==studentId&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','updatedAt']));allow delete:if staff();}
+    match /students/{studentId}/enrollments/{enrollmentId}{allow get,list:if staff()||(isStudent()&&request.auth.uid==studentId);allow create,update,delete:if staff();}
+    match /studentSettings/{userId}{allow get,write:if signedIn()&&request.auth.uid==userId;allow list:if staff();}
+    match /accountDeletionRequests/{userId}{allow get:if signedIn()&&(request.auth.uid==userId||staff());allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.userId==request.auth.uid&&request.resource.data.status=='pending';allow update:if staff();allow list:if staff();allow delete:if staff();}
+    match /instructors/{instructorId}{allow read,write:if staff();}
+    match /applications/{applicationId}{allow create:if signedIn()&&request.resource.data.studentUid==request.auth.uid;allow read,update,delete:if staff();}
+    match /payments/{paymentId}{allow get,list:if staff()||(signedIn()&&resource.data.userId==request.auth.uid);allow create:if signedIn()&&request.resource.data.userId==request.auth.uid;allow update,delete:if staff();}
+    match /withdrawals/{withdrawalId}{allow read,write:if staff();}
+    match /activity/{activityId}{allow read,create:if staff();allow update,delete:if isFounder();}
+    match /platform_controls/{controlId}{allow read:if signedIn();allow write:if isFounder();}
+    match /audit_logs/{logId}{allow read,create:if isFounder();allow update,delete:if false;}
+    match /premiumSubscriptions/{userId}{allow get:if signedIn()&&(request.auth.uid==userId||isFounder());allow list:if isFounder();allow create,update,delete:if isFounder();}
+    match /reports/{reportId}{allow create:if signedIn()&&request.resource.data.reporterId==request.auth.uid&&request.resource.data.adminVisible==true&&request.resource.data.founderVisible==(request.resource.data.priority=='critical'||request.resource.data.type=='system'||request.resource.data.category=='security');allow get:if signedIn()&&(resource.data.reporterId==request.auth.uid||isAdmin()||(isFounder()&&resource.data.founderVisible==true));allow list:if signedIn()&&(isAdmin()||(isFounder()&&resource.data.founderVisible==true)||resource.data.reporterId==request.auth.uid);allow update:if staff();allow delete:if isFounder();}
+    match /notifications/{notificationId}{allow get:if signedIn()&&(resource.data.userId==request.auth.uid||staff());allow list:if staff()||(signedIn()&&resource.data.userId==request.auth.uid);allow create:if staff();allow update:if staff()||(signedIn()&&resource.data.userId==request.auth.uid&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read','readAt','updatedAt']));allow delete:if staff();}
+    match /broadcasts/{broadcastId}{allow read,write:if isFounder();}
+    match /announcements/{announcementId}{allow read:if signedIn();allow create,update,delete:if staff();}
+    match /courses/{courseId}{allow read:if signedIn();allow create,update:if isInstructor()||staff();allow delete:if staff()||(isInstructor()&&resource.data.instructorId==request.auth.uid);}
+    match /enrollments/{enrollmentId}{allow get,list:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid||resource.data.instructorId==request.auth.uid);allow create:if staff();allow update:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid||resource.data.instructorId==request.auth.uid);allow delete:if staff();}
+    match /assignments/{assignmentId}{allow read:if signedIn();allow create,update,delete:if isInstructor()||staff();}
+    match /submissions/{submissionId}{allow get,list:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid||resource.data.instructorId==request.auth.uid);allow create:if signedIn()&&request.resource.data.studentId==request.auth.uid;allow update:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid||resource.data.instructorId==request.auth.uid);allow delete:if staff();}
+    match /certificates/{certificateId}{allow get,list:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid);allow create,update,delete:if staff();}
+    match /settings/{settingsId}{allow read,write:if isFounder();}
+    match /platformSettings/{settingsId}{allow read,write:if isFounder();}
+    function roleFor(uid){return get(/databases/$(database)/documents/users/$(uid)).data.get('role','unknown');}
+    function allowedPair(a,b){return (a=='founder')||(b=='founder')||(a=='student'&&b=='instructor')||(a=='instructor'&&b=='student')||(a=='instructor'&&b=='admin')||(a=='admin'&&b=='instructor');}
+    match /chats/{chatId}{allow get:if signedIn()&&resource.data.participants.hasAny([request.auth.uid]);allow list:if staff()||(signedIn()&&resource.data.participants.hasAny([request.auth.uid]));allow create:if signedIn()&&request.resource.data.participants is list&&request.resource.data.participants.size()==2&&request.resource.data.participants.hasAny([request.auth.uid])&&allowedPair(roleFor(request.auth.uid),roleFor(request.resource.data.participants[0]==request.auth.uid?request.resource.data.participants[1]:request.resource.data.participants[0]));allow update:if signedIn()&&resource.data.participants.hasAny([request.auth.uid])&&request.resource.data.participants==resource.data.participants;allow delete:if isFounder();match /messages/{messageId}{allow read:if signedIn()&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow create:if signedIn()&&request.resource.data.senderId==request.auth.uid&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow update:if signedIn()&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow delete:if isFounder();}}
+    match /{document=**}{allow read,write:if false;}
+  }
+}

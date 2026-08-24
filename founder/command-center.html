@@ -6,21 +6,64 @@
 <title>Command Center | Spark Stack Academy</title>
 <link rel="stylesheet" href="dashboard.css">
 <link rel="stylesheet" href="command-center.css">
+<link rel="stylesheet" href="founder-unified.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-<div class="founder-app"><aside id="sidebarContainer" class="founder-sidebar"></aside><div id="sidebarOverlay" class="sidebar-overlay"></div><main class="founder-main"><header id="topbarContainer" class="founder-topbar"></header><section class="founder-page command-page">
-<div class="command-hero"><div><span class="eyebrow">SSA COMMAND CENTER</span><h1>Platform Control Room</h1><p>Control portal availability, maintenance windows and emergency access from one place.</p></div><div id="globalStatus" class="system-pill"><span></span>Checking system...</div></div>
-<div class="control-grid">
-<article class="control-card"><div class="card-head"><div class="icon blue"><i data-lucide="graduation-cap"></i></div><div><h2>Student Portal</h2><p>Control student access instantly.</p></div></div><div class="state-row"><span>Status</span><strong id="studentState">Online</strong></div><button id="studentToggle" class="danger-btn">Suspend Student Portal</button></article>
-<article class="control-card"><div class="card-head"><div class="icon purple"><i data-lucide="presentation"></i></div><div><h2>Instructor Portal</h2><p>Control instructor access instantly.</p></div></div><div class="state-row"><span>Status</span><strong id="instructorState">Online</strong></div><button id="instructorToggle" class="danger-btn">Suspend Instructor Portal</button></article>
-<article class="control-card emergency"><div class="card-head"><div class="icon red"><i data-lucide="shield-alert"></i></div><div><h2>Emergency Lockdown</h2><p>Immediately restrict student and instructor access.</p></div></div><div class="state-row"><span>Status</span><strong id="lockdownState">Inactive</strong></div><button id="lockdownToggle" class="danger-btn">Activate Lockdown</button></article>
+<div class="founder-app">
+<aside id="sidebarContainer" class="founder-sidebar"></aside>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="founder-main">
+<header id="topbarContainer" class="founder-topbar"></header>
+<section class="founder-page command-page">
+<div class="command-hero">
+<div>
+<span class="eyebrow">SSA COMMAND CENTER</span>
+<h1>Platform Control Room</h1>
+<p>Control portal availability, maintenance windows and emergency access from one place.</p>
 </div>
-<section class="command-panel"><div class="panel-title"><div><span class="eyebrow">SCHEDULED CONTROL</span><h2>Maintenance Window</h2></div><span class="muted">Device timezone</span></div><div class="form-grid"><label>Target<select id="maintenanceTarget"><option value="student">Student Portal</option><option value="instructor">Instructor Portal</option><option value="all">Student + Instructor</option></select></label><label>Start<input id="maintenanceStart" type="datetime-local"></label><label>End<input id="maintenanceEnd" type="datetime-local"></label><label class="wide">Message<input id="maintenanceMessage" value="SSA is temporarily offline for scheduled maintenance. Please check back shortly."></label></div><div class="panel-actions"><button id="scheduleBtn" class="primary-btn"><i data-lucide="calendar-clock"></i> Schedule Maintenance</button><button id="cancelScheduleBtn" class="ghost-btn">Cancel Scheduled Window</button></div><div id="scheduleInfo" class="schedule-info">No maintenance window scheduled.</div></section>
-<section class="command-panel live-panel"><div class="panel-title"><div><span class="eyebrow">LIVE CONTROL</span><h2>Command Feed</h2></div></div><div id="commandLog" class="command-log"><div class="empty">Loading command history...</div></div></section>
-</section></main></div>
-<script type="module" src="js/founder-app.js"></script><script type="module" src="command-center.js"></script><script>document.addEventListener('DOMContentLoaded',()=>window.lucide?.createIcons());</script>
-</body></html>
+<div id="globalStatus" class="system-pill"><span></span>Checking system...</div>
+</div>
+<div class="control-grid">
+<article class="control-card">
+<div class="card-head"><div class="icon blue"><i data-lucide="graduation-cap"></i></div><div><h2>Student Portal</h2><p>Control student access instantly.</p></div></div>
+<div class="state-row"><span>Status</span><strong id="studentState">Online</strong></div>
+<button id="studentToggle" class="danger-btn">Suspend Student Portal</button>
+</article>
+<article class="control-card">
+<div class="card-head"><div class="icon purple"><i data-lucide="presentation"></i></div><div><h2>Instructor Portal</h2><p>Control instructor access instantly.</p></div></div>
+<div class="state-row"><span>Status</span><strong id="instructorState">Online</strong></div>
+<button id="instructorToggle" class="danger-btn">Suspend Instructor Portal</button>
+</article>
+<article class="control-card emergency">
+<div class="card-head"><div class="icon red"><i data-lucide="shield-alert"></i></div><div><h2>Emergency Lockdown</h2><p>Immediately restrict student and instructor access.</p></div></div>
+<div class="state-row"><span>Status</span><strong id="lockdownState">Inactive</strong></div>
+<button id="lockdownToggle" class="danger-btn">Activate Lockdown</button>
+</article>
+</div>
+<section class="command-panel">
+<div class="panel-title"><div><span class="eyebrow">SCHEDULED CONTROL</span><h2>Maintenance Window</h2></div><span class="muted">All times use your device timezone</span></div>
+<div class="form-grid">
+<label>Target<select id="maintenanceTarget"><option value="student">Student Portal</option><option value="instructor">Instructor Portal</option><option value="all">Student + Instructor</option></select></label>
+<label>Start<input id="maintenanceStart" type="datetime-local"></label>
+<label>End<input id="maintenanceEnd" type="datetime-local"></label>
+<label class="wide">Message<input id="maintenanceMessage" value="SSA is temporarily offline for scheduled maintenance. Please check back shortly."></label>
+</div>
+<div class="panel-actions"><button id="scheduleBtn" class="primary-btn"><i data-lucide="calendar-clock"></i> Schedule Maintenance</button><button id="cancelScheduleBtn" class="ghost-btn">Cancel Scheduled Window</button></div>
+<div id="scheduleInfo" class="schedule-info">No maintenance window scheduled.</div>
+</section>
+<section class="command-panel live-panel">
+<div class="panel-title"><div><span class="eyebrow">LIVE CONTROL</span><h2>Command Feed</h2></div></div>
+<div id="commandLog" class="command-log"><div class="empty">Loading command history...</div></div>
+</section>
+</section>
+</main>
+</div>
+<script type="module" src="js/founder-app.js"></script>
+<script type="module" src="command-center.js"></script>
+<script>document.addEventListener('DOMContentLoaded',()=>window.lucide?.createIcons());</script>
+</body>
+</html>

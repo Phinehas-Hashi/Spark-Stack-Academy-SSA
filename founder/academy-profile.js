@@ -1,371 +1,136 @@
 // ===================================
-// SPARK STACK ACADEMY
-// ACADEMY PROFILE
+// SPARK STACK ACADEMY — ACADEMY PROFILE
 // ===================================
 
-import { db } from "../../js/firebase.js";
-
-import {
-
-doc,
-getDoc,
-setDoc,
-serverTimestamp,
-collection,
-getDocs
-
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db, storage } from "../../js/firebase.js";
+import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 console.log("🏫 Academy Profile Loaded");
 
-// ===================================
-// REFERENCES
-// ===================================
+const profileRef = doc(db, "settings", "academyProfile");
+const imageFields = [
+    ["academyLogo", "logoPreview", "logo"],
+    ["academyBanner", "bannerPreview", "banner"],
+    ["academySeal", "sealPreview", "seal"],
+    ["academyFavicon", "faviconPreview", "favicon"],
+    ["founderPhoto", "founderPreview", "founderPhoto"]
+];
 
-const profileRef = doc(
-    db,
-    "settings",
-    "academyProfile"
-);
+const notify = (message, type = "success") => {
+    if (window.showFounderToast) return window.showFounderToast(message, type);
+    console[type === "error" ? "error" : "log"](message);
+};
 
-// ===================================
-// LOAD PROFILE
-// ===================================
+const confirmAction = (message, options = {}) => {
+    if (window.ssaConfirm) return window.ssaConfirm(message, options);
+    return Promise.resolve(false);
+};
 
 async function loadProfile(){
-
     try{
-
         const snap = await getDoc(profileRef);
-
         if(!snap.exists()) return;
-
         const data = snap.data();
-
-        setValue("academyName",data.academyName);
-        setValue("academyTagline",data.tagline);
-        setValue("academyDescription",data.description);
-
-        setValue("founderName",data.founderName);
-        setValue("founderTitle",data.founderTitle);
-        setValue("founderBio",data.founderBio);
-
-        setValue("academyEmail",data.email);
-        setValue("academyPhone",data.phone);
-        setValue("academyWhatsapp",data.whatsapp);
-        setValue("academyWebsite",data.website);
-        setValue("academyAddress",data.address);
-        setValue("academyCity",data.city);
-        setValue("academyCountry",data.country);
-
-        setValue("facebook",data.facebook);
-        setValue("instagram",data.instagram);
-        setValue("twitter",data.twitter);
-        setValue("linkedin",data.linkedin);
-        setValue("youtube",data.youtube);
-        setValue("tiktok",data.tiktok);
-        setValue("github",data.github);
-
-        setValue("language",data.language);
-        setValue("currency",data.currency);
-        setValue("timezone",data.timezone);
-
-        setValue("studentPrefix",data.studentPrefix);
-        setValue("certificatePrefix",data.certificatePrefix);
-
-        setImage("logoPreview",data.logo);
-        setImage("bannerPreview",data.banner);
-        setImage("sealPreview",data.seal);
-        setImage("faviconPreview",data.favicon);
-        setImage("founderPreview",data.founderPhoto);
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-    }
-
+        [
+            ["academyName",data.academyName],["academyTagline",data.tagline],["academyDescription",data.description],
+            ["founderName",data.founderName],["founderTitle",data.founderTitle],["founderBio",data.founderBio],
+            ["academyEmail",data.email],["academyPhone",data.phone],["academyWhatsapp",data.whatsapp],["academyWebsite",data.website],
+            ["academyAddress",data.address],["academyCity",data.city],["academyCountry",data.country],
+            ["facebook",data.facebook],["instagram",data.instagram],["twitter",data.twitter],["linkedin",data.linkedin],
+            ["youtube",data.youtube],["tiktok",data.tiktok],["github",data.github],
+            ["language",data.language],["currency",data.currency],["timezone",data.timezone],
+            ["studentPrefix",data.studentPrefix],["certificatePrefix",data.certificatePrefix]
+        ].forEach(([id,value]) => setValue(id,value));
+        imageFields.forEach(([,preview,key]) => setImage(preview,data[key]));
+    }catch(error){ console.error("Profile load failed:",error); notify(error.message || "Unable to load academy profile.","error"); }
 }
 
-// ===================================
-// HELPERS
-// ===================================
+function setValue(id,value){ const el=document.getElementById(id); if(el) el.value=value||""; }
+function setImage(id,url){ if(!url) return; const img=document.getElementById(id); if(img){ img.src=url; img.classList.add("has-image"); } }
+function getValue(id){ const el=document.getElementById(id); return el ? el.value.trim() : ""; }
 
-function setValue(id,value){
-
-    const el = document.getElementById(id);
-
-    if(el){
-
-        el.value = value || "";
-
+async function uploadSelectedImages(){
+    const uploaded = {};
+    for(const [inputId,,field] of imageFields){
+        const input=document.getElementById(inputId);
+        const file=input?.files?.[0];
+        if(!file) continue;
+        if(!file.type.startsWith("image/")) throw new Error(`${field} must be an image.`);
+        if(file.size > 5*1024*1024) throw new Error(`${field} is larger than 5MB.`);
+        const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"-");
+        const storageRef=ref(storage,`academy-profile/${field}-${Date.now()}-${safeName}`);
+        const snapshot=await uploadBytes(storageRef,file,{contentType:file.type});
+        uploaded[field]=await getDownloadURL(snapshot.ref);
     }
-
+    return uploaded;
 }
 
-function setImage(id,url){
-
-    if(!url) return;
-
-    const img = document.getElementById(id);
-
-    if(img){
-
-        img.src = url;
-
-    }
-
-}
-// ===================================
-// SAVE PROFILE
-// ===================================
-
-const saveBtn =
-document.getElementById("saveProfileBtn");
-
-saveBtn?.addEventListener(
-"click",
-saveProfile
-);
+const saveBtn=document.getElementById("saveProfileBtn");
+saveBtn?.addEventListener("click",saveProfile);
 
 async function saveProfile(){
-
+    if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent="Saving..."; }
     try{
-
-        const profile = {
-
-            academyName:getValue("academyName"),
-            tagline:getValue("academyTagline"),
-            description:getValue("academyDescription"),
-
-            founderName:getValue("founderName"),
-            founderTitle:getValue("founderTitle"),
-            founderBio:getValue("founderBio"),
-
-            email:getValue("academyEmail"),
-            phone:getValue("academyPhone"),
-            whatsapp:getValue("academyWhatsapp"),
-            website:getValue("academyWebsite"),
-            address:getValue("academyAddress"),
-            city:getValue("academyCity"),
-            country:getValue("academyCountry"),
-
-            facebook:getValue("facebook"),
-            instagram:getValue("instagram"),
-            twitter:getValue("twitter"),
-            linkedin:getValue("linkedin"),
-            youtube:getValue("youtube"),
-            tiktok:getValue("tiktok"),
-            github:getValue("github"),
-
-            language:getValue("language"),
-            currency:getValue("currency"),
-            timezone:getValue("timezone"),
-
-            studentPrefix:getValue("studentPrefix"),
-            certificatePrefix:getValue("certificatePrefix"),
-
-            logo:
-            document.getElementById("logoPreview").src,
-
-            banner:
-            document.getElementById("bannerPreview").src,
-
-            seal:
-            document.getElementById("sealPreview").src,
-
-            favicon:
-            document.getElementById("faviconPreview").src,
-
-            founderPhoto:
-            document.getElementById("founderPreview").src,
-
-            updatedAt:
-            serverTimestamp()
-
+        const uploaded=await uploadSelectedImages();
+        const existing=(await getDoc(profileRef)).data()||{};
+        const profile={
+            academyName:getValue("academyName"), tagline:getValue("academyTagline"), description:getValue("academyDescription"),
+            founderName:getValue("founderName"), founderTitle:getValue("founderTitle"), founderBio:getValue("founderBio"),
+            email:getValue("academyEmail"), phone:getValue("academyPhone"), whatsapp:getValue("academyWhatsapp"), website:getValue("academyWebsite"),
+            address:getValue("academyAddress"), city:getValue("academyCity"), country:getValue("academyCountry"),
+            facebook:getValue("facebook"), instagram:getValue("instagram"), twitter:getValue("twitter"), linkedin:getValue("linkedin"),
+            youtube:getValue("youtube"), tiktok:getValue("tiktok"), github:getValue("github"),
+            language:getValue("language"), currency:getValue("currency"), timezone:getValue("timezone"),
+            studentPrefix:getValue("studentPrefix"), certificatePrefix:getValue("certificatePrefix"),
+            ...uploaded, updatedAt:serverTimestamp()
         };
-
-        await setDoc(
-            profileRef,
-            profile,
-            {merge:true}
-        );
-
-        alert("✅ Academy profile saved.");
-
+        imageFields.forEach(([,preview,field])=>{
+            if(!uploaded[field] && existing[field]) profile[field]=existing[field];
+            const img=document.getElementById(preview);
+            if(uploaded[field] && img) img.src=uploaded[field];
+        });
+        await setDoc(profileRef,profile,{merge:true});
+        notify("Academy profile saved successfully.");
+    }catch(error){
+        console.error("Profile save failed:",error);
+        notify(error.message||"Failed to save profile.","error");
+    }finally{
+        if(saveBtn){ saveBtn.disabled=false; saveBtn.textContent="Save Profile"; }
     }
-
-    catch(error){
-
-        console.error(error);
-
-        alert("❌ Failed to save profile.");
-
-    }
-
 }
 
-function getValue(id){
-
-    const el =
-    document.getElementById(id);
-
-    return el ? el.value.trim() : "";
-
-}
-
-// ===================================
-// IMAGE PREVIEW
-// ===================================
-
-setupPreview(
-"academyLogo",
-"logoPreview"
-);
-
-setupPreview(
-"academyBanner",
-"bannerPreview"
-);
-
-setupPreview(
-"academySeal",
-"sealPreview"
-);
-
-setupPreview(
-"academyFavicon",
-"faviconPreview"
-);
-
-setupPreview(
-"founderPhoto",
-"founderPreview"
-);
-
-function setupPreview(
-inputId,
-previewId
-){
-
-    const input =
-    document.getElementById(inputId);
-
-    const preview =
-    document.getElementById(previewId);
-
-    if(!input || !preview) return;
-
-    input.addEventListener(
-    "change",
-    ()=>{
-
-        const file =
-        input.files[0];
-
-        if(!file) return;
-
-        preview.src =
-        URL.createObjectURL(file);
-
+imageFields.forEach(([inputId,previewId])=>{
+    const input=document.getElementById(inputId), preview=document.getElementById(previewId);
+    input?.addEventListener("change",()=>{
+        const file=input.files?.[0];
+        if(!file || !preview) return;
+        if(!file.type.startsWith("image/")){ notify("Please select an image file.","error"); input.value=""; return; }
+        if(file.size>5*1024*1024){ notify("Image must be 5MB or smaller.","error"); input.value=""; return; }
+        preview.src=URL.createObjectURL(file); preview.classList.add("has-image");
     });
-
-}
-
-// ===================================
-// RESET
-// ===================================
-
-document
-.getElementById("resetProfileBtn")
-?.addEventListener(
-"click",
-()=>{
-
-if(confirm(
-"Reset all fields?"
-)){
-
-location.reload();
-
-}
-
 });
-// ===================================
-// LIVE STATISTICS
-// ===================================
+
+document.getElementById("resetProfileBtn")?.addEventListener("click",async()=>{
+    const confirmed = await confirmAction("Reset all unsaved academy profile changes?", {
+        title: "Reset profile changes",
+        confirmText: "Reset changes",
+        cancelText: "Keep editing",
+        danger: true
+    });
+    if(confirmed) location.reload();
+});
 
 async function loadStatistics(){
-
     try{
-
-        const [
-
-            students,
-
-            instructors,
-
-            courses,
-
-            certificates
-
-        ] = await Promise.all([
-
-            getDocs(collection(db,"students")),
-
-            getDocs(collection(db,"instructors")),
-
-            getDocs(collection(db,"courses")),
-
-            getDocs(collection(db,"certificates"))
-
+        const [students,instructors,courses,certificates]=await Promise.all([
+            getDocs(collection(db,"students")),getDocs(collection(db,"instructors")),getDocs(collection(db,"courses")),getDocs(collection(db,"certificates"))
         ]);
-
-        document.getElementById(
-            "totalStudents"
-        ).textContent =
-        students.size.toLocaleString();
-
-        document.getElementById(
-            "totalInstructors"
-        ).textContent =
-        instructors.size.toLocaleString();
-
-        document.getElementById(
-            "totalCourses"
-        ).textContent =
-        courses.size.toLocaleString();
-
-        document.getElementById(
-            "totalCertificates"
-        ).textContent =
-        certificates.size.toLocaleString();
-
-    }
-
-    catch(error){
-
-        console.error(
-            "Statistics Error:",
-            error
-        );
-
-    }
-
+        document.getElementById("totalStudents").textContent=students.size.toLocaleString();
+        document.getElementById("totalInstructors").textContent=instructors.size.toLocaleString();
+        document.getElementById("totalCourses").textContent=courses.size.toLocaleString();
+        document.getElementById("totalCertificates").textContent=certificates.size.toLocaleString();
+    }catch(error){ console.error("Statistics Error:",error); notify("Unable to load academy statistics.","error"); }
 }
 
-// ===================================
-// INITIALIZE
-// ===================================
-
-window.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-    loadProfile();
-
-    loadStatistics();
-
-});
+window.addEventListener("DOMContentLoaded",()=>{ loadProfile(); loadStatistics(); });

@@ -3,56 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Founder course management | Spark Stack Academy">
+<meta name="description" content="Founder Course Management | Spark Stack Academy">
 <title>Courses | Spark Stack Academy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="courses.css">
-<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="founder-unified.css">
+<style>
+.courses-page{max-width:1700px}.page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}.header-text{min-width:0}.page-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:800}.header-text h1{margin:10px 0 6px;font-size:32px;letter-spacing:-.6px}.header-text p{margin:0;color:#64748b;line-height:1.6;max-width:760px}.report-btn,.primary-btn,.secondary-btn,.warning-btn{border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.18s ease}.report-btn{background:#fff;color:#0f172a;white-space:nowrap}.report-btn:hover,.secondary-btn:hover{border-color:#93c5fd;background:#eff6ff;color:#1d4ed8}.primary-btn{background:#2563eb;border-color:#2563eb;color:#fff}.warning-btn{background:#fff7ed;border-color:#fed7aa;color:#c2410c}.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}.stat-card{display:flex;align-items:center;gap:14px;min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;box-shadow:0 8px 28px rgba(15,23,42,.06);transition:.18s ease}.stat-card:hover{transform:translateY(-2px);border-color:#bfdbfe}.stat-icon{display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:13px;background:#eff6ff;color:#2563eb}.stat-info{min-width:0}.stat-info span,.stat-info small{display:block;color:#64748b}.stat-info span{font-size:12px;font-weight:700}.stat-info h2{margin:6px 0 3px;font-size:24px;line-height:1.1}.stat-info small{font-size:10px}.toolbar{display:grid;grid-template-columns:minmax(240px,1fr) repeat(5,minmax(125px,1fr));gap:10px;padding:14px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.06);margin-bottom:22px}.search-box{height:44px;display:flex;align-items:center;gap:10px;padding:0 13px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px}.search-box:focus-within{background:#fff;border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.08)}.search-box input{width:100%;border:0;outline:0;background:transparent;color:#0f172a}.toolbar select{width:100%;height:44px;padding:0 11px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#0f172a;font-weight:600;outline:0}.loading-grid,.courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}.course-skeleton{height:430px;border-radius:16px;background:#eef2f7;animation:pulse 1.3s ease-in-out infinite}@keyframes pulse{50%{opacity:.55}}.course-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:visible;box-shadow:0 8px 28px rgba(15,23,42,.06);transition:.18s ease}.course-card:hover{transform:translateY(-2px)}.course-thumbnail{position:relative;height:190px;overflow:hidden;border-radius:16px 16px 0 0;background:#eef2ff}.course-thumbnail img{width:100%;height:100%;object-fit:cover}.course-status{display:inline-flex;align-items:center;position:absolute;top:12px;left:12px;padding:5px 9px;border-radius:999px;color:#fff;font-size:10px;font-weight:800}.course-status.published{background:#16a34a}.course-status.draft{background:#d97706}.course-status.archived{background:#dc2626}.course-menu-btn{position:absolute;top:10px;right:10px;width:36px;height:36px;border:1px solid rgba(255,255,255,.7);border-radius:10px;background:rgba(255,255,255,.94);color:#0f172a;cursor:pointer}.course-menu{display:none;position:absolute;top:52px;right:10px;z-index:30;min-width:175px;padding:6px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 14px 34px rgba(15,23,42,.14)}.course-menu.open{display:flex;flex-direction:column}.menu-item{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border:0;background:transparent;color:#0f172a;border-radius:8px;text-align:left;font-size:12px;font-weight:700;cursor:pointer}.menu-item:hover{background:#f8fafc}.course-content{padding:18px}.course-category{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.course-category span{padding:5px 9px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:800}.course-category strong{font-size:11px;color:#a16207}.course-content h3{margin:0 0 8px;font-size:18px;line-height:1.35}.course-description{min-height:48px;margin:0 0 16px;color:#64748b;font-size:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.course-tutor{display:flex;align-items:center;gap:10px;margin-bottom:16px}.tutor-avatar{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:50%;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:800}.course-tutor strong,.course-tutor small{display:block}.course-tutor strong{font-size:12px}.course-tutor small{margin-top:2px;color:#64748b;font-size:10px}.course-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:12px 0;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;margin-bottom:14px}.course-stats div{display:flex;flex-direction:column;gap:5px;color:#64748b;font-size:10px}.course-stats i{color:#2563eb}.course-footer{display:flex;align-items:center;justify-content:space-between;gap:10px}.course-price{font-size:12px}.view-course-btn{border:0;background:#eff6ff;color:#1d4ed8;padding:9px 11px;border-radius:9px;font-size:11px;font-weight:800;cursor:pointer}.empty-state{padding:70px 20px;text-align:center;background:#fff;border:1px dashed #cbd5e1;border-radius:16px;color:#64748b}.empty-state h2{margin:12px 0 5px;color:#0f172a;font-size:20px}.empty-icon{font-size:30px;color:#2563eb}.analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:24px}.analytics-card{min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.06);overflow:hidden}.card-header{padding:16px 18px;border-bottom:1px solid #e2e8f0}.card-header h3{margin:0;font-size:14px}.analytics-list{padding:6px 18px}.analytics-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #f1f5f9}.analytics-row:last-child{border-bottom:0}.analytics-row strong,.analytics-row small{display:block}.analytics-row strong{font-size:12px}.analytics-row small{margin-top:2px;color:#64748b;font-size:10px}.analytics-row b{white-space:nowrap;color:#2563eb;font-size:11px}.analytics-empty{padding:25px 0;text-align:center;color:#64748b;font-size:12px}.chart-card{min-height:310px}.chart-wrap{height:250px;padding:18px}.course-drawer{position:fixed;top:0;right:0;width:min(560px,100%);height:100vh;background:#fff;z-index:3000;transform:translateX(100%);transition:transform .25s ease;box-shadow:-18px 0 50px rgba(15,23,42,.14);overflow:auto}.course-drawer.open{transform:translateX(0)}.drawer-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.28);opacity:0;visibility:hidden;z-index:2990;transition:.2s}.drawer-backdrop.open{opacity:1;visibility:visible}.drawer-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:18px 22px;background:rgba(255,255,255,.96);border-bottom:1px solid #e2e8f0;backdrop-filter:blur(10px)}.drawer-header h2{margin:0;font-size:17px}.drawer-close{width:36px;height:36px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:#0f172a;cursor:pointer}.drawer-content{padding:22px}.drawer-cover{width:100%;height:220px;object-fit:cover;border-radius:14px;margin-bottom:14px}.drawer-title{margin:12px 0 8px;font-size:24px}.drawer-description{color:#64748b;font-size:13px;line-height:1.7}.drawer-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}.meta-card{padding:12px;border:1px solid #e2e8f0;border-radius:11px;background:#f8fafc}.meta-card span{display:block;color:#64748b;font-size:10px;margin-bottom:4px}.meta-card strong{font-size:12px}.drawer-tutor{display:flex;align-items:center;gap:10px;padding:14px 0;border-top:1px solid #e2e8f0}.drawer-tutor h4,.drawer-tutor p{margin:0}.drawer-tutor h4{font-size:13px}.drawer-tutor p{margin-top:3px;color:#64748b;font-size:10px}.drawer-instructor-control{display:flex;flex-direction:column;gap:7px;margin:10px 0 14px;color:#64748b;font-size:11px;font-weight:700}.drawer-instructor-control select{height:42px;padding:0 10px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:#0f172a}.drawer-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.drawer-actions button{width:100%}
+@media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{grid-template-columns:1fr 1fr}.search-box{grid-column:1/-1}}@media(max-width:800px){.stats-grid,.analytics-grid{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr}.search-box{grid-column:auto}.page-header{align-items:flex-start;flex-direction:column}.report-btn{width:100%}.courses-grid{grid-template-columns:1fr}.drawer-actions{grid-template-columns:1fr}}@media(max-width:520px){.stat-card{padding:15px}.stat-info h2{font-size:21px}.course-thumbnail{height:170px}.drawer-meta{grid-template-columns:1fr}.drawer-content{padding:16px}}
+</style>
 </head>
 <body>
 <div class="founder-app">
-  <aside id="sidebarContainer" class="founder-sidebar"></aside>
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
-  <main class="founder-main">
-    <header id="topbarContainer" class="founder-topbar"></header>
-    <section class="founder-page courses-page">
-      <header class="page-header">
-        <div class="header-copy">
-          <span class="eyebrow">ACADEMY CATALOG</span>
-          <h1>Courses</h1>
-          <p>Manage the live academy catalog from one clean workspace.</p>
-        </div>
-        <button class="back-btn" type="button" onclick="history.back()"><i data-lucide="arrow-left"></i><span>Back</span></button>
-      </header>
-      <section class="stats-grid" aria-label="Course statistics">
-        <article class="stat-card"><div class="stat-icon blue"><i data-lucide="book-open"></i></div><div><span>Total courses</span><strong id="totalCourses">—</strong></div></article>
-        <article class="stat-card"><div class="stat-icon green"><i data-lucide="globe-2"></i></div><div><span>Published</span><strong id="publishedCourses">—</strong></div></article>
-        <article class="stat-card"><div class="stat-icon amber"><i data-lucide="file-pen-line"></i></div><div><span>Drafts</span><strong id="draftCourses">—</strong></div></article>
-        <article class="stat-card"><div class="stat-icon red"><i data-lucide="archive"></i></div><div><span>Archived</span><strong id="archivedCourses">—</strong></div></article>
-      </section>
-      <section class="toolbar">
-        <label class="search-box"><i data-lucide="search"></i><input id="courseSearch" type="search" placeholder="Search courses..."></label>
-        <select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft</option><option value="archived">Archived</option></select>
-        <select id="sortCourses" aria-label="Sort courses"><option value="latest">Latest updated</option><option value="oldest">Oldest updated</option><option value="alphabetical">A–Z</option></select>
-      </section>
-      <section class="catalog-panel">
-        <div class="panel-head"><div><span class="eyebrow">LIVE DATA</span><h2>Course catalog</h2></div><span id="dataStatus" class="data-status">Loading…</span></div>
-        <div id="loadingGrid" class="loading-grid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
-        <div id="coursesGrid" class="courses-grid"></div>
-        <div id="emptyState" class="empty-state" hidden><i data-lucide="book-x"></i><h2>No courses found</h2><p>There are no courses matching the current filters.</p></div>
-        <div id="errorState" class="error-state" hidden><i data-lucide="triangle-alert"></i><h2>Could not load courses</h2><p id="errorMessage">Please try again.</p><button id="retryBtn" class="primary-btn">Retry</button></div>
-      </section>
-    </section>
-  </main>
+    <aside id="sidebarContainer" class="founder-sidebar"></aside>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <main class="founder-main">
+        <header id="topbarContainer" class="founder-topbar"></header>
+        <section class="founder-page courses-page">
+            <header class="page-header">
+                <div class="header-text"><span class="page-badge"><i class="fas fa-book-open"></i> Course Management</span><h1>Courses</h1><p>Monitor academy courses, instructors, enrollments, ratings and learning performance from one place.</p></div>
+                <button class="report-btn" id="exportCourses"><i class="fas fa-file-export"></i> Export Report</button>
+            </header>
+            <section class="stats-grid">
+                <article class="stat-card"><div class="stat-icon"><i class="fas fa-book"></i></div><div class="stat-info"><span>Total Courses</span><h2 id="totalCourses">0</h2><small>All academy courses</small></div></article>
+                <article class="stat-card"><div class="stat-icon"><i class="fas fa-globe"></i></div><div class="stat-info"><span>Published</span><h2 id="publishedCourses">0</h2><small>Live courses</small></div></article>
+                <article class="stat-card"><div class="stat-icon"><i class="fas fa-file-alt"></i></div><div class="stat-info"><span>Drafts</span><h2 id="draftCourses">0</h2><small>Pending publication</small></div></article>
+                <article class="stat-card"><div class="stat-icon"><i class="fas fa-box-archive"></i></div><div class="stat-info"><span>Archived</span><h2 id="archivedCourses">0</h2><small>Archived courses</small></div></article>
+                <article class="stat-card"><div class="stat-icon"><i class="fas fa-user-graduate"></i></div><div class="stat-info"><span>Enrollments</span><h2 id="totalStudents">0</h2><small>Across all courses</small></div></article>
+                <article class="stat-card"><div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div><div class="stat-info"><span>Revenue</span><h2 id="totalRevenue">$0</h2><small>Recorded revenue</small></div></article>
+                <article class="stat-card"><div class="stat-icon"><i class="fas fa-star"></i></div><div class="stat-info"><span>Average Rating</span><h2 id="averageRating">0.0</h2><small>Student reviews</small></div></article>
+                <article class="stat-card"><div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div><div class="stat-info"><span>Tutors</span><h2 id="totalTutors">0</h2><small>Assigned instructors</small></div></article>
+            </section>
+            <section class="toolbar">
+                <div class="search-box"><i class="fas fa-search"></i><input type="search" id="courseSearch" placeholder="Search title, tutor, category or description..." autocomplete="off"></div>
+                <select id="statusFilter"><option value="all">All Status</option><option value="published">Published</option><option value="draft">Draft</option><option value="archived">Archived</option></select>
+                <select id="categoryFilter"><option value="all">All Categories</option></select>
+                <select id="tutorFilter"><option value="all">All Tutors</option></select>
+                <select id="levelFilter"><option value="all">All Levels</option><option value="Beginner">Beginner</option><option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option></select>
+                <select id="sortCourses"><option value="latest">Latest</option><option value="popular">Most Enrolled</option><option value="rating">Highest Rated</option><option value="alphabetical">A - Z</option></select>
+            </section>
+            <section class="courses-section">
+                <div class="loading-grid" id="loadingGrid"><div class="course-skeleton"></div><div class="course-skeleton"></div><div class="course-skeleton"></div><div class="course-skeleton"></div></div>
+                <div class="courses-grid" id="coursesGrid"></div>
+                <div class="empty-state" id="emptyState" hidden><div class="empty-icon"><i class="fas fa-book-open"></i></div><h2>No Courses Found</h2><p>No courses match the current filters.</p></div>
+            </section>
+            <section class="analytics-grid">
+                <article class="analytics-card"><div class="card-header"><h3>🔥 Most Enrolled</h3></div><div id="popularCourses" class="analytics-list"></div></article>
+                <article class="analytics-card"><div class="card-header"><h3>⭐ Highest Rated</h3></div><div id="ratedCourses" class="analytics-list"></div></article>
+                <article class="analytics-card chart-card"><div class="card-header"><h3>📂 Categories</h3></div><div class="chart-wrap"><canvas id="categoryChart"></canvas></div></article>
+                <article class="analytics-card chart-card"><div class="card-header"><h3>💰 Revenue</h3></div><div class="chart-wrap"><canvas id="courseRevenueChart"></canvas></div></article>
+            </section>
+        </section>
+    </main>
 </div>
-<div id="courseDrawer" class="course-drawer" aria-hidden="true">
-  <div class="drawer-backdrop" id="drawerBackdrop"></div>
-  <aside class="drawer-panel"><header><div><span class="eyebrow">COURSE RECORD</span><h2>Course details</h2></div><button id="closeDrawer" class="icon-btn" type="button" aria-label="Close"><i data-lucide="x"></i></button></header><div id="drawerContent" class="drawer-content"></div></aside>
-</div>
+<aside class="course-drawer" id="courseDrawer" aria-hidden="true"><div class="drawer-header"><h2>Course Details</h2><button class="drawer-close" id="closeDrawer" aria-label="Close"><i class="fas fa-times"></i></button></div><div class="drawer-content" id="drawerContent"></div></aside>
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="js/founder-app.js"></script>
 <script type="module" src="courses.js"></script>
-<script>document.addEventListener('DOMContentLoaded',()=>window.lucide?.createIcons());</script>
 </body>
 </html>

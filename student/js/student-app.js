@@ -1,1397 +1,194 @@
-// =====================================
-// SPARK STACK ACADEMY
-// STUDENT PORTAL V1
-// STUDENT APP CORE
-// =====================================
+// ============================================================
+// SPARK STACK ACADEMY — STUDENT PORTAL CORE
+// Auth + student identity + fast shell + Founder controls.
+// ============================================================
 
-
-
-// =========================
-// FIREBASE IMPORTS
-// =========================
-
-
-import {
-    auth,
-    db
-} from "../../js/firebase.js";
-
-import {
-    loadSidebar,
-    updateSidebar
-} from "../components/sidebar.js";
-
-
-import {
-    loadTopbar,
-    updateTopbar
-} from "../components/topbar.js";
-
-
+import { auth, db } from "../../js/firebase.js";
+import { watchPortalControl } from "../../js/portal-control.js";
+import { loadSidebar, updateSidebar } from "../components/sidebar.js";
+import { loadTopbar, updateTopbar } from "../components/topbar.js";
 import "./notifications.js";
+import { updateStudentStreak } from "./streak.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-    updateStudentStreak
-} from "./streak.js";
+const state = { user: null, profile: null, controlUnsubscribe: null };
+const currentPage = () => location.pathname.split("/").pop() || "dashboard.html";
 
-import {
-
-    onAuthStateChanged
-
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-
-
-import {
-
-    doc,
-    getDoc,
-    collection,
-    query,
-    where,
-    getDocs,
-    orderBy,
-    limit
-
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-
-
-
-
-console.log(
-    "🚀 SSA Student Portal V1 Connected"
-);
-
-
-
-
-
-
-
-// =========================
-// INITIALIZATION
-// =========================
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    initializeStudentPortal();
-
-
-});
-
-
-
-
-
-
-
-// =========================
-// START APPLICATION
-// =========================
-
-async function initializeStudentPortal() {
-
-    console.log("1. Starting...");
-
-    try {
-
-        console.log("2. Loading sidebar...");
-        await loadSidebar();
-        console.log("3. Sidebar loaded");
-
-        console.log("4. Loading topbar...");
-        await loadTopbar();
-        console.log("5. Topbar loaded");
-
-        highlightActivePage();
-
-        lucide.createIcons();
-
-        updateDate();
-
-        console.log("6. Checking auth...");
-        checkAuthentication();
-
-    } catch (err) {
-
-        console.error("Initialization failed:", err);
-
-    }
-
+function highlightActivePage() {
+    const current = currentPage();
+    document.querySelectorAll("#sidebar .sidebar-link, .sidebar-link, [data-page], [data-nav]").forEach(link => {
+        const target = link.getAttribute("href") || link.dataset.page || link.dataset.nav || "";
+        const active = target.split("?")[0].split("#")[0] === current;
+        link.classList.toggle("active", active);
+        if (active) link.setAttribute("aria-current", "page");
+        else link.removeAttribute("aria-current");
+    });
 }
 
-// =========================
-// DATE DISPLAY
-// =========================
-
-
-function updateDate(){
-
-
-    const dateElement =
-    document.getElementById(
-        "todayDate"
-    );
-
-
-
-    if(!dateElement)
-        return;
-
-
-
-    const today =
-    new Date();
-
-
-
-    dateElement.textContent =
-    today.toLocaleDateString(
-        "en-US",
-        {
-            weekday:"long",
-            month:"short",
-            day:"numeric"
-        }
-    );
-
-
+function updateDate() {
+    const el = document.getElementById("todayDate");
+    if (!el) return;
+    el.textContent = new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 }
 
-
-
-
-
-
-
-// =========================
-// AUTH CHECK
-// =========================
-
-
-function checkAuthentication(){
-
-
-
-    onAuthStateChanged(
-
-        auth,
-
-        async(user)=>{
-
-
-
-            if(!user){
-
-
-                window.location.href =
-                "../login.html";
-
-
-                return;
-
-
-            }
-
-
-
-            console.log(
-                "Logged in:",
-                user.email
-            );
-// =========================
-// UPDATE DAILY STREAK
-// =========================
-
-await updateStudentStreak(user.uid);
-
-            const page =
-window.location.pathname.split("/").pop();
-
-if(page === "dashboard.html"){
-
-    await loadStudentProfile(user.uid);
-
-}else{
-
-    const studentRef =
-    doc(db,"students",user.uid);
-
-    const studentSnap =
-    await getDoc(studentRef);
-
-    if(studentSnap.exists()){
-
-        const student =
-        studentSnap.data();
-
-        updateSidebar(student);
-        updateTopbar(student);
-
-    }
-
+async function loadIdentity(uid) {
+    const [userSnap, studentSnap] = await Promise.all([getDoc(doc(db, "users", uid)), getDoc(doc(db, "students", uid))]);
+    if (!userSnap.exists()) throw new Error("Student account profile is missing.");
+    const user = userSnap.data();
+    if (user.role !== "student") throw new Error("This account is not registered as a student.");
+    if (!studentSnap.exists()) throw new Error("Student admission profile is missing.");
+    state.profile = { id: uid, ...studentSnap.data() };
+    return state.profile;
 }
 
+async function initializeStudentPortal(user) {
+    state.user = user;
 
-
-        }
-
-    );
-
-
-
-}
-// =====================================
-// LOAD STUDENT PROFILE
-// =====================================
-
-
-async function loadStudentProfile(uid){
-
-
-    try{
-
-
-        const studentRef =
-        doc(
-            db,
-            "students",
-            uid
-        );
-
-
-
-        const studentSnap =
-        await getDoc(studentRef);
-
-
-
-
-
-        if(!studentSnap.exists()){
-
-
-            console.warn(
-                "Student profile not found"
-            );
-
-
-            return;
-
-
-        }
-
-
-
-
-
-        const student =
-        studentSnap.data();
-
-
-
-
-        console.log(
-            "Student Profile:",
-            student
-        );
-
-
-
-
-
-        updateDashboardUI(
-            student
-        );
-
-
-
-const page =
-window.location.pathname.split("/").pop();
-
-if(page === "dashboard.html"){
-
+    // Shell components load together. Neither blocks the other.
     await Promise.all([
-        loadContinueCourses(uid),
-        loadAnnouncements(),
-        loadMessagesPreview(uid)
+        loadSidebar().catch(err => console.error("[SSA] Sidebar failed:", err)),
+        loadTopbar().catch(err => console.error("[SSA] Topbar failed:", err))
     ]);
 
-    loadGamification(student);
+    highlightActivePage();
+    updateDate();
 
+    const profile = await loadIdentity(user.uid);
+    updateSidebar(profile);
+    updateTopbar(profile);
+
+    if (!state.controlUnsubscribe) {
+        try { state.controlUnsubscribe = watchPortalControl("student"); }
+        catch (err) { console.error("[SSA] Platform control listener failed:", err); }
+    }
+
+    if (currentPage() === "dashboard.html") {
+        updateDashboardUI(profile);
+        await Promise.allSettled([loadContinueCourses(user.uid), loadAnnouncements(), loadMessagesPreview(user.uid)]);
+        loadGamification(profile);
+    }
+
+    try { await updateStudentStreak(user.uid); }
+    catch (err) { console.warn("[SSA] Streak update skipped:", err); }
+
+    document.documentElement.classList.add("student-portal-ready");
+    window.ssaStudent = Object.freeze({ get user() { return state.user; }, get profile() { return state.profile; } });
+    window.dispatchEvent(new CustomEvent("ssa:student-ready", { detail: profile }));
 }
 
-    }
+function updateDashboardUI(student) {
+    const name = student.name || student.fullName || "Student";
+    const email = student.email || state.user?.email || "";
+    const initial = name.charAt(0).toUpperCase();
 
-    catch(error){
-
-
-        console.error(
-            "Profile loading error:",
-            error
-        );
-
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// UPDATE DASHBOARD UI
-// =====================================
-
-
-function updateDashboardUI(student){
-
-
-
-    const name =
-    student.name ||
-    student.fullName ||
-    "Student";
-
-
-
-    const email =
-    student.email ||
-    "";
-
-
-
-    const initial =
-    name
-    .charAt(0)
-    .toUpperCase();
-
-
-
-
-
-
-    // =========================
-    // WELCOME NAME
-    // =========================
-
-
-    const studentName =
-    document.getElementById(
-        "studentName"
-    );
-
-
-    if(studentName){
-
-
-        studentName.textContent =
-        name;
-
-
-    }
-
-
-
-
-
-
-    // =========================
-    // PROFILE CARD
-    // =========================
-
-
-    const fullName =
-    document.getElementById(
-        "studentFullName"
-    );
-
-
-    const studentEmail =
-    document.getElementById(
-        "studentEmail"
-    );
-
-
-    const avatar =
-    document.getElementById(
-        "profileAvatar"
-    );
-
-
-
-
+    document.getElementById("studentName")?.replaceChildren(document.createTextNode(name));
+    const fullName = document.getElementById("studentFullName");
     if (fullName) {
-
-    fullName.innerHTML = `
-        ${name}
-
-        ${
-            student.premium === true
-                ? `<span class="premium-badge" title="SSA Premium Verified">✓</span>`
-                : ""
+        fullName.textContent = name;
+        if (student.premium === true) {
+            const badge = document.createElement("span");
+            badge.className = "premium-badge";
+            badge.title = "SSA Premium Verified";
+            badge.textContent = "✓";
+            fullName.append(" ", badge);
         }
-    `;
-
-}
-
-
-
-    if(studentEmail)
-        studentEmail.textContent = email;
-
-
-
-    if(avatar)
-        avatar.textContent = initial;
-
-
-
-
-
-
-
-    // =========================
-    // ADMISSION NUMBER
-    // =========================
-
-
-    const admission =
-    document.getElementById(
-        "studentAdmission"
-    );
-
-
-
-    if(admission){
-
-
-        admission.textContent =
-        "Admission: " +
-        (
-            student.admissionNumber ||
-            "Pending"
-        );
-
-
     }
+    document.getElementById("studentEmail")?.replaceChildren(document.createTextNode(email));
+    document.getElementById("profileAvatar")?.replaceChildren(document.createTextNode(initial));
+    const admission = document.getElementById("studentAdmission");
+    if (admission) admission.textContent = `Admission: ${student.admissionNumber || "Pending"}`;
 
-
-
-
-
-
-    // =========================
-    // STATISTICS
-    // =========================
-
-
-    const stats =
-    student.stats || {};
-
-
-
-
-    const courseCount =
-    document.getElementById(
-        "courseCount"
-    );
-
-
-    const lessonCount =
-    document.getElementById(
-        "lessonCount"
-    );
-
-
-    const progress =
-    document.getElementById(
-        "progressPercent"
-    );
-
-
-    const certificates =
-    document.getElementById(
-        "certificateCount"
-    );
-
-
-
-
-
-
-    if(courseCount)
-
-        courseCount.textContent =
-        stats.coursesEnrolled || 0;
-
-
-
-
-    if(lessonCount)
-
-        lessonCount.textContent =
-        stats.lessonsCompleted || 0;
-
-
-
-
-    if(progress)
-
-        progress.textContent =
-        (
-            stats.progress || 0
-        )
-        + "%";
-
-
-
-
-    if(certificates)
-
-        certificates.textContent =
-        stats.certificates || 0;
-
-
-
-
-    updateProgressBar(
-        stats.progress || 0
-    );
-
-// =========================
-// TOPBAR + SIDEBAR DATA
-// =========================
-
-updateSidebar(student);
-
-updateTopbar(student);
-
+    const stats = student.stats || {};
+    const progress = Number(stats.progress || 0);
+    document.getElementById("courseCount")?.replaceChildren(document.createTextNode(stats.coursesEnrolled || 0));
+    document.getElementById("lessonCount")?.replaceChildren(document.createTextNode(stats.lessonsCompleted || 0));
+    document.getElementById("progressPercent")?.replaceChildren(document.createTextNode(`${progress}%`));
+    document.getElementById("certificateCount")?.replaceChildren(document.createTextNode(stats.certificates || 0));
+    document.getElementById("overallProgress")?.replaceChildren(document.createTextNode(`${progress}%`));
+    const bar = document.getElementById("progressBarFill");
+    if (bar) bar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
 }
-// =====================================
-// LOAD CONTINUE LEARNING COURSES
-// =====================================
 
-
-async function loadContinueCourses(uid){
-
-
-
-    const container =
-    document.getElementById(
-        "continueCourses"
-    );
-
-
-
-    if(!container)
-        return;
-
-
-
-
-
-    try{
-
-
-        const enrollmentQuery =
-        query(
-
-            collection(
-                db,
-                "enrollments"
-            ),
-
-            where(
-                "studentId",
-                "==",
-                uid
-            )
-
-        );
-
-
-
-
-
-        const enrollmentSnap =
-        await getDocs(
-            enrollmentQuery
-        );
-
-
-
-
-
-
-
-        if(
-            enrollmentSnap.empty
-        ){
-
-
-            container.innerHTML = `
-
-
-            <div class="course-card">
-
-
-                <div class="loading-icon">
-
-                    <i data-lucide="book-open"></i>
-
-                </div>
-
-
-
-                <h3>
-
-                    No Active Courses
-
-                </h3>
-
-
-
-                <p>
-
-                    Enroll into a course and start learning.
-
-                </p>
-
-
-
-                <a href="courses.html">
-
-                    Browse Courses
-
-                </a>
-
-
-            </div>
-
-
-            `;
-
-
-
-            lucide.createIcons();
-
-
+async function loadContinueCourses(uid) {
+    const container = document.getElementById("continueCourses");
+    if (!container) return;
+    try {
+        const snap = await getDocs(query(collection(db, "enrollments"), where("studentId", "==", uid)));
+        if (snap.empty) {
+            container.innerHTML = `<div class="course-card"><h3>No Active Courses</h3><p>Enroll into a course and start learning.</p><a href="courses.html">Browse Courses</a></div>`;
             return;
-
-
         }
-
-
-
-
-
-
-
-        container.innerHTML = "";
-
-
-
-
-
-
-
-        for(
-            const enrollment 
-            of enrollmentSnap.docs
-        ){
-
-
-
-            const enrollmentData =
-            enrollment.data();
-
-
-
-
-
-
-            const courseId =
-            enrollmentData.courseId;
-
-
-
-
-
-
-            const courseRef =
-            doc(
-                db,
-                "courses",
-                courseId
-            );
-
-
-
-
-
-
-            const courseSnap =
-            await getDoc(
-                courseRef
-            );
-
-
-
-
-
-
-
-            if(
-                !courseSnap.exists()
-            )
-                continue;
-
-
-
-
-
-
-
-            const course =
-            courseSnap.data();
-
-
-
-
-
-
-            const progress =
-            enrollmentData.progress || 0;
-
-
-
-
-
-
-
-            container.innerHTML += `
-
-
+        const courses = await Promise.all(snap.docs.map(async enrollment => {
+            const data = enrollment.data();
+            if (!data.courseId) return null;
+            const courseSnap = await getDoc(doc(db, "courses", data.courseId));
+            return courseSnap.exists() ? { id: data.courseId, ...courseSnap.data(), progress: Number(data.progress || 0) } : null;
+        }));
+        const valid = courses.filter(Boolean);
+        if (!valid.length) {
+            container.innerHTML = `<div class="course-card"><h3>No Active Courses</h3><p>Your enrolled course records are being prepared.</p></div>`;
+            return;
+        }
+        container.innerHTML = valid.map(course => `
             <div class="course-card">
-
-
-
-                <div class="course-header">
-
-
-                    <div class="loading-icon">
-
-
-                        <i data-lucide="play-circle"></i>
-
-
-                    </div>
-
-
-
-                    <span>
-
-                        ${progress}% Complete
-
-                    </span>
-
-
-
-                </div>
-
-
-
-
-
-                <h3>
-
-                    ${course.title || "Course"}
-
-                </h3>
-
-
-
-
-
-                <p>
-
-                    ${
-                    course.description ||
-                    "Continue your learning journey."
-                    }
-
-                </p>
-
-
-
-
-
-
-                <div class="course-progress">
-
-
-                    <div>
-
-
-                        <span
-                        style="
-                        width:${progress}%
-                        ">
-                        </span>
-
-
-                    </div>
-
-
-
-                </div>
-
-
-
-
-
-
-
-                <a 
-                href="course-player.html?id=${courseId}"
-                class="continue-btn">
-
-
-                    Continue Learning
-
-
-                </a>
-
-
-
-
-
-            </div>
-
-
-            `;
-
-
-
-        }
-
-
-
-
-
-
-        lucide.createIcons();
-
-
-
+                <div class="course-header"><span>${course.progress}% Complete</span></div>
+                <h3>${course.title || "Course"}</h3>
+                <p>${course.description || "Continue your learning journey."}</p>
+                <div class="course-progress"><div><span style="width:${Math.min(100, Math.max(0, course.progress))}%"></span></div></div>
+                <a href="course-player.html?id=${encodeURIComponent(course.id)}" class="continue-btn">Continue Learning</a>
+            </div>`).join("");
+        window.lucide?.createIcons();
+    } catch (error) {
+        console.error("Courses loading error:", error);
+        container.innerHTML = `<div class="course-card"><h3>Courses unavailable</h3><p>We couldn't load your courses right now.</p><button type="button" onclick="location.reload()">Retry</button></div>`;
     }
+}
 
+function loadGamification(student) {
+    const xp = student.xp || 0;
+    const level = student.level || 1;
+    const streak = student.streak || 0;
+    const badges = student.badges || [];
+    document.getElementById("studentXP")?.replaceChildren(document.createTextNode(xp));
+    document.getElementById("studentLevel")?.replaceChildren(document.createTextNode(level));
+    document.getElementById("streakDays")?.replaceChildren(document.createTextNode(`${streak} Days`));
+    document.getElementById("badgeCount")?.replaceChildren(document.createTextNode(`${badges.length} Badges`));
+    const bar = document.getElementById("xpProgress");
+    if (bar) bar.style.width = `${Math.min(100, (xp / 1000) * 100)}%`;
+}
 
-    catch(error){
+async function loadAnnouncements() {
+    const container = document.getElementById("announcementPreview");
+    if (!container) return;
+    try {
+        const snap = await getDocs(query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(3)));
+        container.innerHTML = snap.empty ? `<p>No announcements yet.</p>` : snap.docs.map(item => {
+            const data = item.data();
+            return `<div class="announcement-item"><h4>${data.title || "Announcement"}</h4><p>${data.message || ""}</p></div>`;
+        }).join("");
+    } catch (error) { console.warn("Announcements unavailable:", error); }
+}
 
+async function loadMessagesPreview(uid) {
+    const container = document.getElementById("messagePreview");
+    if (!container) return;
+    try {
+        const snap = await getDocs(query(collection(db, "messages"), where("receiverId", "==", uid), orderBy("createdAt", "desc"), limit(3)));
+        container.innerHTML = snap.empty ? `<p>No new messages.</p>` : snap.docs.map(item => {
+            const msg = item.data();
+            return `<div class="message-item"><strong>${msg.senderName || "Student"}</strong><p>${msg.text || ""}</p></div>`;
+        }).join("");
+    } catch (error) { console.warn("Messages unavailable:", error); }
+}
 
-
-        console.error(
-
-            "Courses loading error:",
-            error
-
-        );
-
-
-
-        container.innerHTML = `
-
-
-        <p>
-
-            Failed to load courses.
-
-        </p>
-
-
-        `;
-
-
+onAuthStateChanged(auth, user => {
+    if (!user) {
+        location.replace("../login.html");
+        return;
     }
-
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// UPDATE PROGRESS BAR
-// =====================================
-
-
-function updateProgressBar(value){
-
-
-
-    const text =
-    document.getElementById(
-        "overallProgress"
-    );
-
-
-
-    const bar =
-    document.getElementById(
-        "progressBarFill"
-    );
-
-
-
-
-    if(text)
-
-        text.textContent =
-        value + "%";
-
-
-
-
-
-    if(bar)
-
-        bar.style.width =
-        value + "%";
-
-
-
-}
-// =====================================
-// SIDEBAR ACTIVE LINK
-// =====================================
-
-
-function highlightActivePage(){
-
-
-    const currentPage =
-    window.location.pathname
-    .split("/")
-    .pop();
-
-
-
-    const links =
-    document.querySelectorAll(
-        ".sidebar-link"
-    );
-
-
-
-    links.forEach(link=>{
-
-
-        const href =
-        link.getAttribute(
-            "href"
-        );
-
-
-
-        if(
-            href === currentPage
-        ){
-
-
-            link.classList.add(
-                "active"
-            );
-
-
-        }
-
-
-    });
-
-
-
-}
-
-
-
-
-
-
-// =====================================
-// GLOBAL ERROR HANDLER
-// =====================================
-
-
-window.addEventListener(
-"error",
-(event)=>{
-
-
-    console.error(
-        "SSA Portal Error:",
-        event.error
-    );
-
-
+    initializeStudentPortal(user).catch(error => console.error("[SSA] Student portal boot failed:", error));
 });
 
-
-// =====================================
-// GAMIFICATION SYSTEM
-// =====================================
-
-
-function loadGamification(student){
-
-
-    const xp =
-    student.xp || 0;
-
-
-    const level =
-    student.level || 1;
-
-
-    const streak =
-    student.streak || 0;
-
-
-    const badges =
-    student.badges || [];
-
-
-
-    const xpText =
-    document.getElementById(
-        "studentXP"
-    );
-
-
-    const levelText =
-    document.getElementById(
-        "studentLevel"
-    );
-
-
-    const streakText =
-    document.getElementById(
-        "streakDays"
-    );
-
-
-    const badgeText =
-    document.getElementById(
-        "badgeCount"
-    );
-
-
-    const xpBar =
-    document.getElementById(
-        "xpProgress"
-    );
-
-
-
-
-    if(xpText)
-        xpText.textContent = xp;
-
-
-
-    if(levelText)
-        levelText.textContent = level;
-
-
-
-    if(streakText)
-        streakText.textContent =
-        streak + " Days";
-
-
-
-    if(badgeText)
-        badgeText.textContent =
-        badges.length + " Badges";
-
-
-
-
-    // XP calculation
-
-    const levelXP =
-    1000;
-
-
-    const percentage =
-    Math.min(
-        (xp / levelXP) * 100,
-        100
-    );
-
-
-
-    if(xpBar)
-
-        xpBar.style.width =
-        percentage + "%";
-
-
-
-}
-
-// =====================================
-// ANNOUNCEMENTS
-// =====================================
-
-
-async function loadAnnouncements(){
-
-
-const container =
-document.getElementById(
-    "announcementPreview"
-);
-
-
-if(!container)
-return;
-
-
-
-try{
-
-
-const q =
-query(
-
-collection(
-db,
-"announcements"
-),
-
-orderBy(
-"createdAt",
-"desc"
-),
-
-limit(3)
-
-);
-
-
-
-const snap =
-await getDocs(q);
-
-
-
-if(snap.empty){
-
-container.innerHTML =
-`
-<p>No announcements yet.</p>
-`;
-
-return;
-
-}
-
-
-
-
-container.innerHTML="";
-
-
-
-snap.forEach(doc=>{
-
-
-const data =
-doc.data();
-
-
-
-container.innerHTML +=
-`
-
-<div class="announcement-item">
-
-<h4>
-${data.title || "Announcement"}
-</h4>
-
-<p>
-${data.message || ""}
-</p>
-
-</div>
-
-`;
-
-
-});
-
-
-
-}
-
-
-
-catch(error){
-
-console.error(
-"Announcements:",
-error
-);
-
-}
-
-
-}
-
-// =====================================
-// MESSAGE PREVIEW
-// =====================================
-
-
-async function loadMessagesPreview(uid){
-
-
-const container =
-document.getElementById(
-"messagePreview"
-);
-
-
-
-if(!container)
-return;
-
-
-
-try{
-
-
-const q =
-query(
-
-collection(
-db,
-"messages"
-),
-
-where(
-"receiverId",
-"==",
-uid
-),
-
-orderBy(
-"createdAt",
-"desc"
-),
-
-limit(3)
-
-);
-
-
-
-const snap =
-await getDocs(q);
-
-
-
-if(snap.empty){
-
-container.innerHTML =
-`
-<p>
-No new messages.
-</p>
-`;
-
-return;
-
-}
-
-
-
-
-container.innerHTML="";
-
-
-
-snap.forEach(doc=>{
-
-
-const msg =
-doc.data();
-
-
-
-container.innerHTML +=
-`
-
-<div class="message-item">
-
-<strong>
-${msg.senderName || "Student"}
-</strong>
-
-<p>
-${msg.text}
-</p>
-
-</div>
-
-`;
-
-
-});
-
-
-
-}
-
-catch(error){
-
-
-console.error(
-"Messages:",
-error
-);
-
-
-}
-
-
-
-}
-
-// =====================================
-// FINAL READY CHECK
-// =====================================
-
-
-console.log(
-    "%cSpark Stack Academy Student Portal V1 Ready 🚀",
-    "color:#2979FF;font-size:16px;font-weight:bold;"
-);
+window.addEventListener("error", event => console.error("SSA Portal Error:", event.error));
+console.log("%cSpark Stack Academy Student Portal Ready 🚀", "color:#2979FF;font-weight:bold;");
