@@ -1,19 +1,14 @@
+import "./ui-runtime.js";
+import "./ui-polish.js";
+import "./splash-screen.js";
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-import {
-    getAuth,
-    setPersistence,
-    browserLocalPersistence
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-    getStorage
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBlPs-9EU_YYiP4qZ6gFF9ZorJbbktxC4",
+    apiKey: "AIzaSyBlPs-9EU_YYiP4qZ6gFF9ZorJbbktXqC4",
     authDomain: "spark-stack-academy.firebaseapp.com",
     databaseURL: "https://spark-stack-academy-default-rtdb.firebaseio.com",
     projectId: "spark-stack-academy",
