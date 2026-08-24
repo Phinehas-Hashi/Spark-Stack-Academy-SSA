@@ -45,11 +45,11 @@ async function loadIdentity(uid) {
 async function initializeStudentPortal(user) {
     state.user = user;
 
-    // Shell components load together. Neither blocks the other.
-    await Promise.all([
-        loadSidebar().catch(err => console.error("[SSA] Sidebar failed:", err)),
-        loadTopbar().catch(err => console.error("[SSA] Topbar failed:", err))
-    ]);
+    // Load the drawer first, then the topbar controller. The two shells
+    // share the sidebar/overlay DOM, so ordering prevents a mobile-menu
+    // race where topbar.js initializes before sidebar.js has injected it.
+    await loadSidebar().catch(err => console.error("[SSA] Sidebar failed:", err));
+    await loadTopbar().catch(err => console.error("[SSA] Topbar failed:", err));
 
     highlightActivePage();
     updateDate();
