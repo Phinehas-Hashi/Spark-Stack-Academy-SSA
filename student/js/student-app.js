@@ -6,8 +6,8 @@
 import { auth, db } from "../../js/firebase.js";
 import { watchPortalControl } from "../../js/portal-control.js";
 import { loadSidebar, updateSidebar } from "../components/sidebar.js";
-import { loadTopbar } from "../components/topbar.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { loadTopbar, updateTopbar } from "../components/topbar.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const state = { user: null, userProfile: null, profile: null, controlUnsubscribe: null };
@@ -19,7 +19,8 @@ function highlightActivePage() {
         const target = link.getAttribute("href") || link.dataset.page || link.dataset.nav || "";
         const active = target.split("?")[0].split("#")[0] === current;
         link.classList.toggle("active", active);
-        if (active) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current");
+        if (active) link.setAttribute("aria-current", "page");
+        else link.removeAttribute("aria-current");
     });
 }
 
@@ -28,30 +29,27 @@ async function loadIdentity(uid) {
         getDoc(doc(db, "users", uid)),
         getDoc(doc(db, "students", uid))
     ]);
-
     if (!userSnap.exists()) throw new Error("Student account profile is missing.");
-
     const userProfile = userSnap.data();
     if (userProfile.role !== "student") throw new Error("This account is not registered as a student.");
-
-    // Admission/account status is intentionally NOT an access gate here.
-    // Founder platform controls are enforced separately by watchPortalControl().
-    // A pending/incomplete admission must never be mistaken for a platform
-    // suspension and must never cause an automatic logout.
     if (!studentSnap.exists()) throw new Error("Student admission profile is missing.");
-
     state.userProfile = { id: uid, ...userProfile };
     state.profile = { id: uid, ...studentSnap.data() };
     return state.profile;
 }
 
 async function initializeShell() {
-    await loadSidebar().catch(error => console.error("[SSA] Sidebar failed:", error));
-    await loadTopbar().catch(error => console.error("[SSA] Topbar failed:", error));
+    // Sidebar and topbar are independent. Never make one wait for the other.
+    await Promise.all([
+        loadSidebar().catch(error => console.error("[SSA] Sidebar failed:", error)),
+        loadTopbar().catch(error => console.error("[SSA] Topbar failed:", error))
+    ]);
+
     highlightActivePage();
 
     const profile = await loadIdentity(state.user.uid);
-    updateSidebar?.(profile);
+    updateSidebar(profile);
+    updateTopbar(profile);
 
     window.ssaStudent = Object.freeze({
         get user() { return state.user; },
@@ -68,20 +66,20 @@ function startPortalControl() {
 }
 
 async function boot(user) {
-    if (!user) { window.location.replace("../login.html"); return; }
     state.user = user;
+    startPortalControl();
     try {
         await initializeShell();
-        startPortalControl();
-        console.log("🔥 SSA Student Portal ready:", user.email || user.uid);
+        window.dispatchEvent(new CustomEvent("ssa:student-ready", { detail: state.profile }));
     } catch (error) {
-        console.error("[SSA] Portal authorization failed:", error);
-        try { sessionStorage.setItem("ssaPortalNotice", error.message || "Unable to load your student profile."); } catch {}
-        try { await signOut(auth); } catch {}
-        window.location.replace("../login.html");
+        console.error("[SSA] Student portal initialization failed:", error);
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    onAuthStateChanged(auth, boot);
+onAuthStateChanged(auth, user => {
+    if (!user) {
+        window.location.replace("../login.html");
+        return;
+    }
+    boot(user);
 });
