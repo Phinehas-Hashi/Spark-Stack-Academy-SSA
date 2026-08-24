@@ -30,9 +30,14 @@ async function loadIdentity(uid) {
     ]);
 
     if (!userSnap.exists()) throw new Error("Student account profile is missing.");
+
     const userProfile = userSnap.data();
     if (userProfile.role !== "student") throw new Error("This account is not registered as a student.");
-    if (userProfile.status !== "active") throw new Error("Student admission is still pending Founder approval.");
+
+    // Admission/account status is intentionally NOT an access gate here.
+    // Founder platform controls are enforced separately by watchPortalControl().
+    // A pending/incomplete admission must never be mistaken for a platform
+    // suspension and must never cause an automatic logout.
     if (!studentSnap.exists()) throw new Error("Student admission profile is missing.");
 
     state.userProfile = { id: uid, ...userProfile };
@@ -71,7 +76,7 @@ async function boot(user) {
         console.log("🔥 SSA Student Portal ready:", user.email || user.uid);
     } catch (error) {
         console.error("[SSA] Portal authorization failed:", error);
-        try { sessionStorage.setItem("ssaPortalNotice", error.message || "Student access is not active yet."); } catch {}
+        try { sessionStorage.setItem("ssaPortalNotice", error.message || "Unable to load your student profile."); } catch {}
         try { await signOut(auth); } catch {}
         window.location.replace("../login.html");
     }
