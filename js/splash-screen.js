@@ -1,5 +1,5 @@
 const KEY="ssa:splash:v1";
-function loadStyles(){if(document.getElementById("ssaSplashStyles"))return;const link=document.createElement("link");link.id="ssaSplashStyles";link.rel="stylesheet";link.href="/css/splash-screen.css";document.head.appendChild(link)}
+function loadStyles(){if(document.getElementById("ssaSplashStyles"))return;const link=document.createElement("link");link.id="ssaSplashStyles";link.rel="stylesheet";link.href=new URL("../css/splash-screen.css", import.meta.url).href;document.head.appendChild(link)}
 function showSplash(){
  loadStyles();
  if(sessionStorage.getItem(KEY)) return;
