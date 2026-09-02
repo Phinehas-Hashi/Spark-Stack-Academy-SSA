@@ -1,34 +1,73 @@
-<style>
-/* SSA STUDENT SIDEBAR — premium mobile drawer */
-.sidebar.ssa-student-sidebar{width:280px;padding:18px 14px 14px;gap:0;background:linear-gradient(180deg,#071a38 0%,#0a2450 52%,#071a38 100%);border-right:1px solid rgba(255,255,255,.08);box-shadow:14px 0 40px rgba(8,28,58,.18);z-index:1200}
-.ssa-student-sidebar .sidebar-profile{position:relative;margin:2px 4px 18px;padding:15px;background:linear-gradient(135deg,rgba(41,121,255,.18),rgba(255,193,7,.07));border:1px solid rgba(255,255,255,.09);border-radius:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
-.ssa-student-sidebar .sidebar-avatar{width:46px;height:46px;border:2px solid rgba(255,255,255,.18);background:linear-gradient(135deg,#2979ff,#145bd1);box-shadow:0 8px 22px rgba(41,121,255,.28)}
-.ssa-student-sidebar .sidebar-profile h4{font-size:13px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:165px}.ssa-student-sidebar .sidebar-profile p{color:#aebfdf}
-.ssa-student-sidebar .sidebar-menu{gap:4px;overflow:visible}.ssa-student-sidebar .sidebar-link{min-height:44px;padding:11px 12px;border:1px solid transparent;color:#b9c8e4;border-radius:13px;font-weight:600;transition:all .18s ease;position:relative}.ssa-student-sidebar .sidebar-link i{color:#8fa8d1;transition:color .18s ease,transform .18s ease}.ssa-student-sidebar .sidebar-link:hover{transform:translateX(2px);color:#fff;background:rgba(255,255,255,.065);border-color:rgba(255,255,255,.07)}.ssa-student-sidebar .sidebar-link:hover i{color:#67a0ff;transform:scale(1.05)}.ssa-student-sidebar .sidebar-link.active{color:#fff;background:linear-gradient(90deg,rgba(41,121,255,.96),rgba(41,121,255,.68));border-color:rgba(125,174,255,.22);box-shadow:0 8px 22px rgba(41,121,255,.22)}.ssa-student-sidebar .sidebar-link.active i{color:#fff}.ssa-student-sidebar .sidebar-link.active::before{width:3px;height:62%;left:-1px;background:#ffc107;box-shadow:0 0 12px rgba(255,193,7,.55)}
-.ssa-student-sidebar .notification-dot{background:#ffc107;box-shadow:0 0 8px rgba(255,193,7,.6)}.ssa-student-sidebar .message-count{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);min-width:23px;text-align:center}.ssa-student-sidebar .sidebar-footer{margin:12px 4px 0;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}.ssa-student-sidebar .logout-btn{background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.08)!important;color:#b9c8e4!important;font-weight:700!important;transition:.18s ease!important}.ssa-student-sidebar .logout-btn:hover{background:rgba(239,68,68,.13)!important;border-color:rgba(248,113,113,.2)!important;color:#fecaca!important}
-/* The page owns #sidebarOverlay. Keeping a second overlay inside the injected sidebar caused duplicate IDs and inconsistent mobile stacking. */
-@media(max-width:900px){.sidebar.ssa-student-sidebar{position:fixed!important;top:0!important;bottom:0!important;left:0!important;width:min(292px,88vw)!important;height:100dvh!important;max-height:100dvh!important;overflow-y:auto!important;padding:18px 13px 14px!important;transform:translateX(-105%);visibility:hidden;opacity:1;transition:transform .24s cubic-bezier(.22,.8,.25,1),visibility 0s linear .24s;box-shadow:18px 0 50px rgba(0,0,0,.38)}.sidebar.ssa-student-sidebar.open{transform:translateX(0);visibility:visible;transition:transform .24s cubic-bezier(.22,.8,.25,1),visibility 0s}.ssa-student-sidebar .sidebar-menu{padding-bottom:12px}}
-</style>
-
 <div class="sidebar ssa-student-sidebar" id="sidebar">
     <div class="sidebar-profile">
         <div class="sidebar-avatar" id="sidebarAvatar">S</div>
-        <div><h4 id="sidebarName">Student</h4><p>Level <strong id="sidebarLevel">1</strong></p></div>
+        <div class="sidebar-profile-copy">
+            <h4 id="sidebarName">Student</h4>
+            <p>Level <strong id="sidebarLevel">1</strong></p>
+        </div>
     </div>
+
     <nav class="sidebar-menu" aria-label="Student navigation">
-        <a href="dashboard.html" class="sidebar-link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
-        <a href="courses.html" class="sidebar-link"><i data-lucide="book-open"></i><span>My Courses</span></a>
-        <a href="course-library.html" class="sidebar-link"><i data-lucide="search"></i><span>Course Library</span></a>
-        <a href="learning-progress.html" class="sidebar-link"><i data-lucide="chart-line"></i><span>Learning Progress</span></a>
-        <a href="quizzes.html" class="sidebar-link"><i data-lucide="clipboard-list"></i><span>Quizzes</span></a>
-        <a href="assignments.html" class="sidebar-link"><i data-lucide="clipboard-check"></i><span>Assignments</span></a>
-        <a href="certificates.html" class="sidebar-link"><i data-lucide="award"></i><span>Certificates</span></a>
-        <a href="achievements.html" class="sidebar-link"><i data-lucide="trophy"></i><span>Rewards &amp; Badges</span></a>
-        <a href="announcements.html" class="sidebar-link"><i data-lucide="megaphone"></i><span>Announcements</span><span class="notification-dot"></span></a>
-        <a href="messages.html" class="sidebar-link"><i data-lucide="message-circle"></i><span>Messages</span><span class="message-count" id="messageCount">0</span></a>
-        <a href="payments.html" class="sidebar-link"><i data-lucide="credit-card"></i><span>Payments</span></a>
-        <a href="profile.html" class="sidebar-link"><i data-lucide="user"></i><span>Profile</span></a>
-        <a href="settings.html" class="sidebar-link"><i data-lucide="settings"></i><span>Settings</span></a>
+        <a href="dashboard.html" class="sidebar-link">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="courses.html" class="sidebar-link">
+            <i data-lucide="book-open"></i>
+            <span>My Courses</span>
+        </a>
+        <a href="course-library.html" class="sidebar-link">
+            <i data-lucide="search"></i>
+            <span>Course Library</span>
+        </a>
+        <a href="learning-progress.html" class="sidebar-link">
+            <i data-lucide="chart-line"></i>
+            <span>Learning Progress</span>
+        </a>
+        <a href="quizzes.html" class="sidebar-link">
+            <i data-lucide="clipboard-list"></i>
+            <span>Quizzes</span>
+        </a>
+        <a href="assignments.html" class="sidebar-link">
+            <i data-lucide="clipboard-check"></i>
+            <span>Assignments</span>
+        </a>
+        <a href="certificates.html" class="sidebar-link">
+            <i data-lucide="award"></i>
+            <span>Certificates</span>
+        </a>
+        <a href="achievements.html" class="sidebar-link">
+            <i data-lucide="trophy"></i>
+            <span>Rewards &amp; Badges</span>
+        </a>
+        <a href="announcements.html" class="sidebar-link">
+            <i data-lucide="megaphone"></i>
+            <span>Announcements</span>
+            <span class="notification-dot" aria-hidden="true"></span>
+        </a>
+        <a href="messages.html" class="sidebar-link">
+            <i data-lucide="message-circle"></i>
+            <span>Messages</span>
+            <span class="message-count" id="messageCount">0</span>
+        </a>
+        <a href="payments.html" class="sidebar-link">
+            <i data-lucide="credit-card"></i>
+            <span>Payments</span>
+        </a>
+        <a href="profile.html" class="sidebar-link">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+        <a href="settings.html" class="sidebar-link">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+        </a>
     </nav>
-    <div class="sidebar-footer"><button class="logout-btn" id="logoutBtn"><i data-lucide="log-out"></i><span>Logout</span></button></div>
+
+    <div class="sidebar-footer">
+        <button class="logout-btn" id="logoutBtn" type="button">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+        </button>
+    </div>
 </div>
