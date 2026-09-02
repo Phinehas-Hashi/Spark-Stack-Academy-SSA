@@ -5,7 +5,7 @@
 - `founder` — Founder OS access and full founder controls.
 - `admin` — Admin/Moderator Console access.
 
-The normal web client must never be allowed to create or promote these roles. Firebase custom claims are assigned only by the Firebase Admin SDK from this trusted environment. Firebase documents custom claims as the mechanism for role-based access control and states that they must be set from a privileged server environment. citeturn0search4
+The normal web client must never be allowed to create or promote these roles. Custom claims are assigned only by the Firebase Admin SDK from this trusted environment.
 
 ## 1. Install the Admin SDK
 
