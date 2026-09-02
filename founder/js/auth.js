@@ -1,12 +1,10 @@
 // ==========================================
 // FOUNDER OS AUTH GUARD
-// Firebase Auth + Firestore only
+// Firebase Auth + Firestore
 // ==========================================
 
 import { auth, db } from "../../js/firebase.js";
-
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 onAuthStateChanged(auth, async (user) => {
@@ -18,8 +16,7 @@ onAuthStateChanged(auth, async (user) => {
     window.currentUser = user;
 
     try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+        const userSnap = await getDoc(doc(db, "users", user.uid));
 
         if (!userSnap.exists()) {
             console.error("Founder profile not found: users/" + user.uid);
@@ -29,8 +26,11 @@ onAuthStateChanged(auth, async (user) => {
 
         const founderData = userSnap.data();
 
-        if (founderData.role !== "founder" && founderData.role !== "admin") {
-            window.location.href = "../dashboard.html";
+        // Founder OS is founder-only. Admins use the Admin Console.
+        if (founderData.role !== "founder" || founderData.active === false) {
+            window.location.href = founderData.role === "admin"
+                ? "../admin/dashboard.html"
+                : "../login.html";
             return;
         }
 
