@@ -1,6 +1,6 @@
 // ============================================
 // SPARK STACK ACADEMY - login.js
-// DEBUG BUILD: exposes exact Firebase auth errors
+// DEBUG BUILD: exposes exact Firebase auth/profile errors
 // ============================================
 import { auth, db } from "./firebase.js";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, browserLocalPersistence, browserSessionPersistence, setPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -29,10 +29,10 @@ function showLoader(message="Signing you in..."){loader.classList.add("active");
 function hideLoader(){loader.classList.remove("active")}
 function showToast(message,type="success"){
  const toast=document.createElement("div");toast.className=`toast ${type}`;toast.innerHTML=`<strong>${message}</strong>`;toastContainer.appendChild(toast);
- setTimeout(()=>{toast.style.opacity="0";toast.style.transform="translateX(40px)";setTimeout(()=>toast.remove(),300)},5000);
+ setTimeout(()=>{toast.style.opacity="0";toast.style.transform="translateX(40px)";setTimeout(()=>toast.remove(),300)},7000);
 }
 function isValidEmail(email){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
-function redirectByRole(role){if(DASHBOARDS[role]){window.location.href=DASHBOARDS[role];return}hideLoader();showToast(`Unknown account role: ${role||"missing"}`,"error")}
+function redirectByRole(role){if(DASHBOARDS[role]){window.location.href=DASHBOARDS[role];return}hideLoader();showToast(`DIAGNOSTIC — Account role is: ${role===undefined?"UNDEFINED":JSON.stringify(role)}. Check the Firebase profile details shown above.` ,"error")}
 function disableButtons(){loginBtn.disabled=true;googleLoginBtn.disabled=true}
 function enableButtons(){loginBtn.disabled=false;googleLoginBtn.disabled=false}
 
@@ -60,9 +60,17 @@ loginForm.addEventListener("submit",async e=>{
   console.log("[SSA AUTH DEBUG] AUTH SUCCESS",{uid:user.uid,email:user.email,emailVerified:user.emailVerified,providerData:user.providerData});
   const userRef=doc(db,"users",user.uid);const userSnap=await getDoc(userRef);
   if(userSnap.exists()){
-   const userData=userSnap.data();console.log("[SSA AUTH DEBUG] FIRESTORE PROFILE",userData);
+   const userData=userSnap.data();
+   console.log("[SSA AUTH DEBUG] FIRESTORE PROFILE",userData);
+   console.log("[SSA AUTH DEBUG] PROFILE CHECK",{documentPath:`users/${user.uid}`,exists:true,uid:user.uid,email:user.email,profileUid:userData.uid||null,role:Object.prototype.hasOwnProperty.call(userData,"role")?userData.role:"<MISSING FIELD>",active:Object.prototype.hasOwnProperty.call(userData,"active")?userData.active:"<MISSING FIELD>",fullName:userData.fullName||null,projectId:auth.app.options.projectId});
    if(userData.active===false){hideLoader();enableButtons();return showToast("This account has been disabled.","error")}
-   await updateDoc(userRef,{lastLogin:serverTimestamp()});showToast(`Welcome back, ${userData.fullName||"User"}!`,"success");setTimeout(()=>redirectByRole(userData.role),1200);return;
+   await updateDoc(userRef,{lastLogin:serverTimestamp()});
+   if(!DASHBOARDS[userData.role]){
+     hideLoader();enableButtons();
+     showToast(`DIAGNOSTIC: role=${userData.role===undefined?"UNDEFINED":JSON.stringify(userData.role)} | UID=${user.uid} | profile exists=YES | project=${auth.app.options.projectId}`,"error");
+     return;
+   }
+   showToast(`Welcome back, ${userData.fullName||"User"}!`,"success");setTimeout(()=>redirectByRole(userData.role),1200);return;
   }
   const instructorSnap=await getDoc(doc(db,"instructors",user.uid));
   if(instructorSnap.exists()){
@@ -71,7 +79,7 @@ loginForm.addEventListener("submit",async e=>{
    await setDoc(userRef,{uid:user.uid,fullName:instructorData.name||user.displayName||"",email:instructorData.email||user.email||"",role:"instructor",active:true,verified:instructorData.verified===true,lastLogin:serverTimestamp(),createdAt:instructorData.createdAt||serverTimestamp()},{merge:true});
    showToast(`Welcome back, ${instructorData.name||"Instructor"}!`,"success");setTimeout(()=>redirectByRole("instructor"),1200);return;
   }
-  hideLoader();enableButtons();showToast("User profile not found.","error");
+  hideLoader();enableButtons();showToast(`DIAGNOSTIC: users/${user.uid} does NOT exist in Firestore. Project=${auth.app.options.projectId}`,"error");
  }catch(error){
   hideLoader();enableButtons();
   console.error("[SSA AUTH DEBUG] LOGIN FAILED",error);
