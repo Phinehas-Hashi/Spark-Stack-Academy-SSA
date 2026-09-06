@@ -45,6 +45,18 @@ async function loadIdentity(uid) {
 async function initializeStudentPortal(user) {
     state.user = user;
 
+    // Start the Firebase platform-control listener immediately. This is
+    // intentionally before profile loading so a founder suspension/lockdown
+    // can block an already-authenticated student even if another portal
+    // request is slow or fails.
+    if (!state.controlUnsubscribe) {
+        try {
+            state.controlUnsubscribe = watchPortalControl("student");
+        } catch (err) {
+            console.error("[SSA] Platform control listener failed:", err);
+        }
+    }
+
     // Load the drawer first, then the topbar controller. The two shells
     // share the sidebar/overlay DOM, so ordering prevents a mobile-menu
     // race where topbar.js initializes before sidebar.js has injected it.
@@ -57,11 +69,6 @@ async function initializeStudentPortal(user) {
     const profile = await loadIdentity(user.uid);
     updateSidebar(profile);
     updateTopbar(profile);
-
-    if (!state.controlUnsubscribe) {
-        try { state.controlUnsubscribe = watchPortalControl("student"); }
-        catch (err) { console.error("[SSA] Platform control listener failed:", err); }
-    }
 
     if (currentPage() === "dashboard.html") {
         updateDashboardUI(profile);
