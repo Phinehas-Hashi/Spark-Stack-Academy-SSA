@@ -1,10 +1,13 @@
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 
 initializeApp();
 const db = getFirestore();
+const adminAuth = getAuth();
 const platformRef = db.doc("systemConfig/platform");
 
 function safeText(value, fallback = "") { return String(value ?? fallback).trim(); }
@@ -12,6 +15,81 @@ function eventKey(event, suffix) {
   const raw = safeText(event.id || event.params?.docId || Date.now());
   return `${raw}-${suffix}`.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 140);
 }
+
+async function requireFounder(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "You must be signed in as a founder.");
+  const founder = await db.doc(`founder/${uid}`).get();
+  const data = founder.exists ? founder.data() : null;
+  if (!data || data.role !== "founder" || data.status !== "active") {
+    throw new HttpsError("permission-denied", "Only an active founder can create administrator accounts.");
+  }
+  return { uid, data };
+}
+
+exports.createAdminAccount = onCall(async request => {
+  const founder = await requireFounder(request);
+  const email = safeText(request.data?.email).toLowerCase();
+  const password = String(request.data?.password || "");
+  const fullName = safeText(request.data?.fullName);
+  const status = safeText(request.data?.status, "active").toLowerCase() === "active" ? "active" : "suspended";
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new HttpsError("invalid-argument", "Enter a valid administrator email address.");
+  }
+  if (password.length < 8) {
+    throw new HttpsError("invalid-argument", "Administrator passwords must be at least 8 characters.");
+  }
+  if (!fullName || fullName.length < 2) {
+    throw new HttpsError("invalid-argument", "Enter the administrator's full name.");
+  }
+
+  try {
+    const existing = await adminAuth.getUserByEmail(email).catch(error => {
+      if (error.code === "auth/user-not-found") return null;
+      throw error;
+    });
+    if (existing) throw new HttpsError("already-exists", "An account with that email already exists.");
+
+    const userRecord = await adminAuth.createUser({
+      email,
+      password,
+      displayName: fullName,
+      disabled: status !== "active",
+      emailVerified: false
+    });
+
+    const now = Timestamp.now();
+    await db.doc(`users/${userRecord.uid}`).set({
+      uid: userRecord.uid,
+      email,
+      fullName,
+      name: fullName,
+      role: "admin",
+      status,
+      active: status === "active",
+      verified: false,
+      createdAt: now,
+      createdBy: founder.uid,
+      updatedAt: now
+    });
+
+    await db.collection("audit_logs").add({
+      action: "admin_account_created",
+      actorId: founder.uid,
+      targetId: userRecord.uid,
+      targetEmail: email,
+      targetName: fullName,
+      createdAt: now
+    });
+
+    return { success: true, uid: userRecord.uid, message: `Administrator account created for ${fullName}.` };
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    console.error("createAdminAccount failed:", error);
+    throw new HttpsError("internal", "The administrator account could not be created. Please try again.");
+  }
+});
 
 async function writeNotification({ event, recipientId = null, role = null, audience = "user", title, message, type = "general", priority = "normal", metadata = {} }) {
   const id = eventKey(event, recipientId || role || audience);
@@ -107,7 +185,6 @@ exports.notifyCourseCreated = onDocumentCreated("courses/{courseId}", async even
   const title = course.title || course.name || "New course";
   const courseId = event.params.courseId;
 
-  // A newly created course has no enrollments yet, so notify the student role.
   await writeNotification({ event, role: "student", audience: "role", title: "📚 New course available", message: `${title} is now available in Spark Stack Academy.`, type: "course", metadata: { courseId, courseName: title } });
   await notifyLeadership(event, "📚 New course added", `${title} has been added to the academy catalog.`, "course", { courseId, courseName: title });
 });
