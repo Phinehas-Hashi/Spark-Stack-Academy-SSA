@@ -66,7 +66,7 @@
 <button type="button" class="founder-command" id="viewRevenueBtn"><i data-lucide="bar-chart-3"></i><span>Revenue</span></button>
 <button type="button" class="founder-command" id="viewReportsBtn"><i data-lucide="shield-alert"></i><span>Moderation</span></button>
 <button type="button" class="founder-command" id="openSettingsBtn"><i data-lucide="settings"></i><span>Settings</span></button>
-<button type="button" class="founder-command founder-admin-command" id="createAdminBtn"><i data-lucide="user-plus"></i><span>Create Admin</span></button>
+<button type="button" class="founder-command founder-admin-command" id="createAdminBtn"><i data-lucide="user-plus"></i><span>Admin Management</span></button>
 </div></section>
 <section class="founder-panel activity-panel"><div class="founder-panel-header"><div><span class="founder-eyebrow">LIVE INTELLIGENCE</span><h2>Recent Platform Activity</h2></div><button type="button" class="founder-text-link" id="viewAllActivityBtn">View All</button></div><div id="founderActivityList" class="founder-activity-list"><div class="founder-loading"><div class="loading-spinner"></div><span>Loading platform activity...</span></div></div></section>
 </section>
@@ -75,19 +75,25 @@
 
 <div class="founder-modal" id="createAdminModal" aria-hidden="true">
 <div class="founder-modal-backdrop" data-close-admin-modal></div>
-<section class="founder-modal-card" role="dialog" aria-modal="true" aria-labelledby="createAdminTitle">
+<section class="founder-modal-card admin-management-modal" role="dialog" aria-modal="true" aria-labelledby="createAdminTitle">
 <button type="button" class="founder-modal-close" data-close-admin-modal aria-label="Close"><i data-lucide="x"></i></button>
 <div class="founder-modal-icon"><i data-lucide="shield-plus"></i></div>
-<span class="founder-eyebrow">PRIVILEGED ACCESS</span>
-<h2 id="createAdminTitle">Create Administrator</h2>
-<p class="founder-modal-description">Create a moderator account securely from the Founder Console. The administrator will receive access to the Admin Dashboard.</p>
-<form id="createAdminForm" novalidate>
-<label>Full name<input id="adminFullName" name="fullName" type="text" autocomplete="name" placeholder="e.g. Jane Wanjiku" required></label>
-<label>Email address<input id="adminEmail" name="email" type="email" autocomplete="email" placeholder="admin@example.com" required></label>
-<label>Temporary password<input id="adminPassword" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required><small>The administrator can change it after signing in.</small></label>
+<span class="founder-eyebrow">SPARK PLAN · SECURE PROVISIONING</span>
+<h2 id="createAdminTitle">Admin Management</h2>
+<p class="founder-modal-description">Firebase Spark does not provide a trusted server environment for this action. This workflow keeps your security rules locked while guiding you through the official Firebase Console provisioning process.</p>
+
+<div class="admin-security-note"><i data-lucide="shield-check"></i><div><strong>Privilege escalation blocked</strong><span>The Founder Console never writes <code>role: admin</code> from the browser.</span></div></div>
+
+<div class="admin-steps">
+<article class="admin-step"><span>01</span><div><strong>Create the Auth account</strong><p>Open Firebase Authentication and choose <b>Add user</b>. Enter the administrator's email and a temporary password.</p><a class="founder-btn secondary admin-console-link" href="https://console.firebase.google.com/project/spark-stack-academy/authentication/users" target="_blank" rel="noopener">Open Authentication <i data-lucide="external-link"></i></a></div></article>
+<article class="admin-step"><span>02</span><div><strong>Create the admin profile</strong><p>Copy the new user's UID. In Firestore, create <code>users/{UID}</code> with <code>role: "admin"</code>, plus the administrator's <code>fullName</code>, <code>email</code> and <code>status: "active"</code>.</p><a class="founder-btn secondary admin-console-link" href="https://console.firebase.google.com/project/spark-stack-academy/firestore/data/~2Fusers" target="_blank" rel="noopener">Open Firestore <i data-lucide="external-link"></i></a></div></article>
+<article class="admin-step"><span>03</span><div><strong>Verify the account</strong><p>After saving the profile, the administrator can sign in through the normal login page. This dashboard will recognize the account as an Admin.</p><button type="button" class="founder-btn primary" id="refreshAdminList"><i data-lucide="refresh-cw"></i> Refresh Admin Directory</button></div></article>
+</div>
+
+<div class="admin-directory"><div class="admin-directory-header"><div><span class="founder-eyebrow">AUTHORIZED ADMINS</span><h3>Admin Directory</h3></div><span id="adminCount" class="admin-count">0</span></div><div id="adminDirectoryList" class="admin-directory-list"><p class="founder-empty-state">No administrator profiles found.</p></div></div>
+
 <div id="createAdminMessage" class="founder-form-message" role="status" aria-live="polite"></div>
-<div class="founder-modal-actions"><button type="button" class="founder-btn secondary" data-close-admin-modal>Cancel</button><button type="submit" class="founder-btn primary" id="submitCreateAdmin"><i data-lucide="user-plus"></i>Create Administrator</button></div>
-</form>
+<div class="founder-modal-actions"><button type="button" class="founder-btn secondary" data-close-admin-modal>Done</button></div>
 </section>
 </div>
 
