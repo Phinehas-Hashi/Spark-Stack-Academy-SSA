@@ -1,49 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Instructor Dashboard | Spark Stack Academy</title>
-<link rel="stylesheet" href="css/instructor-core.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/responsive.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body>
-<div class="instructor-app">
-<aside id="instructorSidebar" class="instructor-sidebar"></aside>
-<div id="sidebarOverlay" class="sidebar-overlay"></div>
-<main class="instructor-main">
-<header id="instructorTopbar" class="instructor-topbar"></header>
-<section class="dashboard-page">
-<div class="dashboard-hero">
-<div class="hero-content"><span class="dashboard-eyebrow">INSTRUCTOR WORKSPACE</span><h1>Welcome back, <span id="instructorName">Instructor</span> 👋</h1><p>Manage your courses, students, content and teaching performance from one place.</p></div>
-<div class="hero-actions"><button id="viewStudentsBtn" class="dashboard-btn secondary"><i data-lucide="users"></i> Students</button><button id="createCourseBtn" class="dashboard-btn primary"><i data-lucide="plus"></i> Create Course</button></div>
-</div>
-<section class="stats-grid">
-<article class="dashboard-stat"><div class="stat-icon blue"><i data-lucide="book-open"></i></div><div class="stat-info"><span>My Courses</span><strong id="statCourses">0</strong></div></article>
-<article class="dashboard-stat"><div class="stat-icon purple"><i data-lucide="users"></i></div><div class="stat-info"><span>Total Students</span><strong id="statStudents">0</strong></div></article>
-<article class="dashboard-stat"><div class="stat-icon gold"><i data-lucide="trending-up"></i></div><div class="stat-info"><span>Avg. Progress</span><strong id="statProgress">0%</strong></div></article>
-<article class="dashboard-stat"><div class="stat-icon green"><i data-lucide="award"></i></div><div class="stat-info"><span>Completions</span><strong id="statCompletions">0</strong></div></article>
-<article class="dashboard-stat earnings-stat"><div class="stat-icon navy"><i data-lucide="wallet"></i></div><div class="stat-info"><span>Earnings</span><strong id="statEarnings">KSh 0</strong></div></article>
-</section>
-<div class="dashboard-grid">
-<section class="dashboard-card courses-card"><div class="card-header"><div><span>TEACHING</span><h2>My Courses</h2></div><a href="courses.html" class="card-link">View All <i data-lucide="arrow-right"></i></a></div><div id="courseList" class="course-list"><div class="empty-state"><div class="empty-icon"><i data-lucide="book-open"></i></div><h3>No courses yet</h3><p>Create your first course and start teaching.</p><button id="emptyCreateCourseBtn" class="empty-action"><i data-lucide="plus"></i> Create Course</button></div></div></section>
-<section class="dashboard-card"><div class="card-header"><div><span>TOOLS</span><h2>Quick Actions</h2></div></div><div class="quick-actions"><button class="quick-action" data-action="course"><div class="quick-icon blue"><i data-lucide="plus-circle"></i></div><div><strong>Create Course</strong><span>Start a new course</span></div><i data-lucide="arrow-up-right"></i></button><button class="quick-action" data-action="lesson"><div class="quick-icon purple"><i data-lucide="file-plus-2"></i></div><div><strong>Add Lesson</strong><span>Create learning content</span></div><i data-lucide="arrow-up-right"></i></button><button class="quick-action" data-action="assignment"><div class="quick-icon gold"><i data-lucide="clipboard-list"></i></div><div><strong>Assignment</strong><span>Give students work</span></div><i data-lucide="arrow-up-right"></i></button><button class="quick-action" data-action="quiz"><div class="quick-icon green"><i data-lucide="brain"></i></div><div><strong>Create Quiz</strong><span>Test student knowledge</span></div><i data-lucide="arrow-up-right"></i></button><button class="quick-action" data-action="announcement"><div class="quick-icon red"><i data-lucide="megaphone"></i></div><div><strong>Announcement</strong><span>Notify your students</span></div><i data-lucide="arrow-up-right"></i></button></div></section>
-</div>
-<div class="dashboard-grid lower-grid">
-<section class="dashboard-card"><div class="card-header"><div><span>STUDENTS</span><h2>Recent Activity</h2></div><a href="students.html" class="card-link">View Students <i data-lucide="arrow-right"></i></a></div><div id="activityList" class="activity-list"><div class="empty-state small"><div class="empty-icon"><i data-lucide="activity"></i></div><p>Student activity will appear here.</p></div></div></section>
-<section class="dashboard-card"><div class="card-header"><div><span>WORKSPACE</span><h2>Upcoming Tasks</h2></div></div><div id="upcomingTasks" class="task-list"><div class="empty-state small"><div class="empty-icon"><i data-lucide="check-circle"></i></div><p>No pending tasks.</p></div></div></section>
-</div>
 <section class="dashboard-card performance-card"><div class="card-header"><div><span>PERFORMANCE</span><h2>Teaching Overview</h2></div><a href="analytics.html" class="card-link">View Analytics <i data-lucide="arrow-right"></i></a></div><div class="performance-grid"><div class="performance-item"><span>Student Engagement</span><strong id="engagementPercent">0%</strong><div class="progress-track"><div id="engagementBar" class="progress-fill"></div></div></div><div class="performance-item"><span>Course Completion</span><strong id="completionPercent">0%</strong><div class="progress-track"><div id="completionBar" class="progress-fill"></div></div></div><div class="performance-item"><span>Student Satisfaction</span><strong id="satisfactionPercent">0%</strong><div class="progress-track"><div id="satisfactionBar" class="progress-fill"></div></div></div></div></section>
 </section>
 </main>
 </div>
-<script type="module" src="js/platform-gate.js"></script>
 <script type="module" src="js/instructor-app.js"></script>
 <script type="module" src="js/dashboard.js"></script>
 <script>lucide.createIcons();</script>
