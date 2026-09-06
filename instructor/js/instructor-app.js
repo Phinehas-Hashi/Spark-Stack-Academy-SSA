@@ -83,7 +83,7 @@ async function loadComponent(container, path) {
     } catch (error) {
 
         console.error(
-            "❌ Failed loading:",
+            "❌ Component load failed:",
             path,
             error
         );
@@ -95,45 +95,23 @@ async function loadComponent(container, path) {
 }
 
 
-// ============================================================
-// LOAD SHELL
-// ============================================================
-
 async function loadShell() {
 
-    console.log("🚀 Loading instructor shell...");
+    await loadComponent(
+        sidebar,
+        "components/sidebar.html"
+    );
 
-
-    await Promise.all([
-
-        loadComponent(
-            sidebar,
-            "components/sidebar.html"
-        ),
-
-        loadComponent(
-            topbar,
-            "components/topbar.html"
-        )
-
-    ]);
-
-
-    // IMPORTANT:
-    // Components are now inside the DOM.
-
-    setupMobileSidebar();
-
-    setupLogout();
-
-    setupNotifications();
-
-    updateActiveLink();
+    await loadComponent(
+        topbar,
+        "components/topbar.html"
+    );
 
     refreshIcons();
 
+    initSidebar();
 
-    console.log("✓ Instructor shell ready");
+    initTopbar();
 
 }
 
@@ -142,270 +120,59 @@ async function loadShell() {
 // SIDEBAR
 // ============================================================
 
-function setupMobileSidebar() {
+function initSidebar() {
 
-    const menuButton =
-        document.getElementById("instructorMenuBtn");
+    if (!overlay) return;
 
-    const sidebar =
-        document.getElementById("instructorSidebar");
+    document.addEventListener("click", event => {
 
-    const overlay =
-        document.getElementById("sidebarOverlay");
+        const toggle =
+            event.target.closest("[data-sidebar-toggle]");
 
+        if (toggle) {
 
-    // OPEN
-    menuButton?.addEventListener(
-        "click",
-        (event) => {
-
-            event.stopPropagation();
-
-            openSidebar();
-
-        }
-    );
-
-
-    // CLOSE WHEN TAPPING OVERLAY
-    overlay?.addEventListener(
-        "click",
-        closeSidebar
-    );
-
-
-    // CLOSE WHEN TAPPING ANYTHING OUTSIDE SIDEBAR
-    document.addEventListener(
-        "click",
-        (event) => {
-
-            if (!sidebar?.classList.contains("open")) {
-                return;
-            }
-
-            const clickedInsideSidebar =
-                sidebar.contains(event.target);
-
-            const clickedMenuButton =
-                menuButton?.contains(event.target);
-
-            if (
-                !clickedInsideSidebar &&
-                !clickedMenuButton
-            ) {
-
-                closeSidebar();
-
-            }
-
-        }
-    );
-
-
-    // CLOSE WITH ESC
-    document.addEventListener(
-        "keydown",
-        (event) => {
-
-            if (event.key === "Escape") {
-
-                closeSidebar();
-
-            }
-
-        }
-    );
-
-
-    // CLOSE AFTER NAVIGATION
-    sidebar?.querySelectorAll(".nav-link")
-        .forEach(link => {
-
-            link.addEventListener(
-                "click",
-                closeSidebar
+            document.body.classList.toggle(
+                "sidebar-open"
             );
 
-        });
+        }
 
-}
-// ============================================================
-// TOGGLE
-// ============================================================
+        if (
+            event.target === overlay ||
+            event.target.closest(".sidebar-link")
+        ) {
 
-function toggleSidebar() {
-
-    if (
-        sidebar?.classList.contains("open")
-    ) {
-
-        closeSidebar();
-
-    } else {
-
-        openSidebar();
-
-    }
-
-}
-
-
-// ============================================================
-// OPEN
-// ============================================================
-
-function openSidebar() {
-
-    sidebar?.classList.add("open");
-
-    overlay?.classList.add("active");
-
-    document.body.classList.add(
-        "sidebar-open"
-    );
-
-
-    console.log(
-        "📂 SIDEBAR OPENED"
-    );
-
-}
-
-
-// ============================================================
-// CLOSE
-// ============================================================
-
-function closeSidebar() {
-
-    const sidebar =
-        document.getElementById("instructorSidebar");
-
-    const overlay =
-        document.getElementById("sidebarOverlay");
-
-
-    sidebar?.classList.remove("open");
-
-    overlay?.classList.remove("active");
-
-    document.body.classList.remove("sidebar-open");
-
-    document.body.style.overflow = "";
-
-}
-
-
-// ============================================================
-// ACTIVE LINK
-// ============================================================
-
-function updateActiveLink() {
-
-    const currentPage =
-        window.location.pathname
-            .split("/")
-            .pop()
-            .toLowerCase();
-
-
-    sidebar
-        ?.querySelectorAll(".nav-link")
-        .forEach(link => {
-
-            const href =
-                link.getAttribute("href");
-
-            if (!href) return;
-
-
-            const page =
-                href
-                    .split("/")
-                    .pop()
-                    .split("?")[0]
-                    .toLowerCase();
-
-
-            link.classList.toggle(
-                "active",
-                page === currentPage
+            document.body.classList.remove(
+                "sidebar-open"
             );
 
-        });
+        }
+
+    });
 
 }
 
 
 // ============================================================
-// LOGOUT
+// TOPBAR
 // ============================================================
 
-function setupLogout() {
+function initTopbar() {
 
-    document.addEventListener(
-        "click",
-        async event => {
+    document.addEventListener("click", event => {
 
-            const button =
-                event.target.closest(
-                    "#instructorLogoutBtn"
-                );
+        const profile =
+            event.target.closest("[data-profile-menu]");
 
+        if (profile) {
 
-            if (!button) return;
-
-
-            try {
-
-                button.disabled = true;
-
-                await signOut(auth);
-
-                window.location.href =
-                    LOGIN_PAGE;
-
-            } catch (error) {
-
-                console.error(
-                    "Logout failed:",
-                    error
-                );
-
-                button.disabled = false;
-
-            }
+            document.body.classList.toggle(
+                "profile-menu-open"
+            );
 
         }
-    );
 
-}
-
-
-// ============================================================
-// NOTIFICATIONS
-// ============================================================
-
-function setupNotifications() {
-
-    const button =
-        document.getElementById(
-            "notificationBtn"
-        );
-
-
-    if (!button) return;
-
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            window.location.href =
-                "notifications.html";
-
-        }
-    );
+    });
 
 }
 
@@ -422,171 +189,66 @@ function initAuth() {
 
             if (!user) {
 
-                window.location.href =
-                    LOGIN_PAGE;
+                window.location.replace(
+                    LOGIN_PAGE
+                );
 
                 return;
 
             }
 
-
             try {
 
-                const ref =
-                    doc(
-                        db,
-                        "users",
-                        user.uid
-                    );
-
-
-                const snapshot =
-                    await getDoc(ref);
-
-
-                const data =
-                    snapshot.exists()
-                        ? snapshot.data()
-                        : {};
-
-
-                window.currentInstructor = {
-
-                    uid: user.uid,
-
-                    email:
-                        user.email || "",
-
-                    displayName:
-                        data.displayName ||
-                        data.name ||
-                        user.displayName ||
-                        "Instructor",
-
-                    ...data
-
-                };
-
-
-                updateInstructorUI(
-                    window.currentInstructor
+                const snap = await getDoc(
+                    doc(db, "users", user.uid)
                 );
 
+                if (!snap.exists()) {
 
-                refreshIcons();
+                    throw new Error(
+                        "Instructor profile not found."
+                    );
 
+                }
+
+                const data = snap.data();
+
+                if (data.role !== "instructor") {
+
+                    throw new Error(
+                        "This account is not registered as an instructor."
+                    );
+
+                }
+
+                console.log(
+                    "✓ Instructor authenticated:",
+                    user.uid
+                );
+
+                document.body.classList.add(
+                    "instructor-authenticated"
+                );
 
             } catch (error) {
 
                 console.error(
-                    "❌ Instructor auth error:",
+                    "❌ Instructor authentication failed:",
                     error
+                );
+
+                try {
+                    await signOut(auth);
+                } catch {}
+
+                window.location.replace(
+                    LOGIN_PAGE
                 );
 
             }
 
         }
     );
-
-}
-
-
-// ============================================================
-// UPDATE PROFILE
-// ============================================================
-
-function updateInstructorUI(
-    instructor
-) {
-
-    const name =
-        instructor.displayName ||
-        "Instructor";
-
-
-    const initials =
-        getInitials(name);
-
-
-    setText(
-        "sidebarInstructorName",
-        name
-    );
-
-
-    setText(
-        "topbarInstructorName",
-        name
-    );
-
-
-    setText(
-        "sidebarInstructorAvatar",
-        initials
-    );
-
-
-    setText(
-        "topbarInstructorAvatar",
-        initials
-    );
-
-
-    setText(
-        "instructorName",
-        name
-    );
-
-}
-
-
-// ============================================================
-// INITIALS
-// ============================================================
-
-function getInitials(name) {
-
-    const parts =
-        String(name)
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
-
-
-    if (!parts.length) return "I";
-
-    if (parts.length === 1) {
-
-        return parts[0]
-            .charAt(0)
-            .toUpperCase();
-
-    }
-
-
-    return (
-        parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
-    ).toUpperCase();
-
-}
-
-
-// ============================================================
-// HELPER
-// ============================================================
-
-function setText(id, value) {
-
-    const element =
-        document.getElementById(id);
-
-
-    if (element) {
-
-        element.textContent = value;
-
-    }
 
 }
 
@@ -616,12 +278,14 @@ function refreshIcons() {
 
 async function boot() {
 
+    // Start Founder platform controls before shell/auth work so a live
+    // suspension or lockdown can block an already-authenticated instructor
+    // immediately, even if component loading is slow.
+    watchPortalControl("instructor");
+
     await loadShell();
 
     initAuth();
-
-    // Listen for Founder Command Center controls
-    watchPortalControl("instructor");
 
 }
 
