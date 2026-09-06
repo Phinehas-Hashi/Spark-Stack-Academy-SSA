@@ -1,10 +1,7 @@
 import "../js/founder-app.js";
 import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc,
-  query, orderBy, serverTimestamp, runTransaction
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, query, orderBy, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 let currentUser = null;
@@ -12,176 +9,32 @@ let wallets = [];
 let transactions = [];
 let auditLogs = [];
 let selectedWallet = null;
-let financeSecurity = {
-  withdrawalLimit: 50000,
-  treasuryLocked: false,
-  freezeWallets: false,
-  auditNotifications: true
-};
-
+let financeSecurity = { withdrawalLimit: 50000, treasuryLocked: false, freezeWallets: false, auditNotifications: true };
 const money = value => `KES ${Number(value || 0).toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const date = value => {
-  if (!value) return "—";
-  try { const d = value?.toDate ? value.toDate() : new Date(value); return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString("en-KE", { dateStyle: "medium", timeStyle: "short" }); }
-  catch { return "—"; }
-};
+const date = value => { if (!value) return "—"; try { const d = value?.toDate ? value.toDate() : new Date(value); return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString("en-KE", { dateStyle: "medium", timeStyle: "short" }); } catch { return "—"; } };
 const esc = value => String(value ?? "").replace(/[&<>\"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#039;" }[c]));
-
-function toast(message, type = "success") {
-  let el = $("financeToast");
-  if (!el) { el = document.createElement("div"); el.id = "financeToast"; el.className = "finance-toast"; document.body.appendChild(el); }
-  el.textContent = message; el.className = `finance-toast visible ${type}`;
-  clearTimeout(el._timer); el._timer = setTimeout(() => el.classList.remove("visible"), 3200);
-}
-
-async function verifyFounder(user) {
-  const snap = await getDoc(doc(db, "founder", user.uid));
-  const data = snap.exists() ? snap.data() : {};
-  if (!snap.exists() || data.role !== "founder" || data.status !== "active") {
-    toast("Founder authorization required", "error");
-    setTimeout(() => { location.href = "../dashboard.html"; }, 900);
-    return false;
-  }
-  return true;
-}
-
-async function ensureTreasury() {
-  const ref = doc(db, "finance", "treasury");
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    const initial = { balance:0, reservedFunds:0, monthlyRevenue:0, pendingWithdrawals:0, createdAt:serverTimestamp(), updatedAt:serverTimestamp() };
-    await setDoc(ref, initial);
-    return { ...initial, balance:0, reservedFunds:0, monthlyRevenue:0, pendingWithdrawals:0 };
-  }
-  return snap.data();
-}
-
-function renderTreasury(data) {
-  const balance = Number(data.balance || 0), reserved = Number(data.reservedFunds || 0), revenue = Number(data.monthlyRevenue || 0), pending = Number(data.pendingWithdrawals || 0);
-  if ($("treasuryBalance")) $("treasuryBalance").textContent = money(balance);
-  if ($("treasuryAvailable")) $("treasuryAvailable").textContent = money(balance);
-  if ($("reservedFunds")) $("reservedFunds").textContent = money(reserved);
-  if ($("monthlyRevenue")) $("monthlyRevenue").textContent = money(revenue);
-  if ($("pendingWithdrawals")) $("pendingWithdrawals").textContent = money(pending);
-  if ($("lastReconciliation")) $("lastReconciliation").textContent = date(data.lastReconciliationAt);
-  if ($("treasuryStatus")) { $("treasuryStatus").textContent = financeSecurity.treasuryLocked ? "Locked" : "Secure"; $("treasuryStatus").className = `status ${financeSecurity.treasuryLocked ? "danger" : "connected"}`; }
-}
-
-async function loadTreasury() {
-  try { renderTreasury(await ensureTreasury()); }
-  catch (e) { console.error(e); toast("Unable to load treasury", "error"); }
-}
-
-async function loadSecurity() {
-  try {
-    const snap = await getDoc(doc(db, "finance", "security"));
-    if (snap.exists()) financeSecurity = { ...financeSecurity, ...snap.data() };
-    if ($("approvalLimit")) $("approvalLimit").value = Number(financeSecurity.withdrawalLimit || 50000);
-    if ($("lockTreasury")) $("lockTreasury").checked = !!financeSecurity.treasuryLocked;
-    if ($("freezeWallets")) $("freezeWallets").checked = !!financeSecurity.freezeWallets;
-    if ($("auditNotifications")) $("auditNotifications").checked = financeSecurity.auditNotifications !== false;
-  } catch (e) { console.error("Finance security load failed:", e); }
-}
-
-async function loadPendingWithdrawals() {
-  try {
-    const snap = await getDocs(query(collection(db, "withdrawalRequests"), orderBy("createdAt", "desc")));
-    const pending = snap.docs.map(d => d.data()).filter(x => String(x.status || "pending").toLowerCase() === "pending").reduce((sum, x) => sum + Number(x.amount || 0), 0);
-    if ($("pendingWithdrawals")) $("pendingWithdrawals").textContent = money(pending);
-  } catch (e) { console.error("Pending withdrawals load failed:", e); }
-}
-
-async function loadWallets() {
-  try {
-    const snap = await getDocs(collection(db, "instructorWallets"));
-    wallets = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-    const total = wallets.reduce((sum, x) => sum + Number(x.balance || 0), 0);
-    if ($("instructorBalance")) $("instructorBalance").textContent = money(total);
-    renderWallets();
-  } catch (e) { console.error(e); toast("Unable to load instructor wallets", "error"); }
-}
-
-function renderWallets() {
-  const table = $("instructorWalletTable"); if (!table) return;
-  const term = ($("walletSearch")?.value || "").trim().toLowerCase(), filter = $("walletFilter")?.value || "all";
-  const list = wallets.filter(w => {
-    const status = String(w.status || "active").toLowerCase();
-    const text = `${w.name || ""} ${w.email || ""} ${w.instructorId || ""} ${w.walletId || w.id}`.toLowerCase();
-    return (!term || text.includes(term)) && (filter === "all" || (filter === "empty" ? Number(w.balance || 0) === 0 : status === filter));
-  });
-  table.innerHTML = list.length ? list.map(w => `<tr><td>${esc(w.name || w.email || "Instructor")}</td><td>${esc(w.instructorId || w.staffId || "—")}</td><td>${esc(w.walletId || w.id)}</td><td><strong>${money(w.balance)}</strong></td><td><span class="status ${esc(String(w.status || "active").toLowerCase())}">${esc(w.status || "active")}</span></td><td>${date(w.updatedAt || w.lastTransactionAt)}</td><td><button class="action-btn" data-wallet="${esc(w.id)}">Manage</button></td></tr>`).join("") : `<tr><td colspan="7" class="empty-table">No instructor wallets found.</td></tr>`;
-}
-
-async function loadTransactions() {
-  try { const snap = await getDocs(query(collection(db, "financeTransactions"), orderBy("createdAt", "desc"))); transactions = snap.docs.map(d => ({ id:d.id, ...d.data() })); renderTransactions(); }
-  catch (e) { console.error("Transaction history load failed:", e); }
-}
-function renderTransactions() {
-  const table = $("transactionHistoryTable"); if (!table) return;
-  const term = ($("transactionHistorySearch")?.value || "").trim().toLowerCase(), filter = $("transactionHistoryFilter")?.value || "all";
-  const list = transactions.filter(x => (filter === "all" || String(x.type || "").toLowerCase() === filter) && (!term || JSON.stringify(x).toLowerCase().includes(term)));
-  table.innerHTML = list.length ? list.map(x => `<tr><td>${esc(x.transactionId || x.id)}</td><td>${esc(x.type || "—")}</td><td>${esc(x.from || "—")}</td><td>${esc(x.to || "—")}</td><td>${money(x.amount)}</td><td>${esc(x.status || "—")}</td><td>${esc(x.approvedBy || "—")}</td><td>${date(x.createdAt)}</td><td>—</td></tr>`).join("") : `<tr><td colspan="9" class="empty-table">No financial transactions found.</td></tr>`;
-}
-
-async function loadAuditLogs() {
-  try { const snap = await getDocs(query(collection(db, "audit_logs"), orderBy("createdAt", "desc"))); auditLogs = snap.docs.map(d => ({ id:d.id, ...d.data() })).slice(0, 50); const list = $("auditList"); if (list) list.innerHTML = auditLogs.length ? auditLogs.map(x => `<div class="audit-item"><div class="audit-icon">🛡</div><div><h4>${esc(x.action || "Security event")}</h4><p>${esc(x.details || x.target || "—")}</p><small>${date(x.createdAt)}</small></div></div>`).join("") : `<div class="audit-item"><div class="audit-icon">🔒</div><div><h4>System Ready</h4><p>No financial audit activity yet.</p></div></div>`; }
-  catch (e) { console.error("Audit log load failed:", e); }
-}
-
-async function saveSecuritySettings() {
-  if (!currentUser) return;
-  const limit = Math.max(0, Number($("approvalLimit")?.value || 50000));
-  const next = { withdrawalLimit:limit, treasuryLocked:!!$("lockTreasury")?.checked, freezeWallets:!!$("freezeWallets")?.checked, auditNotifications:!!$("auditNotifications")?.checked, updatedAt:serverTimestamp(), updatedBy:currentUser.uid };
-  try { await setDoc(doc(db, "finance", "security"), next, { merge:true }); financeSecurity = { ...financeSecurity, ...next }; renderTreasury(await ensureTreasury()); await addDoc(collection(db, "audit_logs"), { user:currentUser.uid, role:"founder", action:"finance_security_updated", target:"finance/security", details:`Limit ${money(limit)} • Treasury ${next.treasuryLocked ? "locked" : "unlocked"} • Wallet freeze ${next.freezeWallets ? "enabled" : "disabled"}`, createdAt:serverTimestamp() }); toast("Finance security settings saved"); await loadAuditLogs(); }
-  catch (e) { console.error(e); toast("Unable to save security settings", "error"); }
-}
-
-function openWallet(id) { selectedWallet = wallets.find(w => w.id === id); if (!selectedWallet) return; $("walletModal")?.classList.add("open"); }
-function closeWallet() { $("walletModal")?.classList.remove("open"); selectedWallet = null; }
-
-async function confirmWalletAction() {
-  if (!selectedWallet || !currentUser) return;
-  if (financeSecurity.treasuryLocked) { toast("Treasury is locked. Wallet operations are disabled.", "error"); return; }
-  const action = $("walletAction")?.value, amount = Number($("walletAmount")?.value || 0), reason = ($("walletReason")?.value || "").trim();
-  if (["credit","debit"].includes(action) && (!Number.isFinite(amount) || amount <= 0)) { toast("Enter a valid amount", "error"); return; }
-  if (!reason) { toast("A reason is required", "error"); return; }
-  const ref = doc(db, "instructorWallets", selectedWallet.id);
-  try {
-    await runTransaction(db, async tx => {
-      const snap = await tx.get(ref); if (!snap.exists()) throw new Error("Wallet no longer exists.");
-      const data = snap.data(), balance = Number(data.balance || 0), next = action === "credit" ? balance + amount : action === "debit" ? balance - amount : balance;
-      if (action === "debit" && next < 0) throw new Error("Insufficient wallet balance.");
-      const status = action === "freeze" ? "frozen" : action === "unfreeze" ? "active" : String(data.status || "active");
-      tx.update(ref, { balance:next, status, updatedAt:serverTimestamp(), lastTransactionAt:serverTimestamp() });
-    });
-    await addDoc(collection(db, "walletActions"), { walletId:selectedWallet.id, instructorId:selectedWallet.instructorId || selectedWallet.userId || selectedWallet.id, action, amount:["credit","debit"].includes(action) ? amount : 0, reason, performedBy:currentUser.uid, createdAt:serverTimestamp() });
-    await addDoc(collection(db, "audit_logs"), { user:currentUser.uid, role:"founder", action:`wallet_${action}`, target:selectedWallet.id, details:`${money(amount)} • ${reason}`, createdAt:serverTimestamp() });
-    toast("Wallet operation completed"); closeWallet(); await Promise.all([loadWallets(), loadTransactions(), loadAuditLogs()]);
-  } catch (e) { console.error(e); toast(e.message || "Wallet operation failed", "error"); }
-}
-
-function exportRows(filename, rows) {
-  const csv = rows.map(row => row.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], { type:"text/csv;charset=utf-8" }), url = URL.createObjectURL(blob), a = document.createElement("a"); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
-}
-
-$("walletSearch")?.addEventListener("input", renderWallets); $("walletFilter")?.addEventListener("change", renderWallets);
-$("transactionHistorySearch")?.addEventListener("input", renderTransactions); $("transactionHistoryFilter")?.addEventListener("change", renderTransactions);
-$("instructorWalletTable")?.addEventListener("click", e => { const b=e.target.closest("[data-wallet]"); if(b) openWallet(b.dataset.wallet); });
-$("closeWalletModal")?.addEventListener("click", closeWallet); $("cancelWalletAction")?.addEventListener("click", closeWallet); $("confirmWalletAction")?.addEventListener("click", confirmWalletAction); $("saveSecuritySettings")?.addEventListener("click", saveSecuritySettings);
-$("refreshWallets")?.addEventListener("click", async () => { await Promise.all([loadSecurity(), loadTreasury(), loadPendingWithdrawals(), loadWallets(), loadTransactions(), loadAuditLogs()]); toast("Finance workspace refreshed"); });
-$("exportFinance")?.addEventListener("click", () => exportRows("ssa-finance-transactions.csv", [["Transaction ID","Type","From","To","Amount","Status","Approved By","Date"], ...transactions.map(x => [x.transactionId || x.id,x.type,x.from,x.to,x.amount,x.status,x.approvedBy,date(x.createdAt)])]));
-$("exportAuditLogs")?.addEventListener("click", () => exportRows("ssa-finance-audit-logs.csv", [["Action","Target","Details","Date"], ...auditLogs.map(x => [x.action,x.target,x.details,date(x.createdAt)])]));
-$("backupWallets")?.addEventListener("click", () => exportRows("ssa-instructor-wallets.csv", [["Wallet ID","Instructor","Balance","Status","Updated"], ...wallets.map(x => [x.walletId || x.id,x.instructorId || x.email,x.balance,x.status,date(x.updatedAt)])]));
-$("backupFinance")?.addEventListener("click", () => $("exportFinance")?.click());
-$("reconcileAccounts")?.addEventListener("click", async () => { if (!currentUser) return; try { await updateDoc(doc(db,"finance","treasury"), { lastReconciliationAt:serverTimestamp(), updatedAt:serverTimestamp() }); await addDoc(collection(db,"audit_logs"), { user:currentUser.uid, role:"founder", action:"finance_reconciliation", target:"finance/treasury", details:"Founder initiated reconciliation", createdAt:serverTimestamp() }); toast("Reconciliation recorded"); await loadTreasury(); await loadAuditLogs(); } catch(e) { console.error(e); toast("Reconciliation failed","error"); } });
-$("depositFunds")?.addEventListener("click", () => toast("External deposits must be recorded through the approved payment gateway.", "error"));
-$("withdrawFunds")?.addEventListener("click", () => toast("Use the payout queue for instructor withdrawals.", "error"));
-$("transferFunds")?.addEventListener("click", () => toast("Internal transfer workflow is protected and will be enabled after payment ledger validation.", "error"));
-
-onAuthStateChanged(auth, async user => {
-  if (!user) { location.href = "../../login.html"; return; }
-  currentUser = user;
-  try { if (!await verifyFounder(user)) return; if ($("currentAdmin")) $("currentAdmin").textContent = user.email || "Founder"; if ($("lastSecurityCheck")) $("lastSecurityCheck").textContent = date(new Date()); await loadSecurity(); await loadTreasury(); await Promise.all([loadPendingWithdrawals(), loadWallets(), loadTransactions(), loadAuditLogs()]); }
-  catch (e) { console.error(e); toast("Security verification failed", "error"); }
-});
+function toast(message, type = "success") { let el=$("financeToast"); if(!el){el=document.createElement("div");el.id="financeToast";el.className="finance-toast";document.body.appendChild(el);} el.textContent=message;el.className=`finance-toast visible ${type}`;clearTimeout(el._timer);el._timer=setTimeout(()=>el.classList.remove("visible"),3200); }
+async function verifyFounder(user) { const snap=await getDoc(doc(db,"founder",user.uid)); const data=snap.exists()?snap.data():{}; if(!snap.exists()||data.role!=="founder"||data.status!=="active"){toast("Founder authorization required","error");setTimeout(()=>{location.href="../dashboard.html";},900);return false;} return true; }
+async function ensureTreasury(){const ref=doc(db,"finance","treasury");const snap=await getDoc(ref);if(!snap.exists()){const initial={balance:0,reservedFunds:0,monthlyRevenue:0,pendingWithdrawals:0,createdAt:serverTimestamp(),updatedAt:serverTimestamp()};await setDoc(ref,initial);return {...initial,balance:0,reservedFunds:0,monthlyRevenue:0,pendingWithdrawals:0};}return snap.data();}
+function renderTreasury(data){const balance=Number(data.balance||0),reserved=Number(data.reservedFunds||0),revenue=Number(data.monthlyRevenue||0),pending=Number(data.pendingWithdrawals||0);if($("treasuryBalance"))$("treasuryBalance").textContent=money(balance);if($("treasuryAvailable"))$("treasuryAvailable").textContent=money(balance);if($("reservedFunds"))$("reservedFunds").textContent=money(reserved);if($("monthlyRevenue"))$("monthlyRevenue").textContent=money(revenue);if($("pendingWithdrawals"))$("pendingWithdrawals").textContent=money(pending);if($("lastReconciliation"))$("lastReconciliation").textContent=date(data.lastReconciliationAt);}
+async function loadTreasury(){try{renderTreasury(await ensureTreasury());}catch(e){console.error(e);toast("Unable to load treasury","error");}}
+async function loadPendingWithdrawals(){try{const snap=await getDocs(query(collection(db,"withdrawalRequests"),orderBy("createdAt","desc")));const pending=snap.docs.map(d=>d.data()).filter(x=>String(x.status||"pending").toLowerCase()==="pending").reduce((sum,x)=>sum+Number(x.amount||0),0);const ref=doc(db,"finance","treasury");await updateDoc(ref,{pendingWithdrawals:pending,updatedAt:serverTimestamp()});const treasury=await getDoc(ref);if(treasury.exists())renderTreasury(treasury.data());}catch(e){console.error("Pending withdrawals load failed:",e);}}
+async function loadWallets(){const snap=await getDocs(collection(db,"instructorWallets"));wallets=snap.docs.map(d=>({id:d.id,...d.data()}));renderWallets();const total=wallets.reduce((sum,w)=>sum+Number(w.balance||0),0);if($("instructorBalance"))$("instructorBalance").textContent=money(total);if($("instructorWalletTotal"))$("instructorWalletTotal").textContent=money(total);}
+async function createMissingWallets(){const snap=await getDocs(collection(db,"instructors"));const existing=new Set(wallets.map(w=>w.instructorId||w.id));let created=0;for(const item of snap.docs){if(existing.has(item.id))continue;const data=item.data();await setDoc(doc(db,"instructorWallets",item.id),{name:data.fullName||data.name||"Instructor",instructorId:item.id,walletId:`WAL-${Date.now()}-${item.id.slice(0,6)}`,balance:0,pending:0,totalPaid:0,status:"active",createdAt:serverTimestamp(),updatedAt:serverTimestamp()});created++;}if(created)await loadWallets();}
+function renderWallets(){const table=$("instructorWalletTable")||$("walletTable");if(!table)return;const term=($("walletSearch")?.value||"").trim().toLowerCase(),filter=$("walletFilter")?.value||"all";const list=wallets.filter(w=>{const status=String(w.status||"active").toLowerCase(),zero=Number(w.balance||0)===0,text=`${w.name||""} ${w.instructorId||""} ${w.walletId||w.id}`.toLowerCase();return(!term||text.includes(term))&&(filter==="all"||(filter==="empty"?zero:status===filter));});table.innerHTML=list.length?list.map(w=>`<tr><td><strong>${esc(w.name||"Unknown instructor")}</strong></td><td>${esc(w.instructorId||"—")}</td><td>${esc(w.walletId||w.id)}</td><td><strong>${money(w.balance)}</strong></td><td><span class="status ${esc(String(w.status||"active").toLowerCase())}">${esc(w.status||"active")}</span></td><td>${date(w.updatedAt||w.createdAt)}</td><td><button class="secondary-btn" data-wallet-action="manage" data-id="${esc(w.id)}">Manage</button></td></tr>`).join(""):`<tr><td colspan="7" class="empty-table">No instructor wallets found.</td></tr>`;}
+async function loadTransactions(){try{const snap=await getDocs(query(collection(db,"financeTransactions"),orderBy("createdAt","desc")));transactions=snap.docs.map(d=>({id:d.id,...d.data()}));renderTransactions();const today=new Date(),count=transactions.filter(t=>{const d=t.createdAt?.toDate?t.createdAt.toDate():null;return d&&d.toDateString()===today.toDateString()&&["transfer","credit","debit","deposit","withdrawal"].includes(String(t.type||"").toLowerCase());}).length;if($("transferCount"))$("transferCount").textContent=count;}catch(e){console.error("Transaction load failed:",e);}}
+function renderTransactions(){const table=$("transactionHistoryTable");if(!table)return;const term=($("transactionHistorySearch")?.value||"").trim().toLowerCase(),filter=$("transactionHistoryFilter")?.value||"all";const list=transactions.filter(t=>{const type=String(t.type||"").toLowerCase(),text=JSON.stringify(t).toLowerCase();return(!term||text.includes(term))&&(filter==="all"||type===filter||(filter==="salary"&&type==="payroll"));});table.innerHTML=list.length?list.map(t=>`<tr><td>${esc(t.transactionId||t.id)}</td><td>${esc(t.type||"—")}</td><td>${esc(t.from||"—")}</td><td>${esc(t.to||"—")}</td><td>${money(t.amount)}</td><td><span class="status ${t.status==="completed"?"completed":"pending"}">${esc(t.status||"pending")}</span></td><td>${esc(t.approvedBy||"—")}</td><td>${date(t.createdAt)}</td><td><button class="secondary-btn" data-tx-id="${esc(t.id)}">View</button></td></tr>`).join(""):`<tr><td colspan="9" class="empty-table">No financial transactions found.</td></tr>`;}
+async function loadAuditLogs(){try{const snap=await getDocs(query(collection(db,"audit_logs"),orderBy("createdAt","desc")));auditLogs=snap.docs.map(d=>({id:d.id,...d.data()}));renderAuditLogs();}catch(e){console.error(e);renderAuditLogs("Audit logs unavailable.");}}
+function renderAuditLogs(message){const list=$("auditList");if(!list)return;if(message){list.innerHTML=`<div class="audit-item"><div class="audit-icon">⚠️</div><div><h4>Audit service</h4><p>${esc(message)}</p></div></div>`;return;}list.innerHTML=auditLogs.length?auditLogs.slice(0,20).map(x=>`<div class="audit-item"><div class="audit-icon">🛡</div><div><h4>${esc(x.action||"Financial activity")}</h4><p>${esc(x.details||x.target||"—")}</p><small>${esc(x.role||"founder")} • ${date(x.createdAt)}</small></div></div>`).join(""):`<div class="audit-item"><div class="audit-icon">🔒</div><div><h4>System Ready</h4><p>Financial audit logs will appear here.</p><small>Waiting for activity…</small></div></div>`;}
+async function audit(action,target,details){await addDoc(collection(db,"audit_logs"),{user:currentUser.uid,role:"founder",action,target,details,createdAt:serverTimestamp()});}
+async function loadSecurity(){const ref=doc(db,"finance","security"),snap=await getDoc(ref);financeSecurity=snap.exists()?{...financeSecurity,...snap.data()}:{...financeSecurity};if(!snap.exists())await setDoc(ref,{...financeSecurity,updatedAt:serverTimestamp()});if($("approvalLimit"))$("approvalLimit").value=financeSecurity.withdrawalLimit??50000;if($("lockTreasury"))$("lockTreasury").checked=financeSecurity.treasuryLocked===true;if($("freezeWallets"))$("freezeWallets").checked=financeSecurity.freezeWallets===true;if($("auditNotifications"))$("auditNotifications").checked=financeSecurity.auditNotifications!==false;if($("treasuryStatus")){ $("treasuryStatus").textContent=financeSecurity.treasuryLocked?"Locked":"Secure";$("treasuryStatus").className=`status ${financeSecurity.treasuryLocked?"frozen":"connected"}`;}if($("lastSecurityCheck"))$("lastSecurityCheck").textContent=date(financeSecurity.updatedAt);}
+async function saveSecurity(){const limit=Number($("approvalLimit")?.value||50000);if(!Number.isFinite(limit)||limit<0)throw new Error("Approval limit must be zero or higher.");financeSecurity={withdrawalLimit:limit,treasuryLocked:$("lockTreasury")?.checked===true,freezeWallets:$("freezeWallets")?.checked===true,auditNotifications:$("auditNotifications")?.checked!==false};await setDoc(doc(db,"finance","security"),{...financeSecurity,updatedAt:serverTimestamp()},{merge:true});await Promise.all(wallets.map(w=>updateDoc(doc(db,"instructorWallets",w.id),{status:financeSecurity.freezeWallets?"frozen":(w.status==="frozen"?"active":w.status||"active"),updatedAt:serverTimestamp()})));await audit("Security Settings Updated","Finance Security","Founder changed wallet controls");toast("Security settings saved");await Promise.all([loadWallets(),loadSecurity(),loadAuditLogs()]);}
+async function walletAction(id,action,amount,reason){if(!id)throw new Error("Select a wallet first.");if(financeSecurity.freezeWallets)throw new Error("All instructor wallets are currently frozen.");const ref=doc(db,"instructorWallets",id),wallet=wallets.find(w=>w.id===id);if(!wallet)throw new Error("Wallet not found.");if(action==="freeze"||action==="unfreeze"){await updateDoc(ref,{status:action==="freeze"?"frozen":"active",updatedAt:serverTimestamp()});await audit(`Wallet ${action}`,id,reason||`Wallet ${action}`);toast(action==="freeze"?"Wallet frozen":"Wallet activated");return;}const value=Number(amount||0),note=String(reason||"").trim();if(!Number.isFinite(value)||value<=0)throw new Error("Enter a valid positive amount.");if(!note)throw new Error("A reason is required.");if(wallet.status==="frozen")throw new Error("This wallet is frozen.");if(value>Number(financeSecurity.withdrawalLimit||50000))throw new Error(`Amount exceeds the configured approval limit of ${money(financeSecurity.withdrawalLimit)}.`);if(financeSecurity.treasuryLocked)throw new Error("Treasury is locked. Unlock it before moving funds.");const treasuryRef=doc(db,"finance","treasury"),transactionId=`TX-${Date.now()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;await runTransaction(db,async tx=>{const[walletSnap,treasurySnap]=await Promise.all([tx.get(ref),tx.get(treasuryRef)]);if(!walletSnap.exists())throw new Error("Wallet not found.");if(!treasurySnap.exists())throw new Error("Treasury is not initialized.");const walletData=walletSnap.data(),treasuryData=treasurySnap.data(),walletBalance=Number(walletData.balance||0),treasuryBalance=Number(treasuryData.balance||0);if(action==="credit"&&treasuryBalance<value)throw new Error(`Insufficient treasury funds. Available: ${money(treasuryBalance)}.`);if(action==="debit"&&walletBalance<value)throw new Error("Insufficient wallet balance.");tx.update(ref,{balance:action==="credit"?walletBalance+value:walletBalance-value,totalPaid:action==="debit"?Number(walletData.totalPaid||0)+value:Number(walletData.totalPaid||0),updatedAt:serverTimestamp()});tx.update(treasuryRef,{balance:action==="credit"?treasuryBalance-value:treasuryBalance+value,updatedAt:serverTimestamp()});});await addDoc(collection(db,"financeTransactions"),{transactionId,type:"transfer",direction:action,from:action==="credit"?"Academy Treasury":id,to:action==="credit"?id:"Academy Treasury",amount:value,description:note,status:"completed",approvedBy:currentUser.uid,createdAt:serverTimestamp()});await audit(`Wallet ${action}`,id,`${money(value)} • ${note}`);toast(action==="credit"?"Funds transferred to wallet":"Funds returned to treasury");}
+function openWallet(id){selectedWallet=id;$("walletModal")?.classList.add("show");if($("walletAmount"))$("walletAmount").value="";if($("walletReason"))$("walletReason").value="";}
+function closeWallet(){$("walletModal")?.classList.remove("show");selectedWallet=null;}
+function showTransaction(id){const tx=transactions.find(item=>item.id===id);if(tx)toast(`${tx.transactionId||tx.id} • ${money(tx.amount)} • ${tx.type||"transaction"}`);}
+function exportCSV(filename,rows){const csv=rows.map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n"),url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);}
+async function reconcileAccounts(){const treasuryRef=doc(db,"finance","treasury");await updateDoc(treasuryRef,{lastReconciliationAt:serverTimestamp(),updatedAt:serverTimestamp()});await audit("Finance Reconciliation","Treasury","Manual reconciliation completed");await Promise.all([loadTreasury(),loadWallets(),loadAuditLogs()]);toast("Accounts reconciled");}
+async function refreshAll(){toast("Refreshing financial data…");await Promise.all([loadTreasury(),loadWallets(),loadTransactions(),loadAuditLogs(),loadSecurity()]);await loadPendingWithdrawals();toast("Financial data updated");}
+function bindEvents(){$("refreshWallets")?.addEventListener("click",refreshAll);$("refreshFinance")?.addEventListener("click",refreshAll);$("walletSearch")?.addEventListener("input",renderWallets);$("walletFilter")?.addEventListener("change",renderWallets);$("transactionHistorySearch")?.addEventListener("input",renderTransactions);$("transactionHistoryFilter")?.addEventListener("change",renderTransactions);[$("walletTable"),$("instructorWalletTable")].filter(Boolean).forEach(table=>table.addEventListener("click",e=>{const button=e.target.closest("[data-wallet-action]");if(button)openWallet(button.dataset.id);}));$("transactionHistoryTable")?.addEventListener("click",e=>{const button=e.target.closest("[data-tx-id]");if(button)showTransaction(button.dataset.txId);});$("closeWalletModal")?.addEventListener("click",closeWallet);$("cancelWalletAction")?.addEventListener("click",closeWallet);$("walletModal")?.addEventListener("click",e=>{if(e.target.id==="walletModal")closeWallet();});$("confirmWalletAction")?.addEventListener("click",async()=>{try{await walletAction(selectedWallet,$("walletAction")?.value,$("walletAmount")?.value,$("walletReason")?.value||"");closeWallet();await refreshAll();}catch(e){console.error(e);toast(e.message||"Wallet action failed","error");}});$("saveSecuritySettings")?.addEventListener("click",()=>saveSecurity().catch(e=>{console.error(e);toast(e.message||"Unable to save security settings","error");}));$("backupWallets")?.addEventListener("click",()=>exportCSV("academy-wallets.csv",[["Instructor","Wallet ID","Balance","Status","Updated"],...wallets.map(w=>[w.name,w.walletId||w.id,w.balance||0,w.status||"active",date(w.updatedAt)])]));$("exportFinance")?.addEventListener("click",()=>exportCSV("academy-finance.csv",[["Transaction","Type","Amount","Status","Date"],...transactions.map(t=>[t.transactionId||t.id,t.type,t.amount,t.status,date(t.createdAt)])]));$("exportLedger")?.addEventListener("click",()=>exportCSV("academy-financial-ledger.csv",[["Transaction","Type","From","To","Amount","Status","Date"],...transactions.map(t=>[t.transactionId||t.id,t.type,t.from,t.to,t.amount,t.status,date(t.createdAt)])]));$("exportAuditLogs")?.addEventListener("click",()=>exportCSV("academy-audit-logs.csv",[["Action","Target","Details","Date"],...auditLogs.map(a=>[a.action,a.target,a.details,date(a.createdAt)])]));$("backupFinance")?.addEventListener("click",()=>exportCSV("academy-finance-backup.csv",[["Transaction","Type","From","To","Amount","Status","Date"],...transactions.map(t=>[t.transactionId||t.id,t.type,t.from,t.to,t.amount,t.status,date(t.createdAt)])]));$("reconcileAccounts")?.addEventListener("click",()=>reconcileAccounts().catch(e=>{console.error(e);toast(e.message||"Reconciliation failed","error");}));$("depositFunds")?.addEventListener("click",()=>toast("External deposits must be recorded through the approved payment flow."));$("withdrawFunds")?.addEventListener("click",()=>{location.href="payouts.html";});$("transferFunds")?.addEventListener("click",()=>toast("Select an instructor wallet and use Manage to transfer funds."));}
+async function boot(){bindEvents();onAuthStateChanged(auth,async user=>{if(!user){location.href="../../login.html";return;}currentUser=user;try{if(!await verifyFounder(user))return;await loadSecurity();await loadTreasury();await loadWallets();await createMissingWallets();await loadTransactions();await loadAuditLogs();await loadPendingWithdrawals();console.log("✓ Founder wallet system ready");}catch(e){console.error("Wallet boot failed:",e);toast("Unable to initialize wallet system","error");}});}boot();
