@@ -4,7 +4,7 @@
 // ============================================
 import { auth, db } from "./firebase.js";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, browserLocalPersistence, browserSessionPersistence, setPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
@@ -81,22 +81,49 @@ function enableButtons() {
  * Resolve the user's role safely.
  *
  * Primary source: users/{uid}.role
+ * Founder source: founder/{uid}
  * Recovery sources: students/{uid} or instructors/{uid}
  *
- * This fixes older accounts whose users document exists but was created
- * without a role. We never guess founder/admin from an arbitrary account.
+ * Founder accounts are authoritative in founder/{uid}; we do not copy
+ * founder into users.role because the users write rules intentionally
+ * restrict self-assignment of privileged roles.
  */
 async function resolveUserProfile(user) {
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
+    const userData = userSnap.exists() ? userSnap.data() : null;
+
+    // Founder accounts are identified by the protected founder collection.
+    // Check this before student/instructor recovery so a founder account
+    // without a users.role field is not incorrectly reported as missing.
+    const founderSnap = await getDoc(doc(db, "founder", user.uid));
+    if (founderSnap.exists()) {
+        const founderData = founderSnap.data();
+        if (founderData.role === "founder") {
+            const active = founderData.status !== "disabled" && founderData.status !== "inactive";
+            return {
+                userRef,
+                userData: {
+                    ...(userData || {}),
+                    uid: user.uid,
+                    fullName: founderData.fullName || founderData.name || userData?.fullName || user.displayName || "Founder",
+                    email: founderData.email || user.email || userData?.email || "",
+                    role: "founder",
+                    active,
+                    verified: userData?.verified ?? user.emailVerified,
+                    status: founderData.status || "active"
+                },
+                recovered: !userData?.role,
+                source: "founder"
+            };
+        }
+    }
+
+    if (userData?.role && DASHBOARDS[userData.role]) {
+        return { userRef, userData, recovered: false, source: "users" };
+    }
 
     if (userSnap.exists()) {
-        const userData = userSnap.data();
-
-        if (userData.role && DASHBOARDS[userData.role]) {
-            return { userRef, userData, recovered: false };
-        }
-
         // Existing profile but missing/invalid role: recover only from a
         // dedicated role collection instead of blindly assigning a role.
         const studentSnap = await getDoc(doc(db, "students", user.uid));
@@ -113,7 +140,8 @@ async function resolveUserProfile(user) {
             return {
                 userRef,
                 userData: { ...userData, role },
-                recovered: true
+                recovered: true,
+                source: "students"
             };
         }
 
@@ -124,7 +152,8 @@ async function resolveUserProfile(user) {
                 return {
                     userRef,
                     userData: { ...userData, role: "instructor", active: false },
-                    recovered: true
+                    recovered: true,
+                    source: "instructors"
                 };
             }
 
@@ -142,18 +171,19 @@ async function resolveUserProfile(user) {
             return {
                 userRef,
                 userData: { ...userData, ...instructorData, role },
-                recovered: true
+                recovered: true,
+                source: "instructors"
             };
         }
 
-        return { userRef, userData, recovered: false };
+        return { userRef, userData, recovered: false, source: "users" };
     }
 
     // Legacy/incomplete student account: recover from students/{uid}.
     const studentSnap = await getDoc(doc(db, "students", user.uid));
     if (studentSnap.exists()) {
         const studentData = studentSnap.data();
-        const userData = {
+        const recoveredUserData = {
             uid: user.uid,
             fullName: studentData.name || user.displayName || "Student",
             email: studentData.email || user.email || "",
@@ -165,15 +195,15 @@ async function resolveUserProfile(user) {
             lastLogin: serverTimestamp()
         };
 
-        await setDoc(userRef, userData, { merge: true });
-        return { userRef, userData, recovered: true };
+        await setDoc(userRef, recoveredUserData, { merge: true });
+        return { userRef, userData: recoveredUserData, recovered: true, source: "students" };
     }
 
     // Legacy/incomplete instructor account: recover from instructors/{uid}.
     const instructorSnap = await getDoc(doc(db, "instructors", user.uid));
     if (instructorSnap.exists()) {
         const instructorData = instructorSnap.data();
-        const userData = {
+        const recoveredUserData = {
             uid: user.uid,
             fullName: instructorData.name || user.displayName || "Instructor",
             email: instructorData.email || user.email || "",
@@ -185,11 +215,11 @@ async function resolveUserProfile(user) {
             lastLogin: serverTimestamp()
         };
 
-        await setDoc(userRef, userData, { merge: true });
-        return { userRef, userData, recovered: true };
+        await setDoc(userRef, recoveredUserData, { merge: true });
+        return { userRef, userData: recoveredUserData, recovered: true, source: "instructors" };
     }
 
-    return { userRef, userData: null, recovered: false };
+    return { userRef, userData: null, recovered: false, source: "none" };
 }
 
 document.querySelectorAll(".toggle-password").forEach(toggle => {
@@ -287,7 +317,7 @@ loginForm?.addEventListener("submit", async e => {
             providerData: user.providerData
         });
 
-        const { userRef, userData, recovered } = await resolveUserProfile(user);
+        const { userRef, userData, recovered, source } = await resolveUserProfile(user);
 
         if (!userData) {
             hideLoader();
@@ -302,7 +332,7 @@ loginForm?.addEventListener("submit", async e => {
         }
 
         console.log("[SSA AUTH] PROFILE RESOLVED", {
-            documentPath: `users/${user.uid}`,
+            documentPath: `${source || "users"}/${user.uid}`,
             role: userData.role || "<MISSING FIELD>",
             active: userData.active,
             recovered,
@@ -322,7 +352,11 @@ loginForm?.addEventListener("submit", async e => {
             return;
         }
 
-        await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true });
+        // Founder roles are authoritative in founder/{uid}; do not write
+        // privileged founder role data into users/{uid} from the client.
+        if (userData.role !== "founder") {
+            await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true });
+        }
 
         showToast(`Welcome back, ${userData.fullName || "User"}!`, "success");
         setTimeout(() => redirectByRole(userData.role), 1200);
@@ -372,29 +406,37 @@ googleLoginBtn?.addEventListener("click", async () => {
         } else {
             const existing = userSnap.data();
             if (!existing.role) {
-                const studentSnap = await getDoc(doc(db, "students", user.uid));
-                if (studentSnap.exists()) {
-                    await setDoc(userRef, { role: "student" }, { merge: true });
+                const founderSnap = await getDoc(doc(db, "founder", user.uid));
+                if (!founderSnap.exists()) {
+                    const studentSnap = await getDoc(doc(db, "students", user.uid));
+                    if (studentSnap.exists()) {
+                        await setDoc(userRef, { role: "student" }, { merge: true });
+                    }
                 }
             }
             await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true });
         }
 
         const data = (await getDoc(userRef)).data();
-        if (!data?.role || !DASHBOARDS[data.role]) {
+        const founderSnap = await getDoc(doc(db, "founder", user.uid));
+        const finalData = founderSnap.exists() && founderSnap.data().role === "founder"
+            ? { ...data, role: "founder", active: founderSnap.data().status !== "disabled" && founderSnap.data().status !== "inactive" }
+            : data;
+
+        if (!finalData?.role || !DASHBOARDS[finalData.role]) {
             hideLoader();
             enableButtons();
             return showToast("Google account profile has no valid role. Contact the Founder.", "error");
         }
 
-        if (data.active === false) {
+        if (finalData.active === false) {
             hideLoader();
             enableButtons();
             return showToast("This account has been disabled.", "error");
         }
 
-        showToast(`Welcome back, ${data.fullName || "User"}!`, "success");
-        setTimeout(() => redirectByRole(data.role), 1200);
+        showToast(`Welcome back, ${finalData.fullName || "User"}!`, "success");
+        setTimeout(() => redirectByRole(finalData.role), 1200);
     } catch (error) {
         hideLoader();
         enableButtons();
