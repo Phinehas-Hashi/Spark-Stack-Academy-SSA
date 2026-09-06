@@ -7,6 +7,7 @@ let notice = null;
 let lastKey = "";
 let redirecting = false;
 let logoutTimer = null;
+let reevaluateTimer = null;
 
 const label = portal => portal === "instructor" ? "Instructor Portal" : "Student Portal";
 
@@ -75,6 +76,23 @@ function hideBlock() {
     redirecting = false;
 }
 
+function clearReevaluateTimer() {
+    if (reevaluateTimer) {
+        clearTimeout(reevaluateTimer);
+        reevaluateTimer = null;
+    }
+}
+
+function scheduleReevaluation(time, evaluate) {
+    clearReevaluateTimer();
+    if (!Number.isFinite(time)) return;
+    const delay = Math.max(0, time - Date.now());
+    reevaluateTimer = setTimeout(() => {
+        reevaluateTimer = null;
+        evaluate();
+    }, Math.min(delay + 50, 2147483647));
+}
+
 function broadcast(maintenance, portal) {
     const element = noticeEl();
     element.querySelector("#snTitle").textContent = "Maintenance Scheduled";
@@ -100,10 +118,13 @@ async function logout(reason) {
 }
 
 export function watchPortalControl(portal = "student") {
-    return onSnapshot(doc(db, "platform_controls", "global"), async snapshot => {
-        if (!snapshot.exists()) { hideBlock(); return; }
+    const controlDocument = doc(db, "platform_controls", "global");
+    let latestData = null;
 
-        const data = snapshot.data();
+    const evaluate = () => {
+        if (!latestData) return;
+
+        const data = latestData;
         const lockdown = data.lockdown === true;
         const suspended = data[portal]?.suspended === true;
         const maintenance = data.maintenance || {};
@@ -111,34 +132,51 @@ export function watchPortalControl(portal = "student") {
         const start = new Date(maintenance.start).getTime();
         const end = new Date(maintenance.end).getTime();
         const applies = maintenance.target === portal || maintenance.target === "all";
-        const maintenanceActive = maintenance.scheduled && applies && now >= start && now < end;
-        const maintenanceUpcoming = maintenance.scheduled && applies && now < start;
+        const maintenanceActive = maintenance.scheduled === true && applies && Number.isFinite(start) && Number.isFinite(end) && now >= start && now < end;
+        const maintenanceUpcoming = maintenance.scheduled === true && applies && Number.isFinite(start) && Number.isFinite(end) && now < start;
         const reason = data[portal]?.reason || data.reason || maintenance.message || "No additional reason was provided.";
         const key = JSON.stringify({ lockdown, suspended, scheduled: maintenance.scheduled, start, end, reason });
+
+        clearReevaluateTimer();
+        if (maintenanceUpcoming) scheduleReevaluation(start, evaluate);
+        else if (maintenanceActive) scheduleReevaluation(end, evaluate);
 
         if (lockdown) {
             showBlock("Emergency Lockdown", "Spark Stack Academy has temporarily restricted access to protect the platform and its users.\n\nYour current session will end automatically. Please return when access is restored.", "🔒", "Emergency Lockdown Active");
             lastKey = key;
-            await logout("Emergency lockdown is active. Please return after access is restored.");
+            void logout("Emergency lockdown is active. Please return after access is restored.");
             return;
         }
 
         if (suspended) {
             showBlock(`${label(portal)} Suspended`, `Your portal has been temporarily suspended by Spark Stack Academy administration.\n\nReason: ${reason}\n\nYou will not be able to access the portal until access is restored.`, "⛔", "Portal Access Suspended");
             lastKey = key;
-            await logout(`${label(portal)} suspended. ${reason}`);
+            void logout(`${label(portal)} suspended. ${reason}`);
             return;
         }
 
         if (maintenanceActive) {
             showBlock("Scheduled Maintenance", `${maintenance.message || "This portal is temporarily offline for scheduled maintenance."}\n\nMaintenance ends: ${new Date(maintenance.end).toLocaleString()}`, "🛠️", "Maintenance In Progress");
             lastKey = key;
-            await logout("Scheduled maintenance is currently in progress.");
+            void logout("Scheduled maintenance is currently in progress.");
             return;
         }
 
         if (maintenanceUpcoming && key !== lastKey) broadcast(maintenance, portal);
         lastKey = key;
         if (!maintenanceUpcoming) hideBlock();
-    }, error => console.error("SSA platform control listener failed:", error));
+    };
+
+    return onSnapshot(controlDocument, snapshot => {
+        if (!snapshot.exists()) {
+            latestData = {};
+            clearReevaluateTimer();
+            hideBlock();
+            return;
+        }
+        latestData = snapshot.data();
+        evaluate();
+    }, error => {
+        console.error("SSA platform control listener failed:", error);
+    });
 }
