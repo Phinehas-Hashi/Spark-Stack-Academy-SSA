@@ -1,5 +1,3 @@
-import { auth } from "../../js/firebase.js";
-
 const STYLE_ID = "ssa-engagement-hub-style";
 
 function injectStyles() {
@@ -38,14 +36,13 @@ function render(student) {
     const levelProgress=Math.max(0,Math.min(100,((xp-levelBase)/250)*100));
     const courses=Array.isArray(learning.enrollments)?learning.enrollments.length:Number(learning.coursesCount)||0;
     let action = courses ? "Continue your most recent course and complete the next lesson." : "Explore the course catalog and choose your first learning path.";
-    let href = courses ? "courses.html" : "courses.html";
-    if (progress >= 80) { action="You're close to a milestone — finish a lesson and push your course toward completion."; }
-    else if (learning.streak === 0) { action="Start a learning session today to build your streak and keep your momentum alive."; }
+    if (progress >= 80) action="You're close to a milestone — finish a lesson and push your course toward completion.";
+    else if (learning.streak === 0) action="Start a learning session today to build your streak and keep your momentum alive.";
     const mission = progress >= 100 ? "Review your achievements and showcase your completed work." : "Complete one lesson today";
-    const missionHref = progress >= 100 ? "achievements.html" : (courses ? "course-player.html" : "courses.html");
+    const missionHref = progress >= 100 ? "achievements.html" : "courses.html";
     const hub=document.createElement("section");
     hub.id="ssaEngagementHub"; hub.className="ssa-engagement-hub";
-    hub.innerHTML=`<article class="ssa-next-card"><span class="ssa-hub-label">✦ YOUR NEXT MOVE</span><h2>${esc(action)}</h2><p>Your dashboard adapts to your progress so you always have a clear next step.</p><div class="ssa-next-actions"><a class="ssa-hub-btn primary" href="${href}">Continue Learning <span>→</span></a><a class="ssa-hub-btn" href="spark-ai.html">Ask Spark AI</a><a class="ssa-hub-btn" href="achievements.html">View Rewards</a></div></article><article class="ssa-mission-card"><div class="ssa-mission-top"><span class="ssa-hub-label">DAILY MISSION</span><span class="ssa-mission-badge">+25 XP</span></div><h3>${esc(mission)}</h3><p>Small consistent wins compound into real technical progress.</p><div class="ssa-xp-track"><span style="width:${levelProgress}%"></span></div><div class="ssa-mission-meta"><span>Level ${level}</span><span>${xp%250}/250 XP</span></div><div class="ssa-next-actions"><a class="ssa-hub-btn primary" href="${missionHref}">Start Mission</a></div></article>`;
+    hub.innerHTML=`<article class="ssa-next-card"><span class="ssa-hub-label">✦ YOUR NEXT MOVE</span><h2>${esc(action)}</h2><p>Your dashboard adapts to your progress so you always have a clear next step.</p><div class="ssa-next-actions"><a class="ssa-hub-btn primary" href="courses.html">Continue Learning <span>→</span></a><a class="ssa-hub-btn" href="spark-ai.html">Ask Spark AI</a><a class="ssa-hub-btn" href="achievements.html">View Rewards</a></div></article><article class="ssa-mission-card"><div class="ssa-mission-top"><span class="ssa-hub-label">DAILY MISSION</span><span class="ssa-mission-badge">+25 XP</span></div><h3>${esc(mission)}</h3><p>Small consistent wins compound into real technical progress.</p><div class="ssa-xp-track"><span style="width:${levelProgress}%"></span></div><div class="ssa-mission-meta"><span>Level ${level}</span><span>${xp%250}/250 XP</span></div><div class="ssa-next-actions"><a class="ssa-hub-btn primary" href="${missionHref}">Start Mission</a></div></article>`;
     content.prepend(hub);
     window.lucide?.createIcons();
 }
