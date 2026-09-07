@@ -28,6 +28,10 @@ function handleProfile(userData) {
   return true;
 }
 
+function isActiveFounder(profile) {
+  return profile?.role === "founder" && (profile.status === "active" || profile.active === true);
+}
+
 async function signInUser(user) {
   // Founder identity is authoritative. Check it before the shared users profile because
   // an older founder account may also have a users/{uid} document with student metadata.
@@ -36,7 +40,7 @@ async function signInUser(user) {
   if (founderSnap.exists()) {
     const founder = founderSnap.data();
     if (founder.role !== "founder") throw new Error("Founder profile is invalid. Please contact the Founder.");
-    if (founder.status !== "active") throw new Error("Your founder account is not active. Please contact the Founder.");
+    if (!isActiveFounder(founder)) throw new Error("Your founder account is not active. Please contact the Founder.");
     toast(`Welcome back, ${founder.name || founder.fullName || user.displayName || "Founder"}!`);
     setTimeout(() => redirectByRole("founder"), 700);
     return;
@@ -91,7 +95,7 @@ googleLoginBtn?.addEventListener("click", async () => {
     const founderSnap = await getDoc(doc(db, "founder", user.uid));
     if (founderSnap.exists()) {
       const founder = founderSnap.data();
-      if (founder.role !== "founder" || founder.status !== "active") throw new Error("Your founder account is not active. Please contact the Founder.");
+      if (founder.role !== "founder" || !isActiveFounder(founder)) throw new Error("Your founder account is not active. Please contact the Founder.");
       toast(`Welcome back, ${founder.name || founder.fullName || user.displayName || "Founder"}!`);
       setTimeout(() => redirectByRole("founder"), 700);
       hideLoader();
