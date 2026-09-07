@@ -1,4 +1,5 @@
-import { notificationApi } from "./supabase-notifications.js";
+import { auth, db } from "./firebase.js";
+import { collection, doc, getDocs, query, where, limit, updateDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const POLL_MS = 15000;
 let timer = null;
@@ -46,17 +47,25 @@ export function playNotificationSound({ priority = "normal" } = {}) {
   } catch (_) {}
 }
 
-function courseIds() {
-  try { return JSON.parse(localStorage.getItem("ssa_enrolled_course_ids") || "[]"); }
-  catch (_) { return []; }
+async function listNotifications() {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return [];
+  try {
+    const snapshot = await getDocs(query(collection(db, "notifications"), where("userId", "==", uid), limit(50)));
+    return snapshot.docs.map(item => {
+      const data = item.data();
+      return { id: item.id, ...data, read: Boolean(data.read), read_at: data.readAt || data.read_at || null, created_at: data.createdAt || data.created_at || null };
+    }).sort((a, b) => time(b.created_at) - time(a.created_at));
+  } catch (error) {
+    console.warn("Notification query failed:", error);
+    return [];
+  }
 }
 
 async function refresh() {
-  const { notifications = [] } = await notificationApi.list(courseIds(), 50);
+  const notifications = await listNotifications();
   const fresh = notifications.filter(item => !lastIds.has(item.id));
-  if (started && fresh.some(item => !item.read_at)) {
-    playNotificationSound({ priority: fresh[0]?.priority });
-  }
+  if (started && fresh.some(item => !item.read)) playNotificationSound({ priority: fresh[0]?.priority });
   lastIds = new Set(notifications.map(item => item.id));
   window.dispatchEvent(new CustomEvent("ssa:notifications", { detail: notifications }));
   return notifications;
@@ -65,7 +74,7 @@ async function refresh() {
 export async function startNotificationRuntime() {
   if (started) return;
   started = true;
-  try { await refresh(); } catch (error) { console.warn("SSA notification backend unavailable:", error.message); }
+  try { await refresh(); } catch (error) { console.warn("SSA notification runtime unavailable:", error.message); }
   timer = setInterval(() => refresh().catch(() => {}), POLL_MS);
 }
 
@@ -76,11 +85,17 @@ export function stopNotificationRuntime() {
 }
 
 export async function markNotificationRead(id) {
-  await notificationApi.markRead(id);
+  if (!id) return refresh();
+  await updateDoc(doc(db, "notifications", id), { read: true, readAt: serverTimestamp(), updatedAt: serverTimestamp() });
   return refresh();
 }
 
 export async function markAllNotificationsRead() {
-  await notificationApi.markAllRead();
+  const uid = auth.currentUser?.uid;
+  if (!uid) return [];
+  const snapshot = await getDocs(query(collection(db, "notifications"), where("userId", "==", uid), limit(100)));
+  const batch = writeBatch(db);
+  snapshot.docs.forEach(item => batch.update(item.ref, { read: true, readAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+  if (snapshot.size) await batch.commit();
   return refresh();
 }
