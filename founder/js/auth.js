@@ -4,10 +4,10 @@
 // ==========================================
 
 import { auth, db } from "../../js/firebase.js";
-
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const isActiveFounder = profile => profile?.role === "founder" && (profile.status === "active" || profile.active === true);
 
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -18,27 +18,22 @@ onAuthStateChanged(auth, async (user) => {
     window.currentUser = user;
 
     try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+        const founderRef = doc(db, "founder", user.uid);
+        const founderSnap = await getDoc(founderRef);
 
-        if (!userSnap.exists()) {
-            console.error("Founder profile not found: users/" + user.uid);
+        if (!founderSnap.exists() || !isActiveFounder(founderSnap.data())) {
+            console.error("Founder profile is missing or inactive: founder/" + user.uid);
             window.location.href = "../login.html";
             return;
         }
 
-        const founderData = userSnap.data();
-
-        if (founderData.role !== "founder" && founderData.role !== "admin") {
-            window.location.href = "../dashboard.html";
-            return;
-        }
+        const founderData = founderSnap.data();
 
         window.currentFounder = {
             ...founderData,
             uid: founderData.uid || user.uid,
             email: founderData.email || user.email || "",
-            fullName: founderData.fullName || user.displayName || "Founder"
+            fullName: founderData.fullName || founderData.name || user.displayName || "Founder"
         };
 
         sessionStorage.setItem("founderProfile", JSON.stringify(window.currentFounder));
