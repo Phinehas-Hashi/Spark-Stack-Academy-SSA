@@ -7,7 +7,7 @@ service cloud.firestore {
     function isStudent(){return userExists()&&role()=='student';}
     function isInstructor(){return userExists()&&role()=='instructor';}
     function isAdmin(){return userExists()&&role()=='admin';}
-    function isFounder(){return signedIn()&&exists(/databases/$(database)/documents/founder/$(request.auth.uid))&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('role','founder')=='founder'&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('status','active')=='active';}
+    function isFounder(){return signedIn()&&exists(/databases/$(database)/documents/founder/$(request.auth.uid))&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('role','founder')=='founder'&&(get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('status','')=='active'||get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('active',false)==true);}
     function staff(){return isAdmin()||isFounder();}
     function directoryList(){
       return (isStudent()&&resource.data.get('role','unknown')=='instructor')
