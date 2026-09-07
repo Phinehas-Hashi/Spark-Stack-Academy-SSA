@@ -19,7 +19,7 @@ function buttons(disabled) { if (loginBtn) loginBtn.disabled = disabled; if (goo
 function toast(message, type = "success") { const el = document.createElement("div"); el.className = `toast ${type}`; el.textContent = message; toastContainer?.appendChild(el); setTimeout(() => el.remove(), 5000); }
 function pendingMessage() { toast("Your account exists, but admission approval is still required before portal access.", "warning"); }
 
-function handleProfile(userData, user) {
+function handleProfile(userData) {
   if (userData.active === false) throw new Error("This account has been disabled.");
   if (!userData.role) throw new Error("Your account profile is missing its role. Please contact the Founder.");
   if (userData.role === "student" && userData.status !== "active") { pendingMessage(); return false; }
@@ -29,22 +29,30 @@ function handleProfile(userData, user) {
 }
 
 async function signInUser(user) {
+  // Founder identity is authoritative. Check it before the shared users profile because
+  // an older founder account may also have a users/{uid} document with student metadata.
+  const founderRef = doc(db, "founder", user.uid);
+  const founderSnap = await getDoc(founderRef);
+  if (founderSnap.exists()) {
+    const founder = founderSnap.data();
+    if (founder.role !== "founder") throw new Error("Founder profile is invalid. Please contact the Founder.");
+    if (founder.status !== "active") throw new Error("Your founder account is not active. Please contact the Founder.");
+    toast(`Welcome back, ${founder.name || founder.fullName || user.displayName || "Founder"}!`);
+    setTimeout(() => redirectByRole("founder"), 700);
+    return;
+  }
+
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
   if (snap.exists()) {
     const data = snap.data();
-    if (!handleProfile(data, user)) { await signOut(auth); return; }
+    if (!handleProfile(data)) { await signOut(auth); return; }
     await updateDoc(ref, { lastLogin: serverTimestamp() });
     toast(`Welcome back, ${data.fullName || data.displayName || "User"}!`);
     setTimeout(() => redirectByRole(data.role), 700);
     return;
   }
-  const founderSnap = await getDoc(doc(db, "founder", user.uid));
-  if (founderSnap.exists() && founderSnap.data().role === "founder" && founderSnap.data().status === "active") {
-    toast(`Welcome back, ${user.displayName || "Founder"}!`);
-    setTimeout(() => redirectByRole("founder"), 700);
-    return;
-  }
+
   const instructorSnap = await getDoc(doc(db, "instructors", user.uid));
   if (instructorSnap.exists()) {
     const instructor = instructorSnap.data();
@@ -80,6 +88,15 @@ googleLoginBtn?.addEventListener("click", async () => {
     await setPersistence(auth, rememberMe?.checked ? browserLocalPersistence : browserSessionPersistence);
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
+    const founderSnap = await getDoc(doc(db, "founder", user.uid));
+    if (founderSnap.exists()) {
+      const founder = founderSnap.data();
+      if (founder.role !== "founder" || founder.status !== "active") throw new Error("Your founder account is not active. Please contact the Founder.");
+      toast(`Welcome back, ${founder.name || founder.fullName || user.displayName || "Founder"}!`);
+      setTimeout(() => redirectByRole("founder"), 700);
+      hideLoader();
+      return;
+    }
     const ref = doc(db, "users", user.uid);
     const existing = await getDoc(ref);
     if (!existing.exists()) {
