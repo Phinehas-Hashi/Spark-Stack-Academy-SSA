@@ -1,62 +1,1198 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn(){return request.auth!=null;}
-    function userExists(){return signedIn()&&exists(/databases/$(database)/documents/users/$(request.auth.uid));}
-    function role(){return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role','unknown');}
-    function isStudent(){return userExists()&&role()=='student';}
-    function isInstructor(){return userExists()&&role()=='instructor';}
-    function isAdmin(){return userExists()&&role()=='admin';}
-    function isFounder(){return signedIn()&&exists(/databases/$(database)/documents/founder/$(request.auth.uid))&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('role','founder')=='founder'&&get(/databases/$(database)/documents/founder/$(request.auth.uid)).data.get('status','active')=='active';}
-    function staff(){return isAdmin()||isFounder();}
-    function directoryList(){return (isStudent()&&resource.data.get('role','unknown')=='instructor')||(isInstructor()&&resource.data.get('role','unknown') in ['student','admin'])||(isAdmin()&&resource.data.get('role','unknown')=='instructor')||(isFounder()&&resource.data.get('role','unknown') in ['student','instructor','admin']);}
 
-    match /users/{userId}{
-      allow get:if signedIn()&&(request.auth.uid==userId||staff());
-      allow list:if (staff()||directoryList())&&request.query.limit<=50;
-      allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.get('role','student') in ['student','instructor'];
-      allow update:if signedIn()&&request.auth.uid==userId&&((request.resource.data.get('role',resource.data.get('role','unknown'))==resource.data.get('role','unknown')&&request.resource.data.get('status',resource.data.get('status','pending_admission'))==resource.data.get('status','pending_admission')&&request.resource.data.get('verified',resource.data.get('verified',false))==resource.data.get('verified',false)&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName','bio','expertise','profilePhoto','phone','lastLogin','updatedAt','xp','level','badges','lastReward'])&&(!request.resource.data.diff(resource.data).affectedKeys().hasAny(['xp','level','badges','lastReward'])||request.resource.data.get('role',resource.data.get('role','unknown'))=='student')&&request.resource.data.get('xp',resource.data.get('xp',0))>=resource.data.get('xp',0)&&request.resource.data.get('xp',resource.data.get('xp',0))<=resource.data.get('xp',resource.data.get('xp',0))+100&&request.resource.data.get('level',resource.data.get('level',1))>=resource.data.get('level',1)&&request.resource.data.get('level',resource.data.get('level',1))<=resource.data.get('level',1)+1&&request.resource.data.get('badges',resource.data.get('badges',[])).hasAll(resource.data.get('badges',[])))||(!resource.data.keys().hasAny(['role'])&&request.resource.data.get('role','unknown') in ['student','instructor']&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role','lastLogin','uid','email','fullName','active','verified','status','createdAt'])));
-      allow delete:if staff();
+    // ============================================================
+    // AUTH / ROLES
+    // ============================================================
+
+    function signedIn() {
+      return request.auth != null;
     }
 
-    match /founder/{founderId}{allow get:if signedIn()&&(request.auth.uid==founderId||isFounder());allow list:if isFounder();allow create,update,delete:if false;}
-    match /students/{studentId}{allow get:if staff()||(signedIn()&&request.auth.uid==studentId);allow list:if staff();allow create:if signedIn()&&request.auth.uid==studentId&&request.resource.data.uid==request.auth.uid&&request.resource.data.role=='student'&&request.resource.data.status=='Pending'&&request.resource.data.onboardingStatus=='awaiting_admission'&&request.resource.data.admissionNumber=='Pending'&&request.resource.data.level==1&&request.resource.data.xp==0&&request.resource.data.streak==0;allow update:if staff()||(isStudent()&&request.auth.uid==studentId&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','updatedAt']));allow delete:if staff();}
-    match /students/{studentId}/enrollments/{enrollmentId}{allow get,list:if staff()||(isStudent()&&request.auth.uid==studentId);allow create,update,delete:if staff();}
-    match /studentSettings/{userId}{allow get,write:if signedIn()&&request.auth.uid==userId;allow list:if staff();}
-    match /accountDeletionRequests/{userId}{allow get:if signedIn()&&(request.auth.uid==userId||staff());allow create:if signedIn()&&request.auth.uid==userId&&request.resource.data.userId==request.auth.uid&&request.resource.data.status=='pending';allow update:if staff();allow list:if staff();allow delete:if staff();}
-    match /instructors/{instructorId}{allow get:if staff()||(signedIn()&&request.auth.uid==instructorId);allow list:if staff();allow create,update,delete:if staff();}
-    match /applications/{applicationId}{allow create:if signedIn()&&request.resource.data.studentUid==request.auth.uid;allow read,update,delete:if staff();}
-    match /payments/{paymentId}{allow get,list:if staff()||(signedIn()&&resource.data.userId==request.auth.uid);allow create:if signedIn()&&request.resource.data.userId==request.auth.uid;allow update,delete:if staff();}
-    match /withdrawals/{withdrawalId}{allow read,write:if staff();}
-    match /withdrawalRequests/{requestId}{
-      allow get,list:if staff()||(isInstructor()&&resource.data.instructorId==request.auth.uid);
-      allow create:if isInstructor()&&request.resource.data.instructorId==request.auth.uid&&request.resource.data.status=='pending'&&request.resource.data.amount is number&&request.resource.data.amount>0&&request.resource.data.method is string&&request.resource.data.account is string;
-      allow update:if isFounder();
-      allow delete:if isFounder();
+    function userExists() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
-    match /instructorEarnings/{earningId}{allow get,list:if staff()||(isInstructor()&&resource.data.instructorId==request.auth.uid);allow create,update,delete:if staff();}
-    match /instructorWallets/{walletId}{allow get,list:if isFounder();allow create,update,delete:if isFounder();}
-    match /walletActions/{actionId}{allow get,list:if isFounder();allow create:if isFounder();allow update,delete:if false;}
-    match /finance/{financeId}{allow get,list:if isFounder();allow create,update:if isFounder();allow delete:if false;}
-    match /financeTransactions/{transactionId}{allow get,list:if isFounder();allow create:if isFounder();allow update,delete:if false;}
-    match /audit_logs/{logId}{allow read,create:if isFounder();allow update,delete:if false;}
-    match /platform_controls/{controlId}{allow read:if signedIn();allow write:if isFounder();}
-    match /activity/{activityId}{allow read,create:if staff();allow update,delete:if isFounder();}
-    match /premiumSubscriptions/{userId}{allow get:if signedIn()&&(request.auth.uid==userId||isFounder());allow list:if isFounder();allow create,update,delete:if isFounder();}
-    match /reports/{reportId}{allow create:if signedIn()&&request.resource.data.reporterId==request.auth.uid&&request.resource.data.adminVisible==true&&request.resource.data.founderVisible==(request.resource.data.priority=='critical'||request.resource.data.type=='system'||request.resource.data.category=='security');allow get:if signedIn()&&(resource.data.reporterId==request.auth.uid||isAdmin()||(isFounder()&&resource.data.founderVisible==true));allow list:if signedIn()&&(isAdmin()||(isFounder()&&resource.data.founderVisible==true)||resource.data.reporterId==request.auth.uid);allow update:if staff();allow delete:if isFounder();}
-    match /notifications/{notificationId}{allow get:if signedIn()&&(resource.data.userId==request.auth.uid||staff());allow list:if staff()||(signedIn()&&resource.data.userId==request.auth.uid);allow create:if staff();allow update:if staff()||(signedIn()&&request.auth.uid==resource.data.userId&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read','readAt','updatedAt']));allow delete:if staff();}
-    match /broadcasts/{broadcastId}{allow read,write:if isFounder();}
-    match /announcements/{announcementId}{allow read:if signedIn();allow create,update,delete:if staff();}
-    match /courses/{courseId}{allow read:if signedIn();allow create,update:if isInstructor()||staff();allow delete:if staff()||(isInstructor()&&resource.data.instructorId==request.auth.uid);}
-    match /enrollments/{enrollmentId}{allow get,list:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid||resource.data.instructorId==request.auth.uid);allow create:if staff();allow update:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid||resource.data.instructorId==request.auth.uid);allow delete:if staff();}
-    match /assignments/{assignmentId}{allow read:if signedIn();allow create,update,delete:if isInstructor()||staff();}
-    match /submissions/{submissionId}{allow get,list:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid||resource.data.instructorId==request.auth.uid);allow create:if signedIn()&&request.resource.data.studentId==request.auth.uid;allow update:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid||resource.data.instructorId==request.auth.uid);allow delete:if staff();}
-    match /certificates/{certificateId}{allow get,list:if signedIn()&&(staff()||resource.data.studentId==request.auth.uid);allow create,update,delete:if staff();}
-    match /settings/{settingsId}{allow read,write:if isFounder();}
-    match /platformSettings/{settingsId}{allow read,write:if isFounder();}
-    function roleFor(uid){return get(/databases/$(database)/documents/users/$(uid)).data.get('role','unknown');}
-    function allowedPair(a,b){return (a=='founder')||(b=='founder')||(a=='student'&&b=='instructor')||(a=='instructor'&&b=='student')||(a=='instructor'&&b=='admin')||(a=='admin'&&b=='instructor');}
-    match /chats/{chatId}{allow get:if signedIn()&&resource.data.participants.hasAny([request.auth.uid]);allow list:if staff()||(signedIn()&&resource.data.participants.hasAny([request.auth.uid]));allow create:if signedIn()&&request.resource.data.participants is list&&request.resource.data.participants.size()==2&&request.resource.data.participants.hasAny([request.auth.uid])&&allowedPair(roleFor(request.auth.uid),roleFor(request.resource.data.participants[0]==request.auth.uid?request.resource.data.participants[1]:request.resource.data.participants[0]));allow update:if signedIn()&&resource.data.participants.hasAny([request.auth.uid])&&request.resource.data.participants==resource.data.participants;allow delete:if isFounder();match /messages/{messageId}{allow read:if signedIn()&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow create:if signedIn()&&request.resource.data.senderId==request.auth.uid&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow update:if signedIn()&&get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);allow delete:if isFounder();}}
-    match /{document=**}{allow read,write:if false;}
+
+    function role() {
+      return get(
+        /databases/$(database)/documents/users/$(request.auth.uid)
+      ).data.get('role', 'unknown');
+    }
+
+    function isStudent() {
+      return userExists() && role() == 'student';
+    }
+
+    function isInstructor() {
+      return userExists() && role() == 'instructor';
+    }
+
+    function isAdmin() {
+      return userExists() && role() == 'admin';
+    }
+
+    function isFounder() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/founder/$(request.auth.uid))
+        && get(
+          /databases/$(database)/documents/founder/$(request.auth.uid)
+        ).data.get('role', 'founder') == 'founder'
+        && get(
+          /databases/$(database)/documents/founder/$(request.auth.uid)
+        ).data.get('status', 'active') == 'active';
+    }
+
+    function staff() {
+      return isAdmin() || isFounder();
+    }
+
+    function directoryList() {
+      return
+        (isStudent()
+          && resource.data.get('role', 'unknown') == 'instructor')
+        ||
+        (isInstructor()
+          && resource.data.get('role', 'unknown') in ['student', 'admin'])
+        ||
+        (isAdmin()
+          && resource.data.get('role', 'unknown') == 'instructor')
+        ||
+        (isFounder()
+          && resource.data.get('role', 'unknown')
+            in ['student', 'instructor', 'admin']);
+    }
+
+
+    // ============================================================
+    // PLATFORM CONTROL / PORTAL SECURITY
+    // ============================================================
+
+    function platformControls() {
+      return get(
+        /databases/$(database)/documents/platform_controls/global
+      ).data;
+    }
+
+    function maintenanceActive(portal) {
+      let c = platformControls();
+      let m = c.get('maintenance', {});
+
+      return m.get('scheduled', false) == true
+        && (
+          m.get('target', '') == portal
+          || m.get('target', '') == 'all'
+        )
+        && m.keys().hasAll(['startAt', 'endAt'])
+        && request.time >= m.get('startAt')
+        && request.time < m.get('endAt');
+    }
+
+    function portalBlocked(portal) {
+      let c = platformControls();
+
+      return c.get('lockdown', false) == true
+        || c.get(portal, {}).get('suspended', false) == true
+        || maintenanceActive(portal);
+    }
+
+    function studentPortalOpen() {
+      return !portalBlocked('student');
+    }
+
+    function instructorPortalOpen() {
+      return !portalBlocked('instructor');
+    }
+
+    function userPortalOpen() {
+      return
+        isStudent()
+          ? studentPortalOpen()
+          : isInstructor()
+            ? instructorPortalOpen()
+            : true;
+    }
+
+
+    // ============================================================
+    // USERS
+    //
+    // IMPORTANT:
+    // Do NOT gate this collection with portalBlocked().
+    // The application needs the user document to resolve the role.
+    // ============================================================
+
+    match /users/{userId} {
+
+      allow get:
+        if signedIn()
+        && (
+          request.auth.uid == userId
+          || staff()
+        );
+
+      allow list:
+        if (staff() || directoryList())
+        && request.query.limit <= 50;
+
+      allow create:
+        if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.get('role', 'student')
+          in ['student', 'instructor'];
+
+      allow update:
+        if signedIn()
+        && request.auth.uid == userId
+        && (
+          (
+            request.resource.data.get(
+              'role',
+              resource.data.get('role', 'unknown')
+            )
+            ==
+            resource.data.get('role', 'unknown')
+
+            && request.resource.data.get(
+              'status',
+              resource.data.get('status', 'pending_admission')
+            )
+            ==
+            resource.data.get('status', 'pending_admission')
+
+            && request.resource.data.get(
+              'verified',
+              resource.data.get('verified', false)
+            )
+            ==
+            resource.data.get('verified', false)
+
+            && request.resource.data.diff(resource.data)
+              .affectedKeys()
+              .hasOnly([
+                'fullName',
+                'bio',
+                'expertise',
+                'profilePhoto',
+                'phone',
+                'lastLogin',
+                'updatedAt',
+                'xp',
+                'level',
+                'badges',
+                'lastReward'
+              ])
+
+            && (
+              !request.resource.data.diff(resource.data)
+                .affectedKeys()
+                .hasAny([
+                  'xp',
+                  'level',
+                  'badges',
+                  'lastReward'
+                ])
+              ||
+              request.resource.data.get(
+                'role',
+                resource.data.get('role', 'unknown')
+              ) == 'student'
+            )
+
+            && request.resource.data.get(
+              'xp',
+              resource.data.get('xp', 0)
+            ) >= resource.data.get('xp', 0)
+
+            && request.resource.data.get(
+              'xp',
+              resource.data.get('xp', 0)
+            ) <= resource.data.get('xp', 0) + 100
+
+            && request.resource.data.get(
+              'level',
+              resource.data.get('level', 1)
+            ) >= resource.data.get('level', 1)
+
+            && request.resource.data.get(
+              'level',
+              resource.data.get('level', 1)
+            ) <= resource.data.get('level', 1) + 1
+
+            && request.resource.data.get(
+              'badges',
+              resource.data.get('badges', [])
+            ).hasAll(
+              resource.data.get('badges', [])
+            )
+          )
+
+          ||
+
+          (
+            !resource.data.keys().hasAny(['role'])
+
+            && request.resource.data.get(
+              'role',
+              'unknown'
+            ) in ['student', 'instructor']
+
+            && request.resource.data.diff(resource.data)
+              .affectedKeys()
+              .hasOnly([
+                'role',
+                'lastLogin',
+                'uid',
+                'email',
+                'fullName',
+                'active',
+                'verified',
+                'status',
+                'createdAt'
+              ])
+          )
+        );
+
+      allow delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // FOUNDER
+    // ============================================================
+
+    match /founder/{founderId} {
+
+      allow get:
+        if signedIn()
+        && (
+          request.auth.uid == founderId
+          || isFounder()
+        );
+
+      allow list:
+        if isFounder();
+
+      allow create, update, delete:
+        if false;
+    }
+
+
+    // ============================================================
+    // STUDENTS
+    // ============================================================
+
+    match /students/{studentId} {
+
+      allow get:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && request.auth.uid == studentId
+        );
+
+      allow list:
+        if staff();
+
+      // Initial admission/onboarding remains available.
+      allow create:
+        if signedIn()
+        && request.auth.uid == studentId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == 'student'
+        && request.resource.data.status == 'Pending'
+        && request.resource.data.onboardingStatus == 'awaiting_admission'
+        && request.resource.data.admissionNumber == 'Pending'
+        && request.resource.data.level == 1
+        && request.resource.data.xp == 0
+        && request.resource.data.streak == 0;
+
+      allow update:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && request.auth.uid == studentId
+          && request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              'name',
+              'phone',
+              'updatedAt'
+            ])
+        );
+
+      allow delete:
+        if staff();
+    }
+
+
+    match /students/{studentId}/enrollments/{enrollmentId} {
+
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && request.auth.uid == studentId
+        );
+
+      allow create, update, delete:
+        if staff();
+    }
+
+
+    match /studentSettings/{userId} {
+
+      allow get, write:
+        if isStudent()
+        && studentPortalOpen()
+        && request.auth.uid == userId;
+
+      allow list:
+        if staff();
+    }
+
+
+    match /accountDeletionRequests/{userId} {
+
+      allow get:
+        if signedIn()
+        && (
+          request.auth.uid == userId
+          || staff()
+        );
+
+      allow create:
+        if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending';
+
+      allow update:
+        if staff();
+
+      allow list:
+        if staff();
+
+      allow delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // INSTRUCTORS
+    // ============================================================
+
+    match /instructors/{instructorId} {
+
+      allow get:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && request.auth.uid == instructorId
+        );
+
+      allow list:
+        if staff();
+
+      allow create, update, delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // ADMISSIONS
+    // ============================================================
+
+    match /applications/{applicationId} {
+
+      allow create:
+        if signedIn()
+        && request.resource.data.studentUid == request.auth.uid;
+
+      allow read, update, delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // PAYMENTS
+    // ============================================================
+
+    match /payments/{paymentId} {
+
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.userId == request.auth.uid
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.userId == request.auth.uid
+        );
+
+      allow create:
+        if signedIn()
+        && (
+          (
+            isStudent()
+            && studentPortalOpen()
+          )
+          ||
+          (
+            isInstructor()
+            && instructorPortalOpen()
+          )
+        )
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update, delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // WITHDRAWALS / INSTRUCTOR FINANCE
+    // ============================================================
+
+    match /withdrawals/{withdrawalId} {
+      allow read, write:
+        if staff();
+    }
+
+
+    match /withdrawalRequests/{requestId} {
+
+      allow get, list:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+
+      allow create:
+        if isInstructor()
+        && instructorPortalOpen()
+        && request.resource.data.instructorId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.method is string
+        && request.resource.data.account is string;
+
+      allow update:
+        if isFounder();
+
+      allow delete:
+        if isFounder();
+    }
+
+
+    match /instructorEarnings/{earningId} {
+
+      allow get, list:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+
+      allow create, update, delete:
+        if staff();
+    }
+
+
+    match /instructorWallets/{walletId} {
+
+      allow get, list:
+        if isFounder();
+
+      allow create, update, delete:
+        if isFounder();
+    }
+
+
+    match /walletActions/{actionId} {
+
+      allow get, list:
+        if isFounder();
+
+      allow create:
+        if isFounder();
+
+      allow update, delete:
+        if false;
+    }
+
+
+    match /finance/{financeId} {
+
+      allow get, list:
+        if isFounder();
+
+      allow create, update:
+        if isFounder();
+
+      allow delete:
+        if false;
+    }
+
+
+    match /financeTransactions/{transactionId} {
+
+      allow get, list:
+        if isFounder();
+
+      allow create:
+        if isFounder();
+
+      allow update, delete:
+        if false;
+    }
+
+
+    // ============================================================
+    // AUDIT / PLATFORM CONTROLS
+    // ============================================================
+
+    match /audit_logs/{logId} {
+
+      allow read, create:
+        if isFounder();
+
+      allow update, delete:
+        if false;
+    }
+
+
+    match /platform_controls/{controlId} {
+
+      // Required so portal clients can detect suspension,
+      // maintenance and lockdown.
+      allow read:
+        if signedIn();
+
+      // Only the Founder can control platform state.
+      allow write:
+        if isFounder();
+    }
+
+
+    match /activity/{activityId} {
+
+      allow read, create:
+        if staff();
+
+      allow update, delete:
+        if isFounder();
+    }
+
+
+    // ============================================================
+    // PREMIUM SUBSCRIPTIONS
+    // ============================================================
+
+    match /premiumSubscriptions/{userId} {
+
+      allow get:
+        if signedIn()
+        && (
+          request.auth.uid == userId
+          || isFounder()
+        );
+
+      allow list:
+        if isFounder();
+
+      allow create, update, delete:
+        if isFounder();
+    }
+
+
+    // ============================================================
+    // REPORTS
+    // ============================================================
+
+    match /reports/{reportId} {
+
+      allow create:
+        if signedIn()
+        && request.resource.data.reporterId == request.auth.uid;
+
+      allow get:
+        if signedIn()
+        && (
+          resource.data.reporterId == request.auth.uid
+          || isAdmin()
+          || isFounder()
+        );
+
+      allow list:
+        if signedIn()
+        && (
+          isAdmin()
+          || isFounder()
+          || resource.data.reporterId == request.auth.uid
+        );
+
+      allow update:
+        if staff();
+
+      allow delete:
+        if isFounder();
+    }
+
+
+    // ============================================================
+    // NOTIFICATIONS
+    // ============================================================
+
+    match /notifications/{notificationId} {
+
+      allow get:
+        if signedIn()
+        && (
+          resource.data.userId == request.auth.uid
+          || staff()
+        );
+
+      allow list:
+        if staff()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+
+      allow create:
+        if staff();
+
+      allow update:
+        if staff()
+        || (
+          signedIn()
+          && request.auth.uid == resource.data.userId
+          && request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              'read',
+              'readAt',
+              'updatedAt'
+            ])
+        );
+
+      allow delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // BROADCASTS / ANNOUNCEMENTS
+    // ============================================================
+
+    match /broadcasts/{broadcastId} {
+
+      allow read, write:
+        if isFounder();
+    }
+
+
+    match /announcements/{announcementId} {
+
+      allow read:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow create, update, delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // COURSES
+    // ============================================================
+
+    match /courses/{courseId} {
+
+      allow read:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow create, update:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+    }
+
+
+    // ============================================================
+    // ENROLLMENTS
+    // ============================================================
+
+    match /enrollments/{enrollmentId} {
+
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.studentId == request.auth.uid
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+
+      allow create:
+        if staff();
+
+      allow update:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.studentId == request.auth.uid
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+
+      allow delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // ASSIGNMENTS
+    // ============================================================
+
+    match /assignments/{assignmentId} {
+
+      allow read:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow create, update, delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+    }
+
+
+    // ============================================================
+    // COURSE BUILDER
+    // ============================================================
+
+    match /courseModules/{moduleId} {
+
+      allow read:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow create:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow update, delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+    }
+
+
+    match /courseLessons/{lessonId} {
+
+      allow read:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow create:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow update, delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+    }
+
+
+    match /quizzes/{quizId} {
+
+      allow read:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+
+      allow create, update, delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+        );
+    }
+
+
+    // ============================================================
+    // SUBMISSIONS
+    // ============================================================
+
+    match /submissions/{submissionId} {
+
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.studentId == request.auth.uid
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+
+      allow create:
+        if isStudent()
+        && studentPortalOpen()
+        && request.resource.data.studentId == request.auth.uid;
+
+      allow update:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.studentId == request.auth.uid
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == request.auth.uid
+        );
+
+      allow delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // CERTIFICATES
+    // ============================================================
+
+    match /certificates/{certificateId} {
+
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.studentId == request.auth.uid
+        );
+
+      allow create, update, delete:
+        if staff();
+    }
+
+
+    // ============================================================
+    // FOUNDER SETTINGS
+    // ============================================================
+
+    match /settings/{settingsId} {
+
+      allow read, write:
+        if isFounder();
+    }
+
+
+    match /platformSettings/{settingsId} {
+
+      allow read, write:
+        if isFounder();
+    }
+
+
+    // ============================================================
+    // CHAT / MESSAGING
+    // ============================================================
+
+    function roleFor(uid) {
+      return get(
+        /databases/$(database)/documents/users/$(uid)
+      ).data.get('role', 'unknown');
+    }
+
+    function allowedPair(a, b) {
+      return
+        (a == 'founder')
+        ||
+        (b == 'founder')
+        ||
+        (a == 'student' && b == 'instructor')
+        ||
+        (a == 'instructor' && b == 'student')
+        ||
+        (a == 'instructor' && b == 'admin')
+        ||
+        (a == 'admin' && b == 'instructor');
+    }
+
+
+    match /chats/{chatId} {
+
+      allow get:
+        if staff()
+        ||
+        (
+          signedIn()
+          && (
+            (
+              isStudent()
+              && studentPortalOpen()
+            )
+            ||
+            (
+              isInstructor()
+              && instructorPortalOpen()
+            )
+          )
+          && resource.data.participants.hasAny([
+            request.auth.uid
+          ])
+        );
+
+      allow list:
+        if staff()
+        ||
+        (
+          signedIn()
+          && (
+            (
+              isStudent()
+              && studentPortalOpen()
+            )
+            ||
+            (
+              isInstructor()
+              && instructorPortalOpen()
+            )
+          )
+          && resource.data.participants.hasAny([
+            request.auth.uid
+          ])
+        );
+
+      allow create:
+        if signedIn()
+        && (
+          (
+            isStudent()
+            && studentPortalOpen()
+          )
+          ||
+          (
+            isInstructor()
+            && instructorPortalOpen()
+          )
+        )
+        && request.resource.data.participants is list
+        && request.resource.data.participants.size() == 2
+        && request.resource.data.participants.hasAny([
+          request.auth.uid
+        ])
+        && allowedPair(
+          roleFor(request.auth.uid),
+          roleFor(
+            request.resource.data.participants[0] == request.auth.uid
+              ? request.resource.data.participants[1]
+              : request.resource.data.participants[0]
+          )
+        );
+
+      allow update:
+        if signedIn()
+        && (
+          staff()
+          ||
+          (
+            (
+              (
+                isStudent()
+                && studentPortalOpen()
+              )
+              ||
+              (
+                isInstructor()
+                && instructorPortalOpen()
+              )
+            )
+            && resource.data.participants.hasAny([
+              request.auth.uid
+            ])
+          )
+        )
+        && request.resource.data.participants
+          == resource.data.participants;
+
+      allow delete:
+        if isFounder();
+    }
+
+
+    match /messages/{messageId} {
+
+      allow read:
+        if staff()
+        ||
+        (
+          signedIn()
+          && (
+            (
+              isStudent()
+              && studentPortalOpen()
+            )
+            ||
+            (
+              isInstructor()
+              && instructorPortalOpen()
+            )
+          )
+          && get(
+            /databases/$(database)/documents/chats/$(chatId)
+          ).data.participants.hasAny([
+            request.auth.uid
+          ])
+        );
+
+      allow create:
+        if signedIn()
+        && (
+          (
+            isStudent()
+            && studentPortalOpen()
+          )
+          ||
+          (
+            isInstructor()
+            && instructorPortalOpen()
+          )
+        )
+        && request.resource.data.senderId == request.auth.uid
+        && get(
+          /databases/$(database)/documents/chats/$(chatId)
+        ).data.participants.hasAny([
+          request.auth.uid
+        ]);
+
+      allow update:
+        if signedIn()
+        && (
+          (
+            isStudent()
+            && studentPortalOpen()
+          )
+          ||
+          (
+            isInstructor()
+            && instructorPortalOpen()
+          )
+        )
+        && get(
+          /databases/$(database)/documents/chats/$(chatId)
+        ).data.participants.hasAny([
+          request.auth.uid
+        ]);
+
+      allow delete:
+        if isFounder();
+    }
+
+
+    // ============================================================
+    // DEFAULT DENY
+    // ============================================================
+
+    match /{document=**} {
+      allow read, write:
+        if false;
+    }
   }
 }
