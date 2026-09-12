@@ -1,47 +1,303 @@
 /* ============================================================
-   SSA STUDENT SHELL OVERRIDES — SIDEBAR + TOPBAR
-   Loaded last via responsive.css so shared shell stays consistent.
+   SPARK STACK ACADEMY — STUDENT RESPONSIVE SYSTEM
+   Mobile-first / tablet / desktop
 ============================================================ */
 
-@media (min-width:901px){
-  .sidebar-container{width:280px;min-width:280px;max-width:280px;flex:0 0 280px}
-  .student-main{width:calc(100% - 280px);margin-left:0}
-  .topbar-container{position:sticky;top:0;width:100%;z-index:900}
-  .topbar{min-height:72px;padding:12px 28px}
+
+/* ============================================================
+   GLOBAL STUDENT LAYOUT
+============================================================ */
+
+.student-layout {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    display: flex;
+
+    background: #f6f8fc;
 }
 
-@media (max-width:900px){
-  .student-layout{display:block;width:100%}
-  .sidebar-container{width:0;min-width:0;max-width:0;flex:0 0 0}
-  .sidebar,.ssa-student-sidebar{width:min(292px,88vw);max-width:292px;height:100dvh;transform:translate3d(-105%,0,0);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:1200;box-shadow:18px 0 45px rgba(8,28,58,.28)}
-  .sidebar.open,.ssa-student-sidebar.open{transform:translate3d(0,0,0)}
-  .sidebar-overlay,#sidebarOverlay{position:fixed;inset:0;width:100vw;height:100dvh;opacity:0;visibility:hidden;pointer-events:none;background:rgba(3,12,28,.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);transition:opacity .22s ease,visibility .22s ease;z-index:1100}
-  .sidebar-overlay.show,#sidebarOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
-  body.ssa-sidebar-open{overflow:hidden;touch-action:none}
-  .student-main{width:100%;max-width:100%;margin:0;overflow-x:hidden}
-  .topbar-container{position:sticky;top:0;width:100%;z-index:900}
-  .topbar{width:100%;min-height:68px;height:auto;padding:10px 14px;gap:10px}
-  .menu-btn{display:flex;width:42px;height:42px;flex:0 0 42px}
-  .top-search{flex:1 1 auto;width:auto;min-width:0;max-width:none;padding:10px 12px}
-  .top-actions{flex:0 0 auto;gap:6px;margin-left:0}
-  .theme-btn,.icon-btn{width:40px;height:40px}
-  .profile-menu{padding:3px;max-width:none}
-  .profile-info{display:none}
-  .notification-panel{position:fixed;top:68px;right:12px;width:min(360px,calc(100vw - 24px));max-height:calc(100dvh - 82px)}
+
+/* ============================================================
+   DESKTOP SIDEBAR SPACE
+
+   The actual sidebar is fixed.
+   This container reserves its desktop space.
+============================================================ */
+
+.sidebar-container {
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+
+    flex: 0 0 280px;
 }
 
-@media (max-width:480px){
-  .topbar{padding:9px 10px;gap:6px}
-  .menu-btn,.theme-btn,.icon-btn{width:38px;height:38px}
-  .menu-btn{flex-basis:38px}
-  .top-search{padding:9px 10px;gap:7px}
-  .top-search input{font-size:12px}
-  .top-actions{gap:3px}
-  .profile-menu .student-avatar{width:38px;height:38px}
-  .notification-panel{top:62px;right:10px;width:calc(100vw - 20px)}
+
+/* ============================================================
+   MAIN AREA
+============================================================ */
+
+.student-main {
+    position: relative;
+
+    flex: 1 1 auto;
+
+    width: auto;
+
+    min-width: 0;
+    max-width: 100%;
+
+    overflow-x: clip;
 }
 
-@media (max-width:360px){
-  .top-search{display:none}
-  .top-actions{margin-left:auto}
+
+/* ============================================================
+   TOPBAR CONTAINER
+============================================================ */
+
+.topbar-container {
+    width: 100%;
+
+    min-width: 0;
+}
+
+
+/* ============================================================
+   MEDIA
+============================================================ */
+
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+}
+
+img {
+    display: block;
+}
+
+
+/* ============================================================
+   FORM ELEMENTS
+============================================================ */
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+
+    max-width: 100%;
+}
+
+
+/* ============================================================
+   LINKS
+============================================================ */
+
+a {
+    color: inherit;
+}
+
+
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f4f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+
+/* ============================================================
+   TABLETS / MOBILE SHELL
+============================================================ */
+
+@media (max-width: 900px) {
+
+    /*
+     * The sidebar becomes a fixed overlay drawer.
+     * It no longer reserves layout space.
+     */
+
+    .sidebar-container {
+        width: 0;
+        min-width: 0;
+        max-width: 0;
+
+        flex: 0 0 0;
+    }
+
+    .student-main {
+        width: 100%;
+
+        min-width: 0;
+        max-width: 100%;
+    }
+
+}
+
+
+/* ============================================================
+   MOBILE VIEWPORT
+============================================================ */
+
+@media (max-width: 600px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+
+        overflow-x: hidden;
+    }
+
+    .student-layout {
+        width: 100%;
+
+        min-width: 0;
+
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .student-main {
+        width: 100%;
+
+        min-width: 0;
+        max-width: 100%;
+
+        overflow-x: clip;
+    }
+
+    .topbar-container {
+        width: 100%;
+        min-width: 0;
+    }
+
+}
+
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 480px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+
+        overflow-x: hidden;
+    }
+
+    .student-layout {
+        width: 100%;
+        min-width: 0;
+
+        min-height: 100dvh;
+    }
+
+    .student-main {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+}
+
+
+/* ============================================================
+   VERY SMALL PHONES
+============================================================ */
+
+@media (max-width: 380px) {
+
+    .student-main {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+}
+
+
+/* ============================================================
+   EXTREMELY SMALL DEVICES
+============================================================ */
+
+@media (max-width: 320px) {
+
+    .student-main {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+}
+
+
+/* ============================================================
+   LANDSCAPE PHONES
+============================================================ */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+    .student-layout {
+        min-height: 100dvh;
+    }
+
+    .student-main {
+        min-height: 100dvh;
+    }
+
+}
+
+
+/* ============================================================
+   SAFE AREA SUPPORT
+============================================================ */
+
+@supports (
+    padding: env(safe-area-inset-bottom)
+) {
+
+    body {
+        padding-bottom:
+            env(safe-area-inset-bottom);
+    }
+
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+    }
+
 }

@@ -1,19 +1,23 @@
 /* =========================================================
    SPARK STACK ACADEMY
-   STUDENT DASHBOARD V2
-   PREMIUM LEARNING DASHBOARD
+   STUDENT DASHBOARD V3
+   Premium Learning Dashboard
 ========================================================= */
 
 
 /* =========================================================
-   PAGE FOUNDATION
+   DASHBOARD CONTENT
+   This file is the ONLY owner of dashboard-content spacing.
 ========================================================= */
 
 .dashboard-content {
     width: 100%;
     max-width: 1500px;
+
     margin: 0 auto;
-    padding: 30px;
+
+    padding: 28px 30px 40px;
+
     box-sizing: border-box;
 }
 
@@ -24,16 +28,18 @@
 
 .welcome-card {
     position: relative;
-    overflow: hidden;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
+    width: 100%;
     min-height: 250px;
 
+    margin: 0 0 26px;
     padding: 38px 42px;
-    margin-bottom: 26px;
+
+    overflow: hidden;
 
     border-radius: 24px;
 
@@ -55,7 +61,6 @@
         0 18px 50px rgba(8,28,58,.16);
 }
 
-
 .welcome-card::before {
     content: "";
 
@@ -69,123 +74,133 @@
 
     border-radius: 50%;
 
-    background: rgba(41,121,255,.12);
-}
+    background:
+        rgba(41,121,255,.12);
 
+    pointer-events: none;
+}
 
 .welcome-content {
     position: relative;
+
     z-index: 2;
 
     max-width: 720px;
-}
 
+    min-width: 0;
+}
 
 .welcome-badge {
     display: inline-flex;
     align-items: center;
+
     gap: 7px;
 
     padding: 7px 12px;
 
-    border: 1px solid rgba(255,255,255,.14);
+    border:
+        1px solid rgba(255,255,255,.14);
+
     border-radius: 999px;
 
-    background: rgba(255,255,255,.08);
+    background:
+        rgba(255,255,255,.08);
 
     font-size: 12px;
     font-weight: 600;
 }
-
 
 .welcome-badge svg {
     width: 15px;
     height: 15px;
 }
 
-
 .welcome-card h1 {
     margin: 18px 0 10px;
 
-    font-size: clamp(28px, 4vw, 42px);
+    font-size:
+        clamp(28px, 4vw, 42px);
+
     line-height: 1.15;
 
     letter-spacing: -1px;
 }
 
-
 .welcome-card h1 span {
     color: #ffc107;
 }
-
 
 .welcome-card p {
     max-width: 650px;
 
     margin: 0;
 
-    color: rgba(255,255,255,.75);
+    color:
+        rgba(255,255,255,.75);
 
     font-size: 15px;
+
     line-height: 1.7;
 }
-
 
 .learning-meta {
     display: flex;
     align-items: center;
+
     gap: 22px;
 
     margin-top: 25px;
 }
 
-
 .meta-item {
     display: flex;
     align-items: center;
+
     gap: 8px;
 
-    color: rgba(255,255,255,.82);
+    color:
+        rgba(255,255,255,.82);
 
     font-size: 13px;
     font-weight: 500;
 }
-
 
 .meta-item svg {
     width: 17px;
     height: 17px;
 }
 
-
 .meta-item:first-child svg {
     color: #ffc107;
 }
 
-
 .welcome-icon {
     position: relative;
+
     z-index: 2;
+
+    width: 115px;
+    height: 115px;
+
+    flex: 0 0 115px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    width: 115px;
-    height: 115px;
-
     margin-right: 25px;
 
     border-radius: 32px;
 
-    background: rgba(255,255,255,.08);
+    background:
+        rgba(255,255,255,.08);
 
-    border: 1px solid rgba(255,255,255,.12);
+    border:
+        1px solid rgba(255,255,255,.12);
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.08);
 }
-
 
 .welcome-icon svg {
     width: 55px;
@@ -194,7 +209,9 @@
     color: #ffc107;
 
     filter:
-        drop-shadow(0 0 15px rgba(255,193,7,.3));
+        drop-shadow(
+            0 0 15px rgba(255,193,7,.3)
+        );
 }
 
 
@@ -213,17 +230,20 @@
     margin-bottom: 26px;
 }
 
-
 .stat-card {
+    min-width: 0;
+    min-height: 105px;
+
     display: flex;
     align-items: center;
-    gap: 15px;
 
-    min-height: 105px;
+    gap: 15px;
 
     padding: 20px;
 
-    border: 1px solid #e8edf5;
+    border:
+        1px solid #e8edf5;
+
     border-radius: 18px;
 
     background: #fff;
@@ -237,26 +257,25 @@
         border-color .25s ease;
 }
 
-
 .stat-card:hover {
     transform: translateY(-3px);
 
-    border-color: rgba(41,121,255,.25);
+    border-color:
+        rgba(41,121,255,.25);
 
     box-shadow:
         0 14px 32px rgba(8,28,58,.09);
 }
 
-
 .stat-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     width: 48px;
     height: 48px;
 
     flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     border-radius: 14px;
 
@@ -265,12 +284,14 @@
     color: #2979ff;
 }
 
-
 .stat-icon svg {
     width: 22px;
     height: 22px;
 }
 
+.stat-info {
+    min-width: 0;
+}
 
 .stat-info h3 {
     margin: 0 0 5px;
@@ -280,7 +301,6 @@
     font-size: 12px;
     font-weight: 600;
 }
-
 
 .stat-info strong {
     color: #081c3a;
@@ -305,30 +325,31 @@
     margin-bottom: 34px;
 }
 
-
 .gamification-card {
     position: relative;
 
+    min-width: 0;
+    min-height: 145px;
+
     display: flex;
     align-items: flex-start;
-    gap: 16px;
 
-    min-height: 145px;
+    gap: 16px;
 
     padding: 24px;
 
     overflow: hidden;
 
-    border-radius: 20px;
+    border:
+        1px solid #e8edf5;
 
-    border: 1px solid #e8edf5;
+    border-radius: 20px;
 
     background: #fff;
 
     box-shadow:
         0 8px 25px rgba(8,28,58,.05);
 }
-
 
 .gamification-card::after {
     content: "";
@@ -343,25 +364,29 @@
 
     border-radius: 50%;
 
-    background: rgba(41,121,255,.035);
-}
+    background:
+        rgba(41,121,255,.035);
 
+    pointer-events: none;
+}
 
 .gamification-card > div:last-child {
     position: relative;
+
     z-index: 1;
+
+    min-width: 0;
 }
 
-
 .card-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     width: 48px;
     height: 48px;
 
     flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     border-radius: 15px;
 
@@ -370,12 +395,10 @@
     color: #2979ff;
 }
 
-
 .card-icon svg {
     width: 23px;
     height: 23px;
 }
-
 
 .glow-fire {
     color: #ff9800;
@@ -386,7 +409,6 @@
     box-shadow:
         0 0 22px rgba(255,152,0,.12);
 }
-
 
 .gamification-card > div:last-child > span {
     display: block;
@@ -399,7 +421,6 @@
     font-weight: 600;
 }
 
-
 .gamification-card h2 {
     margin: 0;
 
@@ -409,7 +430,6 @@
     font-weight: 800;
 }
 
-
 .gamification-card p {
     margin: 6px 0 0;
 
@@ -417,7 +437,6 @@
 
     font-size: 12px;
 }
-
 
 .gamification-card a {
     display: inline-block;
@@ -432,20 +451,20 @@
     text-decoration: none;
 }
 
-
 .gamification-card a:hover {
     text-decoration: underline;
 }
 
 
 /* =========================================================
-   XP BAR
+   XP
 ========================================================= */
 
 .xp-content {
-    flex: 1;
-}
+    flex: 1 1 auto;
 
+    min-width: 0;
+}
 
 .xp-bar {
     width: 100%;
@@ -459,7 +478,6 @@
 
     background: #edf2f7;
 }
-
 
 .xp-bar span {
     display: block;
@@ -476,9 +494,9 @@
             #66a3ff
         );
 
-    transition: width .6s ease;
+    transition:
+        width .6s ease;
 }
-
 
 .xp-content small {
     display: block;
@@ -499,15 +517,15 @@
     margin-bottom: 34px;
 }
 
-
 .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
+    gap: 15px;
+
     margin-bottom: 16px;
 }
-
 
 .section-header h2 {
     margin: 0;
@@ -520,8 +538,9 @@
     letter-spacing: -.3px;
 }
 
-
 .section-header a {
+    flex-shrink: 0;
+
     color: #2979ff;
 
     font-size: 13px;
@@ -529,7 +548,6 @@
 
     text-decoration: none;
 }
-
 
 .section-header a:hover {
     text-decoration: underline;
@@ -549,15 +567,18 @@
     gap: 18px;
 }
 
-
 .course-card {
     position: relative;
+
+    min-width: 0;
 
     padding: 22px;
 
     overflow: hidden;
 
-    border: 1px solid #e8edf5;
+    border:
+        1px solid #e8edf5;
+
     border-radius: 20px;
 
     background: #fff;
@@ -570,7 +591,6 @@
         box-shadow .25s ease;
 }
 
-
 .course-card:hover {
     transform: translateY(-4px);
 
@@ -578,15 +598,15 @@
         0 16px 35px rgba(8,28,58,.09);
 }
 
-
 .course-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
+    gap: 10px;
+
     margin-bottom: 18px;
 }
-
 
 .course-header .loading-icon {
     display: flex;
@@ -603,11 +623,9 @@
     color: #2979ff;
 }
 
-
 .course-header .loading-icon svg {
     width: 21px;
 }
-
 
 .course-header > span {
     padding: 6px 9px;
@@ -622,7 +640,6 @@
     font-weight: 700;
 }
 
-
 .course-card h3 {
     margin: 0 0 8px;
 
@@ -632,16 +649,17 @@
     font-weight: 800;
 }
 
-
 .course-card > p {
     margin: 0 0 18px;
 
     color: #64748b;
 
     font-size: 13px;
+
     line-height: 1.6;
 
     display: -webkit-box;
+
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 
@@ -657,7 +675,6 @@
     margin-bottom: 18px;
 }
 
-
 .course-progress > div {
     width: 100%;
     height: 7px;
@@ -668,7 +685,6 @@
 
     background: #edf2f7;
 }
-
 
 .course-progress span {
     display: block;
@@ -684,18 +700,17 @@
             #4d91ff
         );
 
-    transition: width .5s ease;
+    transition:
+        width .5s ease;
 }
 
-
 .continue-btn {
+    width: 100%;
+    min-height: 42px;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    width: 100%;
-
-    min-height: 42px;
 
     border-radius: 12px;
 
@@ -713,7 +728,6 @@
         transform .2s ease;
 }
 
-
 .continue-btn:hover {
     background: #2979ff;
 
@@ -722,32 +736,36 @@
 
 
 /* =========================================================
-   LOADING COURSE
+   COURSE LOADING
 ========================================================= */
 
 .course-loading {
     display: flex;
     align-items: center;
+
     gap: 15px;
 
     min-height: 120px;
 
     padding: 22px;
 
-    border: 1px dashed #dce4ef;
+    border:
+        1px dashed #dce4ef;
+
     border-radius: 18px;
 
     background: #fff;
 }
 
-
 .course-loading .loading-icon {
+    width: 45px;
+    height: 45px;
+
+    flex: 0 0 45px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-
-    width: 45px;
-    height: 45px;
 
     border-radius: 13px;
 
@@ -756,7 +774,6 @@
     color: #2979ff;
 }
 
-
 .course-loading h3 {
     margin: 0 0 4px;
 
@@ -764,7 +781,6 @@
 
     font-size: 15px;
 }
-
 
 .course-loading p {
     margin: 0;
@@ -782,7 +798,9 @@
 .progress-card {
     padding: 25px;
 
-    border: 1px solid #e8edf5;
+    border:
+        1px solid #e8edf5;
+
     border-radius: 20px;
 
     background: #fff;
@@ -791,15 +809,15 @@
         0 8px 25px rgba(8,28,58,.05);
 }
 
-
 .progress-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
+    gap: 15px;
+
     margin-bottom: 18px;
 }
-
 
 .progress-top h3 {
     margin: 0 0 5px;
@@ -810,7 +828,6 @@
     font-weight: 800;
 }
 
-
 .progress-top p {
     margin: 0;
 
@@ -819,14 +836,14 @@
     font-size: 12px;
 }
 
-
 .progress-top strong {
+    flex-shrink: 0;
+
     color: #2979ff;
 
     font-size: 27px;
     font-weight: 800;
 }
-
 
 .progress-track {
     width: 100%;
@@ -838,7 +855,6 @@
 
     background: #edf2f7;
 }
-
 
 .progress-fill {
     display: block;
@@ -855,12 +871,13 @@
             #5b9cff
         );
 
-    transition: width .7s ease;
+    transition:
+        width .7s ease;
 }
 
 
 /* =========================================================
-   COMMUNITY HUB
+   COMMUNITY
 ========================================================= */
 
 .community-grid {
@@ -874,11 +891,14 @@
     margin-bottom: 34px;
 }
 
-
 .community-card {
+    min-width: 0;
+
     padding: 24px;
 
-    border: 1px solid #e8edf5;
+    border:
+        1px solid #e8edf5;
+
     border-radius: 20px;
 
     background: #fff;
@@ -887,25 +907,22 @@
         0 8px 25px rgba(8,28,58,.05);
 }
 
-
 .community-card .section-header {
     margin-bottom: 20px;
 }
-
 
 .announcement-item,
 .message-item {
     padding: 14px 0;
 
-    border-bottom: 1px solid #edf1f6;
+    border-bottom:
+        1px solid #edf1f6;
 }
-
 
 .announcement-item:last-child,
 .message-item:last-child {
     border-bottom: 0;
 }
-
 
 .announcement-item h4,
 .message-item strong {
@@ -919,7 +936,6 @@
     font-weight: 700;
 }
 
-
 .announcement-item p,
 .message-item p,
 .community-card > div > p {
@@ -928,16 +944,15 @@
     color: #64748b;
 
     font-size: 12px;
+
     line-height: 1.6;
 }
-
 
 .message-item {
     position: relative;
 
     padding-left: 14px;
 }
-
 
 .message-item::before {
     content: "";
@@ -963,7 +978,9 @@
 .activity-list {
     overflow: hidden;
 
-    border: 1px solid #e8edf5;
+    border:
+        1px solid #e8edf5;
+
     border-radius: 20px;
 
     background: #fff;
@@ -972,32 +989,31 @@
         0 8px 25px rgba(8,28,58,.05);
 }
 
-
 .activity-item {
     display: flex;
     align-items: center;
+
     gap: 15px;
 
     padding: 18px 22px;
 
-    border-bottom: 1px solid #edf1f6;
+    border-bottom:
+        1px solid #edf1f6;
 }
-
 
 .activity-item:last-child {
     border-bottom: 0;
 }
 
-
 .activity-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     width: 42px;
     height: 42px;
 
     flex: 0 0 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     border-radius: 12px;
 
@@ -1006,11 +1022,9 @@
     color: #2979ff;
 }
 
-
 .activity-icon svg {
     width: 19px;
 }
-
 
 .activity-item h4 {
     margin: 0 0 4px;
@@ -1020,7 +1034,6 @@
     font-size: 13px;
     font-weight: 700;
 }
-
 
 .activity-item p {
     margin: 0;
@@ -1038,11 +1051,16 @@
 .profile-card {
     display: flex;
     align-items: center;
+
     gap: 18px;
+
+    min-width: 0;
 
     padding: 25px;
 
-    border: 1px solid #e8edf5;
+    border:
+        1px solid #e8edf5;
+
     border-radius: 20px;
 
     background: #fff;
@@ -1051,16 +1069,15 @@
         0 8px 25px rgba(8,28,58,.05);
 }
 
-
 .profile-avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     width: 68px;
     height: 68px;
 
     flex: 0 0 68px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     border-radius: 20px;
 
@@ -1080,10 +1097,14 @@
         0 10px 25px rgba(41,121,255,.18);
 }
 
+.profile-details {
+    min-width: 0;
+}
 
 .profile-details h3 {
     display: flex;
     align-items: center;
+
     gap: 7px;
 
     margin: 0 0 5px;
@@ -1094,7 +1115,6 @@
     font-weight: 800;
 }
 
-
 .profile-details > p {
     margin: 3px 0;
 
@@ -1102,7 +1122,6 @@
 
     font-size: 12px;
 }
-
 
 .student-status {
     display: inline-flex;
@@ -1123,32 +1142,6 @@
 
 
 /* =========================================================
-   PREMIUM BADGE
-========================================================= */
-
-.premium-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 18px;
-    height: 18px;
-
-    border-radius: 50%;
-
-    background: #2979ff;
-
-    color: #fff;
-
-    font-size: 11px;
-    font-weight: 800;
-
-    box-shadow:
-        0 0 0 3px rgba(41,121,255,.12);
-}
-
-
-/* =========================================================
    QUICK ACTIONS
 ========================================================= */
 
@@ -1163,16 +1156,18 @@
     margin-bottom: 20px;
 }
 
-
 .action-card {
     display: flex;
     align-items: center;
     justify-content: center;
+
     gap: 10px;
 
     min-height: 60px;
 
-    border: 1px solid #e8edf5;
+    border:
+        1px solid #e8edf5;
+
     border-radius: 15px;
 
     background: #fff;
@@ -1193,16 +1188,16 @@
         color .2s ease;
 }
 
-
 .action-card svg {
     width: 19px;
+    height: 19px;
 }
-
 
 .action-card:hover {
     transform: translateY(-2px);
 
-    border-color: rgba(41,121,255,.3);
+    border-color:
+        rgba(41,121,255,.3);
 
     color: #2979ff;
 }
@@ -1219,12 +1214,13 @@
 
     text-align: center;
 
-    border: 1px dashed #dce4ef;
+    border:
+        1px dashed #dce4ef;
+
     border-radius: 20px;
 
     background: #fff;
 }
-
 
 .library-state h3,
 .empty-state h3,
@@ -1236,7 +1232,6 @@
     font-size: 16px;
 }
 
-
 .library-state p,
 .empty-state p,
 .error-state p {
@@ -1247,16 +1242,15 @@
     font-size: 12px;
 }
 
-
 .state-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     width: 50px;
     height: 50px;
 
     margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     border-radius: 15px;
 
@@ -1267,7 +1261,7 @@
 
 
 /* =========================================================
-   BUTTON LOADING STATE
+   BUTTON LOADING
 ========================================================= */
 
 .course-action.loading {
@@ -1276,21 +1270,22 @@
     pointer-events: none;
 }
 
-
 .course-action.loading svg {
-    animation: dashboardSpin .8s linear infinite;
+    animation:
+        dashboardSpin .8s linear infinite;
 }
 
-
 @keyframes dashboardSpin {
+
     to {
         transform: rotate(360deg);
     }
+
 }
 
 
 /* =========================================================
-   RESPONSIVE
+   LARGE TABLETS / SMALL DESKTOPS
 ========================================================= */
 
 @media (max-width: 1100px) {
@@ -1300,17 +1295,14 @@
             repeat(2, minmax(0, 1fr));
     }
 
-
     .gamification-grid {
         grid-template-columns:
-            1fr 1fr;
+            repeat(2, minmax(0, 1fr));
     }
-
 
     .gamification-card:last-child {
         grid-column: 1 / -1;
     }
-
 
     .course-grid {
         grid-template-columns:
@@ -1320,12 +1312,18 @@
 }
 
 
+/* =========================================================
+   TABLETS
+========================================================= */
+
 @media (max-width: 800px) {
 
     .dashboard-content {
-        padding: 22px 18px;
+        padding:
+            22px
+            18px
+            34px;
     }
-
 
     .welcome-card {
         min-height: auto;
@@ -1333,16 +1331,13 @@
         padding: 30px 25px;
     }
 
-
     .welcome-icon {
         display: none;
     }
 
-
     .community-grid {
         grid-template-columns: 1fr;
     }
-
 
     .quick-actions {
         grid-template-columns: 1fr;
@@ -1351,12 +1346,18 @@
 }
 
 
+/* =========================================================
+   PHONES
+========================================================= */
+
 @media (max-width: 600px) {
 
     .dashboard-content {
-        padding: 18px 14px;
+        padding:
+            18px
+            14px
+            30px;
     }
-
 
     .welcome-card {
         padding: 25px 20px;
@@ -1364,22 +1365,19 @@
         border-radius: 20px;
     }
 
-
     .welcome-card h1 {
         font-size: 27px;
     }
-
 
     .welcome-card p {
         font-size: 13px;
     }
 
-
     .learning-meta {
         gap: 14px;
+
         flex-wrap: wrap;
     }
-
 
     .stats-grid {
         grid-template-columns:
@@ -1387,7 +1385,6 @@
 
         gap: 12px;
     }
-
 
     .stat-card {
         min-height: 90px;
@@ -1397,7 +1394,6 @@
         gap: 11px;
     }
 
-
     .stat-icon {
         width: 40px;
         height: 40px;
@@ -1405,11 +1401,9 @@
         flex-basis: 40px;
     }
 
-
     .stat-info strong {
         font-size: 21px;
     }
-
 
     .gamification-grid {
         grid-template-columns: 1fr;
@@ -1417,21 +1411,17 @@
         gap: 12px;
     }
 
-
     .gamification-card:last-child {
         grid-column: auto;
     }
-
 
     .course-grid {
         grid-template-columns: 1fr;
     }
 
-
     .section-header h2 {
         font-size: 18px;
     }
-
 
     .progress-card,
     .community-card,
@@ -1439,11 +1429,9 @@
         padding: 19px;
     }
 
-
     .progress-top strong {
         font-size: 23px;
     }
-
 
     .profile-avatar {
         width: 56px;
@@ -1456,11 +1444,9 @@
         font-size: 21px;
     }
 
-
     .profile-details h3 {
         font-size: 15px;
     }
-
 
     .activity-item {
         padding: 15px;
@@ -1469,17 +1455,19 @@
 }
 
 
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
 @media (max-width: 380px) {
 
     .stats-grid {
         grid-template-columns: 1fr;
     }
 
-
     .welcome-card h1 {
         font-size: 24px;
     }
-
 
     .stat-card {
         min-height: 80px;

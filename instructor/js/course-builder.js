@@ -159,7 +159,8 @@ refreshIcons();
             );
 
             showFatalError(
-                "Unable to load the course builder."
+                `Unable to load the course builder.<br><br>
+                 <strong>${escapeHTML(error?.message || String(error))}</strong>`
             );
 
         }

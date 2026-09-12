@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Calendar | Spark Stack Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/instructor-core.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/calendar.css">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+<div class="instructor-app">
+
+    <aside id="instructorSidebar"></aside>
+
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <main id="instructor-main">
+
+        <div id="instructorTopbar"></div>
+
+        <section class="instructor-calendar-page">
+
+            <div class="calendar-hero">
+                <div>
+                    <span class="calendar-eyebrow">INSTRUCTOR WORKSPACE</span>
+                    <h1>Teaching Calendar</h1>
+                    <p>
+                        Plan lessons, assignments, quizzes and announcements
+                        from one place.
+                    </p>
+                </div>
+
+                <button type="button" class="calendar-primary-btn" id="createEventBtn">
+                    <i data-lucide="plus"></i>
+                    <span>Create Event</span>
+                </button>
+            </div>
+
+            <div class="calendar-layout">
+
+                <section class="calendar-card calendar-main-card">
+
+                    <div class="calendar-toolbar">
+
+                        <div class="calendar-month-controls">
+                            <button
+                                type="button"
+                                class="calendar-icon-btn"
+                                id="previousMonthBtn"
+                                aria-label="Previous month"
+                            >
+                                <i data-lucide="chevron-left"></i>
+                            </button>
+
+                            <h2 id="calendarMonthLabel">Month Year</h2>
+
+                            <button
+                                type="button"
+                                class="calendar-icon-btn"
+                                id="nextMonthBtn"
+                                aria-label="Next month"
+                            >
+                                <i data-lucide="chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <button type="button" class="calendar-today-btn" id="todayBtn">
+                            Today
+                        </button>
+
+                    </div>
+
+                    <div class="calendar-weekdays">
+                        <span>Sun</span>
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                    </div>
+
+                    <div id="calendarGrid" class="calendar-grid">
+                        <div class="calendar-loading">
+                            <i data-lucide="loader-circle"></i>
+                            <span>Loading calendar...</span>
+                        </div>
+                    </div>
+
+                    <div class="calendar-legend">
+                        <span><i class="legend-dot assignment"></i> Assignment</span>
+                        <span><i class="legend-dot quiz"></i> Quiz</span>
+                        <span><i class="legend-dot course"></i> Course</span>
+                        <span><i class="legend-dot announcement"></i> Announcement</span>
+                        <span><i class="legend-dot event"></i> Event</span>
+                    </div>
+
+                </section>
+
+                <aside class="calendar-card upcoming-card">
+
+                    <div class="calendar-card-header">
+                        <div>
+                            <span>PLANNER</span>
+                            <h2>Upcoming</h2>
+                        </div>
+
+                        <i data-lucide="calendar-clock"></i>
+                    </div>
+
+                    <div id="upcomingEvents" class="upcoming-events">
+                        <div class="calendar-empty">
+                            <i data-lucide="calendar-off"></i>
+                            <strong>No upcoming events</strong>
+                            <span>Your upcoming teaching events will appear here.</span>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- Event details modal -->
+<div class="calendar-modal" id="eventDetailsModal" aria-hidden="true">
+    <div class="calendar-modal-backdrop" data-close-modal></div>
+
+    <div class="calendar-modal-dialog" role="dialog" aria-modal="true">
+
+        <button
+            type="button"
+            class="calendar-modal-close"
+            data-close-modal
+            aria-label="Close"
+        >
+            <i data-lucide="x"></i>
+        </button>
+
+        <span class="calendar-modal-type" id="detailsType">EVENT</span>
+
+        <h2 id="detailsTitle">Event</h2>
+
+        <div class="calendar-detail-row">
+            <i data-lucide="clock-3"></i>
+            <span id="detailsDate"></span>
+        </div>
+
+        <div class="calendar-detail-row">
+            <i data-lucide="book-open"></i>
+            <span id="detailsCourse"></span>
+        </div>
+
+        <p id="detailsDescription"></p>
+
+    </div>
+</div>
+
+<!-- Create event modal -->
+<div class="calendar-modal" id="createEventModal" aria-hidden="true">
+    <div class="calendar-modal-backdrop" data-close-create></div>
+
+    <div class="calendar-modal-dialog calendar-create-dialog" role="dialog" aria-modal="true">
+
+        <button
+            type="button"
+            class="calendar-modal-close"
+            data-close-create
+            aria-label="Close"
+        >
+            <i data-lucide="x"></i>
+        </button>
+
+        <span class="calendar-modal-type">NEW EVENT</span>
+        <h2>Create Calendar Event</h2>
+
+        <form id="createEventForm">
+
+            <label>
+                Event title
+                <input id="eventTitle" type="text" required maxlength="120">
+            </label>
+
+            <label>
+                Type
+                <select id="eventType" required>
+                    <option value="event">Event</option>
+                    <option value="course">Course Session</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="announcement">Announcement</option>
+                </select>
+            </label>
+
+            <div class="calendar-form-grid">
+
+                <label>
+                    Start
+                    <input id="eventStart" type="datetime-local" required>
+                </label>
+
+                <label>
+                    End
+                    <input id="eventEnd" type="datetime-local" required>
+                </label>
+
+            </div>
+
+            <label>
+                Course
+                <input
+                    id="eventCourse"
+                    type="text"
+                    maxlength="120"
+                    placeholder="Optional course name"
+                >
+            </label>
+
+            <label>
+                Description
+                <textarea
+                    id="eventDescription"
+                    rows="4"
+                    maxlength="1000"
+                    placeholder="Add details for this event..."
+                ></textarea>
+            </label>
+
+            <p class="calendar-form-error" id="eventFormError"></p>
+
+            <div class="calendar-form-actions">
+                <button type="button" class="calendar-secondary-btn" data-close-create>
+                    Cancel
+                </button>
+
+                <button type="submit" class="calendar-primary-btn">
+                    <i data-lucide="plus"></i>
+                    Create Event
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<script type="module" src="js/instructor-app.js"></script>
+<script type="module" src="js/calendar.js"></script>
+
+<script>
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+</script>
+
+</body>
+</html>

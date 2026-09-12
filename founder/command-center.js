@@ -1,7 +1,7 @@
 import "../js/ui-runtime.js";
 import { auth, db } from "../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { collection, doc, getDoc, setDoc, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, doc, getDoc, setDoc, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const state = { user: null, profile: null };
 const $ = id => document.getElementById(id);
@@ -128,7 +128,18 @@ async function scheduleMaintenance() {
   if (!Number.isFinite(startDate.getTime()) || !Number.isFinite(endDate.getTime())) throw Error("Please enter valid maintenance dates.");
   if (endDate <= startDate) throw Error("End time must be after start time.");
   if (endDate <= new Date()) throw Error("Maintenance must end in the future.");
-  const maintenance = { scheduled: true, target, start: startDate.toISOString(), end: endDate.toISOString(), message: message || "SSA is temporarily offline for scheduled maintenance.", scheduled_by: state.user.uid, scheduled_by_email: state.user.email || "", scheduled_at: serverTimestamp() };
+  const maintenance = {
+    scheduled: true,
+    target,
+    start: startDate.toISOString(),
+    end: endDate.toISOString(),
+    startAt: Timestamp.fromDate(startDate),
+    endAt: Timestamp.fromDate(endDate),
+    message: message || "SSA is temporarily offline for scheduled maintenance.",
+    scheduled_by: state.user.uid,
+    scheduled_by_email: state.user.email || "",
+    scheduled_at: serverTimestamp()
+  };
   await writeControls({ maintenance }, "Maintenance window scheduled", "maintenance_scheduled", { target, start: maintenance.start, end: maintenance.end, message: maintenance.message });
   renderMaintenance(maintenance);
   toast("Maintenance window scheduled successfully.");

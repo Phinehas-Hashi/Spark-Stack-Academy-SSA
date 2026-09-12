@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta
+        name="theme-color"
+        content="#081C3A"
+    >
+
+    <title>Calendar | Spark Stack Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/font/lucide.css"
+    >
+
+    <link rel="stylesheet" href="./css/student-core.css">
+    <link rel="stylesheet" href="./css/components.css">
+    <link rel="stylesheet" href="./css/responsive.css">
+    <link rel="stylesheet" href="./css/calendar.css">
+</head>
+
+<body>
+
+<div class="student-layout">
+
+    <!-- SHARED SIDEBAR -->
+    <aside
+        id="sidebarContainer"
+        class="sidebar-container"
+    ></aside>
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div
+        id="sidebarOverlay"
+        class="sidebar-overlay"
+        aria-hidden="true"
+    ></div>
+
+    <!-- MAIN -->
+    <main class="student-main">
+
+        <!-- SHARED TOPBAR -->
+        <div
+            id="topbarContainer"
+            class="topbar-container"
+        ></div>
+
+        <!-- CALENDAR CONTENT -->
+        <section class="calendar-page">
+
+            <!-- PAGE HEADER -->
+            <div class="calendar-page-header">
+
+                <div class="calendar-heading">
+
+                    <div class="calendar-heading-icon">
+                        <i data-lucide="calendar-days"></i>
+                    </div>
+
+                    <div>
+                        <span class="calendar-eyebrow">
+                            Student Center
+                        </span>
+
+                        <h1>Calendar</h1>
+
+                        <p>
+                            Keep track of your learning schedule,
+                            deadlines and upcoming events.
+                        </p>
+                    </div>
+
+                </div>
+
+                <button
+                    id="todayBtn"
+                    class="calendar-today-btn"
+                    type="button"
+                >
+                    <i data-lucide="calendar-check-2"></i>
+                    <span>Today</span>
+                </button>
+
+            </div>
+
+
+            <!-- CALENDAR CARD -->
+            <div class="calendar-layout">
+
+                <section class="calendar-card">
+
+                    <!-- CALENDAR TOOLBAR -->
+                    <div class="calendar-toolbar">
+
+                        <div class="calendar-month-navigation">
+
+                            <button
+                                id="previousMonthBtn"
+                                class="calendar-nav-btn"
+                                type="button"
+                                aria-label="Previous month"
+                            >
+                                <i data-lucide="chevron-left"></i>
+                            </button>
+
+                            <h2 id="calendarMonth">
+                                Loading...
+                            </h2>
+
+                            <button
+                                id="nextMonthBtn"
+                                class="calendar-nav-btn"
+                                type="button"
+                                aria-label="Next month"
+                            >
+                                <i data-lucide="chevron-right"></i>
+                            </button>
+
+                        </div>
+
+                        <div class="calendar-view-label">
+                            <i data-lucide="calendar"></i>
+                            <span>Month view</span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- WEEKDAYS -->
+                    <div
+                        class="calendar-weekdays"
+                        aria-hidden="true"
+                    >
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                        <div>Sun</div>
+                    </div>
+
+
+                    <!-- DAYS -->
+                    <div
+                        id="calendarGrid"
+                        class="calendar-grid"
+                        aria-live="polite"
+                    >
+                        <div class="calendar-loading">
+                            <div class="calendar-loading-spinner"></div>
+                            <span>Loading calendar...</span>
+                        </div>
+                    </div>
+
+
+                    <!-- LEGEND -->
+                    <div class="calendar-legend">
+
+                        <div class="legend-item">
+                            <span class="legend-dot assignment"></span>
+                            <span>Assignment</span>
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="legend-dot quiz"></span>
+                            <span>Quiz / Exam</span>
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="legend-dot course"></span>
+                            <span>Course</span>
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="legend-dot announcement"></span>
+                            <span>Announcement</span>
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="legend-dot event"></span>
+                            <span>Event</span>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- UPCOMING -->
+                <aside class="upcoming-card">
+
+                    <div class="upcoming-header">
+
+                        <div>
+                            <span class="calendar-eyebrow">
+                                Stay ahead
+                            </span>
+
+                            <h3>Upcoming</h3>
+                        </div>
+
+                        <div class="upcoming-icon">
+                            <i data-lucide="clock-3"></i>
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="upcomingEvents"
+                        class="upcoming-events"
+                    >
+                        <div class="upcoming-empty">
+                            <div class="upcoming-empty-icon">
+                                <i data-lucide="calendar-off"></i>
+                            </div>
+
+                            <strong>No upcoming events</strong>
+
+                            <p>
+                                Your upcoming assignments,
+                                quizzes and events will appear here.
+                            </p>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- EVENT DETAILS MODAL -->
+<div
+    id="calendarEventModal"
+    class="calendar-modal"
+    aria-hidden="true"
+>
+
+    <div
+        class="calendar-modal-backdrop"
+        data-calendar-modal-close
+    ></div>
+
+    <div
+        class="calendar-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="calendarModalTitle"
+    >
+
+        <button
+            id="calendarModalClose"
+            class="calendar-modal-close"
+            type="button"
+            aria-label="Close event details"
+        >
+            <i data-lucide="x"></i>
+        </button>
+
+        <div
+            id="calendarModalIcon"
+            class="calendar-modal-icon"
+        >
+            <i data-lucide="calendar-days"></i>
+        </div>
+
+        <span
+            id="calendarModalType"
+            class="calendar-modal-type"
+        >
+            Event
+        </span>
+
+        <h3 id="calendarModalTitle">
+            Event
+        </h3>
+
+        <div
+            id="calendarModalDate"
+            class="calendar-modal-date"
+        ></div>
+
+        <p
+            id="calendarModalDescription"
+            class="calendar-modal-description"
+        ></p>
+
+        <div
+            id="calendarModalCourse"
+            class="calendar-modal-course"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<!-- STUDENT APP SHELL -->
+<script
+    type="module"
+    src="./js/student-app.js"
+></script>
+
+<!-- CALENDAR -->
+<script
+    type="module"
+    src="./js/calendar.js"
+></script>
+
+<script>
+    window.addEventListener("DOMContentLoaded", () => {
+        window.lucide?.createIcons();
+    });
+</script>
+
+</body>
+</html>
