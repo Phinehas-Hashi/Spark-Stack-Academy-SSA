@@ -440,22 +440,8 @@ service cloud.firestore {
           && resource.data.userId == request.auth.uid
         );
 
-      allow create:
-        if signedIn()
-        && (
-          (
-            isStudent()
-            && studentPortalOpen()
-          )
-          ||
-          (
-            isInstructor()
-            && instructorPortalOpen()
-          )
-        )
-        && request.resource.data.userId == request.auth.uid;
-
-      allow update, delete:
+      // Payment records are created and finalized by the backend only.
+      allow create, update, delete:
         if staff();
     }
 
@@ -787,6 +773,12 @@ service cloud.firestore {
           isStudent()
           && studentPortalOpen()
           && resource.data.studentId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'progress',
+            'completedLessons',
+            'lastAccessedAt',
+            'updatedAt'
+          ])
         )
         || (
           isInstructor()
