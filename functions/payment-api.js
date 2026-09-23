@@ -228,6 +228,25 @@ async function callback(req, res) {
         { upsert: true }
       );
 
+      await db.collection("payments").doc(fresh._id.toString()).set({
+        userId: fresh.studentId,
+        studentId: fresh.studentId,
+        courseId: fresh.courseId,
+        courseName: fresh.courseName,
+        amount: fresh.amount,
+        currency: fresh.currency,
+        provider: "mpesa",
+        method: "M-Pesa",
+        status: "successful",
+        internalReference: fresh.internalReference,
+        merchantRequestId: fresh.merchantRequestId || null,
+        checkoutRequestId: fresh.checkoutRequestId || null,
+        receiptNumber: fresh.receiptNumber || null,
+        createdAt: fresh.createdAt ? Timestamp.fromDate(fresh.createdAt) : Timestamp.now(),
+        verifiedAt: fresh.verifiedAt ? Timestamp.fromDate(fresh.verifiedAt) : Timestamp.now(),
+        updatedAt: Timestamp.now()
+      }, { merge: true });
+
       await db.collection("enrollments").doc(enrollmentKey).set({
         studentId: fresh.studentId,
         userId: fresh.studentId,
