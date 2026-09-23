@@ -114,6 +114,34 @@ async function initiate(req, res) {
   }
 }
 
+async function history(req, res) {
+  const user = await requireUser(req);
+  await prepareDb();
+  const mongo = await getDb();
+  const payments = await mongo.collection("payments")
+    .find({ studentId: user.uid })
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .toArray();
+
+  return json(res, 200, {
+    success: true,
+    payments: payments.map(payment => ({
+      id: payment._id.toString(),
+      courseId: payment.courseId,
+      courseName: payment.courseName,
+      amount: payment.amount,
+      currency: payment.currency,
+      provider: payment.provider,
+      status: payment.status,
+      receiptNumber: payment.receiptNumber || null,
+      reference: payment.internalReference,
+      createdAt: payment.createdAt,
+      verifiedAt: payment.verifiedAt || null
+    }))
+  });
+}
+
 async function callback(req, res) {
   await prepareDb();
   const mongo = await getDb();
@@ -229,7 +257,7 @@ exports.mpesaPayments = onRequest(
     if (req.method === "OPTIONS") return res.status(204).send("");
     try {
       if (req.method === "POST" && req.path.endsWith("/initiate")) return await initiate(req, res);
-      if (req.method === "POST" && req.path.endsWith("/callback")) return await callback(req, res);
+      if (req.method === "POST" && req.path.endsWith("/callback")) return await callback(req, res);\n      if (req.method === "GET" && req.path.endsWith("/history")) return await history(req, res);
       return json(res, 404, { success: false, message: "Payment endpoint not found." });
     } catch (error) {
       console.error("mpesaPayments:", error);
