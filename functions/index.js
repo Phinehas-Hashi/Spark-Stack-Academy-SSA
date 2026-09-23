@@ -4,6 +4,7 @@ const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
+const { mpesaPayments } = require("./payment-api");
 
 initializeApp();
 const db = getFirestore();
