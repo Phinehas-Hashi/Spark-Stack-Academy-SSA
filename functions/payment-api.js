@@ -15,7 +15,7 @@ function json(res, status, body) {
 
 function cors(req, res) {
   const origin = req.headers.origin;
-  const allowed = (process.env.PAYMENT_ALLOWED_ORIGINS || "").split(",").map(v => v.trim()).filter(Boolean);
+  const allowed = (process.env.PAYMENT_ALLOWED_ORIGINS || "https://phinehas-hashi.github.io,http://localhost:5000,http://localhost:3000").split(",").map(v => v.trim()).filter(Boolean);
   if (origin && (allowed.length === 0 || allowed.includes(origin))) {
     res.set("Access-Control-Allow-Origin", origin);
     res.set("Vary", "Origin");
