@@ -20,8 +20,8 @@ import {
 
 console.log("⚡ Fast Payments Engine Loaded");
 
-const SUPABASE_FUNCTION_URL =
-    "https://nlnwllpisbqgbeluhdbr.supabase.co/functions/v1/create-payment";
+const PAYMENT_API_URL =
+    "https://africa-south1-spark-stack-academy.cloudfunctions.net/mpesaPayments";
 
 const params = new URLSearchParams(window.location.search);
 const selectedCourseId = params.get("courseId");
@@ -149,13 +149,16 @@ function renderCheckout(course) {
                 <strong>KSh ${price.toLocaleString()}</strong>
             </div>
 
+            <label class="checkout-phone-label" for="mpesaPhone">M-Pesa phone number</label>
+            <input type="tel" id="mpesaPhone" class="checkout-phone" inputmode="tel" autocomplete="tel" placeholder="07XXXXXXXX" maxlength="13" />
+
             <button
                 type="button"
                 class="pay-btn"
                 id="payCourseBtn"
                 ${price <= 0 ? "disabled" : ""}
             >
-                Pay KSh ${price.toLocaleString()}
+                Pay KSh ${price.toLocaleString()} via M-Pesa
             </button>
 
             <div id="checkoutMessage" class="checkout-message"></div>
@@ -194,6 +197,8 @@ async function startPayment() {
     if (!currentUser || !selectedCourse) return;
 
     const amount = Number(selectedCourse.price || 0);
+    const phoneInput = document.getElementById("mpesaPhone");
+    const phoneNumber = phoneInput?.value?.trim();
     const button = document.getElementById("payCourseBtn");
 
     if (amount <= 0) {
@@ -201,55 +206,44 @@ async function startPayment() {
         return;
     }
 
+    if (!phoneNumber) {
+        showCheckoutMessage("Enter the M-Pesa number that should receive the STK prompt.", true);
+        phoneInput?.focus();
+        return;
+    }
+
     if (button) {
         button.disabled = true;
-        button.textContent = "Opening secure checkout...";
+        button.textContent = "Sending M-Pesa prompt...";
     }
 
     try {
-        const response = await fetch(SUPABASE_FUNCTION_URL, {
+        const idToken = await currentUser.getIdToken();
+        const response = await fetch(`${PAYMENT_API_URL}/initiate`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
-            body: JSON.stringify({
-                userId: currentUser.uid,
-                email: currentUser.email,
-                courseId: selectedCourse.id,
-                course: selectedCourse.title || "Premium Course",
-                amount,
-                currency: "KES"
-            })
+            body: JSON.stringify({ courseId: selectedCourse.id, phoneNumber })
         });
 
         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(
-                data.message || "Payment initialization failed."
-            );
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Payment initialization failed.");
         }
 
-        const checkoutUrl =
-            data.redirect_url ||
-            data.authorization_url ||
-            data.checkout_url;
-
-        if (!checkoutUrl) {
-            throw new Error("No checkout URL was returned.");
-        }
-
-        window.location.replace(checkoutUrl);
+        showCheckoutMessage("M-Pesa prompt sent. Enter your PIN on your phone, then wait for confirmation.");
+        if (paymentStatus) paymentStatus.textContent = "M-Pesa payment pending";
+        if (button) button.textContent = "Payment prompt sent ✓";
     } catch (error) {
-        console.error("Payment initialization failed:", error);
-        showCheckoutMessage(
-            error.message || "Unable to start payment. Please try again.",
-            true
-        );
+        console.error("M-Pesa payment initialization failed:", error);
+        showCheckoutMessage(error.message || "Unable to start M-Pesa payment. Please try again.", true);
 
         if (button) {
             button.disabled = false;
-            button.textContent = `Pay KSh ${amount.toLocaleString()}`;
+            button.textContent = `Pay KSh ${amount.toLocaleString()} via M-Pesa`;
         }
     }
 }
@@ -271,49 +265,40 @@ function startHistoryInBackground() {
     }
 }
 
-function loadPaymentHistory() {
+async function loadPaymentHistory() {
     if (!transactionList || !currentUser) return;
 
     try {
-        const paymentsQuery = query(
-            collection(db, "payments"),
-            where("userId", "==", currentUser.uid),
-            orderBy("createdAt", "desc"),
-            limit(20)
-        );
+        const idToken = await currentUser.getIdToken();
+        const response = await fetch(`${PAYMENT_API_URL}/history`, {
+            headers: { "Authorization": `Bearer ${idToken}` }
+        });
+        const data = await response.json();
 
-        onSnapshot(
-            paymentsQuery,
-            (snapshot) => {
-                let paid = 0;
-                transactionList.innerHTML = "";
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Payment history unavailable.");
+        }
 
-                if (snapshot.empty) {
-                    transactionList.innerHTML =
-                        `<div class="empty-payment">No transactions yet.</div>`;
-                    updateSummary(0);
-                    return;
-                }
+        const payments = Array.isArray(data.payments) ? data.payments : [];
+        let paid = 0;
+        transactionList.innerHTML = "";
 
-                snapshot.forEach((paymentDoc) => {
-                    const payment = paymentDoc.data();
-                    const status = normalizeStatus(payment.status);
+        if (!payments.length) {
+            transactionList.innerHTML = `<div class="empty-payment">No transactions yet.</div>`;
+            updateSummary(0);
+            return;
+        }
 
-                    if (status === "success" || status === "completed") {
-                        paid += Number(payment.amount || 0);
-                    }
-
-                    renderTransaction(payment);
-                });
-
-                updateSummary(paid);
-            },
-            (error) => {
-                console.warn("Payment history unavailable:", error);
+        payments.forEach(payment => {
+            if (["success", "successful", "completed", "paid"].includes(normalizeStatus(payment.status))) {
+                paid += Number(payment.amount || 0);
             }
-        );
+            renderTransaction(payment);
+        });
+
+        updateSummary(paid);
     } catch (error) {
-        console.warn("Payment history setup failed:", error);
+        console.warn("Payment history unavailable:", error);
     }
 }
 
@@ -336,7 +321,7 @@ function renderTransaction(payment) {
         payment.course || payment.courseName || "Academy Payment"
     );
 
-    const method = escapeHTML(payment.method || "PesaPal");
+    const method = escapeHTML(payment.provider === "mpesa" ? "M-Pesa" : (payment.method || "Payment"));
     const status = normalizeStatus(payment.status);
     const amount = Number(payment.amount || 0);
 
