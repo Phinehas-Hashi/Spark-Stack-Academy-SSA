@@ -51,10 +51,10 @@ function password(ts) {
 }
 
 function normalizePhone(phone) {
-  const digits = String(phone || "").replace(/\\D/g, "");
-  if (/^2547\\d{8}$/.test(digits)) return digits;
-  if (/^07\\d{8}$/.test(digits)) return `254${digits.slice(1)}`;
-  if (/^01\\d{8}$/.test(digits)) return `254${digits.slice(1)}`;
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (/^2547\d{8}$/.test(digits)) return digits;
+  if (/^07\d{8}$/.test(digits)) return `254${digits.slice(1)}`;
+  if (/^01\d{8}$/.test(digits)) return `254${digits.slice(1)}`;
   throw new Error("Enter a valid Kenyan M-Pesa phone number.");
 }
 

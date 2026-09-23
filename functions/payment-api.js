@@ -276,7 +276,8 @@ exports.mpesaPayments = onRequest(
     if (req.method === "OPTIONS") return res.status(204).send("");
     try {
       if (req.method === "POST" && req.path.endsWith("/initiate")) return await initiate(req, res);
-      if (req.method === "POST" && req.path.endsWith("/callback")) return await callback(req, res);\n      if (req.method === "GET" && req.path.endsWith("/history")) return await history(req, res);
+      if (req.method === "POST" && req.path.endsWith("/callback")) return await callback(req, res);
+      if (req.method === "GET" && req.path.endsWith("/history")) return await history(req, res);
       return json(res, 404, { success: false, message: "Payment endpoint not found." });
     } catch (error) {
       console.error("mpesaPayments:", error);
