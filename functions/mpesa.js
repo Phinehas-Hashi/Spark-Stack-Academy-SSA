@@ -3,10 +3,21 @@ const MPESA_BASE_URL =
     ? "https://api.safaricom.co.ke"
     : "https://sandbox.safaricom.co.ke";
 
-function required(name) {
+// Daraja sandbox test credentials are shared test values. They are used only
+// when MPESA_ENV is not "production" and no override is supplied.
+const SANDBOX_SHORTCODE = "174379";
+const SANDBOX_PASSKEY =
+  "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
+
+function required(name, sandboxFallback = null) {
   const value = process.env[name];
-  if (!value) throw new Error(`${name} is not configured.`);
-  return value;
+  if (value) return value;
+
+  if (process.env.MPESA_ENV !== "production" && sandboxFallback) {
+    return sandboxFallback;
+  }
+
+  throw new Error(`${name} is not configured.`);
 }
 
 async function getAccessToken() {
@@ -45,8 +56,11 @@ function timestamp() {
 }
 
 function password(ts) {
+  const shortcode = required("MPESA_SHORTCODE", SANDBOX_SHORTCODE);
+  const passkey = required("MPESA_PASSKEY", SANDBOX_PASSKEY);
+
   return Buffer.from(
-    `${required("MPESA_SHORTCODE")}${required("MPESA_PASSKEY")}${ts}`
+    `${shortcode}${passkey}${ts}`
   ).toString("base64");
 }
 
@@ -61,15 +75,16 @@ function normalizePhone(phone) {
 async function initiateStkPush({ amount, phoneNumber, accountReference, transactionDesc }) {
   const token = await getAccessToken();
   const ts = timestamp();
+  const shortcode = required("MPESA_SHORTCODE", SANDBOX_SHORTCODE);
 
   const payload = {
-    BusinessShortCode: required("MPESA_SHORTCODE"),
+    BusinessShortCode: shortcode,
     Password: password(ts),
     Timestamp: ts,
     TransactionType: process.env.MPESA_TRANSACTION_TYPE || "CustomerPayBillOnline",
     Amount: Math.round(Number(amount)),
     PartyA: normalizePhone(phoneNumber),
-    PartyB: required("MPESA_SHORTCODE"),
+    PartyB: shortcode,
     PhoneNumber: normalizePhone(phoneNumber),
     CallBackURL: required("MPESA_CALLBACK_URL"),
     AccountReference: String(accountReference).slice(0, 12),
