@@ -6,7 +6,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/fi
 
 const settingsRef = doc(db, "settings", "sparkAI");
 const $ = id => document.getElementById(id);
-const fields = ["aiProvider","aiModel","apiKey","apiEndpoint","temperature","maxTokens","systemPrompt","aiPersonality","defaultLanguage","responseStyle","enableStreaming","enableMemory","enableWeb","enableCode","enableImages","rateLimit","conversationLimit"];
+const fields = ["aiProvider","aiModel","apiEndpoint","temperature","maxTokens","systemPrompt","aiPersonality","defaultLanguage","responseStyle","enableStreaming","enableMemory","enableWeb","enableCode","enableImages","rateLimit","conversationLimit"];
 
 function toast(message, type = "success") {
     let box = $("sparkAiToast");
@@ -60,7 +60,6 @@ function collectSettings() {
     return {
         aiProvider: $("aiProvider").value,
         aiModel: $("aiModel").value.trim(),
-        apiKey: $("apiKey").value.trim(),
         apiEndpoint: $("apiEndpoint").value.trim(),
         temperature: temperatureValue,
         maxTokens: maxTokensValue,
@@ -75,6 +74,7 @@ function collectSettings() {
         enableImages: $("enableImages").checked,
         rateLimit: rateLimitValue,
         conversationLimit: conversationLimitValue,
+        // API keys are intentionally never stored in Firestore. They belong in a server-side secret store.
         updatedAt: serverTimestamp()
     };
 }
