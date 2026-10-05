@@ -17,7 +17,7 @@ onAuthStateChanged(auth,async user=>{
 
 async function loadUsers(){
  try{
-  const snap=await getDocs(collection(db,"users"));
+  const snap=await getDocs(query(collection(db,"users"), where("role","==","instructor"), where("status","==","active"), where("active","==",true), where("verified","==",true), limit(50)));
   users=snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>u.id!==currentUser.uid&&String(u.role||"").toLowerCase()==="instructor");
   renderUsers(users);
  }catch(error){console.error("Loading instructors failed:",error);noUsers&&(noUsers.style.display="flex");}
