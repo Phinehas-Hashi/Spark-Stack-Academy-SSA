@@ -293,11 +293,45 @@ service cloud.firestore {
                .hasOnly([
                  'name',
                  'phone',
-                 'updatedAt'
+                 'updatedAt',
+                 'xp',
+                 'lastXPReward',
+                 'lastXPReason',
+                 'level',
+                 'lastLevelUp',
+                 'lastLevelUpAt',
+                 'streak',
+                 'lastActiveDate',
+                 'lastActiveAt',
+                 'badges',
+                 'stats'
                ])
         );
 
       allow delete:
+        if isFounder();
+    }
+
+
+    // ============================================================
+    // STUDENT ACTIVITY
+    // ============================================================
+
+    match /students/{studentId}/activity/{activityId} {
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && uid() == studentId
+        );
+
+      allow create:
+        if isStudent()
+        && studentPortalOpen()
+        && uid() == studentId;
+
+      allow update, delete:
         if isFounder();
     }
 
@@ -1108,8 +1142,17 @@ service cloud.firestore {
     }
 
     function validChatMembers() {
-      return request.resource.data.get('memberIds', []).size() == 2
-        && request.resource.data.memberIds.hasAny([uid()]);
+      return (
+        (
+          request.resource.data.get('memberIds', []).size() == 2
+          && request.resource.data.memberIds.hasAny([uid()])
+        )
+        ||
+        (
+          request.resource.data.get('participants', []).size() == 2
+          && request.resource.data.participants.hasAny([uid()])
+        )
+      );
     }
 
 
