@@ -13,8 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
-const API_BASE_URL =
-    "const API_BASE_URL = window.SSA_LEGACY_PAYMENT_API_BASE_URL || "";";
+const API_BASE_URL = window.SSA_LEGACY_PAYMENT_API_BASE_URL || "";
 
 
 const statusElement =
