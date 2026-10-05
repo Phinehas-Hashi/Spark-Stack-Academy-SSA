@@ -1,6 +1,6 @@
 import { auth, db } from "../../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { collection, getDocs, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, query, where, limit, getDocs, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let currentUser=null, currentProfile=null, users=[];
 const $=id=>document.getElementById(id);
@@ -36,9 +36,16 @@ function renderUsers(list){
 
 async function createChat(user){
  try{
-  const snap=await getDocs(collection(db,"chats"));
+  const snap=await getDocs(query(
+    collection(db,"chats"),
+    where("memberIds","array-contains",currentUser.uid),
+    limit(50)
+  ));
   let existing=null;
-  snap.forEach(d=>{const m=d.data().memberIds||[];if(m.includes(currentUser.uid)&&m.includes(user.id))existing=d.id});
+  snap.forEach(d=>{
+    const m=d.data().memberIds||[];
+    if(m.includes(user.id)) existing=d.id;
+  });
   if(existing){location.href=`chat.html?chatId=${existing}`;return;}
   const chat=await addDoc(collection(db,"chats"),{members:[{uid:currentUser.uid,name:currentProfile.name||currentProfile.displayName||currentUser.email||"Student",role:"student"},{uid:user.id,name:user.name||user.displayName||"Instructor",role:"instructor"}],memberIds:[currentUser.uid,user.id],lastMessage:"",createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
   location.href=`chat.html?chatId=${chat.id}`;
