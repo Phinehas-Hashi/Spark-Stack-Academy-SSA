@@ -35,7 +35,8 @@ service cloud.firestore {
     function isStudent() {
       return userExists()
         && role() == 'student'
-        && userData().get('active', true) == true;
+        && userData().get('active', true) == true
+        && userData().get('status', '') == 'active';
     }
 
     function isInstructor() {
@@ -153,10 +154,22 @@ service cloud.firestore {
       allow create:
         if signedIn()
         && uid() == userId
-        && request.resource.data.get('role', 'student') == 'student'
-        && request.resource.data.get('uid', uid()) == uid()
-        && request.resource.data.get('active', true) == true
-        && request.resource.data.get('verified', false) == false;
+        && (
+          (
+            request.resource.data.get('role', 'student') == 'student'
+            && request.resource.data.get('status', 'pending_admission') == 'pending_admission'
+            && request.resource.data.get('active', true) == true
+            && request.resource.data.get('verified', false) == false
+          )
+          ||
+          (
+            request.resource.data.get('role', '') == 'instructor'
+            && request.resource.data.get('status', 'pending_review') == 'pending_review'
+            && request.resource.data.get('active', true) == true
+            && request.resource.data.get('verified', false) == false
+          )
+        )
+        && request.resource.data.get('uid', uid()) == uid();
 
       // ----------------------------------------------------------
       // SELF PROFILE UPDATE
