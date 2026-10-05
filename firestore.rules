@@ -558,8 +558,10 @@ service cloud.firestore {
       allow create:
         if isFounder();
 
-      allow update, delete:
+      allow update:
         if false;
+      allow delete:
+        if isFounder();
     }
 
 
