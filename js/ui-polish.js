@@ -24,7 +24,21 @@
         }
         .modal, .modal-overlay, .modal-backdrop,
         [role="dialog"][aria-modal="true"] {
-            z-index: 2000;
+            z-index: 5000;
+        }
+        /* Drawers must sit above the Founder shell/sidebar/topbar. */
+        .ai-tool-drawer,
+        .course-drawer,
+        .notification-drawer,
+        [class*="drawer"][aria-hidden="false"],
+        [class*="drawer"].open,
+        [class*="drawer"].show {
+            z-index: 5000 !important;
+        }
+        .drawer-backdrop,
+        [class*="drawer-backdrop"].open,
+        [class*="drawer-overlay"].open {
+            z-index: 4990 !important;
         }
         .modal-overlay, .modal-backdrop {
             position: fixed;
