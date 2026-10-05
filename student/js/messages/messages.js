@@ -1,6 +1,6 @@
-import { auth } from "../../../js/firebase.js";
+import { auth } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getMyConversations } from "../../../js/messaging-service.js";
+import { getMyConversations } from "../../js/messaging-service.js";
 
 const conversationList=document.getElementById("conversationList");
 const emptyState=document.getElementById("emptyState");
