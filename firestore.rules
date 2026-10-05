@@ -1234,10 +1234,20 @@ service cloud.firestore {
 
       allow list:
         if staff()
-        || activePortalUser();
+        || (
+          activePortalUser()
+          && (
+            resource.data.get('memberIds', []).hasAny([uid()])
+            ||
+            resource.data.get('participants', []).hasAny([uid()])
+          )
+        );
 
       allow create:
-        if activePortalUser()
+        if (
+          staff()
+          || activePortalUser()
+        )
         && validChatMembers();
 
       allow update:
