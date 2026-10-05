@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isFounder() {
+      return signedIn()
+        && firestore.exists(
+          /databases/(default)/documents/founder/$(request.auth.uid)
+        )
+        && firestore.get(
+          /databases/(default)/documents/founder/$(request.auth.uid)
+        ).data.get('role', '') == 'founder'
+        && firestore.get(
+          /databases/(default)/documents/founder/$(request.auth.uid)
+        ).data.get('status', '') == 'active';
+    }
+
+    function isChatParticipant(chatId) {
+      return signedIn()
+        && firestore.exists(
+          /databases/(default)/documents/chats/$(chatId)
+        )
+        && firestore.get(
+          /databases/(default)/documents/chats/$(chatId)
+        ).data.participants.hasAny([request.auth.uid]);
+    }
+
+    match /academy-profile/{fileName} {
+      allow read: if true;
+      allow write: if isFounder()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /chatFiles/{chatId}/{fileName} {
+      allow read: if isChatParticipant(chatId);
+      allow write: if isChatParticipant(chatId)
+        && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
