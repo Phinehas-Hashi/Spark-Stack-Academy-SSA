@@ -56,7 +56,21 @@
 <div id="scheduleInfo" class="schedule-info">No maintenance window scheduled.</div>
 </section>
 <section class="command-panel live-panel">
-<div class="panel-title"><div><span class="eyebrow">LIVE CONTROL</span><h2>Command Feed</h2></div></div>
+<div class="panel-title command-log-title">
+<div><span class="eyebrow">SECURITY AUDIT</span><h2>Command Audit Log</h2><p class="muted">Search, sort and remove audit entries when necessary.</p></div>
+<div class="audit-count" id="auditCount">0 entries</div>
+</div>
+<div class="audit-toolbar">
+<div class="audit-search"><i data-lucide="search"></i><input id="auditSearch" type="search" placeholder="Search action, message or actor..." autocomplete="off"></div>
+<select id="auditSort" aria-label="Sort audit log">
+<option value="newest">Newest first</option>
+<option value="oldest">Oldest first</option>
+<option value="action">Action A–Z</option>
+<option value="actor">Actor A–Z</option>
+</select>
+<button id="clearAuditSearch" class="ghost-btn audit-clear" type="button">Clear</button>
+<button id="deleteFilteredAudit" class="danger-btn audit-delete-all" type="button"><i data-lucide="trash-2"></i> Delete shown</button>
+</div>
 <div id="commandLog" class="command-log"><div class="empty">Loading command history...</div></div>
 </section>
 </section>
