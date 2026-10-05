@@ -247,3 +247,29 @@
         width: 100%;
     }
 }
+
+/* Audit log controls */
+.command-log-title { margin-bottom: 14px; }
+.command-log-title h2 { margin-bottom: 4px; }
+.audit-toolbar { display:grid; grid-template-columns:minmax(220px,1fr) 170px auto auto; gap:10px; align-items:center; padding:12px; margin-bottom:14px; background:#f8fafc; border:1px solid rgba(15,23,42,.07); border-radius:14px; }
+.audit-search { position:relative; }
+.audit-search i { position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; color:#64748b; }
+.audit-search input,.audit-toolbar select { width:100%; min-height:42px; border:1px solid #dbe2ea; border-radius:10px; background:#fff; padding:0 12px; font:inherit; color:#0f172a; }
+.audit-search input { padding-left:38px; }
+.audit-toolbar select { cursor:pointer; }
+.audit-clear,.audit-delete-all { width:auto; min-height:42px; padding:10px 14px; }
+.audit-delete-all { display:flex; align-items:center; gap:7px; background:#fff1f2; color:#dc2626; border:1px solid #fecdd3; }
+.audit-delete-all i { width:15px; }
+.audit-count { font-size:12px; font-weight:700; color:#64748b; white-space:nowrap; }
+.command-entry { display:flex; justify-content:space-between; align-items:center; gap:14px; background:#fff; transition:.18s ease; }
+.command-entry:hover { border-color:rgba(41,121,255,.25); box-shadow:0 5px 18px rgba(15,23,42,.04); }
+.command-entry-main { display:flex; align-items:flex-start; gap:12px; min-width:0; }
+.audit-entry-icon { width:34px; height:34px; display:grid; place-items:center; flex:0 0 auto; border-radius:10px; background:#edf4ff; color:#2979ff; }
+.audit-entry-icon i { width:16px; }
+.command-entry-main > div:last-child { min-width:0; }
+.command-entry strong { line-height:1.45; }
+.audit-action { display:inline-block; margin-top:7px; padding:3px 7px; border-radius:999px; background:#f1f5f9; color:#475569; font-size:10px; font-weight:800; letter-spacing:.03em; }
+.audit-delete-btn { flex:0 0 auto; width:36px; height:36px; border:1px solid #fecdd3; border-radius:9px; background:#fff; color:#dc2626; cursor:pointer; }
+.audit-delete-btn:hover { background:#fff1f2; }
+@media (max-width:800px) { .audit-toolbar { grid-template-columns:1fr 1fr; } .audit-search { grid-column:1/-1; } .audit-clear,.audit-delete-all { width:100%; } }
+@media (max-width:520px) { .audit-toolbar { grid-template-columns:1fr; } .audit-search { grid-column:auto; } .audit-count { white-space:normal; } }
