@@ -4,7 +4,7 @@
 // ===================================
 
 import "../js/ui-runtime.js";
-import { db } from "../../js/firebase.js";
+import { db } from "../js/firebase.js";
 import {
   collection, addDoc, doc, deleteDoc, updateDoc,
   onSnapshot, serverTimestamp, query, orderBy
