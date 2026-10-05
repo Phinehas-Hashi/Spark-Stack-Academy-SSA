@@ -1,4 +1,4 @@
-import {db} from "../../../js/firebase.js";
+import {db} from "../../js/firebase.js";
 import {doc,getDoc,setDoc,arrayUnion,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {showAchievement} from "./achievement-popup.js";
 import {showLevelUp} from "./level-popup.js";
