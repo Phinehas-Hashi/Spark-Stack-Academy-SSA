@@ -7,7 +7,7 @@ import "./js/founder-app.js";
 
 import { db, auth }
 
-from "../../js/firebase.js";
+from "../js/firebase.js";
 
 import {
 
@@ -42,7 +42,7 @@ auth,
 
 if(!user){
 
-window.location.href="../../login.html";
+window.location.href="../login.html";
 
 return;
 
