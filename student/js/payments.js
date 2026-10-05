@@ -20,8 +20,8 @@ import {
 
 console.log("⚡ Fast Payments Engine Loaded");
 
-const SUPABASE_FUNCTION_URL =
-    "https://nlnwllpisbqgbeluhdbr.supabase.co/functions/v1/create-payment";
+const PAYMENT_API_URL =
+    window.SSA_PAYMENT_API_URL || "";
 
 const params = new URLSearchParams(window.location.search);
 const selectedCourseId = params.get("courseId");
@@ -207,7 +207,11 @@ async function startPayment() {
     }
 
     try {
-        const response = await fetch(SUPABASE_FUNCTION_URL, {
+        if (!PAYMENT_API_URL) {
+            throw new Error("Secure payments are temporarily unavailable while the unified SSA payment service is being configured.");
+        }
+
+        const response = await fetch(PAYMENT_API_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
