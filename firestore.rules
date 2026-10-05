@@ -1205,17 +1205,61 @@ service cloud.firestore {
     }
 
     function validChatMembers() {
-      return (
-        (
-          request.resource.data.get('memberIds', []).size() == 2
-          && request.resource.data.memberIds.hasAny([uid()])
-        )
-        ||
-        (
-          request.resource.data.get('participants', []).size() == 2
-          && request.resource.data.participants.hasAny([uid()])
-        )
-      );
+      let ids = request.resource.data.get('memberIds', []);
+      let participants = request.resource.data.get('participants', []);
+      let members = ids.size() == 2 ? ids : participants;
+
+      return members.size() == 2
+        && members[0] != members[1]
+        && members.hasAny([uid()])
+        && exists(/databases/$(database)/documents/users/$(members[0]))
+        && exists(/databases/$(database)/documents/users/$(members[1]))
+        && (
+          // Student <-> instructor
+          (
+            role() == 'student'
+            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'student'
+            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'instructor'
+          )
+          || (
+            role() == 'student'
+            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'student'
+            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'instructor'
+          )
+          // Instructor <-> student/admin
+          || (
+            role() == 'instructor'
+            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'instructor'
+            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') in ['student', 'admin']
+          )
+          || (
+            role() == 'instructor'
+            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'instructor'
+            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') in ['student', 'admin']
+          )
+          // Admin <-> instructor/founder
+          || (
+            role() == 'admin'
+            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'admin'
+            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') in ['instructor', 'founder']
+          )
+          || (
+            role() == 'admin'
+            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'admin'
+            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') in ['instructor', 'founder']
+          )
+          // Founder <-> permitted portal/admin roles
+          || (
+            role() == 'founder'
+            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'founder'
+            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') in ['student', 'instructor', 'admin']
+          )
+          || (
+            role() == 'founder'
+            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'founder'
+            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') in ['student', 'instructor', 'admin']
+          )
+        );
     }
 
 
