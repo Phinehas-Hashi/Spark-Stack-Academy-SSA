@@ -30,14 +30,26 @@
         .ai-tool-drawer,
         .course-drawer,
         .notification-drawer,
+        .lesson-drawer,
+        .admin-modal,
+        .calendar-modal,
+        .ai-action-modal,
         [class*="drawer"][aria-hidden="false"],
         [class*="drawer"].open,
-        [class*="drawer"].show {
+        [class*="drawer"].show,
+        [class*="modal"][aria-hidden="false"],
+        [class*="modal"].active,
+        [class*="modal"].open,
+        [class*="modal"].show {
             z-index: 5000 !important;
         }
         .drawer-backdrop,
+        .lesson-drawer-overlay,
+        .admin-modal-backdrop,
+        .calendar-modal-backdrop,
         [class*="drawer-backdrop"].open,
-        [class*="drawer-overlay"].open {
+        [class*="drawer-overlay"].open,
+        [class*="modal-backdrop"].open {
             z-index: 4990 !important;
         }
         .modal-overlay, .modal-backdrop {
