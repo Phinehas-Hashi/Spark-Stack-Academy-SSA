@@ -831,10 +831,23 @@ service cloud.firestore {
           && resource.data.instructorId == uid()
         );
 
-      // Enrollment creation is trusted.
-      // Backend/Admin SDK should create paid enrollments.
+      // Paid enrollments are trusted backend records.
+      // Free courses may be enrolled by an active student, but
+      // the course itself must be free so the browser cannot
+      // bypass payment by changing client-side course data.
       allow create:
-        if staff();
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && request.resource.data.userId == uid()
+          && request.resource.data.courseId is string
+          && request.resource.data.status == 'active'
+          && request.resource.data.paymentStatus == 'free'
+          && get(
+               /databases/$(database)/documents/courses/$(request.resource.data.courseId)
+             ).data.get('isFree', false) == true
+        );
 
       // Students may update ONLY harmless learning-progress fields.
       // They cannot alter payment, owner, course, status or identity.
