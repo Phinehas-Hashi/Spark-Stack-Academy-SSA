@@ -358,10 +358,7 @@ async function loadSubmissionStats() {
     try {
 
         const submissionsRef =
-            collection(
-                db,
-                "assignmentSubmissions"
-            );
+            collection(db, "submissions");
 
 
         const q =
