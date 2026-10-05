@@ -1083,6 +1083,49 @@ service cloud.firestore {
 
 
     // ============================================================
+    // QUIZ SUBMISSIONS
+    // ============================================================
+
+    match /quizSubmissions/{submissionId} {
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.studentId == uid()
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+        );
+
+      allow create:
+        if isStudent()
+        && studentPortalOpen()
+        && request.resource.data.studentId == uid();
+
+      allow update:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.studentId == uid()
+          && request.resource.data.studentId == uid()
+        )
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+          && request.resource.data.instructorId == uid()
+        );
+
+      allow delete:
+        if staff();
+    }
+
+
+    // ============================================================
     // CERTIFICATES
     // ============================================================
 
