@@ -23,8 +23,7 @@ import {
 // CONFIG
 // =====================================
 
-const API_BASE_URL =
-    "const API_BASE_URL = window.SSA_LEGACY_PAYMENT_API_BASE_URL || "";";
+const API_BASE_URL = window.SSA_LEGACY_PAYMENT_API_BASE_URL || "";
 
 
 // =====================================
