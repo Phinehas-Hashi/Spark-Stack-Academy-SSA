@@ -9,7 +9,7 @@ import {
 auth,
 db
 
-} from "../../../js/firebase.js";
+} from "../../js/firebase.js";
 
 
 import {
