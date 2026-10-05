@@ -233,11 +233,8 @@ async function loadQuizzes() {
         const q =
             query(
                 ref,
-                where(
-                    "courseId",
-                    "==",
-                    courseId
-                )
+                where("courseId", "==", courseId),
+                where("instructorId", "==", instructor.uid)
             );
 
         snapshot =
