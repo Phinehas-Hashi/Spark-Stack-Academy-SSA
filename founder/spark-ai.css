@@ -1,1506 +1,1863 @@
-/* ===================================
-   SPARKMIND FOUNDER OS
-   FINAL CSS
-   PART 1
-=================================== */
+/* ============================================================
+   SPARK AI
+   Premium Founder AI Workspace
+   ============================================================ */
 
-/* ===================================
+/* ============================================================
    ROOT
-=================================== */
+   ============================================================ */
 
-:root{
+:root {
+    --spark-navy: #081c3a;
+    --spark-blue: #2979ff;
+    --spark-blue-dark: #1557c0;
+    --spark-gold: #ffc107;
 
-    --primary:#22d3ee;
-    --primary-light:#67e8f9;
-    --secondary:#8b5cf6;
-    --accent:#ec4899;
+    --spark-bg: #f5f7fb;
+    --spark-surface: #ffffff;
+    --spark-surface-soft: #f8faff;
 
-    --success:#22c55e;
+    --spark-text: #10213d;
+    --spark-text-soft: #64748b;
+    --spark-text-muted: #94a3b8;
 
-    --background:#050816;
+    --spark-border: #e5eaf2;
+    --spark-border-soft: #edf1f7;
 
-    --surface:rgba(15,23,42,.78);
+    --spark-success: #16a34a;
+    --spark-danger: #dc2626;
 
-    --surface-light:rgba(255,255,255,.05);
+    --spark-radius-sm: 10px;
+    --spark-radius-md: 16px;
+    --spark-radius-lg: 22px;
 
-    --border:rgba(148,163,184,.12);
+    --spark-shadow-sm:
+        0 4px 16px rgba(8, 28, 58, 0.05);
 
-    --text:#f8fafc;
+    --spark-shadow-md:
+        0 12px 35px rgba(8, 28, 58, 0.08);
 
-    --muted:#94a3b8;
-
-    --radius:24px;
-
-    --shadow:0 15px 40px rgba(0,0,0,.35);
-
-    --transition:.3s ease;
-
-    --sidebar-width:280px;
-
+    --spark-shadow-lg:
+        0 20px 55px rgba(8, 28, 58, 0.10);
 }
 
-/* ===================================
-   RESET
-=================================== */
 
-*{
+/* ============================================================
+   APPLICATION
+   ============================================================ */
 
-    margin:0;
+.spark-ai-app {
+    position: relative;
 
-    padding:0;
+    width: 100%;
+    min-height: calc(100vh - 70px);
 
-    box-sizing:border-box;
+    padding: 24px;
 
+    color: var(--spark-text);
 }
 
-html{
 
-    scroll-behavior:smooth;
+/* ============================================================
+   HEADER
+   ============================================================ */
 
+.spark-ai-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    margin-bottom: 22px;
 }
 
-body{
 
-    font-family:"Inter",sans-serif;
+.spark-ai-identity {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+.spark-ai-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 52px;
+    height: 52px;
+
+    flex-shrink: 0;
+
+    border-radius: 16px;
+
+    color: #ffffff;
 
     background:
-
-    radial-gradient(
-        circle at top left,
-        #1e1b4b,
-        transparent 35%
-    ),
-
-    radial-gradient(
-        circle at top right,
-        #0f172a,
-        transparent 30%
-    ),
-
-    linear-gradient(
-        135deg,
-        #050816,
-        #071226,
-        #050816
-    );
-
-    color:var(--text);
-
-    min-height:100vh;
-
-    overflow-x:hidden;
-
-}
-
-/* ===================================
-   BACKGROUND
-=================================== */
-
-.bg-orb{
-
-    position:fixed;
-
-    border-radius:50%;
-
-    filter:blur(80px);
-
-    opacity:.25;
-
-    pointer-events:none;
-
-    animation:float 8s ease-in-out infinite;
-
-    z-index:0;
-
-}
-
-.orb-1{
-
-    width:320px;
-
-    height:320px;
-
-    background:var(--secondary);
-
-    top:-120px;
-
-    left:-80px;
-
-}
-
-.orb-2{
-
-    width:260px;
-
-    height:260px;
-
-    background:var(--primary);
-
-    top:30%;
-
-    right:-100px;
-
-    animation-delay:-2s;
-
-}
-
-.orb-3{
-
-    width:240px;
-
-    height:240px;
-
-    background:var(--accent);
-
-    bottom:-100px;
-
-    left:35%;
-
-    animation-delay:-4s;
-
-}
-
-/* ===================================
-   LAYOUT
-=================================== */
-
-.dashboard-layout{
-
-    display:flex;
-
-    min-height:100vh;
-
-    position:relative;
-
-    z-index:1;
-
-}
-
-.main-content{
-
-    flex:1;
-
-    margin-left:var(--sidebar-width);
-
-    padding:28px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:24px;
-
-    transition:var(--transition);
-
-}
-
-/* ===================================
-   GLASS CARD
-=================================== */
-
-.glass-card{
-
-    background:var(--surface);
-
-    border:1px solid var(--border);
-
-    border-radius:var(--radius);
-
-    backdrop-filter:blur(20px);
-
-    -webkit-backdrop-filter:blur(20px);
-
-    box-shadow:var(--shadow);
-
-    position:relative;
-
-    overflow:hidden;
-
-}
-
-.glass-card::before{
-
-    content:"";
-
-    position:absolute;
-
-    inset:0;
-
-    background:
-
-    linear-gradient(
-
-        135deg,
-
-        rgba(255,255,255,.08),
-
-        transparent 45%
-
-    );
-
-    pointer-events:none;
-
-}
-
-/* ===================================
-   HERO
-=================================== */
-
-.spark-hero{
-
-    padding:34px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:24px;
-
-}
-
-.hero-badge{
-
-    width:fit-content;
-
-    padding:10px 18px;
-
-    border-radius:999px;
-
-    background:
-
-    linear-gradient(
-
-        135deg,
-
-        rgba(34,211,238,.15),
-
-        rgba(139,92,246,.18)
-
-    );
-
-    border:1px solid rgba(34,211,238,.25);
-
-    color:#cffafe;
-
-    font-size:13px;
-
-    font-weight:700;
-
-}
-
-.hero-content{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:30px;
-
-}
-
-.hero-text{
-
-    flex:1;
-
-}
-
-.hero-text h1{
-
-    font-size:46px;
-
-    font-weight:800;
-
-    line-height:1.1;
-
-    margin-bottom:18px;
-
-}
-
-.hero-text span{
-
-    background:
-
-    linear-gradient(
-
-        135deg,
-
-        var(--primary),
-
-        var(--primary-light),
-
-        var(--secondary)
-
-    );
-
-    -webkit-background-clip:text;
-
-    -webkit-text-fill-color:transparent;
-
-}
-
-.hero-text p{
-
-    color:var(--muted);
-
-    line-height:1.8;
-
-    max-width:720px;
-
-}
-
-.hero-status{
-
-    width:260px;
-
-    padding:22px;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:16px;
-
-}
-
-.status-indicator{
-
-    width:16px;
-
-    height:16px;
-
-    border-radius:50%;
-
-    background:var(--success);
+        linear-gradient(
+            135deg,
+            var(--spark-blue),
+            var(--spark-navy)
+        );
 
     box-shadow:
-
-    0 0 18px var(--success);
-
-    animation:pulse 2s infinite;
-
+        0 8px 22px rgba(41, 121, 255, 0.24);
 }
 
-.hero-status h3{
 
-    font-size:17px;
-
-    margin-bottom:4px;
-
+.spark-ai-avatar span {
+    font-size: 25px;
+    line-height: 1;
 }
 
-.hero-status p{
 
-    color:var(--muted);
-
-    font-size:13px;
-
+.spark-ai-heading {
+    min-width: 0;
 }
 
-/* ===================================
-   STATS
-=================================== */
 
-.stats-grid{
+.spark-ai-title-row {
+    display: flex;
+    align-items: center;
 
-    display:grid;
+    flex-wrap: wrap;
 
-    grid-template-columns:repeat(4,1fr);
-
-    gap:22px;
-
+    gap: 10px;
 }
 
-.stat-card{
 
-    padding:24px;
+.spark-ai-title-row h1 {
+    margin: 0;
 
-    transition:var(--transition);
+    color: var(--spark-navy);
 
+    font-size: 26px;
+    font-weight: 700;
+
+    letter-spacing: -0.5px;
 }
 
-.stat-card:hover{
 
-    transform:translateY(-6px);
+.spark-ai-heading > p {
+    margin: 4px 0 0;
 
-    border-color:rgba(34,211,238,.25);
+    color: var(--spark-text-soft);
 
+    font-size: 13px;
+    line-height: 1.5;
 }
 
-.stat-card span{
 
-    display:block;
+/* ============================================================
+   AI STATUS
+   ============================================================ */
 
-    color:var(--muted);
+.spark-ai-status {
+    display: inline-flex;
+    align-items: center;
 
-    font-size:13px;
+    gap: 6px;
 
-    margin-bottom:14px;
+    padding: 5px 9px;
 
+    border: 1px solid var(--spark-border);
+
+    border-radius: 999px;
+
+    background: var(--spark-surface);
+
+    color: var(--spark-text-soft);
+
+    font-size: 11px;
+    font-weight: 600;
 }
 
-.stat-card h2{
 
-    font-size:40px;
+.status-dot {
+    width: 7px;
+    height: 7px;
 
-    font-weight:800;
+    border-radius: 50%;
 
-    margin-bottom:8px;
-
+    background: var(--spark-text-muted);
 }
 
-.stat-card small{
 
-    color:var(--muted);
+.spark-ai-status.ready .status-dot {
+    background: var(--spark-success);
 
-}
-/* ===================================
-   CHAT LAYOUT
-=================================== */
-
-.workspace-grid{
-
-    display:grid;
-
-    grid-template-columns:1.7fr .8fr;
-
-    gap:24px;
-
-    align-items:start;
-
+    box-shadow:
+        0 0 0 4px rgba(22, 163, 74, 0.10);
 }
 
-/* ===================================
-   CHAT PANEL
-=================================== */
 
-.chat-panel{
+.spark-ai-status.thinking .status-dot {
+    background: var(--spark-blue);
 
-    display:flex;
-
-    flex-direction:column;
-
-    min-height:700px;
-
-    padding:24px;
-
-    gap:20px;
-
+    animation: sparkPulse 1.3s ease-in-out infinite;
 }
 
-/* ===================================
-   CHAT HEADER
-=================================== */
 
-.chat-header{
+.spark-ai-status.loading .status-dot {
+    background: var(--spark-gold);
 
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:20px;
-
+    animation: sparkPulse 1.1s ease-in-out infinite;
 }
 
-.chat-title{
 
-    display:flex;
-
-    align-items:center;
-
-    gap:14px;
-
+.spark-ai-status.error .status-dot {
+    background: var(--spark-danger);
 }
 
-.ai-avatar{
 
-    width:52px;
+@keyframes sparkPulse {
 
-    height:52px;
+    0%,
+    100% {
+        opacity: 0.45;
+        transform: scale(0.85);
+    }
 
-    border-radius:18px;
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 
-    display:flex;
 
-    justify-content:center;
+/* ============================================================
+   HEADER ACTIONS
+   ============================================================ */
 
-    align-items:center;
+.spark-ai-header-actions {
+    display: flex;
+    align-items: center;
 
-    font-size:24px;
+    gap: 8px;
+}
+
+
+.spark-ai-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 38px;
+
+    padding: 0 13px;
+
+    border: 1px solid var(--spark-border);
+
+    border-radius: 10px;
+
+    background: var(--spark-surface);
+
+    color: var(--spark-text);
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.spark-ai-action-btn:hover {
+    border-color: rgba(41, 121, 255, 0.35);
+
+    background: var(--spark-surface-soft);
+
+    transform: translateY(-1px);
+}
+
+
+/* ============================================================
+   WORKSPACE
+   ============================================================ */
+
+.spark-ai-workspace {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        330px;
+
+    gap: 20px;
+
+    min-height: calc(100vh - 180px);
+}
+
+
+/* ============================================================
+   CONVERSATION
+   ============================================================ */
+
+.spark-ai-conversation {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+    min-height: 650px;
+
+    overflow: hidden;
+
+    border:
+        1px solid var(--spark-border);
+
+    border-radius: var(--spark-radius-lg);
+
+    background: var(--spark-surface);
+
+    box-shadow: var(--spark-shadow-md);
+}
+
+
+/* ============================================================
+   CONVERSATION TOOLBAR
+   ============================================================ */
+
+.conversation-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    min-height: 58px;
+
+    padding: 0 18px;
+
+    border-bottom:
+        1px solid var(--spark-border-soft);
 
     background:
-
-    linear-gradient(
-        135deg,
-        var(--primary),
-        var(--secondary)
-    );
-
-    box-shadow:0 12px 30px rgba(34,211,238,.25);
-
+        rgba(255, 255, 255, 0.96);
 }
 
-.chat-title h3{
 
-    font-size:19px;
+.conversation-info {
+    display: flex;
+    align-items: center;
 
-    font-weight:700;
+    min-width: 0;
 
+    gap: 9px;
 }
 
-.chat-title p{
 
-    font-size:13px;
+.conversation-title {
+    overflow: hidden;
 
-    color:var(--muted);
+    max-width: 300px;
 
+    color: var(--spark-text);
+
+    font-size: 12px;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.status-pill{
 
-    padding:8px 14px;
+.conversation-context {
+    padding: 4px 7px;
 
-    border-radius:999px;
+    border-radius: 6px;
 
-    background:rgba(34,197,94,.12);
+    background: #eef4ff;
 
-    border:1px solid rgba(34,197,94,.25);
+    color: var(--spark-blue);
 
-    color:#86efac;
-
-    font-size:12px;
-
-    font-weight:700;
-
+    font-size: 10px;
+    font-weight: 600;
 }
 
-/* ===================================
-   CHAT MESSAGES
-=================================== */
 
-.chat-messages{
+.toolbar-btn {
+    border: 0;
 
-    flex:1;
+    background: transparent;
 
-    overflow-y:auto;
+    color: var(--spark-text-soft);
 
-    display:flex;
+    font-family: inherit;
 
-    flex-direction:column;
+    font-size: 11px;
+    font-weight: 600;
 
-    gap:20px;
-
-    padding-right:6px;
-
-    scroll-behavior:smooth;
-
+    cursor: pointer;
 }
 
-.chat-messages::-webkit-scrollbar{
 
-    width:6px;
-
+.toolbar-btn:hover {
+    color: var(--spark-danger);
 }
 
-.chat-messages::-webkit-scrollbar-thumb{
 
-    background:rgba(255,255,255,.10);
+/* ============================================================
+   MESSAGES
+   ============================================================ */
 
-    border-radius:999px;
+.spark-ai-messages {
+    position: relative;
 
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 28px;
+
+    scroll-behavior: smooth;
 }
 
-/* ===================================
+
+.spark-ai-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+
+.spark-ai-messages::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+
+    background: #d9e0eb;
+}
+
+
+/* ============================================================
+   WELCOME
+   ============================================================ */
+
+.spark-ai-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    max-width: 680px;
+
+    margin:
+        70px auto 45px;
+
+    text-align: center;
+}
+
+
+.welcome-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 64px;
+    height: 64px;
+
+    margin-bottom: 18px;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #edf4ff,
+            #f8fbff
+        );
+
+    color: var(--spark-blue);
+
+    font-size: 30px;
+
+    box-shadow:
+        inset 0 0 0 1px rgba(41, 121, 255, 0.10);
+}
+
+
+.spark-ai-welcome h2 {
+    margin: 0;
+
+    color: var(--spark-navy);
+
+    font-size: 25px;
+    font-weight: 700;
+
+    letter-spacing: -0.4px;
+}
+
+
+.spark-ai-welcome > p {
+    max-width: 590px;
+
+    margin: 10px 0 24px;
+
+    color: var(--spark-text-soft);
+
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+
+.welcome-suggestions {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 9px;
+
+    width: 100%;
+}
+
+
+.suggestion-btn {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 12px 13px;
+
+    border:
+        1px solid var(--spark-border);
+
+    border-radius: 11px;
+
+    background: var(--spark-surface);
+
+    color: var(--spark-text);
+
+    font-family: inherit;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.suggestion-btn span {
+    color: var(--spark-blue);
+
+    font-size: 15px;
+}
+
+
+.suggestion-btn:hover {
+    border-color:
+        rgba(41, 121, 255, 0.30);
+
+    background: #f8fbff;
+
+    transform: translateY(-1px);
+}
+
+
+/* ============================================================
    MESSAGE
-=================================== */
+   ============================================================ */
 
-.message{
+.spark-message {
+    display: flex;
 
-    display:flex;
+    gap: 11px;
 
-    gap:14px;
+    max-width: 900px;
 
-    align-items:flex-start;
-
-    animation:fadeUp .3s ease;
-
+    margin: 0 auto 22px;
 }
 
-.user-message{
 
-    flex-direction:row-reverse;
-
+.spark-message.user {
+    flex-direction: row-reverse;
 }
 
-.message-avatar{
 
-    width:44px;
+.ai-message-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    height:44px;
+    width: 32px;
+    height: 32px;
 
-    border-radius:15px;
+    flex-shrink: 0;
 
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    font-size:18px;
-
-    flex-shrink:0;
+    border-radius: 10px;
 
     background:
+        linear-gradient(
+            135deg,
+            var(--spark-blue),
+            var(--spark-navy)
+        );
 
-    linear-gradient(
-        135deg,
-        var(--primary),
-        var(--secondary)
-    );
+    color: #ffffff;
 
+    font-size: 12px;
+    font-weight: 700;
 }
 
-.user-message .message-avatar{
 
-    background:
+.spark-message.user .ai-message-avatar {
+    background: var(--spark-navy);
 
-    linear-gradient(
-        135deg,
-        var(--secondary),
-        var(--accent)
-    );
-
+    font-size: 9px;
 }
 
-.message-content{
 
-    max-width:85%;
+.spark-message-content {
+    min-width: 0;
 
-    padding:18px;
-
-    border-radius:18px;
-
-    background:rgba(255,255,255,.05);
-
-    border:1px solid rgba(255,255,255,.08);
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:12px;
-
+    max-width: min(80%, 720px);
 }
 
-.user-message .message-content{
 
-    background:
+.spark-message-body {
+    padding: 13px 15px;
 
-    linear-gradient(
-        135deg,
-        rgba(34,211,238,.15),
-        rgba(139,92,246,.18)
-    );
+    border:
+        1px solid var(--spark-border);
 
+    border-radius:
+        5px
+        15px
+        15px
+        15px;
+
+    background: var(--spark-surface-soft);
+
+    color: var(--spark-text);
+
+    font-size: 13px;
+    line-height: 1.7;
+
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
-.message-content p{
 
-    line-height:1.8;
+.spark-message.user .spark-message-body {
+    border-color: var(--spark-navy);
 
-    color:var(--text);
+    border-radius:
+        15px
+        5px
+        15px
+        15px;
 
-    word-break:break-word;
+    background: var(--spark-navy);
 
+    color: #ffffff;
 }
 
-.message-footer{
 
-    display:flex;
+.spark-message-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    justify-content:space-between;
+    gap: 10px;
 
-    align-items:center;
+    margin-top: 5px;
 
-    margin-top:4px;
-
+    padding: 0 2px;
 }
 
-.message-time{
 
-    color:var(--muted);
+.spark-message-footer time {
+    color: var(--spark-text-muted);
 
-    font-size:12px;
-
+    font-size: 9px;
 }
 
-.copy-btn{
 
-    border:none;
+.message-copy-btn {
+    padding: 0;
 
-    background:none;
+    border: 0;
 
-    color:var(--primary);
+    background: transparent;
 
-    cursor:pointer;
+    color: var(--spark-text-muted);
 
-    font-size:13px;
+    font-family: inherit;
 
-    font-weight:700;
+    font-size: 9px;
 
+    cursor: pointer;
 }
 
-/* ===================================
-   TYPING
-=================================== */
 
-.typing-indicator{
-
-    display:none;
-
+.message-copy-btn:hover {
+    color: var(--spark-blue);
 }
 
-.typing-indicator.active{
 
-    display:block;
+/* ============================================================
+   THINKING
+   ============================================================ */
 
+.ai-thinking {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    max-width: 900px;
+
+    margin:
+        0 auto 10px;
+
+    padding: 0 28px;
 }
 
-.typing-box{
 
-    display:flex;
+.thinking-content {
+    display: flex;
+    align-items: center;
 
-    gap:8px;
+    gap: 8px;
 
-    align-items:center;
+    color: var(--spark-text-soft);
 
+    font-size: 11px;
+    font-weight: 600;
 }
 
-.typing-box span{
 
-    width:10px;
+.thinking-dots {
+    display: flex;
 
-    height:10px;
-
-    border-radius:50%;
-
-    background:var(--primary);
-
-    animation:typing 1.2s infinite;
-
+    gap: 3px;
 }
 
-.typing-box span:nth-child(2){
 
-    animation-delay:.2s;
+.thinking-dots i {
+    width: 4px;
+    height: 4px;
 
+    border-radius: 50%;
+
+    background: var(--spark-blue);
+
+    animation:
+        thinkingDot 1.2s ease-in-out infinite;
 }
 
-.typing-box span:nth-child(3){
 
-    animation-delay:.4s;
-
+.thinking-dots i:nth-child(2) {
+    animation-delay: 0.15s;
 }
 
-/* ===================================
-   QUICK COMMANDS
-=================================== */
 
-.quick-chips{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:10px;
-
+.thinking-dots i:nth-child(3) {
+    animation-delay: 0.30s;
 }
 
-.chip-btn{
 
-    border:none;
+@keyframes thinkingDot {
 
-    cursor:pointer;
+    0%,
+    60%,
+    100% {
+        opacity: 0.25;
+        transform: translateY(0);
+    }
 
-    padding:11px 16px;
-
-    border-radius:999px;
-
-    color:var(--text);
-
-    font-weight:600;
-
-    background:rgba(255,255,255,.05);
-
-    border:1px solid rgba(255,255,255,.10);
-
-    transition:var(--transition);
-
+    30% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
 }
 
-.chip-btn:hover{
 
-    background:rgba(34,211,238,.12);
-
-    border-color:rgba(34,211,238,.25);
-
-    transform:translateY(-2px);
-
-}
-
-/* ===================================
+/* ============================================================
    COMPOSER
-=================================== */
+   ============================================================ */
 
-.chat-composer{
+.spark-ai-composer {
+    padding: 15px 20px 17px;
 
-    position:sticky;
+    border-top:
+        1px solid var(--spark-border-soft);
 
-    bottom:0;
-
-    padding-top:10px;
-
-    background:linear-gradient(
-        transparent,
-        rgba(5,8,22,.95) 30%
-    );
-
+    background: var(--spark-surface);
 }
 
-.chat-input{
 
-    display:flex;
+.composer-box {
+    overflow: hidden;
 
-    align-items:flex-end;
+    border:
+        1px solid #dbe3ef;
 
-    gap:12px;
+    border-radius: 15px;
 
+    background: #ffffff;
+
+    box-shadow:
+        0 5px 20px rgba(8, 28, 58, 0.05);
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
-#chatInput{
 
-    flex:1;
+.composer-box:focus-within {
+    border-color:
+        rgba(41, 121, 255, 0.45);
 
-    min-height:56px;
-
-    max-height:180px;
-
-    resize:none;
-
-    border:none;
-
-    outline:none;
-
-    color:var(--text);
-
-    font-family:inherit;
-
-    font-size:15px;
-
-    line-height:1.7;
-
-    border-radius:18px;
-
-    padding:16px;
-
-    background:rgba(255,255,255,.05);
-
-    border:1px solid rgba(255,255,255,.08);
-
+    box-shadow:
+        0 0 0 3px rgba(41, 121, 255, 0.08);
 }
 
-#chatInput:focus{
 
-    border-color:rgba(34,211,238,.30);
+.composer-box textarea {
+    display: block;
 
-    box-shadow:0 0 0 4px rgba(34,211,238,.08);
+    width: 100%;
 
+    min-height: 48px;
+    max-height: 220px;
+
+    padding: 14px 15px 7px;
+
+    border: 0;
+    outline: 0;
+
+    resize: none;
+
+    background: transparent;
+
+    color: var(--spark-text);
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    line-height: 1.5;
 }
 
-.composer-actions{
 
-    display:flex;
-
-    gap:10px;
-
+.composer-box textarea::placeholder {
+    color: #9aa8bb;
 }
 
-.icon-btn{
 
-    width:56px;
+.composer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    height:56px;
-
-    border:none;
-
-    border-radius:18px;
-
-    background:rgba(255,255,255,.05);
-
-    color:var(--text);
-
-    cursor:pointer;
-
+    padding:
+        5px
+        7px
+        7px
+        10px;
 }
 
-#sendBtn{
 
-    width:56px;
+.composer-tools {
+    display: flex;
+    align-items: center;
 
-    height:56px;
+    gap: 5px;
+}
 
-    border:none;
 
-    border-radius:18px;
+.composer-tool {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    cursor:pointer;
+    width: 31px;
+    height: 31px;
 
-    color:white;
+    border: 0;
 
-    font-size:18px;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--spark-text-soft);
+
+    font-family: inherit;
+
+    font-size: 15px;
+
+    cursor: pointer;
+}
+
+
+.composer-tool:hover {
+    background: #f1f5f9;
+
+    color: var(--spark-blue);
+}
+
+
+.composer-mode-label {
+    margin-left: 4px;
+
+    color: var(--spark-text-muted);
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+.send-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    border: 0;
+
+    border-radius: 10px;
+
+    background: var(--spark-blue);
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.send-btn:hover:not(:disabled) {
+    background: var(--spark-blue-dark);
+
+    transform: translateY(-1px);
+}
+
+
+.send-btn:disabled {
+    opacity: 0.45;
+
+    cursor: not-allowed;
+}
+
+
+.composer-disclaimer {
+    margin: 7px 2px 0;
+
+    color: var(--spark-text-muted);
+
+    font-size: 9px;
+
+    text-align: center;
+}
+
+
+/* ============================================================
+   RIGHT PANEL
+   ============================================================ */
+
+.spark-ai-panel {
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+
+    min-width: 0;
+}
+
+
+.ai-panel-card {
+    padding: 16px;
+
+    border:
+        1px solid var(--spark-border);
+
+    border-radius: var(--spark-radius-md);
+
+    background: var(--spark-surface);
+
+    box-shadow: var(--spark-shadow-sm);
+}
+
+
+.panel-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 13px;
+}
+
+
+.panel-eyebrow {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: var(--spark-text-muted);
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 0.9px;
+}
+
+
+.panel-card-header h2 {
+    margin: 0;
+
+    color: var(--spark-navy);
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+.panel-link {
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+
+    color: var(--spark-blue);
+
+    font-family: inherit;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   MODES
+   ============================================================ */
+
+.ai-mode-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.ai-mode {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    width: 100%;
+
+    padding: 9px;
+
+    border:
+        1px solid transparent;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: var(--spark-text);
+
+    font-family: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+
+.ai-mode:hover {
+    background: #f7faff;
+}
+
+
+.ai-mode.active {
+    border-color:
+        rgba(41, 121, 255, 0.16);
+
+    background: #f4f8ff;
+}
+
+
+.mode-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #edf4ff;
+
+    color: var(--spark-blue);
+
+    font-size: 13px;
+}
+
+
+.mode-content {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+
+    gap: 2px;
+}
+
+
+.mode-content strong {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+.mode-content small {
+    color: var(--spark-text-muted);
+
+    font-size: 9px;
+
+    line-height: 1.3;
+}
+
+
+.mode-check {
+    margin-left: auto;
+
+    color: var(--spark-blue);
+
+    font-size: 11px;
+
+    opacity: 0;
+}
+
+
+.ai-mode.active .mode-check {
+    opacity: 1;
+}
+
+
+/* ============================================================
+   TOOLS
+   ============================================================ */
+
+.ai-tools-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.ai-tool {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    width: 100%;
+
+    padding: 9px;
+
+    border:
+        1px solid var(--spark-border-soft);
+
+    border-radius: 10px;
+
+    background: var(--spark-surface-soft);
+
+    color: var(--spark-text);
+
+    font-family: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease;
+}
+
+
+.ai-tool:hover {
+    border-color:
+        rgba(41, 121, 255, 0.22);
+
+    background: #f5f9ff;
+}
+
+
+.tool-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 29px;
+    height: 29px;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: var(--spark-blue);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+.ai-tool > span:last-child {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.ai-tool strong {
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+.ai-tool small {
+    color: var(--spark-text-muted);
+
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   CONTEXT
+   ============================================================ */
+
+.context-status {
+    padding: 4px 7px;
+
+    border-radius: 6px;
+
+    background: #ecfdf3;
+
+    color: var(--spark-success);
+
+    font-size: 9px;
+    font-weight: 700;
+}
+
+
+.ai-context {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.context-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding-bottom: 8px;
+
+    border-bottom:
+        1px solid var(--spark-border-soft);
+}
+
+
+.context-item:last-child {
+    padding-bottom: 0;
+
+    border-bottom: 0;
+}
+
+
+.context-item span {
+    color: var(--spark-text-muted);
+
+    font-size: 9px;
+}
+
+
+.context-item strong {
+    color: var(--spark-text);
+
+    font-size: 10px;
+
+    text-align: right;
+}
+
+
+/* ============================================================
+   MEMORY
+   ============================================================ */
+
+.panel-description {
+    margin: 0 0 12px;
+
+    color: var(--spark-text-soft);
+
+    font-size: 10px;
+
+    line-height: 1.55;
+}
+
+
+.memory-status {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 9px;
+
+    border-radius: 9px;
+
+    background: #f7faff;
+
+    color: var(--spark-text-soft);
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+.memory-indicator {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--spark-success);
+}
+
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+
+.ai-action-list {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 6px;
+}
+
+
+.ai-action {
+    min-height: 36px;
+
+    padding: 7px;
+
+    border:
+        1px solid var(--spark-border);
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: var(--spark-text-soft);
+
+    font-family: inherit;
+
+    font-size: 9px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.18s ease,
+        color 0.18s ease,
+        background 0.18s ease;
+}
+
+
+.ai-action:hover {
+    border-color:
+        rgba(41, 121, 255, 0.25);
+
+    background: #f7faff;
+
+    color: var(--spark-blue);
+}
+
+
+/* ============================================================
+   TOOL DRAWER
+   ============================================================ */
+
+.ai-tool-drawer {
+    position: fixed;
+
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 1000;
+
+    width: min(440px, 100%);
+
+    padding: 22px;
+
+    overflow-y: auto;
+
+    border-left:
+        1px solid var(--spark-border);
+
+    background: #ffffff;
+
+    box-shadow:
+        -20px 0 60px rgba(8, 28, 58, 0.12);
+}
+
+
+.tool-drawer-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding-bottom: 18px;
+
+    border-bottom:
+        1px solid var(--spark-border-soft);
+}
+
+
+.tool-drawer-header h2 {
+    margin: 0;
+
+    color: var(--spark-navy);
+
+    font-size: 18px;
+}
+
+
+.tool-drawer-content {
+    padding-top: 22px;
+}
+
+
+.tool-placeholder {
+    padding: 20px;
+
+    border:
+        1px solid var(--spark-border);
+
+    border-radius: 14px;
+
+    background: var(--spark-surface-soft);
+}
+
+
+.tool-placeholder h3 {
+    margin: 0 0 7px;
+
+    color: var(--spark-navy);
+
+    font-size: 14px;
+}
+
+
+.tool-placeholder p {
+    margin: 0 0 16px;
+
+    color: var(--spark-text-soft);
+
+    font-size: 11px;
+
+    line-height: 1.6;
+}
+
+
+.tool-use-btn {
+    min-height: 36px;
+
+    padding: 0 13px;
+
+    border: 0;
+
+    border-radius: 9px;
+
+    background: var(--spark-blue);
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.tool-use-btn:hover {
+    background: var(--spark-blue-dark);
+}
+
+
+.close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    flex-shrink: 0;
+
+    border: 1px solid var(--spark-border);
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: var(--spark-text-soft);
+
+    font-size: 20px;
+
+    cursor: pointer;
+}
+
+
+.close-btn:hover {
+    color: var(--spark-danger);
+
+    border-color:
+        rgba(220, 38, 38, 0.2);
+}
+
+
+/* ============================================================
+   ACTION MODAL
+   ============================================================ */
+
+.ai-action-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1100;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
 
     background:
+        rgba(8, 28, 58, 0.35);
 
-    linear-gradient(
-        135deg,
-        var(--primary),
-        var(--secondary)
-    );
-
-    box-shadow:0 12px 30px rgba(34,211,238,.25);
-
-}
-/* ===================================
-   WORKSPACE SIDEBAR
-=================================== */
-
-.workspace-sidebar{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:22px;
-
+    backdrop-filter:
+        blur(5px);
 }
 
-.workspace-card{
 
-    padding:24px;
+.action-modal-card {
+    position: relative;
 
+    width: min(520px, 100%);
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    padding: 24px;
+
+    border:
+        1px solid var(--spark-border);
+
+    border-radius: 18px;
+
+    background: #ffffff;
+
+    box-shadow: var(--spark-shadow-lg);
 }
 
-.workspace-card h3{
 
-    font-size:18px;
+.action-modal-card > .close-btn {
+    position: absolute;
 
-    margin-bottom:16px;
-
+    top: 14px;
+    right: 14px;
 }
 
-.workspace-card p{
 
-    color:var(--muted);
+/* ============================================================
+   HIDDEN STATE
+   ============================================================ */
 
-    line-height:1.8;
-
-    font-size:14px;
-
+[hidden] {
+    display: none !important;
 }
 
-.workspace-card ul{
 
-    list-style:none;
+/* ============================================================
+   RESPONSIVE — TABLET
+   ============================================================ */
 
-    display:flex;
+@media (max-width: 1100px) {
 
-    flex-direction:column;
-
-    gap:14px;
-
-    margin-top:8px;
-
-}
-
-.workspace-card li{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    color:var(--muted);
-
-    line-height:1.6;
-
-    padding-bottom:10px;
-
-    border-bottom:1px solid rgba(255,255,255,.05);
-
-}
-
-.workspace-card li:last-child{
-
-    border-bottom:none;
-
-    padding-bottom:0;
-
-}
-
-/* ===================================
-   SYSTEM STATUS
-=================================== */
-
-.system-status{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:16px;
-
-}
-
-.status-item{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:14px 16px;
-
-    border-radius:16px;
-
-    background:rgba(255,255,255,.04);
-
-    border:1px solid rgba(255,255,255,.08);
-
-}
-
-.status-item span{
-
-    color:var(--muted);
-
-    font-size:14px;
-
-}
-
-.status-item strong{
-
-    color:#86efac;
-
-    font-size:14px;
-
-    font-weight:700;
-
-}
-
-/* ===================================
-   CARD HOVER
-=================================== */
-
-.workspace-card,
-
-.stat-card,
-
-.chat-panel{
-
-    transition:var(--transition);
-
-}
-
-.workspace-card:hover,
-
-.stat-card:hover{
-
-    transform:translateY(-4px);
-
-    border-color:rgba(34,211,238,.25);
-
-}
-
-/* ===================================
-   BUTTON EFFECTS
-=================================== */
-
-#sendBtn:hover,
-
-.icon-btn:hover,
-
-.copy-btn:hover,
-
-.chip-btn:hover{
-
-    transform:translateY(-2px);
-
-}
-
-#sendBtn,
-
-.icon-btn,
-
-.copy-btn,
-
-.chip-btn{
-
-    transition:var(--transition);
-
-}
-
-/* ===================================
-   ANIMATIONS
-=================================== */
-
-@keyframes float{
-
-    0%,100%{
-
-        transform:translateY(0);
-
+    .spark-ai-workspace {
+        grid-template-columns:
+            minmax(0, 1fr)
+            290px;
     }
 
-    50%{
-
-        transform:translateY(-12px);
-
+    .spark-ai-app {
+        padding: 18px;
     }
 
 }
 
-@keyframes pulse{
 
-    0%{
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
 
-        transform:scale(.95);
+@media (max-width: 850px) {
 
-        box-shadow:0 0 0 0 rgba(34,197,94,.6);
+    .spark-ai-header {
+        align-items: flex-start;
 
+        flex-direction: column;
+
+        gap: 15px;
     }
 
-    70%{
 
-        transform:scale(1);
-
-        box-shadow:0 0 0 12px rgba(34,197,94,0);
-
+    .spark-ai-header-actions {
+        width: 100%;
     }
 
-    100%{
 
-        transform:scale(.95);
-
-        box-shadow:0 0 0 0 rgba(34,197,94,0);
-
+    .spark-ai-action-btn {
+        flex: 1;
     }
 
-}
 
-@keyframes typing{
-
-    0%,80%,100%{
-
-        transform:scale(.6);
-
-        opacity:.4;
-
+    .spark-ai-workspace {
+        display: flex;
+        flex-direction: column;
     }
 
-    40%{
 
-        transform:scale(1);
-
-        opacity:1;
-
+    .spark-ai-conversation {
+        min-height: 650px;
     }
 
-}
 
-@keyframes fadeUp{
+    .spark-ai-panel {
+        display: grid;
 
-    from{
-
-        opacity:0;
-
-        transform:translateY(12px);
-
-    }
-
-    to{
-
-        opacity:1;
-
-        transform:translateY(0);
-
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
 
 }
 
-/* ===================================
-   MOBILE
-=================================== */
 
-@media(max-width:1200px){
+@media (max-width: 600px) {
 
-    .workspace-grid{
-
-        grid-template-columns:1fr;
-
+    .spark-ai-app {
+        padding: 12px;
     }
 
-    .stats-grid{
 
-        grid-template-columns:repeat(2,1fr);
-
+    .spark-ai-title-row h1 {
+        font-size: 22px;
     }
 
-    .hero-content{
 
-        flex-direction:column;
+    .spark-ai-heading > p {
+        max-width: 330px;
 
-        align-items:flex-start;
-
+        font-size: 11px;
     }
 
-    .hero-status{
 
-        width:100%;
+    .spark-ai-avatar {
+        width: 45px;
+        height: 45px;
 
+        border-radius: 13px;
     }
 
-}
 
-@media(max-width:768px){
+    .spark-ai-header-actions {
+        display: grid;
 
-    .main-content{
-
-        margin-left:0;
-
-        padding:18px;
-
+        grid-template-columns:
+            1fr 1fr;
     }
 
-    .spark-hero{
 
-        padding:24px;
+    .spark-ai-conversation {
+        min-height: 600px;
 
+        border-radius: 16px;
     }
 
-    .hero-text h1{
 
-        font-size:34px;
-
+    .conversation-toolbar {
+        padding: 0 13px;
     }
 
-    .stats-grid{
 
-        grid-template-columns:1fr;
-
+    .spark-ai-messages {
+        padding: 18px 13px;
     }
 
-    .chat-panel{
 
-        min-height:unset;
-
-        padding:18px;
-
+    .spark-ai-welcome {
+        margin:
+            45px auto 30px;
     }
 
-    .workspace-card{
 
-        padding:18px;
-
+    .spark-ai-welcome h2 {
+        font-size: 21px;
     }
 
-    .message-content{
 
-        max-width:100%;
-
+    .spark-ai-welcome > p {
+        font-size: 11px;
     }
 
-    .chat-input{
 
-        flex-direction:column;
-
-        align-items:stretch;
-
+    .welcome-suggestions {
+        grid-template-columns: 1fr;
     }
 
-    .composer-actions{
 
-        width:100%;
+    .spark-message {
+        gap: 7px;
 
+        margin-bottom: 18px;
     }
 
-    .icon-btn,
 
-    #sendBtn{
-
-        flex:1;
-
-        width:100%;
-
+    .spark-message-content {
+        max-width: 86%;
     }
 
-}
 
-@media(max-width:480px){
+    .spark-message-body {
+        padding: 11px 12px;
 
-    .main-content{
-
-        padding:14px;
-
+        font-size: 12px;
     }
 
-    .hero-text h1{
 
-        font-size:30px;
-
+    .ai-thinking {
+        padding: 0 13px;
     }
 
-    .hero-badge{
 
-        font-size:12px;
-
+    .spark-ai-composer {
+        padding:
+            11px
+            11px
+            13px;
     }
 
-    .chat-title h3{
 
-        font-size:16px;
-
+    .composer-mode-label {
+        display: none;
     }
 
-    .chat-title p{
 
-        font-size:12px;
-
+    .spark-ai-panel {
+        display: flex;
     }
 
-    .workspace-card{
 
-        padding:16px;
+    .ai-action-list {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
 
+
+    .ai-tool-drawer {
+        width: 100%;
+
+        padding: 17px;
     }
 
 }
-/* ===================================
-   AI MARKDOWN
-=================================== */
 
-.ai-content h1,
-.ai-content h2,
-.ai-content h3,
-.ai-content h4{
 
-    margin:12px 0;
+/* ============================================================
+   VERY SMALL SCREENS
+   ============================================================ */
 
-    font-weight:700;
+@media (max-width: 380px) {
 
-}
+    .spark-ai-action-btn {
+        padding: 0 8px;
 
-.ai-content p{
+        font-size: 10px;
+    }
 
-    margin:10px 0;
 
-    line-height:1.8;
+    .spark-ai-title-row h1 {
+        font-size: 20px;
+    }
 
-}
 
-.ai-content ul,
-.ai-content ol{
+    .spark-ai-conversation {
+        min-height: 570px;
+    }
 
-    margin:12px 0 12px 22px;
 
-}
-
-.ai-content li{
-
-    margin:8px 0;
-
-}
-
-.ai-content strong{
-
-    color:var(--primary-light);
-
-}
-
-.ai-content code{
-
-    padding:2px 6px;
-
-    border-radius:6px;
-
-    background:rgba(255,255,255,.08);
-
-    font-family:monospace;
-
-}
-
-.ai-content pre{
-
-    overflow:auto;
-
-    margin:16px 0;
-
-    padding:18px;
-
-    border-radius:16px;
-
-    background:#0b1120;
-
-    border:1px solid rgba(255,255,255,.08);
-
-}
-
-.ai-content pre code{
-
-    padding:0;
-
-    background:none;
-
-}
-
-.ai-content blockquote{
-
-    margin:16px 0;
-
-    padding-left:16px;
-
-    border-left:3px solid var(--primary);
-
-    color:var(--muted);
-
-}
-
-.ai-content table{
-
-    width:100%;
-
-    border-collapse:collapse;
-
-    margin:18px 0;
-
-}
-
-.ai-content th,
-.ai-content td{
-
-    padding:12px;
-
-    border:1px solid rgba(255,255,255,.08);
-
-}
-
-.ai-content a{
-
-    color:var(--primary);
-
-    text-decoration:none;
+    .ai-panel-card {
+        padding: 13px;
+    }
 
 }

@@ -1,316 +1,977 @@
-/* =========================================
+/* =========================================================
    SPARK STACK ACADEMY
-   STUDENT PAYMENTS — PREMIUM V2
-========================================= */
+   STUDENT PAYMENTS
+   PREMIUM FINANCE DASHBOARD
+   ---------------------------------------------------------
+   Page-specific styling only.
+   Sidebar / Topbar / Responsive layout remain untouched.
+========================================================= */
+
+
+/* =========================================================
+   PAGE
+========================================================= */
 
 .payments-page {
     min-height: 100vh;
     padding: 32px;
     background:
-        radial-gradient(circle at 90% 0%, rgba(41,121,255,.07), transparent 28%),
+        radial-gradient(
+            circle at 90% 0%,
+            rgba(41, 121, 255, 0.08),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 5% 45%,
+            rgba(255, 193, 7, 0.05),
+            transparent 24%
+        ),
         #f6f8fc;
+
     color: #081c3a;
     font-family: "Poppins", sans-serif;
 }
 
-/* =========================================
+
+/* =========================================================
    HEADER
-========================================= */
+========================================================= */
 
 .payments-header {
+    position: relative;
+
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 28px;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    margin-bottom: 26px;
+    padding: 26px 28px;
+
+    border: 1px solid #e5eaf2;
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.98),
+            rgba(248,251,255,0.96)
+        );
+
+    box-shadow:
+        0 14px 40px rgba(8, 28, 58, 0.07);
+
+    overflow: hidden;
 }
+
+.payments-header::before {
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+    height: 220px;
+
+    top: -125px;
+    right: -75px;
+
+    border-radius: 50%;
+
+    background: rgba(41, 121, 255, 0.07);
+
+    pointer-events: none;
+}
+
+.payments-header::after {
+    content: "";
+
+    position: absolute;
+
+    width: 100px;
+    height: 100px;
+
+    bottom: -70px;
+    left: 45%;
+
+    border-radius: 50%;
+
+    background: rgba(255, 193, 7, 0.07);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   HEADER LEFT
+========================================================= */
+
+.payments-header-left {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+
+    gap: 17px;
+
+    min-width: 0;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
 
 .header-btn {
     width: 46px;
     height: 46px;
+
     flex-shrink: 0;
 
-    display: grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    border: 1px solid #e4e9f1;
+    border: 1px solid #e0e6ef;
     border-radius: 14px;
 
-    background: #fff;
+    background: #ffffff;
     color: #081c3a;
 
     cursor: pointer;
 
-    box-shadow: 0 8px 22px rgba(8,28,58,.06);
-    transition: .2s ease;
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .header-btn:hover {
-    color: #2979ff;
-    border-color: #bcd3ff;
-    transform: translateX(-3px);
+    transform: translateY(-2px);
+
+    border-color: #2979ff;
+
+    background: #2979ff;
+    color: #ffffff;
+
+    box-shadow:
+        0 9px 22px rgba(41, 121, 255, 0.22);
 }
 
 .header-btn svg {
     width: 19px;
+    height: 19px;
 }
 
-.payments-header > div {
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.payments-title {
     min-width: 0;
 }
 
-.payments-header h1 {
-    margin: 0;
-    font-size: 29px;
-    line-height: 1.2;
+.page-eyebrow {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #2979ff;
+
+    font-size: 10px;
     font-weight: 800;
-    letter-spacing: -.5px;
+
+    letter-spacing: 1.7px;
+    text-transform: uppercase;
 }
 
-.payments-header p {
-    margin: 5px 0 0;
-    color: #7b8798;
+.payments-title h1 {
+    margin: 0;
+
+    color: #081c3a;
+
+    font-size: clamp(25px, 3vw, 35px);
+    font-weight: 800;
+
+    line-height: 1.15;
+
+    letter-spacing: -0.7px;
+}
+
+.payments-title p {
+    margin: 7px 0 0;
+
+    color: #718096;
+
     font-size: 13px;
+    line-height: 1.6;
 }
 
-/* =========================================
-   SUMMARY
-========================================= */
+
+/* =========================================================
+   SECURE BADGE
+========================================================= */
+
+.payment-secure-badge {
+    position: relative;
+    z-index: 2;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    flex-shrink: 0;
+
+    padding: 10px 14px;
+
+    border: 1px solid rgba(22, 134, 91, 0.16);
+    border-radius: 999px;
+
+    background: rgba(22, 134, 91, 0.07);
+    color: #16865b;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.payment-secure-badge svg {
+    width: 16px;
+    height: 16px;
+}
+
+
+/* =========================================================
+   PAYMENT SUMMARY
+========================================================= */
 
 .payment-summary {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
     gap: 18px;
-    margin-bottom: 38px;
+
+    margin-bottom: 28px;
 }
+
+
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
 
 .summary-card {
     position: relative;
-    min-height: 125px;
+
+    min-height: 145px;
+
     padding: 23px;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    border: 1px solid #e5eaf2;
+    border-radius: 21px;
+
+    background: rgba(255,255,255,0.97);
+
+    box-shadow:
+        0 10px 28px rgba(8, 28, 58, 0.06);
 
     overflow: hidden;
 
-    background: #fff;
-    border: 1px solid #e7ebf2;
-    border-radius: 20px;
-
-    box-shadow: 0 10px 30px rgba(8,28,58,.055);
-
-    transition: .2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .summary-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 18px 38px rgba(8,28,58,.08);
+
+    border-color: #d8e2f2;
+
+    box-shadow:
+        0 17px 38px rgba(8, 28, 58, 0.09);
 }
 
 .summary-card::after {
     content: "";
+
+    position: absolute;
+
+    width: 105px;
+    height: 105px;
+
+    right: -40px;
+    bottom: -45px;
+
+    border-radius: 50%;
+
+    background: rgba(41,121,255,0.055);
+}
+
+.balance-card::after {
+    background: rgba(255,193,7,0.08);
+}
+
+.status-card::after {
+    background: rgba(22,134,91,0.07);
+}
+
+
+/* =========================================================
+   SUMMARY ICON
+========================================================= */
+
+.summary-icon {
+    position: absolute;
+
+    top: 21px;
+    right: 21px;
+
+    width: 43px;
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background: rgba(41,121,255,0.09);
+    color: #2979ff;
+}
+
+.summary-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.balance-card .summary-icon {
+    background: rgba(255,193,7,0.12);
+    color: #b77900;
+}
+
+.status-card .summary-icon {
+    background: rgba(22,134,91,0.10);
+    color: #16865b;
+}
+
+
+/* =========================================================
+   SUMMARY CONTENT
+========================================================= */
+
+.summary-content {
+    position: relative;
+    z-index: 2;
+}
+
+.summary-content > span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #718096;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.summary-content h2 {
+    margin: 0;
+
+    color: #081c3a;
+
+    font-size: 25px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+.summary-content small {
+    display: block;
+
+    margin-top: 7px;
+
+    color: #9aa6b8;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   COURSE PAYMENTS
+========================================================= */
+
+.course-payments,
+.payment-history {
+    margin-bottom: 28px;
+
+    padding: 25px;
+
+    border: 1px solid #e5eaf2;
+    border-radius: 23px;
+
+    background: rgba(255,255,255,0.97);
+
+    box-shadow:
+        0 10px 30px rgba(8,28,58,0.055);
+}
+
+
+/* =========================================================
+   SECTION HEADING
+========================================================= */
+
+.section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+.section-heading > div > span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #2979ff;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+.section-heading h2 {
+    margin: 0;
+
+    color: #081c3a;
+
+    font-size: 19px;
+    font-weight: 800;
+
+    letter-spacing: -0.2px;
+}
+
+.section-heading p {
+    margin: 5px 0 0;
+
+    color: #718096;
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   COURSE LIST
+========================================================= */
+
+#courseList {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+
+/* =========================================================
+   PAYMENT COURSE CARDS
+   Supports common class names used by JS.
+========================================================= */
+
+.course-card,
+.course-payment-card,
+.payment-course-card {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 215px;
+
+    padding: 21px;
+
+    border: 1px solid #e4e9f1;
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f8faff
+        );
+
+    overflow: hidden;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.course-card::before,
+.course-payment-card::before,
+.payment-course-card::before {
+    content: "";
+
     position: absolute;
 
     width: 120px;
     height: 120px;
 
-    right: -55px;
-    bottom: -60px;
+    top: -70px;
+    right: -35px;
 
     border-radius: 50%;
-    background: rgba(41,121,255,.06);
+
+    background: rgba(41,121,255,0.06);
 }
 
-.summary-card span {
-    position: relative;
-    z-index: 1;
+.course-card:hover,
+.course-payment-card:hover,
+.payment-course-card:hover {
+    transform: translateY(-3px);
 
-    color: #7c8898;
-    font-size: 12px;
-    font-weight: 600;
+    border-color: rgba(41,121,255,0.28);
+
+    box-shadow:
+        0 15px 35px rgba(8,28,58,0.08);
 }
 
-.summary-card h2 {
-    position: relative;
-    z-index: 1;
 
-    margin: 7px 0 0;
+/* =========================================================
+   COURSE CARD TYPOGRAPHY
+========================================================= */
+
+.course-card h3,
+.course-payment-card h3,
+.payment-course-card h3 {
+    position: relative;
+    z-index: 2;
+
+    margin: 0 0 7px;
 
     color: #081c3a;
-    font-size: 25px;
-    font-weight: 800;
-}
-
-.summary-card:first-child {
-    border-top: 3px solid #2979ff;
-}
-
-.summary-card:nth-child(2) {
-    border-top: 3px solid #ffc107;
-}
-
-.summary-card:nth-child(3) {
-    border-top: 3px solid #20a779;
-}
-
-#paymentStatus {
-    color: #20a779;
-}
-
-/* =========================================
-   SECTION HEADINGS
-========================================= */
-
-.course-payments,
-.payment-history {
-    margin-bottom: 38px;
-}
-
-.course-payments > h2,
-.payment-history > h2 {
-    margin: 0 0 17px;
-
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: -.2px;
-}
-
-/* =========================================
-   COURSE LIST
-========================================= */
-
-#courseList {
-    display: grid;
-    gap: 14px;
-}
-
-.course-payment-card {
-    position: relative;
-
-    padding: 21px;
-
-    background: #fff;
-
-    border: 1px solid #e5eaf1;
-    border-radius: 19px;
-
-    box-shadow: 0 8px 25px rgba(8,28,58,.045);
-
-    transition: .2s ease;
-}
-
-.course-payment-card:hover {
-    transform: translateY(-3px);
-    border-color: #cbdcff;
-    box-shadow: 0 15px 35px rgba(8,28,58,.08);
-}
-
-/* Generic generated course content */
-
-.course-payment-card h3 {
-    margin: 0 0 6px;
 
     font-size: 16px;
     font-weight: 750;
 }
 
-.course-payment-card p {
-    margin: 0;
+.course-card p,
+.course-payment-card p,
+.payment-course-card p {
+    position: relative;
+    z-index: 2;
 
-    color: #7c8898;
+    margin: 0 0 14px;
+
+    color: #718096;
+
     font-size: 12px;
+    line-height: 1.6;
 }
 
-/* =========================================
-   EMPTY STATE
-========================================= */
 
-.empty-payment {
-    min-height: 170px;
+/* =========================================================
+   COURSE PRICE
+========================================================= */
 
-    display: flex;
+.course-price,
+.course-amount,
+.payment-course-amount {
+    position: relative;
+    z-index: 2;
+
+    margin-top: auto;
+
+    color: #081c3a;
+
+    font-size: 21px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   COURSE PAYMENT BUTTONS
+========================================================= */
+
+.course-card button,
+.course-payment-card button,
+.payment-course-card button,
+.pay-course-btn,
+.pay-btn {
+    position: relative;
+    z-index: 3;
+
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+
+    gap: 8px;
+
+    width: 100%;
+
+    min-height: 44px;
+
+    margin-top: 14px;
+
+    padding: 11px 17px;
+
+    border: 0;
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2979ff,
+            #1559c7
+        );
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 9px 21px rgba(41,121,255,0.20);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+}
+
+.course-card button:hover,
+.course-payment-card button:hover,
+.payment-course-card button:hover,
+.pay-course-btn:hover,
+.pay-btn:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 13px 27px rgba(41,121,255,0.27);
+
+    filter: brightness(1.04);
+}
+
+.course-card button svg,
+.course-payment-card button svg,
+.payment-course-card button svg {
+    width: 16px;
+    height: 16px;
+}
+
+
+/* =========================================================
+   EMPTY PAYMENT STATE
+========================================================= */
+
+.empty-payment {
+    min-height: 185px;
+
+    display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-    padding: 28px;
+    padding: 30px;
 
-    background: #fff;
+    border: 1px dashed #d7dfeb;
+    border-radius: 17px;
 
-    border: 1px dashed #ccd5e2;
-    border-radius: 18px;
-
-    color: #7c8898;
+    background:
+        linear-gradient(
+            180deg,
+            #fbfcfe,
+            #f8faff
+        );
 
     text-align: center;
 }
 
-.empty-payment::before {
-    content: "💳";
+.empty-payment-icon {
+    width: 46px;
+    height: 46px;
 
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    width: 48px;
-    height: 48px;
-
-    margin-bottom: 12px;
+    margin-bottom: 11px;
 
     border-radius: 15px;
 
-    background: #edf4ff;
-
-    font-size: 21px;
+    background: #eef4ff;
+    color: #2979ff;
 }
 
-/* =========================================
-   PAYMENT MODAL
-========================================= */
+.empty-payment-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.empty-payment h3 {
+    margin: 0 0 5px;
+
+    color: #081c3a;
+
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.empty-payment p {
+    max-width: 400px;
+
+    margin: 0;
+
+    color: #718096;
+
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   LOADER
+========================================================= */
+
+.empty-payment .loader-circle {
+    animation: payment-spin 1s linear infinite;
+}
+
+@keyframes payment-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   TRANSACTION HISTORY
+========================================================= */
+
+#transactionList {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+/* =========================================================
+   TRANSACTION ITEMS
+========================================================= */
+
+.transaction-item,
+.transaction-row,
+.payment-transaction {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto
+        auto;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 16px 18px;
+
+    border: 1px solid #e5eaf2;
+    border-radius: 15px;
+
+    background: #ffffff;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.transaction-item:hover,
+.transaction-row:hover,
+.payment-transaction:hover {
+    background: #f9fbff;
+
+    border-color: #dce5f3;
+}
+
+
+/* =========================================================
+   TRANSACTION CONTENT
+========================================================= */
+
+.transaction-info,
+.transaction-main {
+    min-width: 0;
+}
+
+.transaction-info h4,
+.transaction-main h4 {
+    margin: 0 0 4px;
+
+    color: #081c3a;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.transaction-info span,
+.transaction-main span {
+    color: #8794a8;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   TRANSACTION AMOUNT
+========================================================= */
+
+.transaction-amount {
+    color: #081c3a;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.transaction-status,
+.payment-status,
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 28px;
+
+    padding: 5px 10px;
+
+    border-radius: 999px;
+
+    background: #eef4ff;
+    color: #2979ff;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.transaction-status.paid,
+.payment-status.paid,
+.status-badge.paid {
+    background: rgba(22,134,91,0.09);
+    color: #16865b;
+}
+
+.transaction-status.pending,
+.payment-status.pending,
+.status-badge.pending {
+    background: rgba(255,193,7,0.13);
+    color: #a66c00;
+}
+
+.transaction-status.failed,
+.payment-status.failed,
+.status-badge.failed {
+    background: rgba(197,48,48,0.09);
+    color: #c53030;
+}
+
+
+/* =========================================================
+   MODAL BACKDROP
+========================================================= */
 
 .receipt-modal {
     position: fixed;
+
     inset: 0;
+
     z-index: 9999;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    padding: 18px;
+    padding: 20px;
 
-    background: rgba(3,15,34,.68);
+    background:
+        rgba(4,16,35,0.62);
 
-    backdrop-filter: blur(9px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .receipt-modal.hidden {
     display: none;
 }
 
+
+/* =========================================================
+   MODAL BOX
+========================================================= */
+
 .receipt-box {
     position: relative;
 
-    width: min(510px, 100%);
-    max-height: 90vh;
+    width: min(100%, 520px);
+
+    max-height:
+        calc(100vh - 40px);
 
     overflow-y: auto;
 
     padding: 30px;
 
-    background: #fff;
+    border:
+        1px solid rgba(255,255,255,0.65);
 
     border-radius: 25px;
 
-    box-shadow: 0 35px 90px rgba(0,0,0,.25);
+    background: #ffffff;
 
-    animation: paymentModalIn .22s ease;
+    box-shadow:
+        0 35px 90px rgba(0,0,0,0.25);
+
+    animation:
+        payment-modal-in 0.22s ease;
 }
 
-@keyframes paymentModalIn {
+@keyframes payment-modal-in {
     from {
         opacity: 0;
-        transform: translateY(18px) scale(.97);
+        transform: translateY(12px) scale(0.98);
     }
 
     to {
@@ -319,361 +980,706 @@
     }
 }
 
-/* Close button supports BOTH your current HTML and future styled version */
 
-#closePayment,
-#closeReceipt {
+/* =========================================================
+   MODAL CLOSE
+========================================================= */
+
+.modal-close-btn {
     position: absolute;
+
     top: 16px;
     right: 16px;
 
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
 
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    border: 0;
-    border-radius: 10px;
+    border: 1px solid #e3e8f0;
+    border-radius: 12px;
 
-    background: #f3f6fa;
-    color: #607086;
+    background: #f7f9fc;
+    color: #718096;
 
     cursor: pointer;
 
-    transition: .2s ease;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-#closePayment:hover,
-#closeReceipt:hover {
-    background: #e9eef5;
-    color: #081c3a;
+.modal-close-btn:hover {
+    transform: rotate(4deg);
+
+    background: #eef4ff;
+    color: #2979ff;
 }
 
-#closePayment svg,
-#closeReceipt svg {
+.modal-close-btn svg {
     width: 17px;
+    height: 17px;
 }
 
-/* =========================================
-   MODAL TITLE
-========================================= */
 
-.receipt-box > h2 {
-    margin: 0 35px 5px 0;
+/* =========================================================
+   MODAL ICON
+========================================================= */
+
+.modal-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 16px;
+
+    border-radius: 17px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eaf2ff,
+            #f4f8ff
+        );
+
+    color: #2979ff;
+}
+
+.modal-icon svg {
+    width: 23px;
+    height: 23px;
+}
+
+
+/* =========================================================
+   MODAL TITLES
+========================================================= */
+
+.modal-eyebrow {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #2979ff;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+}
+
+.receipt-box h2 {
+    margin: 0;
 
     color: #081c3a;
 
-    font-size: 23px;
+    font-size: 22px;
     font-weight: 800;
 }
 
-#selectedCourse {
-    margin: 0 0 20px;
+.selected-course {
+    margin: 5px 0 20px;
 
-    color: #7a8798;
-    font-size: 13px;
+    color: #718096;
+
+    font-size: 12px;
 }
 
-/* =========================================
-   AMOUNT BOX
-========================================= */
+
+/* =========================================================
+   PAYMENT SUMMARY BOX
+========================================================= */
 
 .payment-summary-box {
-    padding: 22px;
+    padding: 20px;
 
-    margin-bottom: 15px;
+    margin-bottom: 14px;
 
-    border-radius: 18px;
+    border:
+        1px solid rgba(41,121,255,0.12);
+
+    border-radius: 17px;
 
     background:
-        radial-gradient(circle at 100% 0%, rgba(41,121,255,.3), transparent 40%),
-        linear-gradient(135deg,#081c3a,#123d70);
+        linear-gradient(
+            135deg,
+            #edf4ff,
+            #f8fbff
+        );
 
-    color: #fff;
+    text-align: center;
 }
 
-.payment-summary-box p {
-    margin: 0;
+.payment-summary-box span {
+    display: block;
 
-    color: rgba(255,255,255,.65);
+    margin-bottom: 5px;
 
-    font-size: 11px;
-    font-weight: 600;
+    color: #718096;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
 }
 
 .payment-summary-box h2 {
-    margin: 5px 0 0;
+    margin: 0;
+
+    color: #081c3a;
 
     font-size: 29px;
     font-weight: 800;
 }
 
-/* =========================================
-   M-PESA
-========================================= */
+
+/* =========================================================
+   M-PESA NOTE
+========================================================= */
 
 .mpesa-note {
-    padding: 15px 17px;
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
 
     margin-bottom: 15px;
+    padding: 15px;
 
-    border: 1px solid #bce9d8;
+    border:
+        1px solid rgba(22,134,91,0.13);
+
     border-radius: 15px;
 
-    background: #effcf7;
-
-    color: #087f5b;
-
-    font-size: 13px;
-    font-weight: 700;
+    background:
+        rgba(22,134,91,0.055);
 }
 
-/* =========================================
+.mpesa-note > svg {
+    width: 19px;
+    height: 19px;
+
+    flex-shrink: 0;
+
+    margin-top: 2px;
+
+    color: #16865b;
+}
+
+.mpesa-note strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #081c3a;
+
+    font-size: 12px;
+}
+
+.mpesa-note span {
+    display: block;
+
+    color: #718096;
+
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+
+/* =========================================================
    PAYMENT INSTRUCTIONS
-========================================= */
+========================================================= */
 
 .till-payment-box {
     padding: 18px;
 
-    margin-bottom: 17px;
+    border: 1px solid #e3e8f0;
+    border-radius: 18px;
 
-    background: #f8fafc;
-
-    border: 1px solid #e5eaf1;
-    border-radius: 17px;
+    background: #fafcff;
 }
 
-.till-payment-box h3 {
-    margin: 0 0 13px;
+
+/* =========================================================
+   INSTRUCTION HEADER
+========================================================= */
+
+.payment-instruction-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding-bottom: 14px;
+    margin-bottom: 4px;
+
+    border-bottom: 1px dashed #dbe2ec;
+}
+
+.payment-instruction-header span {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #2979ff;
+
+    font-size: 8px;
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+}
+
+.payment-instruction-header h3 {
+    margin: 0;
 
     color: #081c3a;
 
-    font-size: 14px;
-    font-weight: 800;
+    font-size: 13px;
+    font-weight: 750;
 }
 
-.till-payment-box p {
+.payment-instruction-header > svg {
+    width: 17px;
+    height: 17px;
+
+    color: #9aa7ba;
+}
+
+
+/* =========================================================
+   PAYMENT DETAILS
+========================================================= */
+
+.payment-detail {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    gap: 15px;
 
-    padding: 10px 0;
-    margin: 0;
+    gap: 20px;
 
-    border-bottom: 1px solid #e7ebf1;
+    padding: 12px 0;
 
-    color: #748195;
-
-    font-size: 12px;
+    border-bottom: 1px solid #edf0f5;
 }
 
-.till-payment-box p:last-child {
+.payment-detail:last-of-type {
     border-bottom: 0;
 }
 
-.till-payment-box strong {
-    color: #081c3a;
+.payment-detail span {
+    color: #718096;
+
+    font-size: 11px;
 }
 
-/* =========================================
-   CONFIRM
-========================================= */
+.payment-detail strong {
+    color: #081c3a;
 
-#confirmPayment {
+    font-size: 12px;
+    font-weight: 800;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   CONFIRM PAYMENT
+========================================================= */
+
+.confirm-payment-btn {
     width: 100%;
-    min-height: 50px;
+
+    min-height: 49px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    margin-top: 17px;
 
     border: 0;
     border-radius: 14px;
 
-    background: #2979ff;
-    color: #fff;
+    background:
+        linear-gradient(
+            135deg,
+            #2979ff,
+            #1559c7
+        );
+
+    color: #ffffff;
 
     font-family: inherit;
 
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 750;
 
     cursor: pointer;
 
-    box-shadow: 0 10px 25px rgba(41,121,255,.23);
+    box-shadow:
+        0 11px 25px rgba(41,121,255,0.22);
 
-    transition: .2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-#confirmPayment:hover {
-    background: #1769ed;
+.confirm-payment-btn:hover {
     transform: translateY(-2px);
+
+    box-shadow:
+        0 15px 30px rgba(41,121,255,0.29);
 }
 
-#paymentMessage {
-    margin: 12px 0 0;
+.confirm-payment-btn svg {
+    width: 17px;
+    height: 17px;
+}
 
-    color: #68778b;
 
-    font-size: 12px;
+/* =========================================================
+   PAYMENT MESSAGE
+========================================================= */
+
+.payment-message {
+    min-height: 18px;
+
+    margin: 10px 0 0;
+
+    color: #718096;
+
+    font-size: 10px;
+
+    line-height: 1.5;
+
     text-align: center;
 }
 
-/* =========================================
-   TRANSACTION HISTORY
-========================================= */
 
-#transactionList {
-    overflow: hidden;
+/* =========================================================
+   RECEIPT
+========================================================= */
 
-    background: #fff;
+.receipt-logo {
+    display: flex;
+    align-items: center;
 
-    border: 1px solid #e5eaf1;
-    border-radius: 19px;
+    gap: 12px;
 
-    box-shadow: 0 8px 25px rgba(8,28,58,.045);
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+
+    border-bottom: 1px dashed #dbe2ec;
 }
 
-#transactionList > div {
-    padding: 17px 20px;
+.receipt-logo-icon {
+    width: 43px;
+    height: 43px;
 
-    border-bottom: 1px solid #edf0f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #081c3a,
+            #12335f
+        );
+
+    color: #ffc107;
 }
 
-#transactionList > div:last-child {
+.receipt-logo-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.receipt-logo strong {
+    display: block;
+
+    color: #081c3a;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.receipt-logo span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #718096;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   RECEIPT CONTENT
+========================================================= */
+
+#receiptContent {
+    color: #081c3a;
+}
+
+#receiptContent > div {
+    padding: 10px 0;
+
+    border-bottom: 1px solid #edf0f5;
+}
+
+#receiptContent > div:last-child {
     border-bottom: 0;
 }
 
-/* =========================================
-   RECEIPT
-========================================= */
 
-#receiptModal .receipt-box {
-    width: min(470px,100%);
-}
+/* =========================================================
+   PRINT RECEIPT
+========================================================= */
 
-#receiptModal .receipt-box h2 {
-    margin-bottom: 3px;
-}
-
-#receiptModal .receipt-box > p {
-    margin: 0 0 20px;
-
-    color: #7c8898;
-
-    font-size: 12px;
-}
-
-#receiptModal .receipt-box > button:last-child {
+.print-receipt-btn {
     width: 100%;
+
     min-height: 46px;
 
-    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    border: 0;
+    gap: 8px;
+
+    margin-top: 18px;
+
+    border: 1px solid #2979ff;
     border-radius: 13px;
 
-    background: #081c3a;
-    color: #fff;
+    background: #ffffff;
+    color: #2979ff;
 
     font-family: inherit;
-    font-weight: 700;
+
+    font-size: 12px;
+    font-weight: 750;
 
     cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+.print-receipt-btn:hover {
+    transform: translateY(-1px);
 
-@media (max-width: 800px) {
-
-    .payments-page {
-        padding: 22px 16px;
-    }
-
-    .payment-summary {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .summary-card {
-        min-height: 105px;
-    }
-
+    background: #2979ff;
+    color: #ffffff;
 }
 
-@media (max-width: 520px) {
+.print-receipt-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+
+/* =========================================================
+   BUTTON STATES
+========================================================= */
+
+.payments-page button:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+
+    transform: none !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   MODAL SCROLLBAR
+========================================================= */
+
+.receipt-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.receipt-box::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.receipt-box::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+
+    background: #ccd5e3;
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+body.dark-mode .payments-page,
+body.dark .payments-page,
+.dark .payments-page {
+    background:
+        radial-gradient(
+            circle at 90% 0%,
+            rgba(41,121,255,0.13),
+            transparent 30%
+        ),
+        #071426;
+
+    color: #edf4ff;
+}
+
+body.dark-mode .payments-header,
+body.dark .payments-header,
+.dark .payments-header,
+body.dark-mode .summary-card,
+body.dark .summary-card,
+.dark .summary-card,
+body.dark-mode .course-payments,
+body.dark .course-payments,
+.dark .course-payments,
+body.dark-mode .payment-history,
+body.dark .payment-history,
+.dark .payment-history {
+    background: #0d1c31;
+
+    border-color: #1e324c;
+}
+
+body.dark-mode .payments-title h1,
+body.dark .payments-title h1,
+.dark .payments-title h1,
+body.dark-mode .summary-content h2,
+body.dark .summary-content h2,
+.dark .summary-content h2,
+body.dark-mode .section-heading h2,
+body.dark .section-heading h2,
+.dark .section-heading h2,
+body.dark-mode .course-card h3,
+body.dark .course-card h3,
+.dark .course-card h3,
+body.dark-mode .course-payment-card h3,
+body.dark .course-payment-card h3,
+.dark .course-payment-card h3,
+body.dark-mode .payment-course-card h3,
+body.dark .payment-course-card h3,
+.dark .payment-course-card h3 {
+    color: #edf4ff;
+}
+
+body.dark-mode .payments-title p,
+body.dark .payments-title p,
+.dark .payments-title p,
+body.dark-mode .summary-content > span,
+body.dark .summary-content > span,
+.dark .summary-content > span,
+body.dark-mode .summary-content small,
+body.dark .summary-content small,
+.dark .summary-content small,
+body.dark-mode .section-heading p,
+body.dark .section-heading p,
+.dark .section-heading p {
+    color: #91a5bf;
+}
+
+body.dark-mode .course-card,
+body.dark .course-card,
+.dark .course-card,
+body.dark-mode .course-payment-card,
+body.dark .course-payment-card,
+.dark .course-payment-card,
+body.dark-mode .payment-course-card,
+body.dark .payment-course-card,
+.dark .payment-course-card,
+body.dark-mode .transaction-item,
+body.dark .transaction-item,
+.dark .transaction-item {
+    background: #102139;
+
+    border-color: #223954;
+}
+
+body.dark-mode .empty-payment,
+body.dark .empty-payment,
+.dark .empty-payment,
+body.dark-mode .till-payment-box,
+body.dark .till-payment-box,
+.dark .till-payment-box {
+    background: #0b1a2d;
+
+    border-color: #263c57;
+}
+
+body.dark-mode .header-btn,
+body.dark .header-btn,
+.dark .header-btn {
+    background: #102139;
+
+    border-color: #223954;
+
+    color: #edf4ff;
+}
+
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+@media print {
 
     .payments-page {
-        padding: 18px 13px;
+        padding: 0;
+
+        background: #ffffff;
     }
 
-    .payments-header {
-        margin-bottom: 22px;
+    .payments-header,
+    .payment-summary,
+    .course-payments,
+    .payment-history {
+        box-shadow: none;
     }
 
-    .header-btn {
-        width: 42px;
-        height: 42px;
-    }
+    .receipt-modal {
+        position: static;
 
-    .payments-header h1 {
-        font-size: 23px;
-    }
+        padding: 0;
 
-    .payments-header p {
-        font-size: 11px;
-    }
-
-    .payment-summary {
-        margin-bottom: 30px;
-    }
-
-    .summary-card {
-        padding: 18px;
-        border-radius: 17px;
-    }
-
-    .summary-card h2 {
-        font-size: 22px;
-    }
-
-    .course-payments > h2,
-    .payment-history > h2 {
-        font-size: 18px;
-    }
-
-    .course-payment-card {
-        padding: 17px;
-        border-radius: 17px;
+        background: #ffffff;
     }
 
     .receipt-box {
-        padding: 24px 18px;
-        border-radius: 21px;
+        width: 100%;
+
+        max-height: none;
+
+        border: 0;
+
+        box-shadow: none;
     }
 
-    .payment-summary-box {
-        padding: 18px;
+    .modal-close-btn,
+    .print-receipt-btn {
+        display: none !important;
     }
-
-    .payment-summary-box h2 {
-        font-size: 25px;
-    }
-
-    .till-payment-box p {
-        flex-direction: column;
-        gap: 3px;
-    }
-
-}
-
-@media (max-width: 360px) {
-
-    .payments-page {
-        padding: 15px 10px;
-    }
-
-    .payments-header h1 {
-        font-size: 21px;
-    }
-
 }

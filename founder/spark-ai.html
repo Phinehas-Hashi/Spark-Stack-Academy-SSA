@@ -1,314 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <title>Spark AI | Spark Stack Academy</title>
 
-    <title>SparkMind | Founder OS</title>
+    <link rel="stylesheet" href="founder-unified.css">
+    <link rel="stylesheet" href="spark-ai.css">
 
-    <link rel="stylesheet"
-          href="spark-ai.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
-
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet">
-
-<link rel="stylesheet" href="founder-unified.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
 </head>
 
 <body>
 
-    <!-- ==========================
-         BACKGROUND
-    =========================== -->
-
-    <div class="bg-orb orb-1"></div>
-
-    <div class="bg-orb orb-2"></div>
-
-    <div class="bg-orb orb-3"></div>
-
-    <!-- ==========================
-         LAYOUT
-    =========================== -->
+    <!-- ==========================================
+         APPLICATION SHELL
+    =========================================== -->
 
     <div class="dashboard-layout">
 
-        <!-- Sidebar -->
-
+        <!-- Founder Sidebar -->
         <aside id="sidebarContainer"></aside>
 
         <div id="sidebarOverlay"></div>
 
-        <!-- Main -->
+        <!-- ======================================
+             MAIN APPLICATION
+        ======================================= -->
 
         <main class="main-content">
 
-            <!-- Topbar -->
-
+            <!-- Founder Topbar -->
             <header id="topbarContainer"></header>
 
-            <!-- ==========================
-                 HERO
-            =========================== -->
+            <!-- ==================================
+                 SPARK AI APPLICATION
+            =================================== -->
 
-            <section class="spark-hero glass-card">
+            <section
+                class="spark-ai-app"
+                id="sparkAIApp"
+            >
 
-                <div class="hero-badge">
+                <!-- ==================================
+                     AI HEADER
+                =================================== -->
 
-                    🧠 SparkMind • Founder Intelligence System
+                <header class="spark-ai-header">
 
-                </div>
+                    <div class="spark-ai-identity">
 
-                <div class="hero-content">
+                        <div
+                            class="spark-ai-avatar"
+                            aria-hidden="true"
+                        >
+                            <span>✦</span>
+                        </div>
 
-                    <div class="hero-text">
+                        <div class="spark-ai-heading">
 
-                        <h1>
+                            <div class="spark-ai-title-row">
 
-                            Welcome back,
+                                <h1>Spark AI</h1>
 
-                            <span>Phinehas</span>
+                                <span
+                                    class="spark-ai-status"
+                                    id="sparkAIStatus"
+                                >
+                                    <span class="status-dot"></span>
+                                    Ready
+                                </span>
 
-                        </h1>
-
-                        <p>
-
-                            Your executive AI operating system for
-                            monitoring academy performance,
-                            understanding platform intelligence,
-                            reviewing founder insights,
-                            and planning the future of
-                            Spark Stack.
-
-                        </p>
-
-                    </div>
-
-                    <div class="hero-status glass-card">
-
-                        <div class="status-indicator"></div>
-
-                        <div>
-
-                            <h3>
-
-                                SparkMind Online
-
-                            </h3>
+                            </div>
 
                             <p>
-
-                                Powered by Groq AI
-
+                                Your intelligent operating companion for
+                                thinking, planning, solving and building.
                             </p>
 
                         </div>
 
                     </div>
 
-                </div>
+                    <div class="spark-ai-header-actions">
 
-            </section>
+                        <button
+                            type="button"
+                            id="newConversationBtn"
+                            class="spark-ai-action-btn"
+                        >
+                            <span aria-hidden="true">＋</span>
+                            New conversation
+                        </button>
 
-            <!-- ==========================
-                 LIVE METRICS
-            =========================== -->
+                        <button
+                            type="button"
+                            id="aiSettingsBtn"
+                            class="spark-ai-action-btn"
+                        >
+                            <span aria-hidden="true">⚙</span>
+                            Settings
+                        </button>
 
-            <section class="stats-grid">
+                    </div>
 
-                <div class="stat-card glass-card">
+                </header>
 
-                    <span>
 
-                        👨‍🎓 Students
+                <!-- ==================================
+                     AI WORKSPACE
+                =================================== -->
 
-                    </span>
+                <div class="spark-ai-workspace">
 
-                    <h2 id="briefStudents">
+                    <!-- =================================
+                         CONVERSATION AREA
+                    ================================== -->
 
-                        0
+                    <section class="spark-ai-conversation">
 
-                    </h2>
+                        <!-- Conversation toolbar -->
 
-                    <small>
+                        <div class="conversation-toolbar">
 
-                        Active Learners
+                            <div class="conversation-info">
 
-                    </small>
+                                <span
+                                    id="conversationTitle"
+                                    class="conversation-title"
+                                >
+                                    New conversation
+                                </span>
 
-                </div>
-
-                <div class="stat-card glass-card">
-
-                    <span>
-
-                        📚 Courses
-
-                    </span>
-
-                    <h2 id="briefCourses">
-
-                        0
-
-                    </h2>
-
-                    <small>
-
-                        Published Courses
-
-                    </small>
-
-                </div>
-
-                <div class="stat-card glass-card">
-
-                    <span>
-
-                        👨‍🏫 Instructors
-
-                    </span>
-
-                    <h2 id="briefInstructors">
-
-                        0
-
-                    </h2>
-
-                    <small>
-
-                        Active Instructors
-
-                    </small>
-
-                </div>
-
-                <div class="stat-card glass-card">
-
-                    <span>
-
-                        🚀 Enrollments
-
-                    </span>
-
-                    <h2 id="briefEnrollments">
-
-                        0
-
-                    </h2>
-
-                    <small>
-
-                        Total Enrollments
-
-                    </small>
-
-                </div>
-
-            </section>
-
-            <!-- ==========================
-                 MAIN GRID
-            =========================== -->
-
-            <section class="workspace-grid">
-
-                <!-- ======================
-                     CHAT PANEL
-                ======================= -->
-
-                <section class="chat-panel glass-card">
-
-                    <div class="chat-header">
-
-                        <div class="chat-title">
-
-                            <div class="ai-avatar">
-
-                                ✨
+                                <span
+                                    id="conversationContext"
+                                    class="conversation-context"
+                                >
+                                    Spark AI
+                                </span>
 
                             </div>
 
-                            <div>
-
-                                <h3>
-
-                                    SparkMind
-
-                                </h3>
-
-                                <p>
-
-                                    Founder Intelligence System
-
-                                </p>
-
-                            </div>
+                            <button
+                                type="button"
+                                id="clearConversationBtn"
+                                class="toolbar-btn"
+                                title="Clear conversation"
+                            >
+                                Clear
+                            </button>
 
                         </div>
 
-                        <span class="status-pill">
 
-                            ● Online
+                        <!-- Messages -->
 
-                        </span>
+                        <div
+                            id="chatMessages"
+                            class="spark-ai-messages"
+                            aria-live="polite"
+                            aria-label="Spark AI conversation"
+                        >
 
-                    </div>
-                                        <!-- ======================
-                         CHAT MESSAGES
-                    ======================= -->
+                            <!-- Empty state -->
 
-                    <div id="chatMessages"
-                         class="chat-messages">
+                            <div
+                                id="sparkAIWelcome"
+                                class="spark-ai-welcome"
+                            >
 
-                        <div class="message ai-message">
+                                <div class="welcome-icon">
+                                    ✦
+                                </div>
 
-                            <div class="message-avatar">
-
-                                ✨
-
-                            </div>
-
-                            <div class="message-content">
-
-                                <p>
-
-                                    Welcome back, Phinehas.
-
-                                </p>
+                                <h2>
+                                    What are we solving today?
+                                </h2>
 
                                 <p>
-
-                                    I'm SparkMind, your Founder Intelligence
-                                    System. I can analyze academy performance,
-                                    explain trends, discuss growth strategies,
-                                    summarize platform activity, and help you
-                                    make better decisions for Spark Stack.
-
+                                    Ask Spark AI to think through a problem,
+                                    build a plan, analyze information,
+                                    explain something, or help you make a
+                                    decision.
                                 </p>
 
-                                <div class="message-footer">
+                                <div class="welcome-suggestions">
 
-                                    <span class="message-time">
+                                    <button
+                                        type="button"
+                                        class="suggestion-btn"
+                                        data-prompt="Help me think through an important business decision."
+                                    >
+                                        <span>◈</span>
+                                        Think through a decision
+                                    </button>
 
-                                        SparkMind • Just now
+                                    <button
+                                        type="button"
+                                        class="suggestion-btn"
+                                        data-prompt="Create a practical plan for my next major goal."
+                                    >
+                                        <span>◎</span>
+                                        Build a plan
+                                    </button>
 
-                                    </span>
+                                    <button
+                                        type="button"
+                                        class="suggestion-btn"
+                                        data-prompt="Analyze this problem and help me find the best solution."
+                                    >
+                                        <span>⌁</span>
+                                        Solve a problem
+                                    </button>
 
-                                    <button class="copy-btn">
-
-                                        Copy
-
+                                    <button
+                                        type="button"
+                                        class="suggestion-btn"
+                                        data-prompt="Help me improve Spark Stack Academy."
+                                    >
+                                        <span>✦</span>
+                                        Improve Spark Stack
                                     </button>
 
                                 </div>
@@ -317,245 +238,552 @@
 
                         </div>
 
-                    </div>
 
-                    <!-- ======================
-                         TYPING INDICATOR
-                    ======================= -->
+                        <!-- Typing / thinking state -->
 
-                    <div id="typingIndicator"
-                         class="typing-indicator">
+                        <div
+                            id="aiThinking"
+                            class="ai-thinking"
+                            hidden
+                        >
 
-                        <div class="message ai-message">
-
-                            <div class="message-avatar">
-
-                                ✨
-
+                            <div class="ai-message-avatar">
+                                ✦
                             </div>
 
-                            <div class="message-content typing-box">
+                            <div class="thinking-content">
 
-                                <span></span>
+                                <span>Thinking</span>
 
-                                <span></span>
-
-                                <span></span>
+                                <div class="thinking-dots">
+                                    <i></i>
+                                    <i></i>
+                                    <i></i>
+                                </div>
 
                             </div>
 
                         </div>
 
-                    </div>
 
-                    <!-- ======================
-                         AI COMMANDS
-                    ======================= -->
+                        <!-- =================================
+                             COMPOSER
+                        ================================== -->
 
-                    <div class="quick-chips">
+                        <div class="spark-ai-composer">
 
-                        <button
-                            id="dailyBriefBtn"
-                            class="chip-btn">
+                            <form id="chatForm">
 
-                            📈 Founder Briefing
+                                <div class="composer-box">
 
-                        </button>
+                                    <textarea
+                                        id="chatInput"
+                                        name="message"
+                                        rows="1"
+                                        maxlength="12000"
+                                        autocomplete="off"
+                                        placeholder="Ask Spark AI anything..."
+                                        aria-label="Message Spark AI"
+                                    ></textarea>
 
-                        <button
-                            id="academyHealthBtn"
-                            class="chip-btn">
+                                    <div class="composer-bottom">
 
-                            📊 Academy Health
+                                        <div class="composer-tools">
 
-                        </button>
+                                            <button
+                                                type="button"
+                                                id="attachBtn"
+                                                class="composer-tool"
+                                                title="Attach"
+                                            >
+                                                ＋
+                                            </button>
 
-                        <button
-                            id="growthBtn"
-                            class="chip-btn">
+                                            <button
+                                                type="button"
+                                                id="voiceBtn"
+                                                class="composer-tool"
+                                                title="Voice input"
+                                            >
+                                                ◉
+                                            </button>
 
-                            🚀 Growth Ideas
+                                            <span
+                                                id="messageModeLabel"
+                                                class="composer-mode-label"
+                                            >
+                                                Spark AI
+                                            </span>
 
-                        </button>
+                                        </div>
 
-                        <button
-                            id="roadmapBtn"
-                            class="chip-btn">
+                                        <button
+                                            type="submit"
+                                            id="sendBtn"
+                                            class="send-btn"
+                                            aria-label="Send message"
+                                        >
+                                            <span>↑</span>
+                                        </button>
 
-                            🗺️ Product Roadmap
+                                    </div>
 
-                        </button>
+                                </div>
 
-                    </div>
+                            </form>
 
-                    <!-- ======================
-                         CHAT COMPOSER
-                    ======================= -->
+                            <p class="composer-disclaimer">
+                                Spark AI can make mistakes. Review important
+                                decisions and information before acting.
+                            </p>
 
-                    <div class="chat-composer">
+                        </div>
 
-                        <form id="chatForm"
-                              class="chat-input">
+                    </section>
 
-                            <textarea
-                                id="chatInput"
-                                rows="1"
-                                placeholder="Message SparkMind..."></textarea>
 
-                            <div class="composer-actions">
+                    <!-- =================================
+                         AI CONTROL PANEL
+                    ================================== -->
+
+                    <aside class="spark-ai-panel">
+
+                        <!-- =================================
+                             MODE
+                        ================================== -->
+
+                        <section class="ai-panel-card">
+
+                            <div class="panel-card-header">
+
+                                <div>
+                                    <span class="panel-eyebrow">
+                                        MODE
+                                    </span>
+
+                                    <h2>How should Spark AI think?</h2>
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="ai-mode-list"
+                                id="aiModeList"
+                            >
 
                                 <button
                                     type="button"
-                                    id="clearChat"
-                                    class="icon-btn"
-                                    title="Clear Chat">
+                                    class="ai-mode active"
+                                    data-mode="assistant"
+                                >
+                                    <span class="mode-icon">✦</span>
 
-                                    🗑️
+                                    <span class="mode-content">
+                                        <strong>Assistant</strong>
+                                        <small>
+                                            General thinking and problem
+                                            solving
+                                        </small>
+                                    </span>
 
+                                    <span class="mode-check">✓</span>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="ai-mode"
+                                    data-mode="strategy"
+                                >
+                                    <span class="mode-icon">◈</span>
+
+                                    <span class="mode-content">
+                                        <strong>Strategy</strong>
+                                        <small>
+                                            Business, growth and decisions
+                                        </small>
+                                    </span>
+
+                                    <span class="mode-check">✓</span>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="ai-mode"
+                                    data-mode="technical"
+                                >
+                                    <span class="mode-icon">⌘</span>
+
+                                    <span class="mode-content">
+                                        <strong>Technical</strong>
+                                        <small>
+                                            Code, systems and debugging
+                                        </small>
+                                    </span>
+
+                                    <span class="mode-check">✓</span>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="ai-mode"
+                                    data-mode="planning"
+                                >
+                                    <span class="mode-icon">◎</span>
+
+                                    <span class="mode-content">
+                                        <strong>Planning</strong>
+                                        <small>
+                                            Goals, projects and execution
+                                        </small>
+                                    </span>
+
+                                    <span class="mode-check">✓</span>
+                                </button>
+
+                            </div>
+
+                        </section>
+
+
+                        <!-- =================================
+                             CAPABILITIES
+                        ================================== -->
+
+                        <section class="ai-panel-card">
+
+                            <div class="panel-card-header">
+
+                                <div>
+                                    <span class="panel-eyebrow">
+                                        CAPABILITIES
+                                    </span>
+
+                                    <h2>Tools</h2>
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="ai-tools-list"
+                                id="aiToolsList"
+                            >
+
+                                <button
+                                    type="button"
+                                    class="ai-tool"
+                                    data-tool="academy"
+                                >
+                                    <span class="tool-icon">⌂</span>
+
+                                    <span>
+                                        <strong>Academy intelligence</strong>
+                                        <small>
+                                            Understand Spark Stack data
+                                        </small>
+                                    </span>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="ai-tool"
+                                    data-tool="calculator"
+                                >
+                                    <span class="tool-icon">＋</span>
+
+                                    <span>
+                                        <strong>Calculations</strong>
+                                        <small>
+                                            Work through numbers and estimates
+                                        </small>
+                                    </span>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="ai-tool"
+                                    data-tool="code"
+                                >
+                                    <span class="tool-icon">&lt;/&gt;</span>
+
+                                    <span>
+                                        <strong>Code analysis</strong>
+                                        <small>
+                                            Understand and solve technical
+                                            problems
+                                        </small>
+                                    </span>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="ai-tool"
+                                    data-tool="planning"
+                                >
+                                    <span class="tool-icon">↗</span>
+
+                                    <span>
+                                        <strong>Planning</strong>
+                                        <small>
+                                            Turn ideas into actionable steps
+                                        </small>
+                                    </span>
+                                </button>
+
+                            </div>
+
+                        </section>
+
+
+                        <!-- =================================
+                             CONTEXT
+                        ================================== -->
+
+                        <section class="ai-panel-card">
+
+                            <div class="panel-card-header">
+
+                                <div>
+                                    <span class="panel-eyebrow">
+                                        CONTEXT
+                                    </span>
+
+                                    <h2>Current context</h2>
+                                </div>
+
+                                <span
+                                    id="contextStatus"
+                                    class="context-status"
+                                >
+                                    Ready
+                                </span>
+
+                            </div>
+
+                            <div
+                                id="aiContext"
+                                class="ai-context"
+                            >
+
+                                <div class="context-item">
+
+                                    <span>Workspace</span>
+
+                                    <strong>
+                                        Spark Stack Academy
+                                    </strong>
+
+                                </div>
+
+                                <div class="context-item">
+
+                                    <span>Role</span>
+
+                                    <strong>
+                                        Founder
+                                    </strong>
+
+                                </div>
+
+                                <div class="context-item">
+
+                                    <span>Mode</span>
+
+                                    <strong id="activeMode">
+                                        Assistant
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+
+                        <!-- =================================
+                             MEMORY
+                        ================================== -->
+
+                        <section class="ai-panel-card">
+
+                            <div class="panel-card-header">
+
+                                <div>
+                                    <span class="panel-eyebrow">
+                                        MEMORY
+                                    </span>
+
+                                    <h2>Assistant memory</h2>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    id="memorySettingsBtn"
+                                    class="panel-link"
+                                >
+                                    Manage
+                                </button>
+
+                            </div>
+
+                            <p class="panel-description">
+                                Spark AI can use approved context to make
+                                future conversations more useful.
+                            </p>
+
+                            <div class="memory-status">
+
+                                <span class="memory-indicator"></span>
+
+                                <span id="memoryStatus">
+                                    Memory ready
+                                </span>
+
+                            </div>
+
+                        </section>
+
+
+                        <!-- =================================
+                             ACTIONS
+                        ================================== -->
+
+                        <section class="ai-panel-card">
+
+                            <div class="panel-card-header">
+
+                                <div>
+                                    <span class="panel-eyebrow">
+                                        ACTIONS
+                                    </span>
+
+                                    <h2>What can I do?</h2>
+                                </div>
+
+                            </div>
+
+                            <div class="ai-action-list">
+
+                                <button
+                                    type="button"
+                                    class="ai-action"
+                                    data-action="analyze"
+                                >
+                                    Analyze something
                                 </button>
 
                                 <button
-                                    id="sendBtn"
-                                    type="submit">
+                                    type="button"
+                                    class="ai-action"
+                                    data-action="plan"
+                                >
+                                    Build a plan
+                                </button>
 
-                                    ➜
+                                <button
+                                    type="button"
+                                    class="ai-action"
+                                    data-action="compare"
+                                >
+                                    Compare options
+                                </button>
 
+                                <button
+                                    type="button"
+                                    class="ai-action"
+                                    data-action="explain"
+                                >
+                                    Explain something
                                 </button>
 
                             </div>
 
-                        </form>
+                        </section>
+
+                    </aside>
+
+                </div>
+
+
+                <!-- ==================================
+                     FUTURE TOOL DRAWER
+                =================================== -->
+
+                <div
+                    id="aiToolDrawer"
+                    class="ai-tool-drawer"
+                    hidden
+                >
+
+                    <div class="tool-drawer-header">
+
+                        <div>
+
+                            <span
+                                id="toolDrawerEyebrow"
+                                class="panel-eyebrow"
+                            >
+                                TOOL
+                            </span>
+
+                            <h2 id="toolDrawerTitle">
+                                Spark AI Tool
+                            </h2>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            id="closeToolDrawerBtn"
+                            class="close-btn"
+                            aria-label="Close tool"
+                        >
+                            ×
+                        </button>
 
                     </div>
 
-                </section>
-                                <!-- ===================================
-                     FOUNDER SIDEBAR
-                ==================================== -->
-
-                <aside class="workspace-sidebar">
-
-                    <!-- AI COMMAND CENTER -->
-
-                    <div class="glass-card workspace-card">
-
-                        <h3>
-
-                            ⚡ AI Command Center
-
-                        </h3>
-
-                        <p>
-
-                            Ask SparkMind anything about your academy,
-                            platform performance, business strategy,
-                            or the future of Spark Stack.
-
-                        </p>
-
+                    <div
+                        id="toolDrawerContent"
+                        class="tool-drawer-content"
+                    >
                     </div>
 
-                    <!-- FOUNDER INSIGHTS -->
+                </div>
 
-                    <div class="glass-card workspace-card">
 
-                        <h3>
+                <!-- ==================================
+                     FUTURE COMMAND / ACTION MODAL
+                =================================== -->
 
-                            📈 Founder Insight
+                <div
+                    id="aiActionModal"
+                    class="ai-action-modal"
+                    hidden
+                >
 
-                        </h3>
+                    <div class="action-modal-card">
 
-                        <p id="founderInsight">
+                        <button
+                            type="button"
+                            id="closeActionModalBtn"
+                            class="close-btn"
+                            aria-label="Close"
+                        >
+                            ×
+                        </button>
 
-                            SparkMind is continuously analyzing academy
-                            activity and preparing strategic
-                            recommendations.
-
-                        </p>
-
-                    </div>
-
-                    <!-- ACADEMY HEALTH -->
-
-                    <div class="glass-card workspace-card">
-
-                        <h3>
-
-                            💚 Academy Health
-
-                        </h3>
-
-                        <ul>
-
-                            <li>
-
-                                AI System Online
-
-                            </li>
-
-                            <li>
-
-                                Academy Services Healthy
-
-                            </li>
-
-                            <li>
-
-                                Founder Dashboard Connected
-
-                            </li>
-
-                            <li>
-
-                                Waiting for Live Analytics
-
-                            </li>
-
-                        </ul>
-
-                    </div>
-
-                    <!-- SYSTEM STATUS -->
-
-                    <div class="glass-card workspace-card">
-
-                        <h3>
-
-                            🛰 System Status
-
-                        </h3>
-
-                        <div class="system-status">
-
-                            <div class="status-item">
-
-                                <span>AI</span>
-
-                                <strong>Online</strong>
-
-                            </div>
-
-                            <div class="status-item">
-
-                                <span>Database</span>
-
-                                <strong>Connected</strong>
-
-                            </div>
-
-                            <div class="status-item">
-
-                                <span>Founder OS</span>
-
-                                <strong>Running</strong>
-
-                            </div>
-
+                        <div id="actionModalContent">
                         </div>
 
                     </div>
 
-                </aside>
+                </div>
 
             </section>
 
@@ -563,26 +791,32 @@
 
     </div>
 
-    <!-- ==========================
+
+    <!-- ==========================================
          LIBRARIES
-    =========================== -->
+    =========================================== -->
 
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- ==========================
-         APP
-    =========================== -->
+
+    <!-- ==========================================
+         FOUNDER APPLICATION SHELL
+    =========================================== -->
 
     <script
         type="module"
-        src="./js/founder-app.js"></script>
+        src="./js/founder-app.js"
+    ></script>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- ==========================================
+         SPARK AI ENGINE
+    =========================================== -->
 
     <script
         type="module"
-        src="spark-ai.js"></script>
+        src="spark-ai.js"
+    ></script>
 
 </body>
-
 </html>

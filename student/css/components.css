@@ -847,22 +847,19 @@
 .sidebar-overlay,
 #sidebarOverlay {
     position: fixed;
-
     inset: 0;
 
-    display: block;
+    width: 100%;
+    height: 100dvh;
 
-    opacity: 0;
-
-    visibility: hidden;
-
-    pointer-events: none;
-
-    background:
-        rgba(2,10,25,.62);
+    background: rgba(2, 10, 25, .62);
 
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 
     z-index: 1100;
 
@@ -874,96 +871,264 @@
 .sidebar-overlay.show,
 #sidebarOverlay.show {
     opacity: 1;
-
     visibility: visible;
-
     pointer-events: auto;
 }
 
 
 /* ============================================================
-   RESPONSIVE STUDENT SIDEBAR
-   Adapts to the actual device viewport.
+   MOBILE / TABLET SIDEBAR
 ============================================================ */
 
 @media (max-width: 900px) {
 
     .sidebar,
     .ssa-student-sidebar {
-        width: min(352px, calc(100dvw - 24px));
-        max-width: calc(100dvw - 24px);
+        position: fixed;
+
+        top: 0;
+        left: 0;
+        bottom: 0;
+
+        width: min(320px, 85vw);
 
         height: 100dvh;
-        max-height: 100dvh;
 
-        transform: translate3d(
-            calc(-100% - 24px),
-            0,
-            0
-        );
-
-        visibility: hidden;
-        pointer-events: none;
+        margin: 0;
+        padding: 16px;
 
         overflow-x: hidden;
         overflow-y: auto;
 
+        -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
 
-        -webkit-overflow-scrolling: touch;
+        transform: translateX(-110%);
 
-        transition:
-            transform .24s cubic-bezier(.22,.8,.25,1),
-            visibility 0s linear .24s;
+        visibility: hidden;
+        pointer-events: none;
+
+        z-index: 1200;
 
         box-shadow:
-            18px 0 50px rgba(0,0,0,.38);
+            16px 0 40px rgba(0, 0, 0, .35);
+
+        transition:
+            transform .22s ease,
+            visibility 0s linear .22s;
     }
 
     .sidebar.open,
     .ssa-student-sidebar.open {
-        transform: translate3d(0, 0, 0);
+        transform: translateX(0);
 
         visibility: visible;
         pointer-events: auto;
 
         transition:
-            transform .24s cubic-bezier(.22,.8,.25,1),
+            transform .22s ease,
             visibility 0s;
     }
 
+    /* Mobile menu button */
+
     .menu-btn {
         display: flex;
+
+        width: 42px;
+        height: 42px;
+
+        min-width: 42px;
+        min-height: 42px;
+
+        align-items: center;
+        justify-content: center;
     }
 
+    /* Comfortable touch targets */
+
+    .sidebar-link {
+        min-height: 46px;
+        padding: 11px 12px;
+
+        touch-action: manipulation;
+    }
+
+    .sidebar-footer button,
+    .sidebar-footer .logout-btn {
+        min-height: 46px;
+
+        touch-action: manipulation;
+    }
 }
 
 
 /* ============================================================
-   PHONE DRAWER
+   SMALL PHONES
 ============================================================ */
 
-@media (max-width: 480px) {
+@media (max-width: 380px) {
 
     .sidebar,
     .ssa-student-sidebar {
-        width: calc(100dvw - 16px);
-        max-width: calc(100dvw - 16px);
+        width: min(300px, 88vw);
+
+        padding: 14px 12px;
     }
 
+    .sidebar-profile {
+        margin-bottom: 14px;
+        padding: 12px;
+    }
+
+    .sidebar-avatar {
+        width: 42px;
+        height: 42px;
+
+        flex-basis: 42px;
+    }
+
+    .sidebar-profile h4 {
+        font-size: 12px;
+    }
+
+    .sidebar-profile p {
+        font-size: 10px;
+    }
+
+    .sidebar-link {
+        min-height: 44px;
+
+        padding: 10px;
+
+        font-size: 12px;
+    }
+
+    .sidebar-link i,
+    .sidebar-link svg {
+        width: 17px;
+        height: 17px;
+
+        flex-basis: 17px;
+    }
+
+    .sidebar-footer {
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+
+    .sidebar-footer button,
+    .sidebar-footer .logout-btn {
+        min-height: 44px;
+    }
 }
 
 
 /* ============================================================
-   VERY SMALL PHONE DRAWER
+   TABLETS
 ============================================================ */
 
-@media (max-width: 360px) {
+@media (min-width: 601px) and (max-width: 900px) {
 
     .sidebar,
     .ssa-student-sidebar {
-        width: calc(100dvw - 12px);
-        max-width: calc(100dvw - 12px);
+        width: min(320px, 72vw);
+
+        padding: 18px 14px 14px;
     }
 
+    .sidebar-link {
+        min-height: 46px;
+
+        font-size: 13px;
+    }
+}
+
+
+/* ============================================================
+   LANDSCAPE DEVICES
+============================================================ */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+    .sidebar,
+    .ssa-student-sidebar {
+        height: 100dvh;
+
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .sidebar-profile {
+        margin-bottom: 10px;
+        padding: 10px 12px;
+    }
+
+    .sidebar-avatar {
+        width: 40px;
+        height: 40px;
+
+        flex-basis: 40px;
+    }
+
+    .sidebar-menu {
+        gap: 3px;
+    }
+
+    .sidebar-link {
+        min-height: 40px;
+        padding: 8px 10px;
+    }
+
+    .sidebar-footer {
+        margin-top: 8px;
+        padding-top: 8px;
+    }
+
+    .sidebar-footer button,
+    .sidebar-footer .logout-btn {
+        min-height: 40px;
+        padding: 8px 10px;
+    }
+}
+
+
+/* ============================================================
+   SAFE AREA
+============================================================ */
+
+@supports (padding: env(safe-area-inset-bottom)) {
+
+    .sidebar,
+    .ssa-student-sidebar {
+        padding-left: max(
+            12px,
+            env(safe-area-inset-left)
+        );
+
+        padding-right: max(
+            12px,
+            env(safe-area-inset-right)
+        );
+
+        padding-bottom: max(
+            12px,
+            env(safe-area-inset-bottom)
+        );
+    }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .sidebar,
+    .ssa-student-sidebar,
+    .sidebar-overlay,
+    #sidebarOverlay {
+        transition: none !important;
+    }
 }

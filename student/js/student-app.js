@@ -207,7 +207,7 @@ auth.onAuthStateChanged(user => {
 // ------------------------------------------------------------
 
 try {
-    watchPortalControl();
+  watchPortalControl("student");
 } catch (error) {
     console.warn(
         "Portal control unavailable:",

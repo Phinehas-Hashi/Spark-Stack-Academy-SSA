@@ -1,11 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"><meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
 >
@@ -15,14 +9,11 @@
     content="Manage your Spark Stack Academy payments, course fees and transaction history."
 >
 
-<title>
-    Payments | Spark Stack Academy
-</title>
-
+<title>Payments | Spark Stack Academy</title>
 
 <!-- =========================================
      CORE STYLES
-========================================= -->
+========================================== -->
 
 <link
     rel="stylesheet"
@@ -44,10 +35,9 @@
     href="css/responsive.css"
 >
 
-
 <!-- =========================================
      FONT
-========================================= -->
+========================================== -->
 
 <link
     rel="preconnect"
@@ -65,596 +55,582 @@
     rel="stylesheet"
 >
 
-
 <!-- =========================================
      ICONS
-========================================= -->
+========================================== -->
 
-<script
-    src="https://unpkg.com/lucide@latest">
-</script>
+<script src="https://unpkg.com/lucide@latest"></script>
 
-</head>
+</head><body><!-- =========================================
+     SSA STUDENT SHELL
+========================================== -->
 
-
-<body>
-
-
-<div class="payments-page">
-
-
-    <!-- =====================================
-         HEADER
-    ====================================== -->
-
-    <header class="payments-header">
+<aside
+    id="sidebarContainer"
+    class="sidebar-container"
+></aside>
 
 
-        <div class="payments-header-left">
-
-            <button
-                id="backBtn"
-                class="header-btn"
-                type="button"
-                aria-label="Go back"
-            >
-
-                <i data-lucide="arrow-left"></i>
-
-            </button>
+<div
+    id="sidebarOverlay"
+    class="sidebar-overlay"
+    aria-hidden="true"
+></div>
 
 
-            <div class="payments-title">
-
-                <span class="page-eyebrow">
-                    STUDENT FINANCE
-                </span>
-
-                <h1>
-                    Payments
-                </h1>
-
-                <p>
-                    Manage your academy fees and transactions.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="payment-secure-badge">
-
-            <i data-lucide="shield-check"></i>
-
-            <span>
-                Secure Payments
-            </span>
-
-        </div>
-
-    </header>
-
-
+<div class="student-shell">
 
     <!-- =====================================
-         PAYMENT SUMMARY
-    ====================================== -->
-
-    <section class="payment-summary">
-
-
-        <!-- TOTAL PAID -->
-
-        <div class="summary-card paid-card">
-
-            <div class="summary-icon">
-
-                <i data-lucide="wallet"></i>
-
-            </div>
-
-
-            <div class="summary-content">
-
-                <span>
-                    Total Paid
-                </span>
-
-                <h2 id="totalPaid">
-                    KSh 0
-                </h2>
-
-                <small>
-                    All completed payments
-                </small>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- BALANCE -->
-
-        <div class="summary-card balance-card">
-
-            <div class="summary-icon">
-
-                <i data-lucide="receipt"></i>
-
-            </div>
-
-
-            <div class="summary-content">
-
-                <span>
-                    Outstanding Balance
-                </span>
-
-                <h2 id="balance">
-                    KSh 0
-                </h2>
-
-                <small>
-                    Amount remaining
-                </small>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- STATUS -->
-
-        <div class="summary-card status-card">
-
-            <div class="summary-icon">
-
-                <i data-lucide="circle-check"></i>
-
-            </div>
-
-
-            <div class="summary-content">
-
-                <span>
-                    Payment Status
-                </span>
-
-                <h2 id="paymentStatus">
-                    Pending
-                </h2>
-
-                <small>
-                    Current account status
-                </small>
-
-            </div>
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- =====================================
-         COURSE FEES
-    ====================================== -->
-
-    <section class="course-payments">
-
-
-        <div class="section-heading">
-
-            <div>
-
-                <span>
-                    COURSE FEES
-                </span>
-
-                <h2>
-                    My Courses
-                </h2>
-
-                <p>
-                    View your course fees and make payments securely.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div id="courseList">
-
-            <div class="empty-payment">
-
-                <div class="empty-payment-icon">
-
-                    <i data-lucide="loader-circle"></i>
-
-                </div>
-
-                <h3>
-                    Loading courses...
-                </h3>
-
-                <p>
-                    Fetching your payment information.
-                </p>
-
-            </div>
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- =====================================
-         PAYMENT MODAL
+         TOPBAR
     ====================================== -->
 
     <div
-        id="paymentModal"
-        class="receipt-modal hidden"
-    >
-
-        <div class="receipt-box payment-modal-box">
+        id="topbarContainer"
+        class="topbar-container"
+    ></div>
 
 
-            <button
-                id="closePayment"
-                class="modal-close-btn"
-                type="button"
-                aria-label="Close payment"
-            >
+    <!-- =====================================
+         MAIN CONTENT
+    ====================================== -->
 
-                <i data-lucide="x"></i>
+    <main class="student-main">
 
-            </button>
+        <div class="payments-page">
 
 
-            <div class="modal-icon payment-modal-icon">
+            <!-- =====================================
+                 HEADER
+            ====================================== -->
 
-                <i data-lucide="credit-card"></i>
+            <header class="payments-header">
 
-            </div>
+                <div class="payments-header-left">
 
-
-            <span class="modal-eyebrow">
-                COURSE PAYMENT
-            </span>
-
-
-            <h2>
-                Make Payment
-            </h2>
-
-
-            <p
-                id="selectedCourse"
-                class="selected-course"
-            >
-                Course
-            </p>
+                    <button
+                        id="backBtn"
+                        class="header-btn"
+                        type="button"
+                        aria-label="Go back"
+                    >
+                        <i data-lucide="arrow-left"></i>
+                    </button>
 
 
+                    <div class="payments-title">
 
-            <!-- AMOUNT -->
+                        <span class="page-eyebrow">
+                            STUDENT FINANCE
+                        </span>
 
-            <div class="payment-summary-box">
+                        <h1>
+                            Payments
+                        </h1>
 
-                <span>
-                    Amount Due
-                </span>
+                        <p>
+                            Manage your academy fees and transactions.
+                        </p>
 
-                <h2 id="displayAmount">
-                    KSh 0
-                </h2>
+                    </div>
 
-            </div>
+                </div>
 
 
+                <div class="payment-secure-badge">
 
-            <!-- PAYMENT METHOD -->
-
-            <div class="mpesa-note">
-
-                <i data-lucide="smartphone"></i>
-
-                <div>
-
-                    <strong>
-                        M-PESA / Co-op Payment
-                    </strong>
+                    <i data-lucide="shield-check"></i>
 
                     <span>
-                        Use the instructions below to complete your payment.
+                        Secure Payments
                     </span>
 
                 </div>
 
-            </div>
+            </header>
 
 
 
-            <!-- INSTRUCTIONS -->
+            <!-- =====================================
+                 PAYMENT SUMMARY
+            ====================================== -->
 
-            <div class="till-payment-box">
+            <section class="payment-summary">
 
-                <div class="payment-instruction-header">
+                <!-- TOTAL PAID -->
+
+                <div class="summary-card paid-card">
+
+                    <div class="summary-icon">
+                        <i data-lucide="wallet"></i>
+                    </div>
+
+
+                    <div class="summary-content">
+
+                        <span>
+                            Total Paid
+                        </span>
+
+                        <h2 id="totalPaid">
+                            KSh 0
+                        </h2>
+
+                        <small>
+                            All completed payments
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BALANCE -->
+
+                <div class="summary-card balance-card">
+
+                    <div class="summary-icon">
+                        <i data-lucide="receipt"></i>
+                    </div>
+
+
+                    <div class="summary-content">
+
+                        <span>
+                            Outstanding Balance
+                        </span>
+
+                        <h2 id="balance">
+                            KSh 0
+                        </h2>
+
+                        <small>
+                            Amount remaining
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="summary-card status-card">
+
+                    <div class="summary-icon">
+                        <i data-lucide="circle-check"></i>
+                    </div>
+
+
+                    <div class="summary-content">
+
+                        <span>
+                            Payment Status
+                        </span>
+
+                        <h2 id="paymentStatus">
+                            Pending
+                        </h2>
+
+                        <small>
+                            Current account status
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =====================================
+                 COURSE FEES
+            ====================================== -->
+
+            <section class="course-payments">
+
+                <div class="section-heading">
 
                     <div>
 
                         <span>
-                            PAYMENT INSTRUCTIONS
+                            COURSE FEES
                         </span>
 
-                        <h3>
-                            Complete your payment
-                        </h3>
+                        <h2>
+                            My Courses
+                        </h2>
+
+                        <p>
+                            View your course fees and make payments securely.
+                        </p>
 
                     </div>
 
-                    <i data-lucide="arrow-down"></i>
-
                 </div>
 
 
-                <div class="payment-detail">
+                <div id="courseList">
 
-                    <span>
-                        Paybill / Till
-                    </span>
+                    <div class="empty-payment">
 
-                    <strong>
-                        400200
-                    </strong>
+                        <div class="empty-payment-icon">
+                            <i data-lucide="loader-circle"></i>
+                        </div>
 
-                </div>
+                        <h3>
+                            Loading courses...
+                        </h3>
 
+                        <p>
+                            Fetching your payment information.
+                        </p>
 
-                <div class="payment-detail">
-
-                    <span>
-                        Account Number
-                    </span>
-
-                    <strong>
-                        1078687
-                    </strong>
+                    </div>
 
                 </div>
 
-
-                <div class="payment-detail">
-
-                    <span>
-                        Amount
-                    </span>
-
-                    <strong id="tillAmount">
-                        KSh 0
-                    </strong>
-
-                </div>
-
-
-                <div class="payment-detail">
-
-                    <span>
-                        Reference
-                    </span>
-
-                    <strong id="courseReference">
-                        SSA Course
-                    </strong>
-
-                </div>
-
-
-                <input
-                    id="paymentAmount"
-                    type="hidden"
-                >
-
-            </div>
+            </section>
 
 
 
-            <!-- CONFIRM -->
+            <!-- =====================================
+                 PAYMENT MODAL
+            ====================================== -->
 
-            <button
-                id="confirmPayment"
-                class="confirm-payment-btn"
-                type="button"
+            <div
+                id="paymentModal"
+                class="receipt-modal hidden"
             >
 
-                <i data-lucide="check-circle"></i>
+                <div class="receipt-box payment-modal-box">
 
-                I Have Paid
-
-            </button>
-
-
-            <p
-                id="paymentMessage"
-                class="payment-message"
-            ></p>
-
-
-        </div>
-
-    </div>
+                    <button
+                        id="closePayment"
+                        class="modal-close-btn"
+                        type="button"
+                        aria-label="Close payment"
+                    >
+                        <i data-lucide="x"></i>
+                    </button>
 
 
-
-    <!-- =====================================
-         TRANSACTION HISTORY
-    ====================================== -->
-
-    <section class="payment-history">
+                    <div class="modal-icon payment-modal-icon">
+                        <i data-lucide="credit-card"></i>
+                    </div>
 
 
-        <div class="section-heading">
-
-            <div>
-
-                <span>
-                    TRANSACTIONS
-                </span>
-
-                <h2>
-                    Transaction History
-                </h2>
-
-                <p>
-                    Keep track of your recent academy payments.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div id="transactionList">
-
-            <div class="empty-payment">
-
-                <div class="empty-payment-icon">
-
-                    <i data-lucide="receipt"></i>
-
-                </div>
-
-                <h3>
-                    No transactions yet
-                </h3>
-
-                <p>
-                    Your completed payments will appear here.
-                </p>
-
-            </div>
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- =====================================
-         RECEIPT MODAL
-    ====================================== -->
-
-    <div
-        id="receiptModal"
-        class="receipt-modal hidden"
-    >
-
-        <div class="receipt-box receipt-modal-box">
-
-
-            <button
-                id="closeReceipt"
-                class="modal-close-btn"
-                type="button"
-                aria-label="Close receipt"
-            >
-
-                <i data-lucide="x"></i>
-
-            </button>
-
-
-            <div class="receipt-logo">
-
-                <div class="receipt-logo-icon">
-
-                    <i data-lucide="sparkles"></i>
-
-                </div>
-
-                <div>
-
-                    <strong>
-                        Spark Stack Academy
-                    </strong>
-
-                    <span>
-                        Official Payment Receipt
+                    <span class="modal-eyebrow">
+                        COURSE PAYMENT
                     </span>
 
+
+                    <h2>
+                        Make Payment
+                    </h2>
+
+
+                    <p
+                        id="selectedCourse"
+                        class="selected-course"
+                    >
+                        Course
+                    </p>
+
+
+                    <!-- AMOUNT -->
+
+                    <div class="payment-summary-box">
+
+                        <span>
+                            Amount Due
+                        </span>
+
+                        <h2 id="displayAmount">
+                            KSh 0
+                        </h2>
+
+                    </div>
+
+
+                    <!-- PAYMENT METHOD -->
+
+                    <div class="mpesa-note">
+
+                        <i data-lucide="smartphone"></i>
+
+                        <div>
+
+                            <strong>
+                                M-PESA / Co-op Payment
+                            </strong>
+
+                            <span>
+                                Use the instructions below to complete your payment.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- INSTRUCTIONS -->
+
+                    <div class="till-payment-box">
+
+                        <div class="payment-instruction-header">
+
+                            <div>
+
+                                <span>
+                                    PAYMENT INSTRUCTIONS
+                                </span>
+
+                                <h3>
+                                    Complete your payment
+                                </h3>
+
+                            </div>
+
+                            <i data-lucide="arrow-down"></i>
+
+                        </div>
+
+
+                        <div class="payment-detail">
+
+                            <span>
+                                Paybill / Till
+                            </span>
+
+                            <strong>
+                                400200
+                            </strong>
+
+                        </div>
+
+
+                        <div class="payment-detail">
+
+                            <span>
+                                Account Number
+                            </span>
+
+                            <strong>
+                                1078687
+                            </strong>
+
+                        </div>
+
+
+                        <div class="payment-detail">
+
+                            <span>
+                                Amount
+                            </span>
+
+                            <strong id="tillAmount">
+                                KSh 0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="payment-detail">
+
+                            <span>
+                                Reference
+                            </span>
+
+                            <strong id="courseReference">
+                                SSA Course
+                            </strong>
+
+                        </div>
+
+
+                        <input
+                            id="paymentAmount"
+                            type="hidden"
+                        >
+
+                    </div>
+
+
+                    <!-- CONFIRM -->
+
+                    <button
+                        id="confirmPayment"
+                        class="confirm-payment-btn"
+                        type="button"
+                    >
+
+                        <i data-lucide="check-circle"></i>
+
+                        I Have Paid
+
+                    </button>
+
+
+                    <p
+                        id="paymentMessage"
+                        class="payment-message"
+                    ></p>
+
                 </div>
 
             </div>
 
 
-            <div id="receiptContent">
-            </div>
+
+            <!-- =====================================
+                 TRANSACTION HISTORY
+            ====================================== -->
+
+            <section class="payment-history">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span>
+                            TRANSACTIONS
+                        </span>
+
+                        <h2>
+                            Transaction History
+                        </h2>
+
+                        <p>
+                            Keep track of your recent academy payments.
+                        </p>
+
+                    </div>
+
+                </div>
 
 
-            <button
-                id="printReceiptBtn"
-                class="print-receipt-btn"
-                type="button"
+                <div id="transactionList">
+
+                    <div class="empty-payment">
+
+                        <div class="empty-payment-icon">
+                            <i data-lucide="receipt"></i>
+                        </div>
+
+                        <h3>
+                            No transactions yet
+                        </h3>
+
+                        <p>
+                            Your completed payments will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =====================================
+                 RECEIPT MODAL
+            ====================================== -->
+
+            <div
+                id="receiptModal"
+                class="receipt-modal hidden"
             >
 
-                <i data-lucide="printer"></i>
+                <div class="receipt-box receipt-modal-box">
 
-                Print Receipt
+                    <button
+                        id="closeReceipt"
+                        class="modal-close-btn"
+                        type="button"
+                        aria-label="Close receipt"
+                    >
+                        <i data-lucide="x"></i>
+                    </button>
 
-            </button>
+
+                    <div class="receipt-logo">
+
+                        <div class="receipt-logo-icon">
+                            <i data-lucide="sparkles"></i>
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Spark Stack Academy
+                            </strong>
+
+                            <span>
+                                Official Payment Receipt
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="receiptContent"></div>
+
+
+                    <button
+                        id="printReceiptBtn"
+                        class="print-receipt-btn"
+                        type="button"
+                    >
+
+                        <i data-lucide="printer"></i>
+
+                        Print Receipt
+
+                    </button>
+
+                </div>
+
+            </div>
 
 
         </div>
 
-    </div>
-
+    </main>
 
 </div>
 
 
-
-<!-- =====================================
+<!-- =========================================
      APPLICATION
-===================================== -->
+========================================== -->
 
 <script
     type="module"
-    src="js/student-app.js">
-</script>
+    src="js/student-app.js"
+></script>
 
 <script
     type="module"
-    src="js/payments.js">
-</script>
+    src="js/payments.js"
+></script>
 
 
 <script>
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
 
-        if (window.lucide) {
-
-            lucide.createIcons();
+            if (window.lucide) {
+                lucide.createIcons();
+            }
 
         }
-
-    }
-);
+    );
 
 </script>
 
-
-</body>
-
-</html>
+</body></html>

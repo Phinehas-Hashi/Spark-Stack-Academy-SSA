@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Instructor Admissions | Spark Stack Academy</title>
+
+    <link rel="stylesheet" href="founder-unified.css">
+    <link rel="stylesheet" href="instructor-admissions.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body>
+
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+<div class="bg-orb orb-3"></div>
+
+<div class="dashboard-layout">
+
+    <aside id="sidebarContainer"></aside>
+
+    <div id="sidebarOverlay"></div>
+
+    <main class="main-content">
+
+        <header id="topbarContainer"></header>
+
+        <section class="page-hero glass-card">
+
+            <div class="hero-content">
+
+                <div class="hero-badge">
+                    👨‍🏫 Instructor Admissions
+                </div>
+
+                <h1>Instructor Admissions</h1>
+
+                <p>
+                    Review instructor applications, approve qualified instructors,
+                    or reject applicants before they can enter the Instructor Portal.
+                </p>
+
+            </div>
+
+            <div class="hero-actions">
+
+                <button
+                    class="primary-btn"
+                    id="refreshInstructorAdmissions"
+                    type="button"
+                >
+                    🔄 Refresh
+                </button>
+
+            </div>
+
+        </section>
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Pending</span>
+                    <div class="stat-icon gold">⏳</div>
+                </div>
+
+                <h2 id="pendingCount">0</h2>
+                <small>Waiting for Founder Review</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Active</span>
+                    <div class="stat-icon green">✅</div>
+                </div>
+
+                <h2 id="activeCount">0</h2>
+                <small>Approved Instructors</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Rejected</span>
+                    <div class="stat-icon red">❌</div>
+                </div>
+
+                <h2 id="rejectedCount">0</h2>
+                <small>Rejected Applications</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Total</span>
+                    <div class="stat-icon blue">👥</div>
+                </div>
+
+                <h2 id="totalCount">0</h2>
+                <small>Instructor Accounts</small>
+            </div>
+
+        </section>
+
+        <section class="glass-card admissions-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Instructor Applications</h2>
+                    <p id="applicationTotal">
+                        0 Applications
+                    </p>
+                </div>
+
+                <div class="filter-group">
+
+                    <button
+                        type="button"
+                        class="filter-btn active"
+                        data-filter="all"
+                    >
+                        All
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-btn"
+                        data-filter="pending_review"
+                    >
+                        Pending
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-btn"
+                        data-filter="active"
+                    >
+                        Active
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-btn"
+                        data-filter="rejected"
+                    >
+                        Rejected
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table class="students-table">
+
+                    <thead>
+                        <tr>
+                            <th>Instructor</th>
+                            <th>Expertise</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Applied</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="instructorsTable">
+
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <strong>Loading instructor applications...</strong>
+                                    <span>Please wait.</span>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script type="module" src="./js/founder-app.js"></script>
+<script type="module" src="./instructor-admissions.js"></script>
+
+</body>
+</html>

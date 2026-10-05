@@ -1,0 +1,976 @@
+/* ============================================================
+SPARK STACK ACADEMY — FOUNDER OS
+INSTRUCTOR ADMISSIONS
+Premium Founder dashboard styling
+============================================================ */
+
+/* ============================================================
+PAGE HERO
+============================================================ */
+
+.page-hero {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 24px;
+
+margin-bottom: 24px;
+padding: 28px;
+
+overflow: hidden;
+
+position: relative;
+
+}
+
+.page-hero::before {
+content: "";
+
+position: absolute;
+top: -100px;
+right: -80px;
+
+width: 260px;
+height: 260px;
+
+border-radius: 50%;
+
+background: rgba(41, 121, 255, .12);
+
+filter: blur(10px);
+
+pointer-events: none;
+
+}
+
+.hero-content {
+position: relative;
+z-index: 1;
+
+min-width: 0;
+
+}
+
+.hero-badge {
+display: inline-flex;
+align-items: center;
+
+width: fit-content;
+
+margin-bottom: 10px;
+padding: 7px 12px;
+
+border: 1px solid rgba(41,121,255,.18);
+border-radius: 999px;
+
+background: rgba(41,121,255,.08);
+
+color: #2979ff;
+
+font-size: 11px;
+font-weight: 800;
+
+letter-spacing: .04em;
+
+}
+
+.page-hero h1 {
+margin: 0;
+
+color: #081c3a;
+
+font-size: clamp(24px, 3vw, 34px);
+font-weight: 800;
+
+line-height: 1.15;
+
+letter-spacing: -.025em;
+
+}
+
+.page-hero p {
+max-width: 700px;
+
+margin: 10px 0 0;
+
+color: #64748b;
+
+font-size: 13px;
+line-height: 1.65;
+
+}
+
+.hero-actions {
+position: relative;
+z-index: 1;
+
+flex-shrink: 0;
+
+}
+
+.primary-btn {
+min-height: 44px;
+
+display: inline-flex;
+align-items: center;
+justify-content: center;
+
+gap: 8px;
+
+padding: 10px 17px;
+
+border: 1px solid rgba(41,121,255,.25);
+border-radius: 12px;
+
+background:
+    linear-gradient(
+        135deg,
+        #2979ff,
+        #145bd1
+    );
+
+color: #fff;
+
+font: inherit;
+
+font-size: 12px;
+font-weight: 800;
+
+cursor: pointer;
+
+box-shadow:
+    0 8px 20px rgba(41,121,255,.20);
+
+transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    opacity .18s ease;
+
+}
+
+.primary-btn:hover {
+transform: translateY(-1px);
+
+box-shadow:
+    0 12px 26px rgba(41,121,255,.28);
+
+}
+
+.primary-btn:active {
+transform: translateY(0);
+}
+
+.primary-btn:disabled {
+opacity: .65;
+
+cursor: wait;
+
+transform: none;
+
+}
+
+.primary-btn.is-loading {
+opacity: .7;
+}
+
+/* ============================================================
+STAT CARDS
+============================================================ */
+
+.stats-grid {
+display: grid;
+
+grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+gap: 16px;
+
+margin-bottom: 24px;
+
+}
+
+.stat-card {
+position: relative;
+
+min-width: 0;
+
+padding: 20px;
+
+border: 1px solid rgba(148,163,184,.16);
+border-radius: 18px;
+
+background:
+    rgba(255,255,255,.88);
+
+box-shadow:
+    0 10px 30px rgba(8,28,58,.055);
+
+overflow: hidden;
+
+}
+
+.stat-card::after {
+content: "";
+
+position: absolute;
+
+right: -35px;
+bottom: -45px;
+
+width: 110px;
+height: 110px;
+
+border-radius: 50%;
+
+background: rgba(41,121,255,.035);
+
+pointer-events: none;
+
+}
+
+.stat-top {
+position: relative;
+z-index: 1;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+gap: 12px;
+
+color: #64748b;
+
+font-size: 11px;
+font-weight: 800;
+
+text-transform: uppercase;
+
+letter-spacing: .06em;
+
+}
+
+.stat-icon {
+width: 34px;
+height: 34px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+flex-shrink: 0;
+
+border-radius: 10px;
+
+font-size: 15px;
+
+}
+
+.stat-icon.gold {
+background: rgba(255,193,7,.12);
+}
+
+.stat-icon.green {
+background: rgba(34,197,94,.11);
+}
+
+.stat-icon.red {
+background: rgba(239,68,68,.10);
+}
+
+.stat-icon.blue {
+background: rgba(41,121,255,.10);
+}
+
+.stat-card h2 {
+position: relative;
+z-index: 1;
+
+margin: 13px 0 4px;
+
+color: #081c3a;
+
+font-size: 27px;
+font-weight: 800;
+
+line-height: 1;
+
+}
+
+.stat-card small {
+position: relative;
+z-index: 1;
+
+color: #94a3b8;
+
+font-size: 10px;
+line-height: 1.4;
+
+}
+
+/* ============================================================
+APPLICATION PANEL
+============================================================ */
+
+.admissions-panel {
+overflow: hidden;
+}
+
+.panel-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+gap: 20px;
+
+padding: 20px 22px;
+
+border-bottom:
+    1px solid rgba(148,163,184,.14);
+
+}
+
+.panel-header h2 {
+margin: 0;
+
+color: #081c3a;
+
+font-size: 17px;
+font-weight: 800;
+
+}
+
+.panel-header p {
+margin: 4px 0 0;
+
+color: #94a3b8;
+
+font-size: 11px;
+
+}
+
+.filter-group {
+display: flex;
+align-items: center;
+
+gap: 6px;
+
+flex-wrap: wrap;
+
+justify-content: flex-end;
+
+}
+
+.filter-btn {
+min-height: 34px;
+
+padding: 7px 12px;
+
+border: 1px solid #e5eaf2;
+border-radius: 9px;
+
+background: #f8fafc;
+
+color: #64748b;
+
+font: inherit;
+
+font-size: 11px;
+font-weight: 700;
+
+cursor: pointer;
+
+transition:
+    background .18s ease,
+    border-color .18s ease,
+    color .18s ease;
+
+}
+
+.filter-btn:hover {
+border-color: rgba(41,121,255,.25);
+
+color: #2979ff;
+
+background: #f1f6ff;
+
+}
+
+.filter-btn.active {
+border-color: rgba(41,121,255,.22);
+
+background: #2979ff;
+
+color: #fff;
+
+box-shadow:
+    0 5px 14px rgba(41,121,255,.16);
+
+}
+
+/* ============================================================
+TABLE
+============================================================ */
+
+.table-wrap {
+width: 100%;
+
+overflow-x: auto;
+
+-webkit-overflow-scrolling: touch;
+
+}
+
+.students-table {
+width: 100%;
+
+min-width: 900px;
+
+border-collapse: collapse;
+
+font-size: 12px;
+
+}
+
+.students-table thead {
+background: #f8fafc;
+}
+
+.students-table th {
+padding: 13px 16px;
+
+border-bottom:
+    1px solid #e8edf4;
+
+color: #64748b;
+
+font-size: 10px;
+font-weight: 800;
+
+text-align: left;
+
+text-transform: uppercase;
+
+letter-spacing: .055em;
+
+white-space: nowrap;
+
+}
+
+.students-table td {
+padding: 15px 16px;
+
+border-bottom:
+    1px solid #eef2f7;
+
+color: #475569;
+
+vertical-align: middle;
+
+}
+
+.students-table tbody tr {
+transition:
+background .15s ease;
+}
+
+.students-table tbody tr:hover {
+background: #fafcff;
+}
+
+.students-table tbody tr:last-child td {
+border-bottom: 0;
+}
+
+/* ============================================================
+INSTRUCTOR CELL
+============================================================ */
+
+.instructor-cell {
+display: flex;
+align-items: center;
+
+gap: 11px;
+
+min-width: 190px;
+
+}
+
+.instructor-avatar {
+width: 40px;
+height: 40px;
+
+flex: 0 0 40px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 12px;
+
+background:
+    linear-gradient(
+        135deg,
+        #2979ff,
+        #145bd1
+    );
+
+color: #fff;
+
+font-size: 11px;
+font-weight: 800;
+
+box-shadow:
+    0 5px 14px rgba(41,121,255,.18);
+
+}
+
+.instructor-info {
+min-width: 0;
+
+display: flex;
+flex-direction: column;
+
+gap: 3px;
+
+}
+
+.instructor-info strong {
+max-width: 190px;
+
+overflow: hidden;
+
+color: #081c3a;
+
+font-size: 12px;
+font-weight: 800;
+
+white-space: nowrap;
+text-overflow: ellipsis;
+
+}
+
+.instructor-info span {
+max-width: 190px;
+
+overflow: hidden;
+
+color: #94a3b8;
+
+font-size: 9px;
+
+white-space: nowrap;
+text-overflow: ellipsis;
+
+}
+
+/* ============================================================
+EMAIL
+============================================================ */
+
+.email-link {
+color: #2979ff;
+
+font-size: 11px;
+font-weight: 600;
+
+text-decoration: none;
+
+white-space: nowrap;
+
+}
+
+.email-link:hover {
+text-decoration: underline;
+}
+
+/* ============================================================
+STATUS BADGES
+============================================================ */
+
+.status {
+display: inline-flex;
+align-items: center;
+
+min-height: 26px;
+
+padding: 5px 9px;
+
+border-radius: 999px;
+
+font-size: 9px;
+font-weight: 800;
+
+line-height: 1;
+
+text-transform: capitalize;
+
+white-space: nowrap;
+
+}
+
+.status.pending_review {
+border: 1px solid rgba(245,158,11,.16);
+
+background: rgba(245,158,11,.10);
+
+color: #b45309;
+
+}
+
+.status.active {
+border: 1px solid rgba(34,197,94,.16);
+
+background: rgba(34,197,94,.10);
+
+color: #15803d;
+
+}
+
+.status.rejected {
+border: 1px solid rgba(239,68,68,.16);
+
+background: rgba(239,68,68,.09);
+
+color: #b91c1c;
+
+}
+
+/* ============================================================
+ACTION BUTTONS
+============================================================ */
+
+.action-buttons {
+display: flex;
+align-items: center;
+
+gap: 6px;
+
+white-space: nowrap;
+
+}
+
+.action-btn {
+min-height: 32px;
+
+padding: 7px 10px;
+
+border-radius: 8px;
+
+font: inherit;
+
+font-size: 10px;
+font-weight: 800;
+
+cursor: pointer;
+
+transition:
+    background .18s ease,
+    border-color .18s ease,
+    transform .15s ease,
+    opacity .18s ease;
+
+}
+
+.action-btn:hover {
+transform: translateY(-1px);
+}
+
+.action-btn:active {
+transform: translateY(0);
+}
+
+.action-btn:disabled {
+opacity: .5;
+
+cursor: wait;
+
+transform: none;
+
+}
+
+.action-btn.approve {
+border: 1px solid rgba(34,197,94,.20);
+
+background: rgba(34,197,94,.09);
+
+color: #15803d;
+
+}
+
+.action-btn.approve:hover {
+background: rgba(34,197,94,.16);
+
+border-color: rgba(34,197,94,.30);
+
+}
+
+.action-btn.reject {
+border: 1px solid rgba(239,68,68,.18);
+
+background: rgba(239,68,68,.07);
+
+color: #b91c1c;
+
+}
+
+.action-btn.reject:hover {
+background: rgba(239,68,68,.14);
+
+border-color: rgba(239,68,68,.28);
+
+}
+
+.action-complete {
+color: #94a3b8;
+
+font-size: 10px;
+font-weight: 700;
+
+}
+
+/* ============================================================
+EMPTY / ERROR STATE
+============================================================ */
+
+.empty-state {
+min-height: 180px;
+
+display: flex;
+flex-direction: column;
+
+align-items: center;
+justify-content: center;
+
+gap: 7px;
+
+padding: 30px;
+
+text-align: center;
+
+}
+
+.empty-state strong {
+color: #334155;
+
+font-size: 13px;
+font-weight: 800;
+
+}
+
+.empty-state span {
+max-width: 420px;
+
+color: #94a3b8;
+
+font-size: 11px;
+line-height: 1.5;
+
+}
+
+.empty-state.error strong {
+color: #b91c1c;
+}
+
+/* ============================================================
+TABLET
+============================================================ */
+
+@media (max-width: 1000px) {
+
+.stats-grid {
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+}
+
+.page-hero {
+    padding: 24px;
+}
+
+}
+
+/* ============================================================
+MOBILE
+============================================================ */
+
+@media (max-width: 700px) {
+
+.page-hero {
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 18px;
+
+    padding: 20px;
+}
+
+.page-hero h1 {
+    font-size: 24px;
+}
+
+.page-hero p {
+    font-size: 12px;
+}
+
+.hero-actions {
+    width: 100%;
+}
+
+.primary-btn {
+    width: 100%;
+}
+
+.stats-grid {
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+.stat-card {
+    padding: 15px;
+
+    border-radius: 15px;
+}
+
+.stat-card h2 {
+    font-size: 23px;
+}
+
+.stat-top {
+    font-size: 9px;
+}
+
+.stat-icon {
+    width: 30px;
+    height: 30px;
+
+    font-size: 13px;
+}
+
+.panel-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    padding: 17px;
+}
+
+.filter-group {
+    justify-content: flex-start;
+
+    overflow-x: auto;
+
+    flex-wrap: nowrap;
+
+    padding-bottom: 2px;
+
+    scrollbar-width: none;
+}
+
+.filter-group::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-btn {
+    flex: 0 0 auto;
+}
+
+.students-table {
+    min-width: 850px;
+}
+
+}
+
+/* ============================================================
+SMALL PHONES
+============================================================ */
+
+@media (max-width: 430px) {
+
+.page-hero {
+    padding: 17px;
+}
+
+.hero-badge {
+    font-size: 10px;
+}
+
+.page-hero h1 {
+    font-size: 21px;
+}
+
+.page-hero p {
+    font-size: 11px;
+}
+
+.stats-grid {
+    gap: 8px;
+}
+
+.stat-card {
+    padding: 13px;
+}
+
+.stat-card h2 {
+    margin-top: 10px;
+
+    font-size: 21px;
+}
+
+.stat-card small {
+    font-size: 9px;
+}
+
+.stat-icon {
+    width: 28px;
+    height: 28px;
+
+    font-size: 12px;
+}
+
+.panel-header {
+    padding: 15px;
+}
+
+.panel-header h2 {
+    font-size: 15px;
+}
+
+.students-table th,
+.students-table td {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+}
+
+/* ============================================================
+VERY SMALL PHONES
+============================================================ */
+
+@media (max-width: 340px) {
+
+.stats-grid {
+    grid-template-columns: 1fr;
+}
+
+.page-hero h1 {
+    font-size: 20px;
+}
+
+}
+
+/* ============================================================
+REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+.primary-btn,
+.filter-btn,
+.action-btn,
+.stat-card,
+.students-table tbody tr {
+    transition: none !important;
+}
+
+}
