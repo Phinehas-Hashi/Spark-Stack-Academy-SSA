@@ -24,7 +24,7 @@ import {
 // CONFIG
 // ============================================================
 
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = window.SSA_LEGACY_PAYMENT_API_BASE_URL || "";
 
 const DEFAULT_PRICE = 999;
 
@@ -226,6 +226,10 @@ async function startPayment() {
 
 
     try {
+
+        if (!BACKEND_URL) {
+            throw new Error("The legacy Instructor Pro payment endpoint is disabled until the unified SSA payment service is configured.");
+        }
 
         if (button) {
 
