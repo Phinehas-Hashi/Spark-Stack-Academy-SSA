@@ -137,11 +137,18 @@ service cloud.firestore {
           || staff()
         );
 
-      // Staff can list users.
-      // Students/instructors can only use tightly constrained
-      // directory queries where their role is permitted.
+      // Directory listing is limited to roles the signed-in
+      // portal user is permitted to contact. This keeps the
+      // messaging directory useful without exposing arbitrary
+      // user records to the browser.
       allow list:
-        if staff();
+        if activePortalUser()
+        && (
+          (isStudent() && resource.data.get('role', '') == 'instructor')
+          || (isInstructor() && resource.data.get('role', '') in ['student', 'admin'])
+          || (isAdmin() && resource.data.get('role', '') in ['instructor', 'founder'])
+          || isFounder()
+        );
 
       // ----------------------------------------------------------
       // ACCOUNT CREATION
