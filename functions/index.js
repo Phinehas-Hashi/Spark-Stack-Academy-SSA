@@ -8,7 +8,7 @@ const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 initializeApp();
 const db = getFirestore();
 const adminAuth = getAuth();
-const platformRef = db.doc("systemConfig/platform");
+const platformRef = db.doc("platform_controls/global");
 
 function safeText(value, fallback = "") { return String(value ?? fallback).trim(); }
 function eventKey(event, suffix) {
@@ -236,15 +236,12 @@ exports.applyScheduledMaintenance = onSchedule("every 5 minutes", async () => {
   const now = Date.now();
   if (now < start || (end && now >= end)) {
     if (maintenance.active === true && end && now >= end) {
-      await platformRef.update({ "maintenance.active": false, updatedAt: Timestamp.now() });
+      await platformRef.update({ "maintenance.active": false, updated_at: Timestamp.now() });
       await db.collection("systemCommandLog").add({ command: "Scheduled maintenance ended", details: { target: maintenance.target }, actor: "system", createdAt: Timestamp.now() });
     }
     return;
   }
   if (maintenance.active === true) return;
-  const updates = { "maintenance.active": true, updatedAt: Timestamp.now() };
-  if (maintenance.target === "student" || maintenance.target === "all") updates["studentPortal.enabled"] = false;
-  if (maintenance.target === "instructor" || maintenance.target === "all") updates["instructorPortal.enabled"] = false;
-  await platformRef.update(updates);
+  await platformRef.update({ "maintenance.active": true, updated_at: Timestamp.now() });
   await db.collection("systemCommandLog").add({ command: "Scheduled maintenance activated", details: { target: maintenance.target, message: maintenance.message || "" }, actor: "system", createdAt: Timestamp.now() });
 });

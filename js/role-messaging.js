@@ -109,7 +109,8 @@ composer.onsubmit = async event => {
     const otherId = members.find(id => id !== user.uid);
     await addDoc(collection(db, "chats", activeChatId, "messages"), { senderId: user.uid, text, timestamp: serverTimestamp(), seen: false });
     await updateDoc(doc(db, "chats", activeChatId), { lastMessage: text, updatedAt: serverTimestamp(), lastSenderId: user.uid });
-    if (otherId) await addDoc(collection(db, "notifications"), { title: `New message from ${profile?.name || profile?.displayName || role}`, message: text.slice(0, 120), type: "message", audience: "user", recipientId: otherId, userId: otherId, senderId: user.uid, priority: "normal", read: false, createdAt: serverTimestamp(), metadata: { chatId: activeChatId } });
+    // Message notifications are created by trusted backend workflows; the browser
+    // must not be able to forge notification records for another user.
     input.value = "";
   } catch (error) {
     window.ssaToast?.(window.ssaFriendlyError?.(error, "Message could not be sent.") || "Message could not be sent.", "error", "Messaging");

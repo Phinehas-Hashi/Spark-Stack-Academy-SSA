@@ -1,203 +1,412 @@
-.
-├── .gitignore
-├── admin
-│   ├── Settings.html
-│   ├── admissions.css
-│   ├── admissions.html
-│   ├── admissions.js
-│   ├── announcement.js
-│   ├── announcements.css
-│   ├── announcements.html
-│   ├── components
-│   │   ├── sidebar.css
-│   │   ├── sidebar.html
-│   │   ├── topbar.css
-│   │   └── topbar.html
-│   ├── courses.css
-│   ├── courses.html
-│   ├── courses.js
-│   ├── dashboard.css
-│   ├── dashboard.html
-│   ├── dashboard.js
-│   ├── instructors.css
-│   ├── instructors.html
-│   ├── instructors.js
-│   ├── js
-│   │   └── admin-app.js
-│   ├── reports.css
-│   ├── reports.html
-│   ├── reports.js
-│   ├── settings.css
-│   ├── settings.js
-│   ├── students.css
-│   ├── students.html
-│   └── students.js
-├── assets
-│   └── images
-│       ├── ssa-badge.png
-│       └── ssa-logo.png
-├── css
-│   ├── auth.css
-│   └── index.css
-├── founder
-│   ├── academy-profile.css
-│   ├── academy-profile.html
-│   ├── academy-profile.js
-│   ├── admissions.css
-│   ├── admissions.html
-│   ├── admissions.js
-│   ├── announcements.css
-│   ├── announcements.html
-│   ├── announcements.js
-│   ├── certificates.css
-│   ├── certificates.html
-│   ├── certificates.js
-│   ├── components
-│   │   ├── sidebar.css
-│   │   ├── sidebar.html
-│   │   ├── topbar.css
-│   │   └── topbar.html
-│   ├── courses.css
-│   ├── courses.html
-│   ├── courses.js
-│   ├── dashboard.css
-│   ├── dashboard.html
-│   ├── dashboard.js
-│   ├── instructors-profile.css
-│   ├── instructors-profile.html
-│   ├── instructors-profile.js
-│   ├── instructors.css
-│   ├── instructors.html
-│   ├── instructors.js
-│   ├── js
-│   │   ├── auth.js
-│   │   ├── component-loader.js
-│   │   ├── dashboard.js
-│   │   ├── founder-app.js
-│   │   ├── notification-service.js
-│   │   └── payment-notifications.js
-│   ├── monetization.css
-│   ├── monetization.html
-│   ├── monetization.js
-│   ├── notifications.css
-│   ├── notifications.html
-│   ├── payments.css
-│   ├── payments.html
-│   ├── payments.js
-│   ├── platform-settings.css
-│   ├── platform-settings.html
-│   ├── platform-settings.js
-│   ├── revenue.css
-│   ├── revenue.html
-│   ├── revenue.js
-│   ├── security.css
-│   ├── security.html
-│   ├── security.js
-│   ├── settings.css
-│   ├── settings.html
-│   ├── settings.js
-│   ├── spark-ai-settings.css
-│   ├── spark-ai-settings.html
-│   ├── spark-ai-settings.js
-│   ├── spark-ai.css
-│   ├── spark-ai.html
-│   ├── spark-ai.js
-│   ├── students.css
-│   ├── students.html
-│   ├── students.js
-│   └── wallets
-│       ├── wallets.css
-│       ├── wallets.html
-│       └── wallets.js
-├── index.html
-├── instructors
-│   ├── add-lesson.css
-│   ├── add-lesson.html
-│   ├── add-lesson.js
-│   ├── components
-│   │   ├── sidebar.css
-│   │   ├── sidebar.html
-│   │   ├── sidebar.js
-│   │   ├── topbar.css
-│   │   ├── topbar.html
-│   │   └── topbar.js
-│   ├── courses.css
-│   ├── courses.html
-│   ├── courses.js
-│   ├── create-course.css
-│   ├── create-course.html
-│   ├── create-course.js
-│   ├── dashboard.css
-│   ├── dashboard.html
-│   ├── dashboard.js
-│   ├── js
-│   │   └── instructor-app.js
-│   ├── manage-content.css
-│   ├── manage-content.html
-│   ├── manage-content.js
-│   ├── manage-course.css
-│   ├── manage-course.html
-│   ├── manage-course.js
-│   ├── settings.css
-│   ├── settings.html
-│   ├── settings.js
-│   ├── student-profile.css
-│   ├── student-profile.html
-│   ├── student-profile.js
-│   ├── students.css
-│   ├── students.html
-│   └── students.js
-├── js
-│   ├── auth-guard.js
-│   ├── firebase.js
-│   ├── index.js
-│   ├── login.js
-│   ├── signup.js
-│   └── theme.js
-├── login.html
-├── project-tree.txt
-├── signup.html
-└── student
-    ├── certificate.css
-    ├── certificate.html
-    ├── certificate.js
-    ├── certificates.css
-    ├── certificates.html
-    ├── certificates.js
-    ├── components
-    │   ├── notifications.js
-    │   ├── sidebar.css
-    │   ├── sidebar.html
-    │   ├── sidebar.js
-    │   ├── test.js
-    │   ├── topbar.css
-    │   ├── topbar.html
-    │   └── topbar.js
-    ├── course-player.css
-    ├── course-player.html
-    ├── course-player.js
-    ├── course.css
-    ├── course.html
-    ├── course.js
-    ├── courses.css
-    ├── courses.html
-    ├── courses.js
-    ├── css
-    │   ├── dashboard.css
-    │   ├── responsive.css
-    │   ├── sidebar.css
-    │   ├── student.css
-    │   └── topbar.css
-    ├── dashboard.css
-    ├── dashboard.html
-    ├── dashboard.js
-    ├── js
-    │   └── student-app.js
-    ├── my-courses.css
-    ├── my-courses.html
-    ├── my-courses.js
-    ├── settings.css
-    ├── settings.html
-    └── settings.js
+Spark Stack Academy — Repository Tree
+Generated from Git commit 5810051962b9d2204140f91958c78979bad132d2
 
-19 directories, 182 files
+Files and directories are listed from the repository tree. This file is informational and should be regenerated after structural changes.
+
+admin/
+admin/components/
+admin/css/
+admin/js/
+assets/
+assets/images/
+css/
+docs/
+founder/
+founder/components/
+founder/js/
+founder/wallets/
+functions/
+guides/
+instructor/
+instructor/components/
+instructor/css/
+instructor/js/
+js/
+student/
+student/components/
+student/css/
+student/js/
+student/js/messages/
+
+.firebaserc
+.gitignore
+404.html
+README.md
+admin/Settings.html
+admin/admissions.html
+admin/announcements.html
+admin/assignments.html
+admin/certificates.html
+admin/components/sidebar.html
+admin/components/sidebar.js
+admin/components/topbar.html
+admin/components/topbar.js
+admin/course-profile.html
+admin/courses.html
+admin/css/admin-core.css
+admin/css/admissions.css
+admin/css/announcements.css
+admin/css/assignments.css
+admin/css/components.css
+admin/css/course-profile.css
+admin/css/courses.css
+admin/css/dashboard.css
+admin/css/instructor-profile.css
+admin/css/instructors.css
+admin/css/notifications.css
+admin/css/profile.css
+admin/css/reports.css
+admin/css/responsive.css
+admin/css/settings.css
+admin/css/students.css
+admin/dashboard.html
+admin/instructor-profile.html
+admin/instructors.html
+admin/js/admin-app.js
+admin/js/admissions.js
+admin/js/announcements.js
+admin/js/assignments.js
+admin/js/course-profile.js
+admin/js/courses.js
+admin/js/dashboard.js
+admin/js/instructor-profile.js
+admin/js/instructors.js
+admin/js/notifications.js
+admin/js/operations-hub.js
+admin/js/profile.js
+admin/js/reports.js
+admin/js/settings.js
+admin/js/students.js
+admin/messages.html
+admin/notifications.html
+admin/profile.html
+admin/reports.html
+admin/reports.js
+admin/settings.html
+admin/students.html
+admin/withdrawals.html
+assets/images/ssa-badge.png
+assets/images/ssa-logo.png
+css/auth.css
+css/index.css
+css/role-messaging.css
+css/splash-screen.css
+docs/platform-architecture.md
+firebase.json
+firestore.rules
+firestore.rules.pre-portal-security
+firestore.rules.production-backup
+firestore.rules.security-backup
+founder/academy-profile.css
+founder/academy-profile.html
+founder/academy-profile.js
+founder/admissions.css
+founder/admissions.html
+founder/admissions.js
+founder/analytics.css
+founder/analytics.html
+founder/analytics.js
+founder/announcements.css
+founder/announcements.html
+founder/announcements.js
+founder/certificates.css
+founder/certificates.html
+founder/certificates.js
+founder/command-center.css
+founder/command-center.html
+founder/command-center.js
+founder/command-center.js.security-backup
+founder/components/founder-shell.css
+founder/components/founder-theme.css
+founder/components/sidebar.css
+founder/components/sidebar.html
+founder/components/topbar.css
+founder/components/topbar.html
+founder/courses.css
+founder/courses.html
+founder/courses.js
+founder/dashboard.css
+founder/dashboard.html
+founder/dashboard.js
+founder/founder-complete.css
+founder/founder-unified.css
+founder/instructor-admissions.css
+founder/instructor-admissions.html
+founder/instructor-admissions.js
+founder/instructors-profile.css
+founder/instructors-profile.html
+founder/instructors-profile.js
+founder/instructors.css
+founder/instructors.html
+founder/instructors.js
+founder/js/auth.js
+founder/js/command-palette.js
+founder/js/component-loader.js
+founder/js/dashboard.js
+founder/js/founder-app.js
+founder/js/founder-dashboard.js
+founder/js/notification-service.js
+founder/js/payment-notifications.js
+founder/messages.html
+founder/monetization.css
+founder/monetization.html
+founder/monetization.js
+founder/notifications.css
+founder/notifications.html
+founder/notifications.js
+founder/payments.css
+founder/payments.html
+founder/payments.js
+founder/platform-settings.css
+founder/platform-settings.html
+founder/platform-settings.js
+founder/premium-management.html
+founder/premium-management.js
+founder/reports.css
+founder/reports.html
+founder/reports.js
+founder/revenue-premium.css
+founder/revenue.css
+founder/revenue.html
+founder/revenue.js
+founder/security.css
+founder/security.html
+founder/security.js
+founder/settings.css
+founder/settings.html
+founder/settings.js
+founder/spark-ai-settings.css
+founder/spark-ai-settings.html
+founder/spark-ai-settings.js
+founder/spark-ai.css
+founder/spark-ai.html
+founder/spark-ai.js
+founder/students-fixes.css
+founder/students.css
+founder/students.html
+founder/students.js
+founder/wallets/payouts.css
+founder/wallets/payouts.html
+founder/wallets/payouts.js
+founder/wallets/wallets.css
+founder/wallets/wallets.html
+founder/wallets/wallets.js
+functions/index.js
+functions/package-lock.json
+functions/package.json
+guides/admin.html
+guides/founder.html
+guides/instructor.html
+guides/student.html
+index.html
+instructor/analytics.html
+instructor/announcements.html
+instructor/assignment.html
+instructor/assignments.html
+instructor/calendar.html
+instructor/components/sidebar.html
+instructor/components/sidebar.js
+instructor/components/topbar.html
+instructor/components/topbar.js
+instructor/course-builder.html
+instructor/courses.html
+instructor/create-assignment.html
+instructor/create-quiz.html
+instructor/css/analytics.css
+instructor/css/announcements.css
+instructor/css/assignment.css
+instructor/css/assignments.css
+instructor/css/calendar.css
+instructor/css/components.css
+instructor/css/course-builder.css
+instructor/css/courses.css
+instructor/css/create-assignment.css
+instructor/css/create-quiz.css
+instructor/css/dashboard.css
+instructor/css/earnings.css
+instructor/css/instructor-core.css
+instructor/css/notifications.css
+instructor/css/payments.css
+instructor/css/pro.css
+instructor/css/profile.css
+instructor/css/quiz-submission.css
+instructor/css/quiz.css
+instructor/css/quizzes.css
+instructor/css/responsive.css
+instructor/css/settings.css
+instructor/css/students.css
+instructor/css/submission.css
+instructor/dashboard.html
+instructor/earnings.html
+instructor/js/analytics.js
+instructor/js/announcements.js
+instructor/js/assignment.js
+instructor/js/assignments.js
+instructor/js/calendar.js
+instructor/js/course-builder.js
+instructor/js/courses.js
+instructor/js/create-assignment.js
+instructor/js/create-quiz.js
+instructor/js/dashboard.js
+instructor/js/earnings.js
+instructor/js/instructor-app.js
+instructor/js/notifications.js
+instructor/js/payments.js
+instructor/js/portal-gate.js
+instructor/js/pro.js
+instructor/js/profile.js
+instructor/js/quiz-submission.js
+instructor/js/quiz.js
+instructor/js/quizzes.js
+instructor/js/settings.js
+instructor/js/students.js
+instructor/js/submission.js
+instructor/js/teaching-hub.js
+instructor/messages.html
+instructor/notifications.html
+instructor/payments.html
+instructor/portal-suspended.html
+instructor/pro.html
+instructor/profile.html
+instructor/quiz-submission.html
+instructor/quiz.html
+instructor/quizzes.html
+instructor/report.html
+instructor/settings.html
+instructor/students.html
+instructor/submission.html
+js/auth-guard.js
+js/command-center.js
+js/firebase.js
+js/index.js
+js/learning-enhancements.js
+js/login.js
+js/media-service.js
+js/messaging-service.js
+js/messaging-ui.js
+js/notification-runtime.js
+js/notification-sound.js
+js/notifications.js
+js/portal-control.js
+js/premium-access.js
+js/realtime-manager.js
+js/report-page.js
+js/reports.js
+js/role-messaging.js
+js/signup.js
+js/splash-screen.js
+js/ssa-ui.js
+js/supabase-test.js
+js/supabase.js
+js/theme.js
+js/ui-polish.js
+js/ui-runtime.js
+legal.css
+login.html
+privacy.html
+report.html
+signup.html
+student/achievements.html
+student/announcements.html
+student/assignment-details.html
+student/assignments.html
+student/calendar.html
+student/certificate-view.html
+student/certificates.html
+student/chat.html
+student/components/sidebar.html
+student/components/sidebar.js
+student/components/topbar.html
+student/components/topbar.js
+student/course-details.html
+student/course-library.html
+student/course-player.html
+student/courses.html
+student/css/achievements.css
+student/css/announcements.css
+student/css/assignment-details.css
+student/css/assignments.css
+student/css/calendar.css
+student/css/certificate-view.css
+student/css/certificates.css
+student/css/chat.css
+student/css/class-discussion.css
+student/css/components.css
+student/css/course-details.css
+student/css/course-library.css
+student/css/course-player.css
+student/css/courses.css
+student/css/dashboard.css
+student/css/help-center.css
+student/css/learning-progress.css
+student/css/messages.css
+student/css/new-chat.css
+student/css/notifications.css
+student/css/payments.css
+student/css/premium.css
+student/css/profile.css
+student/css/quizzes.css
+student/css/responsive.css
+student/css/settings.css
+student/css/student-core.css
+student/css/take-quiz.css
+student/dashboard.html
+student/help-center.html
+student/js/achievement-popup.js
+student/js/achievements.js
+student/js/announcements.js
+student/js/assignment-detail.js
+student/js/assignments.js
+student/js/calendar.js
+student/js/certificate-engine.js
+student/js/certificate-view.js
+student/js/certificates.js
+student/js/class-discussion.js
+student/js/course-details.js
+student/js/course-library.js
+student/js/course-player.js
+student/js/courses.js
+student/js/dashboard.js
+student/js/help-center.js
+student/js/learning-progress.js
+student/js/level-popup.js
+student/js/messages/chat-controls.js
+student/js/messages/chat-service.js
+student/js/messages/chat.js
+student/js/messages/emoji.js
+student/js/messages/input.js
+student/js/messages/messages.js
+student/js/messages/migrate-chats.js
+student/js/messages/new-chat.js
+student/js/messages/presence.js
+student/js/messages/typing.js
+student/js/messages/uploads.js
+student/js/notifications.js
+student/js/payments.js
+student/js/paystack.js
+student/js/premium-success.js
+student/js/premium.js
+student/js/profile.js
+student/js/quizzes.js
+student/js/rewards.js
+student/js/settings.js
+student/js/streak.js
+student/js/student-app.js
+student/js/take-quiz.js
+student/js/xp-engine.js
+student/js/xp-runtime.js
+student/learning-progress.html
+student/messages.html
+student/new-chat.html
+student/notifications.html
+student/payments.html
+student/portal-suspended.html
+student/premium-success.html
+student/premium.html
+student/profile.html
+student/progress.html
+student/quizzes.html
+student/report.html
+student/settings.html
+student/take-quiz.html
+terms.html

@@ -7,7 +7,7 @@ import "./js/founder-app.js";
 
 import { db, auth }
 
-from "../../js/firebase.js";
+from "../js/firebase.js";
 
 import {
 
@@ -42,7 +42,7 @@ auth,
 
 if(!user){
 
-window.location.href="../../login.html";
+window.location.href="../login.html";
 
 return;
 
@@ -863,221 +863,55 @@ alert(
 
 });
 /* ===================================
-   FINAL EVENT LISTENERS
+   STABLE PAYMENT ACTIONS
 =================================== */
 
-document
-.getElementById("refreshPayments")
-?.addEventListener("click", () => {
-
-    loadPayments();
-
+document.getElementById("refreshPayments")?.addEventListener("click", () => {
     loadGatewaySettings();
-
-    showToast(
-        "Payments refreshed successfully.",
-        "success"
-    );
-
+    listenForTransactions();
+    showToast("Payments refreshed successfully.", "success");
 });
 
+document.getElementById("exportTransactions")?.addEventListener("click", exportTransactions);
 
-document
-.getElementById("exportTransactions")
-?.addEventListener("click", exportTransactions);
-
-
-document
-.getElementById("backupPayments")
-?.addEventListener("click", backupPayments);
-
-
-document
-.getElementById("savePaymentSettings")
-?.addEventListener("click", savePaymentSettings);
-
-
-document
-.getElementById("downloadReceipt")
-?.addEventListener("click", downloadReceipt);
-
-
-document
-.getElementById("emailReceipt")
-?.addEventListener("click", emailReceipt);
-
-
-async function exportTransactions(){
-
-    try{
-
-        let csv =
-`Receipt,Student,Admission,Method,Amount,Status,Date\n`;
-
-        payments.forEach(payment=>{
-
-            csv +=
-`${payment.receiptNumber},
-${payment.studentName},
-${payment.admissionNumber},
-${payment.method},
-${payment.amount},
-${payment.status},
-${formatDate(payment.createdAt.toDate())}\n`;
-
-        });
-
-        const blob =
-        new Blob([csv],{
-
-            type:"text/csv"
-
-        });
-
-        const url =
-        URL.createObjectURL(blob);
-
-        const a =
-        document.createElement("a");
-
-        a.href = url;
-
-        a.download =
-        "academy-payments.csv";
-
-        a.click();
-
+function exportTransactions() {
+    try {
+        const rows = [
+            ["Receipt","Student","Admission","Method","Amount","Status","Date"],
+            ...allTransactions.map(payment => [
+                payment.receiptNumber || "",
+                payment.studentName || "",
+                payment.admissionNumber || "",
+                payment.method || "",
+                payment.amount ?? "",
+                payment.status || "",
+                payment.createdAt?.toDate ? formatDate(payment.createdAt.toDate()) : ""
+            ])
+        ];
+        const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"','""')}"`).join(",")).join("\n");
+        const url = URL.createObjectURL(new Blob([csv], { type:"text/csv;charset=utf-8" }));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "academy-payments.csv";
+        link.click();
         URL.revokeObjectURL(url);
-
-        showToast(
-            "CSV exported.",
-            "success"
-        );
-
+        showToast("CSV exported.", "success");
+    } catch (error) {
+        console.error("Payment export failed:", error);
+        showToast("Export failed.", "error");
     }
-
-    catch(error){
-
-        console.error(error);
-
-        showToast(
-            "Export failed.",
-            "error"
-        );
-
-    }
-
 }
 
-async function backupPayments(){
+document.getElementById("testGateway")?.addEventListener("click", () => {
+    alert("Gateway connectivity is controlled by the unified SSA payment service. Browser-side gateway secrets are never used here.");
+});
 
-    showToast(
+document.getElementById("generateReceipt")?.addEventListener("click", () => {
+    alert("Select a transaction from the ledger to preview its receipt.");
+});
 
-        "Payment backup started...",
-
-        "info"
-
-    );
-
-}
-
-
-async function downloadReceipt(){
-
-    showToast(
-
-        "Preparing PDF...",
-
-        "info"
-
-    );
-
-}
-
-
-async function emailReceipt(){
-
-    showToast(
-
-        "Sending receipt...",
-
-        "info"
-
-    );
-
-}
-
-
-async function savePaymentSettings(){
-
-    try{
-
-        await setDoc(
-
-            doc(db,"system","paymentSettings"),
-
-            {
-
-                currency:
-                defaultCurrency.value,
-
-                prefix:
-                receiptPrefix.value,
-
-                format:
-                receiptFormat.value,
-
-                autoReceipt:
-                autoReceipt.checked,
-
-                emailReceipts:
-                emailReceipts.checked,
-
-                manualRefunds:
-                manualRefunds.checked
-
-            }
-
-        );
-
-        showToast(
-
-            "Settings saved.",
-
-            "success"
-
-        );
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-        showToast(
-
-            "Unable to save settings.",
-
-            "error"
-
-        );
-
-    }
-
-}
-
-function showToast(message,type="success"){
-
-    console.log(type,message);
-
-}
-
-async function initPayments(){
-
-    loadGatewaySettings();
-
-    loadPayments();
-
+function showToast(message, type="success") {
+    console.log(`[SSA Payments:${type}] ${message}`);
 }
 
 initPayments();

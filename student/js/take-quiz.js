@@ -1747,6 +1747,9 @@ async function submitQuiz() {
             courseId:
                 quiz.courseId || null,
 
+            instructorId:
+                quiz.instructorId || null,
+
             attemptNumber,
 
             answers,

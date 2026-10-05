@@ -42,19 +42,9 @@ async function loadMyCourses() {
             ...s.data()
         }));
 
-        // Legacy fallback for older enrollment records.
-        if (!records.length) {
-            try {
-                const legacySnap = await getDocs(collection(db, "enrollments"));
-                records.push(...legacySnap.docs
-                    .map(s => ({ id: s.id, ...s.data() }))
-                    .filter(e => String(e.userId || e.studentId || e.uid || "") === currentUser.uid));
-                console.log("📦 Legacy enrollment records:", records.length);
-            } catch (legacyError) {
-                console.warn("Legacy enrollment fallback unavailable:", legacyError);
-            }
-        }
-
+        // The nested student enrollment collection is the canonical
+        // source. Do not fall back to an unscoped top-level query:
+        // production Firestore rules intentionally forbid that.
         const seen = new Set();
 
         for (const enrollment of records) {
