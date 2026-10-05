@@ -25,9 +25,15 @@ service firebase.storage {
         && firestore.exists(
           /databases/(default)/documents/chats/$(chatId)
         )
-        && firestore.get(
-          /databases/(default)/documents/chats/$(chatId)
-        ).data.participants.hasAny([request.auth.uid]);
+        && (
+          firestore.get(
+            /databases/(default)/documents/chats/$(chatId)
+          ).data.get('participants', []).hasAny([request.auth.uid])
+          ||
+          firestore.get(
+            /databases/(default)/documents/chats/$(chatId)
+          ).data.get('memberIds', []).hasAny([request.auth.uid])
+        );
     }
 
     match /academy-profile/{fileName} {
