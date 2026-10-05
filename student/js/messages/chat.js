@@ -1,6 +1,6 @@
-import { auth } from "../../../js/firebase.js";
+import { auth } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getMessages, sendMessage, subscribeToMessages, subscribeToReadReceipts, markConversationRead, getProfileByFirebaseUid, getConversationPeople, createChatPresence, touchLastSeen } from "../../../js/messaging-service.js";
+import { getMessages, sendMessage, subscribeToMessages, subscribeToReadReceipts, markConversationRead, getProfileByFirebaseUid, getConversationPeople, createChatPresence, touchLastSeen } from "../../js/messaging-service.js";
 
 const params = new URLSearchParams(location.search);
 const chatId = params.get("conversation") || params.get("chatId");
