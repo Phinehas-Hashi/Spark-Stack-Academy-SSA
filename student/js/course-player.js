@@ -128,26 +128,41 @@ async function loadCourse() {
 }
 
 async function checkCourseAccess() {
+    // Free courses are intentionally open to authenticated students.
     if (course.isFree === true || Number(course.price || 0) <= 0) return true;
 
+    // Canonical enrollment IDs are deterministic: uid_courseId.
+    // Read the document directly instead of running a compound query.
+    // This avoids index/query failures and matches the production rules.
     try {
-        const q = query(
-            collection(db, "enrollments"),
-            where("userId", "==", currentUser.uid),
-            where("courseId", "==", courseId)
-        );
-        const snap = await getDocs(q);
-        const enrollment = snap.docs[0]?.data();
-        if (enrollment && ["paid", "active", "approved"].includes(enrollment.status || enrollment.paymentStatus)) return true;
+        const enrollmentRef = doc(db, "enrollments", `${currentUser.uid}_${courseId}`);
+        const snap = await getDoc(enrollmentRef);
+
+        if (snap.exists()) {
+            const data = snap.data() || {};
+            const status = String(data.status || data.paymentStatus || "").trim().toLowerCase();
+
+            if (["paid", "active", "approved", "completed", "free"].includes(status)) {
+                return true;
+            }
+        }
     } catch (error) {
-        console.warn("Enrollment access check failed:", error);
+        console.warn("Canonical enrollment access check failed:", error);
     }
 
+    // Backward compatibility for older nested enrollment records.
     try {
-        const legacy = await getDoc(doc(db, "students", currentUser.uid, "enrollments", courseId));
+        const legacy = await getDoc(
+            doc(db, "students", currentUser.uid, "enrollments", courseId)
+        );
+
         if (legacy.exists()) {
-            const data = legacy.data();
-            if (["paid", "free", "active", "approved"].includes(data.status || data.paymentStatus)) return true;
+            const data = legacy.data() || {};
+            const status = String(data.status || data.paymentStatus || "").trim().toLowerCase();
+
+            if (["paid", "free", "active", "approved", "completed"].includes(status)) {
+                return true;
+            }
         }
     } catch (error) {
         console.warn("Legacy enrollment check failed:", error);
