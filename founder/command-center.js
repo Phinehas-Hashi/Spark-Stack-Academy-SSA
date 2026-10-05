@@ -1,9 +1,9 @@
 import "../js/ui-runtime.js";
 import { auth, db } from "../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { collection, doc, getDoc, setDoc, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, doc, getDoc, setDoc, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const state = { user: null, profile: null };
+const state = { user: null, profile: null, auditLogs: [] };
 const $ = id => document.getElementById(id);
 const toast = (message, type = "success") => window.showToast?.(message, type) ?? console.log(message);
 const controlRef = () => doc(db, "platform_controls", "global");
@@ -111,14 +111,75 @@ function listenControls() {
   return onSnapshot(controlRef(), snapshot => renderControls(snapshot.exists() ? snapshot.data() : {}), error => { console.error("Control listener failed:", error); toast("Unable to read platform controls.", "error"); });
 }
 
-function listenAuditLog() {
+function renderAuditLog() {
   const commandLog = $("commandLog");
   if (!commandLog) return;
-  const q = query(collection(db, "audit_logs"), orderBy("created_at", "desc"), limit(30));
+  const search = String($("auditSearch")?.value || "").trim().toLowerCase();
+  const sort = $("auditSort")?.value || "newest";
+  let items = state.auditLogs.filter(item => {
+    const d = item.data;
+    const haystack = [d.message, d.action, d.actor_email, d.target_type, d.target_id].filter(Boolean).join(" ").toLowerCase();
+    return !search || haystack.includes(search);
+  });
+  items.sort((a,b) => {
+    const da = a.data, dbb = b.data;
+    if (sort === "oldest") return auditTime(da.created_at) - auditTime(dbb.created_at);
+    if (sort === "action") return String(da.action || da.message || "").localeCompare(String(dbb.action || dbb.message || ""));
+    if (sort === "actor") return String(da.actor_email || "").localeCompare(String(dbb.actor_email || ""));
+    return auditTime(dbb.created_at) - auditTime(da.created_at);
+  });
+  $("auditCount") && ($("auditCount").textContent = `${items.length} shown · ${state.auditLogs.length} total`);
+  if (!items.length) { commandLog.innerHTML = '<div class="empty">No audit entries match your search.</div>'; return; }
+  commandLog.innerHTML = items.map(item => {
+    const d = item.data;
+    return `<article class="command-entry">
+      <div class="command-entry-main"><div class="audit-entry-icon"><i data-lucide="shield-check"></i></div><div>
+        <strong>${escapeHTML(d.message || d.action || "Command executed")}</strong>
+        <small>${escapeHTML(d.actor_email || "Founder")} · ${auditDate(d.created_at)}</small>
+        <span class="audit-action">${escapeHTML(d.action || "platform_action")}</span>
+      </div></div>
+      <button class="audit-delete-btn" type="button" data-delete-audit="${escapeHTML(item.id)}" title="Delete audit entry" aria-label="Delete audit entry"><i data-lucide="trash-2"></i></button>
+    </article>`;
+  }).join("");
+  window.lucide?.createIcons();
+}
+function auditTime(value) { return value?.toDate ? value.toDate().getTime() : (new Date(value || 0).getTime() || 0); }
+function auditDate(value) { const t = auditTime(value); return t ? new Date(t).toLocaleString() : "Just now"; }
+function escapeHTML(value) { return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function listenAuditLog() {
+  const q = query(collection(db, "audit_logs"), orderBy("created_at", "desc"), limit(100));
   onSnapshot(q, snapshot => {
-    if (!snapshot.docs.length) { commandLog.innerHTML = '<div class="empty">No command activity yet.</div>'; return; }
-    commandLog.innerHTML = snapshot.docs.map(item => { const data = item.data(); return `<div class="command-entry"><strong>${data.message || data.action || "Command executed"}</strong><small>${data.actor_email || "Founder"} · ${data.created_at?.toDate ? data.created_at.toDate().toLocaleString() : "Just now"}</small></div>`; }).join("");
-  }, error => { console.error("Audit listener failed:", error); commandLog.innerHTML = '<div class="empty">Command history is temporarily unavailable.</div>'; });
+    state.auditLogs = snapshot.docs.map(item => ({ id: item.id, data: item.data() }));
+    renderAuditLog();
+  }, error => { console.error("Audit listener failed:", error); $("commandLog").innerHTML = '<div class="empty">Command history is temporarily unavailable.</div>'; });
+}
+async function deleteAuditEntry(id) {
+  if (!id) return;
+  const confirmed = await window.ssaConfirm?.("Delete this audit entry? This cannot be undone.", { title: "Delete audit entry?", confirmText: "Delete", tone: "danger", icon: "🗑" });
+  if (!confirmed) return;
+  await deleteDoc(doc(db, "audit_logs", id));
+  toast("Audit entry deleted.");
+}
+async function deleteFilteredAudit() {
+  const search = String($("auditSearch")?.value || "").trim().toLowerCase();
+  const sort = $("auditSort")?.value || "newest";
+  const items = state.auditLogs.filter(item => {
+    const d=item.data; return !search || [d.message,d.action,d.actor_email,d.target_type,d.target_id].filter(Boolean).join(" ").toLowerCase().includes(search);
+  });
+  if (!items.length) { toast("There are no shown audit entries to delete.","warning"); return; }
+  const confirmed = await window.ssaConfirm?.(`Delete ${items.length} shown audit entr${items.length === 1 ? "y" : "ies"}? This cannot be undone.`, { title: "Delete shown entries?", confirmText: "Delete shown", tone: "danger", icon: "🗑" });
+  if (!confirmed) return;
+  $("deleteFilteredAudit").disabled = true;
+  try { for (const item of items) await deleteDoc(doc(db, "audit_logs", item.id)); toast(`${items.length} audit entr${items.length === 1 ? "y" : "ies"} deleted.`); }
+  catch (error) { console.error(error); toast(error.message || "Unable to delete audit entries.","error"); }
+  finally { $("deleteFilteredAudit").disabled = false; }
+}
+function bindAuditControls() {
+  $("auditSearch")?.addEventListener("input", renderAuditLog);
+  $("auditSort")?.addEventListener("change", renderAuditLog);
+  $("clearAuditSearch")?.addEventListener("click", () => { $("auditSearch").value=""; $("auditSort").value="newest"; renderAuditLog(); });
+  $("deleteFilteredAudit")?.addEventListener("click", deleteFilteredAudit);
+  $("commandLog")?.addEventListener("click", event => { const button=event.target.closest("[data-delete-audit]"); if (button) deleteAuditEntry(button.dataset.deleteAudit); });
 }
 
 async function scheduleMaintenance() {
@@ -189,6 +250,6 @@ function bindEvents() {
 
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.replace("../login.html"); return; }
-  try { await requireFounder(user); listenControls(); listenAuditLog(); bindEvents(); console.log("🔥 Founder Command Center connected to Firebase."); }
+  try { await requireFounder(user); listenControls(); listenAuditLog(); bindAuditControls(); bindEvents(); console.log("🔥 Founder Command Center connected to Firebase."); }
   catch (error) { console.error(error); toast(error.message || "Founder authorization failed.", "error"); setTimeout(() => window.location.replace("../login.html"), 1500); }
 });
