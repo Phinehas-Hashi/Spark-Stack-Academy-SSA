@@ -14,7 +14,7 @@ import {
 
 
 const API_BASE_URL =
-    "http://localhost:3000";
+    "const API_BASE_URL = window.SSA_LEGACY_PAYMENT_API_BASE_URL || "";";
 
 
 const statusElement =
@@ -82,6 +82,10 @@ onAuthStateChanged(
 async function verifyPayment() {
 
     try {
+
+        if (!API_BASE_URL) {
+            throw new Error("The legacy premium verification endpoint is disabled.");
+        }
 
         setStatus(
             "Verifying your payment..."
