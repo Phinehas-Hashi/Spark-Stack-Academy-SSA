@@ -8,9 +8,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/f
 import {
     doc, getDoc, setDoc, collection, query, where, getDocs, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { awardXP, XP_REWARDS } from "./xp-engine.js";
+import { awardXP, XP_REWARDS, updateLearningStreak } from "./achievements.js";
 import { issueCertificate } from "./certificate-engine.js";
-import { updateLearningStreak } from "./achievement.js";
 
 let currentUser = null;
 let course = null;
