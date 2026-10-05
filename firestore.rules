@@ -600,8 +600,11 @@ service cloud.firestore {
       allow read, create:
         if isFounder();
 
-      allow update, delete:
+      allow update:
         if false;
+
+      allow delete:
+        if isFounder();
     }
 
 
