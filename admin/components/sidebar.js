@@ -7,7 +7,7 @@ const ADMIN_PAGES = {
     "dashboard.html": "dashboard", "students.html": "students", "instructors.html": "instructors",
     "courses.html": "courses", "assignments.html": "assignments", "reports.html": "reports",
     "messages.html": "messages", "announcements.html": "announcements", "notifications.html": "notifications",
-    "profile.html": "profile", "settings.html": "settings", "course-profile.html": "courses", "instructor-profile.html": "instructors"
+    "profile.html": "profile", "settings.html": "settings", "pricing.html": "pricing", "institutions.html": "institutions", "course-profile.html": "courses", "instructor-profile.html": "instructors"
 };
 
 function setActiveAdminPage() {
