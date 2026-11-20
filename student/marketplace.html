@@ -1,4 +1,53 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Marketplace | Spark Stack Academy</title><link rel="stylesheet" href="css/student-core.css"><link rel="stylesheet" href="css/marketplace.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"><script src="https://unpkg.com/lucide@latest"></script></head><body><div class="student-layout"><aside id="sidebarContainer" class="sidebar-container"></aside><div id="sidebarOverlay" class="sidebar-overlay"></div><main class="student-main"><div id="topbarContainer" class="topbar-container"></div><section class="student-marketplace">
-<header class="student-market-hero"><span>SPARK STACK MARKETPLACE</span><h1>One marketplace. More ways to grow.</h1><p>Explore learning programmes, professional opportunities and digital resources from across Spark Stack Academy.</p><div class="market-search"><i data-lucide="search"></i><input id="marketSearch" type="search" placeholder="Search the marketplace"></div></header>
-<div class="market-toolbar"><div id="marketFilters" class="market-filters"><button class="active" data-type="all">All</button><button data-type="course">Courses</button><button data-type="mentorship">Mentorship</button><button data-type="professional_service">Professional services</button><button data-type="course_bundle">Bundles</button><button data-type="bootcamp">Boot camps</button><button data-type="digital_product">Digital products</button><button data-type="addon">Add-ons</button><button data-type="corporate_training">Corporate training</button><button data-type="student_membership">Memberships</button></div><span id="marketCount">Loading catalogue…</span></div>
-<div id="marketItems" class="market-items"><p class="market-state">Loading marketplace…</p></div><div id="marketEmpty" class="market-state" hidden>No marketplace items match your search.</div><p class="market-footnote">This catalogue is being connected to the Academy's checkout and fulfilment services. Product visibility does not mean checkout is currently enabled.</p></section></main></div><script type="module" src="js/student-app.js"></script><script type="module" src="js/marketplace.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Discover global courses and learning opportunities at Spark Stack Academy.">
+<title>Academy Marketplace | Spark Stack Academy</title>
+<link rel="stylesheet" href="css/student-core.css">
+<link rel="stylesheet" href="css/marketplace.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="../css/brand-system.css?v=20261121-learning1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="student-layout">
+<aside id="sidebarContainer" class="sidebar-container"></aside>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="student-main">
+<div id="topbarContainer" class="topbar-container"></div>
+<section class="student-marketplace">
+<header class="student-market-hero">
+<div class="market-hero-copy"><span class="market-eyebrow">SPARK STACK ACADEMY · GLOBAL MARKETPLACE</span>
+<h1>Discover skills.<br><em>Unlock your next opportunity.</em></h1>
+<p>Explore approved courses from independent instructors and institutions, alongside learning experiences across the Academy ecosystem.</p>
+<div class="market-hero-points"><span><i data-lucide="globe-2"></i> Global catalogue</span><span><i data-lucide="badge-check"></i> Academy-reviewed courses</span><span><i data-lucide="graduation-cap"></i> Learn at your pace</span></div>
+</div>
+<div class="market-hero-art"><div class="market-art-orbit"></div><div class="market-art-icon"><i data-lucide="graduation-cap"></i></div><span class="market-art-label">LEARN · TEACH · GROW</span></div>
+<div class="market-search"><i data-lucide="search"></i><input id="marketSearch" type="search" placeholder="Search courses, skills, instructors or institutions" aria-label="Search marketplace"></div>
+</header>
+<div class="market-section-heading"><div><span>EXPLORE THE ECOSYSTEM</span><h2>Marketplace offerings</h2><p>Discover public offerings. Your purchases and enrolments appear in My Courses.</p></div><a href="courses.html" class="market-library-link"><i data-lucide="library"></i> My Courses</a></div>
+<div class="market-toolbar"><div id="marketFilters" class="market-filters" aria-label="Filter marketplace">
+<button class="active" data-type="all" aria-pressed="true">All offerings</button>
+<button data-type="course" aria-pressed="false">Courses</button>
+<button data-type="mentorship" aria-pressed="false">Mentorship</button>
+<button data-type="professional_service" aria-pressed="false">Services</button>
+<button data-type="course_bundle" aria-pressed="false">Bundles</button>
+<button data-type="bootcamp" aria-pressed="false">Boot camps</button>
+<button data-type="digital_product" aria-pressed="false">Digital products</button>
+<button data-type="addon" aria-pressed="false">Add-ons</button>
+<button data-type="corporate_training" aria-pressed="false">Corporate training</button>
+<button data-type="student_membership" aria-pressed="false">Memberships</button>
+</div><span id="marketCount" aria-live="polite">Loading catalogue…</span></div>
+<div id="marketItems" class="market-items"><div class="market-loading"><i data-lucide="loader-circle"></i><strong>Loading global offerings</strong><span>Please wait…</span></div></div>
+<div id="marketEmpty" class="market-empty" hidden><i data-lucide="search-x"></i><h3>No matching offerings</h3><p>Try another search or category.</p></div>
+<p class="market-footnote">Only published offerings are displayed. A listing does not itself grant course access. Checkout and fulfilment are shown only where the relevant service is enabled.</p>
+</section>
+</main></div>
+<script type="module" src="js/student-app.js"></script>
+<script type="module" src="js/marketplace.js?v=20261121-learning1"></script>
+</body></html>
