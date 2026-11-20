@@ -33,6 +33,24 @@ function setInstitutionName(name) {
   }
 }
 
+function renderQuota(id, barId, used, maximum) {
+  const value = Math.max(0, Number(used) || 0);
+  const cap = Math.max(0, Number(maximum) || 0);
+  const label = document.getElementById(id);
+  const bar = document.getElementById(barId);
+  if (label) label.textContent = value.toLocaleString() + " / " + cap.toLocaleString();
+  if (bar) bar.style.width = (cap ? Math.min(100, value / cap * 100) : 0) + "%";
+}
+
+function renderInstitutionQuotas(institution) {
+  const limits = institution.limits || { instructors: 20, courses: 100, students: 5000, adminAccounts: 10 };
+  const usage = institution.usage || {};
+  renderQuota("quotaInstructors", "barInstructors", usage.instructors, limits.instructors ?? 20);
+  renderQuota("quotaCourses", "barCourses", usage.courses, limits.courses ?? 100);
+  renderQuota("quotaStudents", "barStudents", usage.students, limits.students ?? 5000);
+  renderQuota("quotaAdmins", "barAdmins", usage.adminAccounts, limits.adminAccounts ?? 10);
+}
+
 function setupNavigation() {
   const menu = document.getElementById("institutionMenuBtn");
   menu?.addEventListener("click", () => {
@@ -102,6 +120,11 @@ async function boot() {
       if (!ALLOWED_ROLES.has(role) || !approved) {
         denyAccess();
         return;
+      }
+      const institutionId = profile.institutionId;
+      if (institutionId) {
+        const institutionSnapshot = await getDoc(doc(db, "institutions", institutionId));
+        if (institutionSnapshot.exists()) renderInstitutionQuotas(institutionSnapshot.data());
       }
       const name = profile.institutionName || profile.organizationName || profile.displayName || profile.name || user.displayName || "Your institution";
       setInstitutionName(name);
