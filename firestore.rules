@@ -796,42 +796,26 @@ service cloud.firestore {
     // ============================================================
 
     match /courses/{courseId} {
-
       allow get, list:
         if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
+        || (isStudent() && studentPortalOpen())
+        || (isInstructor() && instructorPortalOpen())
+        || (resource.data.get('institutionId', '') != ''
+          && institutionMember(resource.data.institutionId));
 
       allow create:
         if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && request.resource.data.instructorId == uid()
-        );
+        || (isInstructor() && instructorPortalOpen()
+          && request.resource.data.instructorId == uid());
 
       allow update:
         if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
+        || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
-        );
+          && request.resource.data.instructorId == uid());
 
-      allow delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-        );
+      // Course deletion is retained as a trusted moderation operation.
+      allow delete: if staff();
     }
 
 
