@@ -17,6 +17,7 @@ const MPESA_CONSUMER_SECRET = defineSecret("MPESA_CONSUMER_SECRET");
 const MPESA_SHORTCODE = defineSecret("MPESA_SHORTCODE");
 const MPESA_PASSKEY = defineSecret("MPESA_PASSKEY");
 const MPESA_ENVIRONMENT = defineSecret("MPESA_ENVIRONMENT");
+const MPESA_TRANSACTION_TYPE = defineSecret("MPESA_TRANSACTION_TYPE");
 
 function safeText(value, fallback = "") { return String(value ?? fallback).trim(); }
 function eventKey(event, suffix) {
@@ -132,7 +133,7 @@ async function requireInstitutionReviewer(request) {
 
 const DARAJA_SECRETS = [
   MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE,
-  MPESA_PASSKEY, MPESA_ENVIRONMENT
+  MPESA_PASSKEY, MPESA_ENVIRONMENT, MPESA_TRANSACTION_TYPE
 ];
 
 function darajaBaseUrl() {
@@ -210,7 +211,7 @@ async function startInstitutionStkPayment({ applicationId, institutionId, ownerU
         BusinessShortCode: shortcode,
         Password: password,
         Timestamp: timestamp,
-        TransactionType: "CustomerPayBillOnline",
+        TransactionType: MPESA_TRANSACTION_TYPE.value() || "CustomerPayBillOnline",
         Amount: Number(amount),
         PartyA: phoneNumber,
         PartyB: shortcode,
@@ -927,6 +928,8 @@ exports.saveInstitutionPricing = onCall(async request => {
   if (!Number.isInteger(trialDays) || trialDays < 0 || trialDays > 90) throw new HttpsError("invalid-argument", "Trial duration must be between 0 and 90 days.");
   if (!["before_activation", "after_approval"].includes(input.onboardingTiming)) throw new HttpsError("invalid-argument", "Choose a valid onboarding fee collection timing.");
   if (input.onboardingFeeEnabled === true && Number(input.onboardingFeeAmount) <= 0) throw new HttpsError("failed-precondition", "Enter an onboarding fee greater than zero or disable the fee.");
+  if (input.onboardingFeeEnabled === true && currency !== "KES") throw new HttpsError("failed-precondition", "Institution onboarding collection currently uses M-Pesa Daraja and must be priced in KES.");
+  if (input.onboardingFeeEnabled === true && !Number.isInteger(Number(input.onboardingFeeAmount))) throw new HttpsError("invalid-argument", "M-Pesa onboarding fees must be whole KES amounts.");
   if (input.transactionFeeEnabled === true && feePercent <= 0) throw new HttpsError("failed-precondition", "Enter a transaction fee percentage greater than zero or disable the fee.");
 
   const pricing = {
