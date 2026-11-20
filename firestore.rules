@@ -1439,8 +1439,7 @@ service cloud.firestore {
     // Entries are created and maintained by trusted Cloud Functions.
     // ============================================================
     match /marketplaceItems/{itemId} {
-      allow get, list: if resource.data.get('status', '') == 'published'
-        && resource.data.get('published', false) == true;
+      allow get, list: if resource.data.get('status', '') == 'published';
       allow create, update, delete: if false;
     }
 
