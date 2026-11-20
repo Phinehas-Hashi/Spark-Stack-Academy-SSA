@@ -682,3 +682,18 @@
     }
 
 }
+
+/* ===== Institution learning library ===== */
+.institution-course-card .course-cover{height:165px}
+.institution-course-card .course-cover img{width:100%;height:100%;object-fit:cover}
+.institution-course-origin{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;max-width:calc(100% - 24px);overflow:hidden;padding:7px 10px;border:1px solid rgba(255,255,255,.22);border-radius:9px;background:rgba(8,5,34,.78);color:#fff;font-size:9px;font-weight:700;text-overflow:ellipsis;white-space:nowrap;backdrop-filter:blur(8px)}
+.institution-course-origin svg{width:13px;flex-shrink:0;color:#36d9ed}
+.institution-course-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;color:#8750df;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.institution-course-owner{margin:0 0 15px;color:#77728e;font-size:10px}
+.institution-course-open{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:auto;text-decoration:none}
+.institution-course-open svg{width:15px}
+.library-hero{border:1px solid rgba(183,139,255,.55)!important;background:radial-gradient(circle at 88% 15%,rgba(32,216,242,.18),transparent 28%),linear-gradient(120deg,#090625,#171052 65%,#25116a)!important}
+.library-hero h1,.library-hero p{color:#fff!important}
+.library-hero p{opacity:.82}
+.library-hero .page-badge{color:#d4baff}
+.course-filters .filter-btn.active{background:linear-gradient(105deg,#7024f5,#a12bff)!important;border-color:#8a42ed!important}
