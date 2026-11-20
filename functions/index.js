@@ -1,7 +1,7 @@
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentUpdated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
@@ -526,6 +526,111 @@ exports.submitInstitutionCourseForReview = onCall(async request => {
   await ref.update({ status: "pending_review", published: false, reviewStatus: "awaiting_admin_review", reviewRequestedAt: now, reviewRequestedBy: member.uid, updatedAt: now });
   await db.collection("audit_logs").add({ action: "institution_course_submitted_for_review", actorId: member.uid, targetId: courseId, institutionId: member.institutionId, createdAt: now });
   return { success: true, status: "pending_review" };
+});
+
+
+const MARKETPLACE_PRICE_TYPES = [
+  { key: "course", label: "Individual courses", unit: "per course", proposed: 2500 },
+  { key: "mentorship", label: "Mentorship", unit: "per session", proposed: 1500 },
+  { key: "professional_service", label: "Professional services", unit: "starting price", proposed: 5000 },
+  { key: "course_bundle", label: "Course bundles", unit: "per bundle", proposed: 5500 },
+  { key: "bootcamp", label: "Boot camps", unit: "per learner / cohort", proposed: 7500 },
+  { key: "digital_product", label: "Digital products", unit: "per item", proposed: 500 },
+  { key: "addon", label: "Platform add-ons", unit: "per add-on / month", proposed: 300 },
+  { key: "corporate_training", label: "Corporate training", unit: "starting price per cohort", proposed: 75000 },
+  { key: "institution_onboarding", label: "Institution onboarding", unit: "one-time per institution", proposed: 15000 },
+  { key: "institution_monthly", label: "Institution subscription", unit: "per institution / month", proposed: 7500 },
+  { key: "institution_annual", label: "Institution subscription", unit: "per institution / year", proposed: 75000 },
+  { key: "student_membership_monthly", label: "Student membership", unit: "per student / month", proposed: 499 },
+  { key: "student_membership_annual", label: "Student membership", unit: "per student / year", proposed: 4999 }
+];
+
+exports.getMarketplacePricing = onCall(async request => {
+  await requireFounder(request);
+  const snap = await db.doc("marketplacePricing/global").get();
+  const saved = snap.exists ? snap.data() : {};
+  const prices = Object.fromEntries(MARKETPLACE_PRICE_TYPES.map(item => {
+    const configured = saved.prices?.[item.key] || {};
+    return [item.key, {
+      label: item.label, unit: item.unit,
+      proposedAmount: item.proposed,
+      amount: Number.isFinite(Number(configured.amount)) ? Number(configured.amount) : item.proposed,
+      currency: configured.currency || "KES",
+      enabled: configured.enabled === true
+    }];
+  }));
+  return { currency: saved.currency || "KES", prices, transactionFeeEnabled: saved.transactionFeeEnabled === true, transactionFeePercent: Number(saved.transactionFeePercent || 0), pricingStatus: saved.pricingStatus || "proposed" };
+});
+
+exports.saveMarketplacePricing = onCall(async request => {
+  const founder = await requireFounder(request);
+  const payload = request.data || {};
+  const currency = safeText(payload.currency, "KES");
+  if (!["KES", "USD", "EUR", "GBP"].includes(currency)) throw new HttpsError("invalid-argument", "Unsupported marketplace currency.");
+  const incoming = payload.prices || {};
+  const prices = {};
+  for (const item of MARKETPLACE_PRICE_TYPES) {
+    const value = incoming[item.key] || {};
+    const amount = Number(value.amount);
+    if (!Number.isFinite(amount) || amount < 0 || amount > 100000000) throw new HttpsError("invalid-argument", "Invalid price for " + item.label + ".");
+    prices[item.key] = { amount, currency, enabled: value.enabled === true, unit: item.unit, label: item.label };
+  }
+  const transactionFeePercent = Number(payload.transactionFeePercent || 0);
+  if (!Number.isFinite(transactionFeePercent) || transactionFeePercent < 0 || transactionFeePercent > 20) throw new HttpsError("invalid-argument", "Transaction fee must be between 0 and 20 percent.");
+  const now = Timestamp.now();
+  await db.doc("marketplacePricing/global").set({
+    currency, prices,
+    transactionFeeEnabled: payload.transactionFeeEnabled === true,
+    transactionFeePercent,
+    pricingStatus: "proposed",
+    updatedAt: now, updatedBy: founder.uid
+  }, { merge: true });
+  await db.collection("audit_logs").add({ action: "marketplace_pricing_proposals_updated", actorId: founder.uid, currency, createdAt: now });
+  return { success: true, pricingStatus: "proposed", prices };
+});
+
+exports.founderModerateCourse = onCall(async request => {
+  const founder = await requireFounder(request);
+  const courseId = safeText(request.data?.courseId);
+  const action = safeText(request.data?.action);
+  if (!courseId || !["request_admin_review", "delete"].includes(action)) throw new HttpsError("invalid-argument", "Choose a valid course moderation action.");
+  const ref = db.doc("courses/" + courseId);
+  const snap = await ref.get();
+  if (!snap.exists) throw new HttpsError("not-found", "Course not found.");
+  const now = Timestamp.now();
+  if (action === "request_admin_review") {
+    await ref.update({ status: "pending_review", published: false, reviewStatus: "awaiting_admin_review", reviewRouting: "admin", reviewRequestedByFounder: founder.uid, reviewRequestedAt: now, marketplaceVisibility: "hidden", updatedAt: now });
+  } else {
+    // Soft-delete to protect historical enrolments, certificates and financial records.
+    await ref.update({ status: "deleted", published: false, reviewStatus: "closed", deletedAt: now, deletedBy: founder.uid, marketplaceVisibility: "hidden", updatedAt: now });
+  }
+  await db.collection("audit_logs").add({ action: action === "delete" ? "course_soft_deleted_by_founder" : "course_routed_to_admin_review", actorId: founder.uid, targetId: courseId, createdAt: now });
+  return { success: true, status: action === "delete" ? "deleted" : "pending_review" };
+});
+
+exports.syncPublishedCourseToMarketplace = onDocumentWritten("courses/{courseId}", async event => {
+  const after = event.data?.after;
+  if (!after?.exists) return;
+  const course = after.data() || {};
+  const listingRef = db.doc("marketplaceItems/course_" + event.params.courseId);
+  const visible = (course.published === true || safeText(course.status).toLowerCase() === "published")
+    && safeText(course.status).toLowerCase() !== "deleted"
+    && course.marketplaceVisibility !== "hidden";
+  if (!visible) {
+    await listingRef.delete().catch(() => {});
+    return;
+  }
+  await listingRef.set({
+    itemId: "course_" + event.params.courseId,
+    sourceCollection: "courses", sourceId: event.params.courseId,
+    productType: "course", title: safeText(course.title, "Untitled course"),
+    description: safeText(course.description), category: safeText(course.category),
+    price: Number(course.price || 0), currency: safeText(course.currency, "KES"),
+    instructorId: safeText(course.instructorId), institutionId: safeText(course.institutionId),
+    ownerType: safeText(course.ownerType, course.institutionId ? "institution" : "instructor"),
+    status: "published", published: true, updatedAt: Timestamp.now(),
+    createdAt: course.createdAt || Timestamp.now()
+  }, { merge: true });
 });
 
 exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, async request => {
