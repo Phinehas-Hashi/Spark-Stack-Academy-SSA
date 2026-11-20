@@ -37,7 +37,8 @@ const TYPE_LABELS = {
     quiz: "Quiz",
     course: "Course",
     announcement: "Announcement",
-    event: "Event"
+    event: "Event",
+    live_class: "Live Class"
 };
 
 function refreshIcons() {
@@ -115,7 +116,9 @@ function normalizeEvent(docSnap) {
         courseId: data.courseId || "",
         courseName: data.courseName || "",
         userId: data.userId || "",
-        audience: data.audience || "students"
+        audience: data.audience || "students",
+        meetingProvider: data.meetingProvider || "",
+        meetingUrl: data.meetingUrl || ""
     };
 }
 
@@ -402,6 +405,19 @@ async function createEvent(event) {
     const startValue = document.getElementById("eventStart").value;
     const endValue = document.getElementById("eventEnd").value;
     const courseName = document.getElementById("eventCourse").value.trim();
+    const courseId = document.getElementById("eventCourseId").value.trim();
+    const meetingProvider = document.getElementById("meetingProvider").value;
+    const meetingUrl = document.getElementById("meetingUrl").value.trim();
+
+    if (type === "live_class") {
+        let parsedMeetingUrl;
+        try { parsedMeetingUrl = new URL(meetingUrl); } catch { parsedMeetingUrl = null; }
+        const validHost = parsedMeetingUrl && parsedMeetingUrl.protocol === "https:" &&
+            (parsedMeetingUrl.hostname === "zoom.us" || parsedMeetingUrl.hostname.endsWith(".zoom.us") ||
+             parsedMeetingUrl.hostname === "meet.google.com");
+        if (!courseId) { showFormError("Enter the course ID for this live class."); return; }
+        if (!validHost) { showFormError("Enter a valid HTTPS Zoom or Google Meet link."); return; }
+    }
     const description = document.getElementById("eventDescription").value.trim();
 
     const startAt = new Date(startValue);
@@ -441,8 +457,10 @@ async function createEvent(event) {
             type,
             startAt,
             endAt,
-            courseId: "",
+            courseId: type === "live_class" ? courseId : "",
             courseName,
+            meetingProvider: type === "live_class" ? meetingProvider : "",
+            meetingUrl: type === "live_class" ? meetingUrl : "",
             userId: user.uid,
             audience: "students",
             createdAt: serverTimestamp()
@@ -511,6 +529,17 @@ document.getElementById("createEventBtn")?.addEventListener(
 );
 
 createForm?.addEventListener("submit", createEvent);
+
+const eventTypeSelect = document.getElementById("eventType");
+const liveMeetingFields = document.getElementById("liveMeetingFields");
+function toggleLiveMeetingFields() {
+    const active = eventTypeSelect?.value === "live_class";
+    if (liveMeetingFields) liveMeetingFields.hidden = !active;
+    document.getElementById("eventCourseId")?.toggleAttribute("required", active);
+    document.getElementById("meetingUrl")?.toggleAttribute("required", active);
+}
+eventTypeSelect?.addEventListener("change", toggleLiveMeetingFields);
+toggleLiveMeetingFields();
 
 document.querySelectorAll("[data-close-modal]").forEach(element => {
     element.addEventListener("click", () => closeModal(detailsModal));
