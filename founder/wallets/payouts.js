@@ -114,6 +114,7 @@ async function action(id, type) {
     return;
   }
 
+  if (!window.SSAOnlineActionGuard?.requireOnline("Processing an instructor payout")) return;
   if (financeSecurity.treasuryLocked) throw new Error("Treasury is locked. Unlock it before processing payouts.");
 
   const ref = doc(db, "withdrawalRequests", id);
