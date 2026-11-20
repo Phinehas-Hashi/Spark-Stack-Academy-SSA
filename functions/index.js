@@ -444,6 +444,90 @@ exports.reconcileInstitutionOnboardingPayments = onSchedule({
 });
 
 
+
+function requireActiveInstitutionMember(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to manage institution courses.");
+  return db.doc("users/" + uid).get().then(snap => {
+    const p = snap.exists ? snap.data() : {};
+    const role = safeText(p.role).toLowerCase();
+    if (!["institution", "institution_owner", "institution_admin"].includes(role)
+      || p.status !== "active" || p.active !== true || p.verified !== true
+      || !p.institutionId) {
+      throw new HttpsError("permission-denied", "An active, verified institution account is required.");
+    }
+    return { uid, profile: p, institutionId: p.institutionId };
+  });
+}
+
+exports.createInstitutionCourse = onCall(async request => {
+  const member = await requireActiveInstitutionMember(request);
+  const title = safeText(request.data?.title);
+  const description = safeText(request.data?.description);
+  const category = safeText(request.data?.category);
+  const level = safeText(request.data?.level, "Beginner");
+  const price = Number(request.data?.price ?? 0);
+  const currency = safeText(request.data?.currency, "KES");
+  const instructorId = safeText(request.data?.instructorId);
+  if (title.length < 3 || title.length > 140) throw new HttpsError("invalid-argument", "Course title must be 3–140 characters.");
+  if (description.length < 20 || description.length > 4000) throw new HttpsError("invalid-argument", "Course description must be 20–4,000 characters.");
+  if (!category || category.length > 80) throw new HttpsError("invalid-argument", "Choose a valid course category.");
+  if (!Number.isFinite(price) || price < 0 || price > 10000000) throw new HttpsError("invalid-argument", "Enter a valid course price.");
+  if (!["KES", "USD", "EUR", "GBP"].includes(currency)) throw new HttpsError("invalid-argument", "Unsupported course currency.");
+  if (instructorId) {
+    const instructorSnap = await db.doc("users/" + instructorId).get();
+    const instructor = instructorSnap.exists ? instructorSnap.data() : {};
+    if (instructor.role !== "instructor" || instructor.institutionId !== member.institutionId || instructor.status !== "active" || instructor.active !== true || instructor.verified !== true) {
+      throw new HttpsError("failed-precondition", "The selected instructor is not an active verified member of this institution.");
+    }
+  }
+  const institutionRef = db.doc("institutions/" + member.institutionId);
+  const courseRef = db.collection("courses").doc();
+  const now = Timestamp.now();
+  await db.runTransaction(async tx => {
+    const institutionSnap = await tx.get(institutionRef);
+    if (!institutionSnap.exists || institutionSnap.data().status !== "active") throw new HttpsError("failed-precondition", "The institution workspace is not active.");
+    const institution = institutionSnap.data();
+    const used = Number(institution.usage?.courses || 0);
+    const maximum = Number(institution.limits?.courses || 100);
+    if (used >= maximum) throw new HttpsError("resource-exhausted", "Your institution has reached its 100-course limit.");
+    tx.create(courseRef, {
+      title, description, category, level, price, currency,
+      instructorId: instructorId || null,
+      institutionId: member.institutionId,
+      institutionName: institution.institutionName || institution.legalName || "",
+      createdBy: member.uid,
+      ownerType: "institution",
+      sourceType: "institution",
+      status: "draft",
+      published: false,
+      reviewStatus: "not_submitted",
+      marketplaceVisibility: "hidden",
+      createdAt: now,
+      updatedAt: now
+    });
+    tx.update(institutionRef, { "usage.courses": used + 1, updatedAt: now });
+  });
+  await db.collection("audit_logs").add({ action: "institution_course_created", actorId: member.uid, targetId: courseRef.id, institutionId: member.institutionId, createdAt: now });
+  return { success: true, courseId: courseRef.id, status: "draft" };
+});
+
+exports.submitInstitutionCourseForReview = onCall(async request => {
+  const member = await requireActiveInstitutionMember(request);
+  const courseId = safeText(request.data?.courseId);
+  if (!courseId) throw new HttpsError("invalid-argument", "Course ID is required.");
+  const ref = db.doc("courses/" + courseId);
+  const snap = await ref.get();
+  if (!snap.exists) throw new HttpsError("not-found", "Course not found.");
+  const course = snap.data();
+  if (course.institutionId !== member.institutionId) throw new HttpsError("permission-denied", "This course belongs to another institution.");
+  if (!["draft", "rejected"].includes(safeText(course.status).toLowerCase())) throw new HttpsError("failed-precondition", "Only draft or previously rejected courses can be submitted.");
+  const now = Timestamp.now();
+  await ref.update({ status: "pending_review", published: false, reviewStatus: "awaiting_admin_review", reviewRequestedAt: now, reviewRequestedBy: member.uid, updatedAt: now });
+  await db.collection("audit_logs").add({ action: "institution_course_submitted_for_review", actorId: member.uid, targetId: courseId, institutionId: member.institutionId, createdAt: now });
+  return { success: true, status: "pending_review" };
+});
+
 exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, async request => {
   const reviewer = await requireInstitutionReviewer(request);
   const applicationId = safeText(request.data?.applicationId);
