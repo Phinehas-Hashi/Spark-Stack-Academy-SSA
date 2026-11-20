@@ -235,14 +235,20 @@ async function startInstitutionStkPayment({ applicationId, institutionId, ownerU
       responseDescription: result.ResponseDescription || "",
       updatedAt: Timestamp.now()
     });
-    await db.doc("institutions/" + institutionId).set({
-      onboardingFee: {
-        status: "pending", amount: Number(amount), currency: "KES",
-        paymentId: paymentRef.id, provider: "safaricom_daraja",
-        phoneNumber, updatedAt: Timestamp.now()
-      },
-      updatedAt: Timestamp.now()
-    }, { merge: true });
+    await Promise.all([
+      db.doc("institutions/" + institutionId).set({
+        onboardingFee: {
+          status: "pending", amount: Number(amount), currency: "KES",
+          paymentId: paymentRef.id, provider: "safaricom_daraja",
+          phoneNumber, updatedAt: Timestamp.now()
+        },
+        updatedAt: Timestamp.now()
+      }, { merge: true }),
+      db.doc("institutionApplications/" + applicationId).set({
+        onboardingFeeStatus: "pending", currentOnboardingPaymentId: paymentRef.id,
+        updatedAt: Timestamp.now()
+      }, { merge: true })
+    ]);
     await db.collection("audit_logs").add({
       action: "institution_onboarding_stk_initiated",
       actorId: initiatedBy, targetId: institutionId,
@@ -288,9 +294,11 @@ exports.retryInstitutionOnboardingPayment = onCall({ secrets: DARAJA_SECRETS }, 
   if (!applicationSnap.exists || !institutionSnap.exists) throw new HttpsError("not-found", "Institution application or workspace was not found.");
   const application = applicationSnap.data();
   const institution = institutionSnap.data();
-  if (application.status !== "approved_awaiting_payment" && application.onboardingFeeStatus !== "due"
-      && institution.onboardingFee?.status !== "due" && institution.onboardingFee?.status !== "initiation_failed") {
-    throw new HttpsError("failed-precondition", "This institution does not currently have an unpaid onboarding fee eligible for retry.");
+  const retryableStatuses = ["due", "failed", "initiation_failed"];
+  const retryable = retryableStatuses.includes(application.onboardingFeeStatus)
+    || retryableStatuses.includes(institution.onboardingFee?.status);
+  if (!retryable) {
+    throw new HttpsError("failed-precondition", "There is no failed or due onboarding payment to retry. Check the current payment status before sending another prompt.");
   }
   const fee = institution.pricingSnapshot || {};
   if (fee.onboardingFeeEnabled !== true || Number(fee.onboardingFeeAmount) <= 0) {
@@ -384,9 +392,14 @@ exports.darajaInstitutionCallback = onRequest({ secrets: DARAJA_SECRETS, invoker
         status: "failed", resultCode: Number(callback.ResultCode),
         resultDescription: description, updatedAt: Timestamp.now()
       }, { merge: true });
-      await db.doc("institutions/" + payment.institutionId).set({
-        onboardingFee: { status: "due", lastFailure: description, updatedAt: Timestamp.now() }
-      }, { merge: true });
+      await Promise.all([
+        db.doc("institutions/" + payment.institutionId).set({
+          onboardingFee: { status: "due", lastFailure: description, updatedAt: Timestamp.now() }
+        }, { merge: true }),
+        db.doc("institutionApplications/" + payment.applicationId).set({
+          onboardingFeeStatus: "due", lastPaymentFailure: description, updatedAt: Timestamp.now()
+        }, { merge: true })
+      ]);
       res.status(200).json({ ResultCode: 0, ResultDesc: "Callback acknowledged." });
       return;
     }
