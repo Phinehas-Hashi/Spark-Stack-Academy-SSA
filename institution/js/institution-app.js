@@ -101,6 +101,7 @@ function setupTeamForm() {
   }
   form.addEventListener("submit", async event => {
     event.preventDefault();
+    if (!window.SSAOnlineActionGuard?.requireOnline("Creating an institution team account")) return;
     const button = document.getElementById("createTeamAccountBtn");
     const message = document.getElementById("teamAccountMessage");
     const values = new FormData(form);
