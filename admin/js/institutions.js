@@ -58,7 +58,7 @@ function render() {
     detail(details, "Website", item.website);
     card.append(details);
     if (item.rejectionReason) card.append(node("div", "application-reason", "Rejection reason: " + item.rejectionReason));
-    if (item.status === "approved_awaiting_payment" || (item.status === "approved" && item.onboardingFeeStatus === "due")) {
+    if (["due", "failed", "initiation_failed"].includes(item.onboardingFeeStatus)) {
       const actions = node("div", "application-actions");
       const retry = node("button", "approve-button", "Resend M-Pesa payment prompt");
       retry.type = "button";
