@@ -128,44 +128,41 @@ async function loadCourse() {
 }
 
 async function checkCourseAccess() {
-    // Free courses are intentionally open to authenticated students.
-    if (course.isFree === true || Number(course.price || 0) <= 0) return true;
+    // A public listing or a zero price is not an entitlement.
+    // Access requires a trusted active enrolment record.
+    const activeStatuses = ["active", "approved", "completed"];
+    const hasEntitlement = data => {
+        if (!data) return false;
+        const status = String(data.status || "").trim().toLowerCase();
+        const paymentStatus = String(data.paymentStatus || "").trim().toLowerCase();
+        if (["revoked", "suspended", "cancelled", "canceled", "rejected", "pending"].includes(status)) return false;
 
-    // Canonical enrollment IDs are deterministic: uid_courseId.
-    // Read the document directly instead of running a compound query.
-    // This avoids index/query failures and matches the production rules.
+        // Institution-issued enrolments are valid when tied to an institution
+        // and active; the institution is responsible for the learner's access.
+        if (data.institutionId && activeStatuses.includes(status)) return true;
+
+        // Marketplace/free enrolments must have both an active state and
+        // a trusted paid/free payment state.
+        if (activeStatuses.includes(status) && ["paid", "free"].includes(paymentStatus)) return true;
+
+        // Older trusted payment records may use status="paid".
+        return status === "paid" && (paymentStatus === "" || paymentStatus === "paid");
+    };
+
+    // Canonical marketplace enrolment: deterministic uid_courseId document.
     try {
-        const enrollmentRef = doc(db, "enrollments", `${currentUser.uid}_${courseId}`);
-        const snap = await getDoc(enrollmentRef);
-
-        if (snap.exists()) {
-            const data = snap.data() || {};
-            const status = String(data.status || data.paymentStatus || "").trim().toLowerCase();
-
-            if (["paid", "active", "approved", "completed", "free"].includes(status)) {
-                return true;
-            }
-        }
+        const canonical = await getDoc(doc(db, "enrollments", `${currentUser.uid}_${courseId}`));
+        if (canonical.exists() && hasEntitlement(canonical.data())) return true;
     } catch (error) {
-        console.warn("Canonical enrollment access check failed:", error);
+        console.warn("Canonical enrolment check failed:", error);
     }
 
-    // Backward compatibility for older nested enrollment records.
+    // Institution and legacy enrolments live under the student's record.
     try {
-        const legacy = await getDoc(
-            doc(db, "students", currentUser.uid, "enrollments", courseId)
-        );
-
-        if (legacy.exists()) {
-            const data = legacy.data() || {};
-            const status = String(data.status || data.paymentStatus || "").trim().toLowerCase();
-
-            if (["paid", "free", "active", "approved", "completed"].includes(status)) {
-                return true;
-            }
-        }
+        const nested = await getDoc(doc(db, "students", currentUser.uid, "enrollments", courseId));
+        if (nested.exists() && hasEntitlement(nested.data())) return true;
     } catch (error) {
-        console.warn("Legacy enrollment check failed:", error);
+        console.warn("Institution/legacy enrolment check failed:", error);
     }
 
     return false;
@@ -494,7 +491,7 @@ function showLockedState() {
     if (courseLocked) courseLocked.style.display = "block";
     if (courseContent) courseContent.style.display = "none";
     unlockCourseBtn && (unlockCourseBtn.onclick = () => {
-        window.location.href = `payments.html?courseId=${encodeURIComponent(courseId)}`;
+        window.location.href = `course-details.html?id=${encodeURIComponent(courseId)}`;
     });
 }
 
