@@ -956,3 +956,20 @@ RESPONSIVE
 .lesson-navigation button,.player-action{border-radius:10px}
 .lesson-navigation .primary-btn{background:linear-gradient(105deg,#7024f5,#a12bff)!important}
 @media(max-width:700px){.classroom-header{padding:18px;align-items:stretch;flex-direction:column}.course-player-page{padding:14px}}
+
+
+/* Live classroom sessions */
+.live-class-card{margin-top:18px;padding:22px;background:#fff;border:1px solid var(--cp-border);border-radius:var(--cp-radius);box-shadow:var(--cp-shadow)}
+.live-class-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.live-class-heading h3{margin:4px 0 0;color:var(--cp-navy);font-size:18px}
+.live-class-heading>i{color:var(--cp-blue);width:24px;height:24px}
+.live-class-eyebrow{color:var(--cp-blue);font-size:10px;font-weight:800;letter-spacing:1px}
+.live-class-sessions{display:grid;gap:10px}
+.live-class-empty{margin:0;padding:14px;border-radius:10px;background:#f7f9fc;color:var(--cp-muted);font-size:13px}
+.live-class-session{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid var(--cp-border);border-radius:12px}
+.live-class-session-info{display:grid;gap:5px;min-width:0}
+.live-class-session-info strong{color:var(--cp-text);font-size:14px}
+.live-class-session-info span,.live-class-session-info p{margin:0;color:var(--cp-muted);font-size:12px}
+.live-class-join{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;padding:10px 14px;border-radius:9px;background:var(--cp-blue);color:#fff;text-decoration:none;font-size:12px;font-weight:700}
+.live-class-join:hover{background:var(--cp-blue-dark)}
+@media(max-width:600px){.live-class-session{align-items:flex-start;flex-direction:column}.live-class-join{width:100%;justify-content:center}}
