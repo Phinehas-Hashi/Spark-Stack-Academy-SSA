@@ -1,0 +1,29 @@
+name: Validate Spark Stack Academy payment functions
+
+on:
+  push:
+    branches: [modernization]
+    paths:
+      - "functions/**"
+      - "firestore.rules"
+      - ".github/workflows/validate-institution-payments.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "functions/**"
+      - "firestore.rules"
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate Cloud Functions JavaScript syntax
+        run: node --check functions/index.js
+      - name: Validate Functions package metadata
+        run: node -e "const p=require('./functions/package.json'); if (p.engines.node !== '>=20') process.exit(1); console.log('Functions package metadata OK')"
