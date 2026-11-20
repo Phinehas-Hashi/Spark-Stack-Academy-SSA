@@ -178,6 +178,8 @@ exports.approveInstitutionApplication = onCall(async request => {
         estimatedLearnerRange: application.learnerRange,
         status: "active",
         verificationStatus: "verified",
+        limits: { instructors: 20, courses: 100, students: 5000, adminAccounts: 10 },
+        usage: { instructors: 0, courses: 0, students: 0, adminAccounts: 0 },
         subscription: {
           plan: "trial",
           status: "trialing",
@@ -263,6 +265,75 @@ exports.rejectInstitutionApplication = onCall(async request => {
     if (error instanceof HttpsError) throw error;
     console.error("rejectInstitutionApplication failed:", error);
     throw new HttpsError("internal", "The application could not be rejected. Check its status before retrying.");
+  }
+});
+
+
+
+exports.createInstitutionTeamAccount = onCall(async request => {
+  const callerUid = request.auth?.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Sign in to manage your institution team.");
+  const callerSnap = await db.doc(`users/${callerUid}`).get();
+  const caller = callerSnap.exists ? callerSnap.data() : {};
+  if (caller.role !== "institution" || caller.institutionRole !== "owner" || caller.status !== "active" || caller.active !== true || caller.verified !== true) {
+    throw new HttpsError("permission-denied", "Only the verified institution owner can add team accounts.");
+  }
+
+  const institutionId = safeText(caller.institutionId);
+  const institutionRef = db.doc(`institutions/${institutionId}`);
+  const email = safeText(request.data?.email).toLowerCase();
+  const fullName = safeText(request.data?.fullName);
+  const role = safeText(request.data?.role).toLowerCase();
+  const password = String(request.data?.temporaryPassword || "");
+  if (!institutionId || !["institution_admin", "instructor"].includes(role)) throw new HttpsError("invalid-argument", "Choose a valid team role.");
+  if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || fullName.length < 2 || password.length < 12) {
+    throw new HttpsError("invalid-argument", "Provide a valid email, full name and temporary password of at least 12 characters.");
+  }
+
+  const institutionSnap = await institutionRef.get();
+  if (!institutionSnap.exists || institutionSnap.data().status !== "active") throw new HttpsError("failed-precondition", "Institution workspace is not active.");
+  const institution = institutionSnap.data();
+  const limitKey = role === "instructor" ? "instructors" : "adminAccounts";
+  const roleQuery = db.collection("users").where("institutionId", "==", institutionId).where("institutionRole", "==", role);
+  const existing = await adminAuth.getUserByEmail(email).catch(error => error.code === "auth/user-not-found" ? null : Promise.reject(error));
+  if (existing) throw new HttpsError("already-exists", "An account with this email already exists.");
+
+  let created;
+  try {
+    created = await adminAuth.createUser({ email, password, displayName: fullName, emailVerified: false, disabled: false });
+    await db.runTransaction(async transaction => {
+      const [freshInstitution, members] = await Promise.all([
+        transaction.get(institutionRef),
+        transaction.get(roleQuery)
+      ]);
+      if (!freshInstitution.exists || freshInstitution.data().status !== "active") throw new HttpsError("failed-precondition", "Institution workspace is not active.");
+      const limits = freshInstitution.data().limits || {};
+      const max = Number(limits[limitKey] ?? (role === "instructor" ? 20 : 10));
+      if (members.size >= max) throw new HttpsError("resource-exhausted", `Institution limit reached: maximum ${max} ${limitKey === "instructors" ? "instructors" : "admin accounts"}.`);
+      const memberRef = db.doc(`institutions/${institutionId}/members/${created.uid}`);
+      transaction.create(db.doc(`users/${created.uid}`), {
+        uid: created.uid, email, fullName, name: fullName, displayName: fullName,
+        role: role === "instructor" ? "instructor" : "institution_admin",
+        institutionRole: role, institutionId, institutionName: institution.institutionName,
+        status: "active", active: true, verified: true,
+        createdAt: Timestamp.now(), createdBy: callerUid
+      });
+      transaction.create(memberRef, {
+        uid: created.uid, email, fullName, role, status: "active",
+        createdAt: Timestamp.now(), createdBy: callerUid
+      });
+    });
+    await db.collection("audit_logs").add({
+      action: "institution_team_account_created", actorId: callerUid,
+      targetId: created.uid, targetEmail: email, targetName: fullName,
+      institutionId, memberRole: role, createdAt: Timestamp.now()
+    });
+    return { success: true, uid: created.uid, role };
+  } catch (error) {
+    if (created) await adminAuth.deleteUser(created.uid).catch(() => {});
+    if (error instanceof HttpsError) throw error;
+    console.error("createInstitutionTeamAccount failed:", error);
+    throw new HttpsError("internal", "The team account could not be created.");
   }
 });
 
