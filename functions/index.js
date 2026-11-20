@@ -308,7 +308,8 @@ exports.createInstitutionTeamAccount = onCall(async request => {
       if (!freshInstitution.exists || freshInstitution.data().status !== "active") throw new HttpsError("failed-precondition", "Institution workspace is not active.");
       const limits = freshInstitution.data().limits || {};
       const max = Number(limits[limitKey] ?? (role === "instructor" ? 20 : 10));
-      const effectiveMax = role === "institution_admin" ? Math.max(0, max - 1) : max;\n      if (members.size >= effectiveMax) throw new HttpsError("resource-exhausted", `Institution limit reached: maximum ${max} ${limitKey === "instructors" ? "instructors" : "admin accounts including the owner"}.`);
+      const effectiveMax = role === "institution_admin" ? Math.max(0, max - 1) : max;
+      if (members.size >= effectiveMax) throw new HttpsError("resource-exhausted", `Institution limit reached: maximum ${max} ${limitKey === "instructors" ? "instructors" : "admin accounts including the owner"}.`);
       const memberRef = db.doc(`institutions/${institutionId}/members/${created.uid}`);
       transaction.create(db.doc(`users/${created.uid}`), {
         uid: created.uid, email, fullName, name: fullName, displayName: fullName,
