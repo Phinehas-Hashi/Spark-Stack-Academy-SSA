@@ -1433,6 +1433,24 @@ service cloud.firestore {
 
 
     // ============================================================
+    // INSTITUTION PAYMENT RECORDS
+    // Payment records are server-written; only authorised staff
+    // and the associated institution's active members may read.
+    // ============================================================
+
+    match /institutionPayments/{paymentId} {
+      allow get, list: if staff()
+        || (
+          signedIn()
+          && userExists()
+          && userData().get('institutionId', '') == resource.data.get('institutionId', '')
+          && userData().get('active', false) == true
+          && userData().get('status', '') == 'active'
+        );
+      allow create, update, delete: if false;
+    }
+
+    // ============================================================
     // DEFAULT DENY
     // ============================================================
 
