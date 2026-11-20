@@ -80,6 +80,20 @@ service cloud.firestore {
       return isStudent() || isInstructor();
     }
 
+    function institutionMember(institutionId) {
+      return signedIn()
+        && userExists()
+        && userData().get('institutionId', '') == institutionId
+        && userData().get('status', '') == 'active'
+        && userData().get('active', false) == true
+        && userData().get('verified', false) == true;
+    }
+
+    function institutionOwner(institutionId) {
+      return institutionMember(institutionId)
+        && userData().get('institutionRole', '') == 'owner';
+    }
+
 
     // ============================================================
     // PLATFORM CONTROL
@@ -782,42 +796,29 @@ service cloud.firestore {
     // ============================================================
 
     match /courses/{courseId} {
-
       allow get, list:
         if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
+        || (isStudent() && studentPortalOpen())
+        || (isInstructor() && instructorPortalOpen())
+        || (resource.data.get('institutionId', '') != ''
+          && institutionMember(resource.data.institutionId));
 
       allow create:
         if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && request.resource.data.instructorId == uid()
-        );
+        || (isInstructor() && instructorPortalOpen()
+          && request.resource.data.instructorId == uid());
 
       allow update:
         if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
+        || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
-        );
+          && request.resource.data.instructorId == uid());
 
-      allow delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-        );
+      // Instructors retain deletion access to their own course records.
+      // Founder moderation uses a soft-delete Cloud Function to preserve history.
+      allow delete: if staff()
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid());
     }
 
 
@@ -1342,6 +1343,108 @@ service cloud.firestore {
       }
     }
 
+
+    // ============================================================
+    // INSTITUTION WORKSPACES
+    // Workspace metadata is readable by verified members.
+    // Membership provisioning is restricted to trusted functions.
+    // ============================================================
+
+    match /institutions/{institutionId} {
+      allow get: if institutionMember(institutionId) || staff();
+      allow list: if staff();
+      allow create, update, delete: if false;
+
+      match /members/{memberId} {
+        allow get: if institutionMember(institutionId)
+          && (uid() == memberId || institutionOwner(institutionId));
+        allow list: if institutionOwner(institutionId);
+        allow create, update, delete: if false;
+      }
+    }
+
+    // ============================================================
+    // INSTITUTION APPLICATIONS
+    // Applicants can submit and read only their own pending request.
+    // Review and approval are reserved for trusted staff tooling.
+    // ============================================================
+
+    match /institutionApplications/{applicationId} {
+      allow create:
+        if signedIn()
+        && uid() == applicationId
+        && request.resource.data.institutionOwnerUid == uid()
+        && request.resource.data.status == 'pending_review'
+        && request.resource.data.source == 'institution_registration'
+        && request.resource.data.keys().hasOnly([
+          'institutionOwnerUid',
+          'institutionName',
+          'institutionType',
+          'country',
+          'website',
+          'learnerRange',
+          'institutionPhone',
+          'ownerName',
+          'ownerEmail',
+          'ownerPosition',
+          'status',
+          'submittedAt',
+          'source'
+        ])
+        && request.resource.data.institutionName is string
+        && request.resource.data.institutionName.size() >= 2
+        && request.resource.data.institutionName.size() <= 120
+        && request.resource.data.ownerName is string
+        && request.resource.data.ownerName.size() >= 2
+        && request.resource.data.ownerEmail is string
+        && request.resource.data.country is string
+        && request.resource.data.institutionPhone is string
+        && request.resource.data.ownerPosition is string
+        && request.resource.data.institutionType is string
+        && request.resource.data.learnerRange is string;
+
+      allow get:
+        if signedIn()
+        && (
+          uid() == applicationId
+          || staff()
+        );
+
+      allow list:
+        if staff();
+
+      // Applicant cannot change the application or self-approve.
+      allow update, delete:
+        if false;
+    }
+
+
+    // ============================================================
+    // INSTITUTION PAYMENT RECORDS
+    // Payment records are server-written; only authorised staff
+    // and the associated institution's active members may read.
+    // ============================================================
+
+    match /institutionPayments/{paymentId} {
+      allow get, list: if staff()
+        || (
+          signedIn()
+          && userExists()
+          && userData().get('institutionId', '') == resource.data.get('institutionId', '')
+          && userData().get('active', false) == true
+          && userData().get('status', '') == 'active'
+        );
+      allow create, update, delete: if false;
+    }
+
+    // ============================================================
+    // UNIFIED MARKETPLACE CATALOGUE
+    // Entries are created and maintained by trusted Cloud Functions.
+    // ============================================================
+    match /marketplaceItems/{itemId} {
+      allow get, list: if resource.data.get('status', '') == 'published';
+      allow create, update, delete: if false;
+    }
 
     // ============================================================
     // DEFAULT DENY

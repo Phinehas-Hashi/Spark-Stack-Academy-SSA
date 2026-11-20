@@ -24,14 +24,30 @@ async function loadAdminShell() {
 }
 
 async function getAdminProfile(uid) {
-    try { const snapshot = await getDoc(doc(db, "users", uid)); return snapshot.exists() ? { uid, ...snapshot.data() } : null; }
+    try { const snapshot = await getDoc(doc(db, "users", uid));
+        if (snapshot.exists()) {
+            const profile = { uid, ...snapshot.data() };
+            if (String(profile.role || "").toLowerCase() !== "founder") return profile;
+            const founderSnapshot = await getDoc(doc(db, "founder", uid));
+            if (!founderSnapshot.exists()) return null;
+            const founder = founderSnapshot.data();
+            if (founder.role !== "founder" || founder.status !== "active" || founder.active === false || founder.verified === false) return null;
+            return { ...profile, role: "founder", active: true, status: "active" };
+        }
+        const founderSnapshot = await getDoc(doc(db, "founder", uid));
+        if (!founderSnapshot.exists()) return null;
+        const founder = founderSnapshot.data();
+        return founder.role === "founder" && founder.status === "active" && founder.active !== false && founder.verified !== false
+            ? { uid, ...founder, role: "founder", active: true, status: "active" } : null; }
     catch (error) { console.error("❌ Failed loading admin profile:", error); return null; }
 }
 
 function isAuthorized(profile) {
     if (!profile) return false;
     const role = String(profile.role || "").trim().toLowerCase();
-    return ["admin", "administrator", "moderator"].includes(role);
+    return ["admin", "administrator", "moderator", "finance_manager", "financial_manager", "founder"].includes(role)
+        && profile.active !== false
+        && profile.status !== "suspended";
 }
 
 function syncAdminProfile(profile) { window.AdminSidebar?.updateProfile?.(profile); window.AdminTopbar?.updateProfile?.(profile); }
