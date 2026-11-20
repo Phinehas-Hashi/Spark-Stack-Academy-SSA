@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#081c3a">
+  <title>Institution Dashboard | Spark Stack Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/institution.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="institution-app">
+  <aside id="institutionSidebar" class="institution-sidebar"></aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <main class="institution-main">
+    <header id="institutionTopbar" class="institution-topbar"></header>
+    <section class="page-wrap">
+      <section class="welcome-panel">
+        <div>
+          <span class="eyebrow">INSTITUTION WORKSPACE</span>
+          <h1>Welcome, <span id="institutionName">your institution</span></h1>
+          <p>Coordinate learning, manage your institution’s people and keep your programmes organised.</p>
+        </div>
+        <div class="welcome-mark"><i data-lucide="building-2"></i></div>
+      </section>
+
+      <section class="notice-panel" aria-live="polite">
+        <i data-lucide="info"></i>
+        <div><strong>Institution workspace setup</strong><p>This portal shell is ready. Your institution records, billing status and learner data will appear after the data model and permissions are verified.</p></div>
+      </section>
+
+      <div class="section-heading"><div><span class="eyebrow">AT A GLANCE</span><h2>Institution overview</h2></div><span class="muted">Live data connection pending</span></div>
+      <section class="metrics-grid">
+        <article class="metric-card"><span class="metric-icon blue"><i data-lucide="users"></i></span><div><span>Learners</span><strong>—</strong><small>Awaiting data connection</small></div></article>
+        <article class="metric-card"><span class="metric-icon violet"><i data-lucide="graduation-cap"></i></span><div><span>Instructors</span><strong>—</strong><small>Awaiting data connection</small></div></article>
+        <article class="metric-card"><span class="metric-icon gold"><i data-lucide="book-open"></i></span><div><span>Programmes</span><strong>—</strong><small>Awaiting data connection</small></div></article>
+        <article class="metric-card"><span class="metric-icon green"><i data-lucide="chart-no-axes-combined"></i></span><div><span>Learning activity</span><strong>—</strong><small>Awaiting data connection</small></div></article>
+      </section>
+
+      <div class="section-heading"><div><span class="eyebrow">WORKSPACE</span><h2>Institution services</h2></div></div>
+      <section class="services-grid">
+        <a class="service-card" href="#learners"><span class="service-icon blue"><i data-lucide="users"></i></span><strong>Learner management</strong><p>Organise learner access, enrolments and learning progress.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
+        <a class="service-card" href="#programmes"><span class="service-icon violet"><i data-lucide="book-open-check"></i></span><strong>Courses & programmes</strong><p>Coordinate institution programmes and course approvals.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
+        <a class="service-card" href="#instructors"><span class="service-icon gold"><i data-lucide="presentation"></i></span><strong>Instructor coordination</strong><p>Manage teaching teams and programme assignments.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
+        <a class="service-card" href="#billing"><span class="service-icon green"><i data-lucide="wallet"></i></span><strong>Billing & subscriptions</strong><p>Review subscription information and institution billing.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
+        <a class="service-card" href="#reports"><span class="service-icon cyan"><i data-lucide="file-chart-column"></i></span><strong>Reports & analytics</strong><p>Track institutional learning and operational outcomes.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
+        <a class="service-card" href="#settings"><span class="service-icon slate"><i data-lucide="settings"></i></span><strong>Institution settings</strong><p>Maintain your institution profile and workspace preferences.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
+      </section>
+
+      <section class="module-grid">
+        <article class="module-panel" id="learners"><div class="module-title"><i data-lucide="users"></i><div><h3>Learner management</h3><p>Access and enrolment tools will be connected here.</p></div></div><span class="module-state">Planned integration</span></article>
+        <article class="module-panel" id="programmes"><div class="module-title"><i data-lucide="book-open"></i><div><h3>Courses & programmes</h3><p>Institution course catalogue and approval status.</p></div></div><span class="module-state">Planned integration</span></article>
+        <article class="module-panel" id="instructors"><div class="module-title"><i data-lucide="presentation"></i><div><h3>Instructor coordination</h3><p>Teaching team invitations and assignments.</p></div></div><span class="module-state">Planned integration</span></article>
+        <article class="module-panel" id="billing"><div class="module-title"><i data-lucide="wallet"></i><div><h3>Billing & subscriptions</h3><p>Subscription and direct-settlement information.</p></div></div><span class="module-state">Planned integration</span></article>
+        <article class="module-panel" id="reports"><div class="module-title"><i data-lucide="chart-no-axes-combined"></i><div><h3>Reports & analytics</h3><p>Verified institutional reporting and exports.</p></div></div><span class="module-state">Planned integration</span></article>
+        <article class="module-panel" id="settings"><div class="module-title"><i data-lucide="settings"></i><div><h3>Institution settings</h3><p>Profile, team permissions and preferences.</p></div></div><span class="module-state">Planned integration</span></article>
+      </section>
+      <footer class="page-footer">Spark Stack Academy · Institution Portal</footer>
+    </section>
+  </main>
+</div>
+<script type="module" src="js/institution-app.js"></script>
+</body>
+</html>
