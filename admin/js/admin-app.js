@@ -24,14 +24,19 @@ async function loadAdminShell() {
 }
 
 async function getAdminProfile(uid) {
-    try { const snapshot = await getDoc(doc(db, "users", uid));\n        if (snapshot.exists()) return { uid, ...snapshot.data() };\n        const founderSnapshot = await getDoc(doc(db, "founder", uid));\n        return founderSnapshot.exists() ? { uid, ...founderSnapshot.data(), role: "founder", active: true, status: "active" } : null; }
+    try { const snapshot = await getDoc(doc(db, "users", uid));
+        if (snapshot.exists()) return { uid, ...snapshot.data() };
+        const founderSnapshot = await getDoc(doc(db, "founder", uid));
+        return founderSnapshot.exists() ? { uid, ...founderSnapshot.data(), role: "founder", active: true, status: "active" } : null; }
     catch (error) { console.error("❌ Failed loading admin profile:", error); return null; }
 }
 
 function isAuthorized(profile) {
     if (!profile) return false;
     const role = String(profile.role || "").trim().toLowerCase();
-    return ["admin", "administrator", "moderator", "finance_manager", "financial_manager", "founder"].includes(role)\n        && profile.active !== false\n        && profile.status !== "suspended";
+    return ["admin", "administrator", "moderator", "finance_manager", "financial_manager", "founder"].includes(role)
+        && profile.active !== false
+        && profile.status !== "suspended";
 }
 
 function syncAdminProfile(profile) { window.AdminSidebar?.updateProfile?.(profile); window.AdminTopbar?.updateProfile?.(profile); }
