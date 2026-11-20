@@ -570,8 +570,8 @@ exports.saveInstitutionPricing = onCall(async request => {
   if (!allowedCurrencies.includes(currency)) throw new HttpsError("invalid-argument", "Choose a supported currency.");
   for (const field of amountFields) {
     const value = Number(input[field]);
-    if (!Number.isSafeInteger(value) || value < 0 || value > 1000000000) {
-      throw new HttpsError("invalid-argument", `${field} must be a whole amount between 0 and 1,000,000,000.`);
+    if (!Number.isFinite(value) || value < 0 || value > 1000000000 || Number(value.toFixed(2)) !== value) {
+      throw new HttpsError("invalid-argument", `${field} must be an amount between 0 and 1,000,000,000 with at most two decimal places.`);
     }
   }
   const feePercent = Number(input.transactionFeePercent);
@@ -594,14 +594,17 @@ exports.saveInstitutionPricing = onCall(async request => {
     trialDays
   };
   const now = Timestamp.now();
-  await institutionPricingRef.set({ ...pricing, updatedAt: now, updatedBy: actor.uid, updatedByRole: actor.role }, { merge: true });
-  await db.collection("audit_logs").add({
-    action: "institution_pricing_updated",
-    actorId: actor.uid,
-    actorRole: actor.role,
-    actorEmail: actor.email,
-    changes: pricing,
-    createdAt: now
+  const auditRef = db.collection("audit_logs").doc();
+  await db.runTransaction(async transaction => {
+    transaction.set(institutionPricingRef, { ...pricing, updatedAt: now, updatedBy: actor.uid, updatedByRole: actor.role }, { merge: true });
+    transaction.create(auditRef, {
+      action: "institution_pricing_updated",
+      actorId: actor.uid,
+      actorRole: actor.role,
+      actorEmail: actor.email,
+      changes: pricing,
+      createdAt: now
+    });
   });
   return { success: true, pricing };
 });
