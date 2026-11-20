@@ -322,6 +322,10 @@ exports.createInstitutionTeamAccount = onCall(async request => {
         uid: created.uid, email, fullName, role, status: "active",
         createdAt: Timestamp.now(), createdBy: callerUid
       });
+      transaction.update(institutionRef, {
+        usage: { ...(freshInstitution.data().usage || {}), [limitKey]: members.size + 1 },
+        updatedAt: Timestamp.now()
+      });
     });
     await db.collection("audit_logs").add({
       action: "institution_team_account_created", actorId: callerUid,
