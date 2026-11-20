@@ -6,6 +6,7 @@ import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/
 const functions = getFunctions(getApp());
 const approveApplication = httpsCallable(functions, "approveInstitutionApplication");
 const rejectApplication = httpsCallable(functions, "rejectInstitutionApplication");
+const retryOnboardingPayment = httpsCallable(functions, "retryInstitutionOnboardingPayment");
 const list = document.getElementById("applicationsList");
 const filter = document.getElementById("applicationFilter");
 const message = document.getElementById("applicationMessage");
@@ -56,6 +57,14 @@ function render() {
     detail(details, "Website", item.website);
     card.append(details);
     if (item.rejectionReason) card.append(node("div", "application-reason", "Rejection reason: " + item.rejectionReason));
+    if (item.status === "approved_awaiting_payment") {
+      const actions = node("div", "application-actions");
+      const retry = node("button", "approve-button", "Resend M-Pesa payment prompt");
+      retry.type = "button";
+      retry.addEventListener("click", () => handleRetryPayment(item, retry));
+      card.append(actions);
+      actions.append(retry);
+    }
     if (item.status === "pending_review") {
       const actions = node("div", "application-actions");
       const approve = node("button", "approve-button", "Approve & activate");
@@ -77,7 +86,7 @@ async function loadApplications() {
     const snap = await getDocs(query(collection(db, "institutionApplications"), orderBy("submittedAt", "desc")));
     applications = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     document.getElementById("pendingCount").textContent = applications.filter(x => x.status === "pending_review").length;
-    document.getElementById("approvedCount").textContent = applications.filter(x => x.status === "approved").length;
+    document.getElementById("approvedCount").textContent = applications.filter(x => ["approved", "approved_awaiting_payment"].includes(x.status)).length;
     document.getElementById("rejectedCount").textContent = applications.filter(x => x.status === "rejected").length;
     render();
     window.lucide?.createIcons();
@@ -90,13 +99,34 @@ async function handleApprove(item, button, otherButton) {
   if (!window.confirm("Approve " + item.institutionName + " and activate its owner account with a 14-day trial?")) return;
   button.disabled = true; otherButton.disabled = true; setMessage("Approving institution…");
   try {
-    await approveApplication({ applicationId: item.id });
-    setMessage("Institution approved. Its 14-day trial has started.", "success");
+    const result = await approveApplication({ applicationId: item.id });
+    const data = result.data || {};
+    setMessage(data.payment?.success
+      ? (data.activationPendingPayment
+          ? "Application approved. Workspace activation is waiting for verified M-Pesa payment. STK Push sent to the registered phone."
+          : "Institution approved and trial started. Onboarding fee payment prompt sent to the registered phone.")
+      : (data.payment?.status === "initiation_failed"
+          ? "Application approved, but M-Pesa prompt could not be sent. Use Resend M-Pesa payment prompt after checking Daraja configuration."
+          : "Institution approved. Its trial has started."), data.payment?.status === "initiation_failed" ? "error" : "success");
     await loadApplications();
   } catch (error) {
     console.error("Institution approval failed:", error);
     setMessage(error.message || "Approval failed. Check application status before retrying.", "error");
     button.disabled = false; otherButton.disabled = false;
+  }
+}
+async function handleRetryPayment(item, button) {
+  if (!window.confirm("Send a new M-Pesa STK Push to " + (item.institutionPhone || "the registered institution phone") + "?")) return;
+  button.disabled = true;
+  setMessage("Sending a new M-Pesa payment prompt…");
+  try {
+    const result = await retryOnboardingPayment({ applicationId: item.id });
+    setMessage(result.data?.customerMessage || "M-Pesa prompt sent. Ask the institution contact to complete payment on their phone.", "success");
+    await loadApplications();
+  } catch (error) {
+    console.error("Institution onboarding payment retry failed:", error);
+    setMessage(error.message || "Payment prompt could not be sent.", "error");
+    button.disabled = false;
   }
 }
 async function handleReject(item, button, otherButton) {
