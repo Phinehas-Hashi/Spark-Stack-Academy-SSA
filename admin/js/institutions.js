@@ -53,6 +53,7 @@ function render() {
     detail(details, "Work email", item.ownerEmail);
     detail(details, "Position", item.ownerPosition);
     detail(details, "Phone", item.institutionPhone);
+    if (item.onboardingFeeStatus && item.onboardingFeeStatus !== "not_required") detail(details, "Onboarding fee", item.onboardingFeeStatus.replaceAll("_", " "));
     detail(details, "Estimated learners", item.learnerRange);
     detail(details, "Website", item.website);
     card.append(details);
@@ -96,7 +97,7 @@ async function loadApplications() {
   }
 }
 async function handleApprove(item, button, otherButton) {
-  if (!window.confirm("Approve " + item.institutionName + " and activate its owner account with a 14-day trial?")) return;
+  if (!window.confirm("Approve " + item.institutionName + " using the current institution trial and onboarding fee settings? An M-Pesa payment prompt may be sent to its registered contact number.")) return;
   button.disabled = true; otherButton.disabled = true; setMessage("Approving institution…");
   try {
     const result = await approveApplication({ applicationId: item.id });
