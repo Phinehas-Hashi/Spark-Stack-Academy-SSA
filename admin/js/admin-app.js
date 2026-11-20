@@ -25,9 +25,20 @@ async function loadAdminShell() {
 
 async function getAdminProfile(uid) {
     try { const snapshot = await getDoc(doc(db, "users", uid));
-        if (snapshot.exists()) return { uid, ...snapshot.data() };
+        if (snapshot.exists()) {
+            const profile = { uid, ...snapshot.data() };
+            if (String(profile.role || "").toLowerCase() !== "founder") return profile;
+            const founderSnapshot = await getDoc(doc(db, "founder", uid));
+            if (!founderSnapshot.exists()) return null;
+            const founder = founderSnapshot.data();
+            if (founder.role !== "founder" || founder.status !== "active" || founder.active === false || founder.verified === false) return null;
+            return { ...profile, role: "founder", active: true, status: "active" };
+        }
         const founderSnapshot = await getDoc(doc(db, "founder", uid));
-        return founderSnapshot.exists() ? { uid, ...founderSnapshot.data(), role: "founder", active: true, status: "active" } : null; }
+        if (!founderSnapshot.exists()) return null;
+        const founder = founderSnapshot.data();
+        return founder.role === "founder" && founder.status === "active" && founder.active !== false && founder.verified !== false
+            ? { uid, ...founder, role: "founder", active: true, status: "active" } : null; }
     catch (error) { console.error("❌ Failed loading admin profile:", error); return null; }
 }
 
