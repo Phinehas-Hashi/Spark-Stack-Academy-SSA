@@ -3,7 +3,7 @@
 // Behavior-only shell loader. Styling lives in components.css.
 // ============================================================
 
-const CACHE_KEY = "ssa_student_sidebar_html_v3";
+const CACHE_KEY = "ssa_student_sidebar_html_v4";
 
 function paint(html, container) {
     if (!container || !html) return false;
