@@ -68,6 +68,7 @@ async(user)=>{
     await loadAssignment();
 
     await loadSubmission(user.uid);
+    setupAssignmentSubmission(user);
 
 }
 
@@ -229,4 +230,68 @@ ${submission.feedback || "Waiting for grading."}
 
 `;
 
+}
+
+// ==============================
+// ONLINE-ONLY TEXT SUBMISSION
+// File uploads remain disabled in this phase.
+// ==============================
+function setupAssignmentSubmission(user) {
+  const button = document.getElementById("submitAssignmentBtn");
+  const notes = document.getElementById("submissionNotes");
+  const fileInput = document.getElementById("submissionFile");
+  if (!button || !notes) return;
+
+  button.addEventListener("click", async () => {
+    if (!window.SSAOnlineActionGuard?.requireOnline("Submitting an assignment")) return;
+
+    if (!assignmentId || !assignmentData) {
+      alert("This assignment could not be verified. Refresh and try again.");
+      return;
+    }
+
+    if (fileInput?.files?.length) {
+      alert("File uploads are not enabled in this phase. Remove the selected file and submit your written response only.");
+      return;
+    }
+
+    const content = notes.value.trim();
+    if (!content) {
+      alert("Write your assignment response before submitting.");
+      notes.focus();
+      return;
+    }
+
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = "Submitting…";
+
+    try {
+      await setDoc(doc(db, "submissions", `${assignmentId}_${user.uid}`), {
+        assignmentId,
+        userId: user.uid,
+        studentId: user.uid,
+        studentName: user.displayName || user.email?.split("@")[0] || "Student",
+        studentEmail: user.email || "",
+        content,
+        notes: content,
+        status: "submitted",
+        submittedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      const status = document.getElementById("assignmentStatus");
+      if (status) {
+        status.textContent = "Submitted";
+        status.className = "status submitted";
+      }
+      alert("Assignment submitted successfully.");
+    } catch (error) {
+      console.error("Assignment submission failed:", error);
+      alert(error.message || "The assignment could not be submitted. Check your connection and try again.");
+    } finally {
+      button.disabled = false;
+      button.textContent = originalText || "Submit Assignment";
+    }
+  });
 }
