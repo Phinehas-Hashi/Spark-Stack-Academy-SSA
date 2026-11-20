@@ -1787,96 +1787,31 @@ async function saveCourse() {
 // ============================================================
 
 async function publishCourse() {
-
-    if (!modules.length) {
-
-        alert(
-            "Add at least one module before publishing."
-        );
-
+    if (!modules.length || !lessons.length) {
+        alert("Add at least one module and one lesson before submitting for review.");
         return;
-
     }
-
-
-    if (!lessons.length) {
-
-        alert(
-            "Add at least one lesson before publishing."
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            "Publish this course?\n\nStudents will be able to access its published content."
-        );
-
-
+    const confirmed = confirm("Submit this course to Spark Stack Admin for review? Students will not see it until an administrator approves it.");
     if (!confirmed) return;
-
-
     try {
-
-        await updateDoc(
-
-            doc(
-                db,
-                "courses",
-                courseId
-            ),
-
-            {
-
-                status:
-                    "published",
-
-                published:
-                    true,
-
-                updatedAt:
-                    serverTimestamp(),
-
-                publishedAt:
-                    serverTimestamp()
-
-            }
-
-        );
-
-
-        course.status =
-            "published";
-
-        course.published =
-            true;
-
-
+        await updateDoc(doc(db, "courses", courseId), {
+            status: "pending_review",
+            published: false,
+            reviewStatus: "awaiting_admin_review",
+            reviewRouting: "admin",
+            reviewRequestedAt: serverTimestamp(),
+            marketplaceVisibility: "hidden",
+            updatedAt: serverTimestamp()
+        });
+        course.status = "pending_review";
+        course.published = false;
         updateStatus();
-
-        showToast(
-            "Course published successfully 🚀"
-        );
-
-
+        showToast("Course submitted for Spark Stack Admin review.");
     } catch (error) {
-
-        console.error(
-            "Publish course error:",
-            error
-        );
-
-        alert(
-            "Unable to publish course."
-        );
-
+        console.error("Course review submission error:", error);
+        alert("Unable to submit this course for review.");
     }
-
 }
-
 
 // ============================================================
 // PREVIEW
