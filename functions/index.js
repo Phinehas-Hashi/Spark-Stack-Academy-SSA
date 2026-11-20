@@ -30,8 +30,9 @@ async function requireFounder(request) {
   if (!uid) throw new HttpsError("unauthenticated", "You must be signed in as a founder.");
   const founder = await db.doc(`founder/${uid}`).get();
   const data = founder.exists ? founder.data() : null;
-  if (!data || data.role !== "founder" || data.status !== "active") {
-    throw new HttpsError("permission-denied", "Only an active founder can create administrator accounts.");
+  if (!data || data.role !== "founder" || data.status !== "active"
+      || data.active === false || data.verified === false) {
+    throw new HttpsError("permission-denied", "Only the active, verified Founder Super Admin can perform this operation.");
   }
   return { uid, data };
 }
@@ -618,7 +619,17 @@ exports.getMarketplaceProducts = onCall(async request => {
   const founder = await requireFounder(request); // Founder is the platform Super Admin.
   const snap = await db.collection("marketplaceItems").orderBy("updatedAt", "desc").limit(200).get();
   return {
-    products: snap.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+    products: snap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id, itemId: data.itemId, productType: data.productType,
+        title: data.title, description: data.description, category: data.category,
+        price: data.price, currency: data.currency, status: data.status,
+        sourceCollection: data.sourceCollection, checkoutEnabled: false,
+        createdAt: data.createdAt?.toDate?.().toISOString() || null,
+        updatedAt: data.updatedAt?.toDate?.().toISOString() || null
+      };
+    }),
     actor: { uid: founder.uid, role: "founder", accessLevel: "super_admin" }
   };
 });
