@@ -927,7 +927,11 @@ async function toggleCourseStatus() {
                 course.id
             ),
             {
-                status: newStatus
+                status: newStatus,
+                published: newStatus === "published",
+                marketplaceVisibility: newStatus === "published" ? "public" : "hidden",
+                reviewStatus: newStatus === "published" ? "approved" : "not_submitted",
+                reviewedAt: Timestamp.now()
             }
         );
 
