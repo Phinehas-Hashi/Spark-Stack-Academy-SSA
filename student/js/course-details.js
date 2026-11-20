@@ -801,23 +801,13 @@ async function checkEnrollment() {
 // ============================================
 
 function hasAccess(enrollment) {
-
-    return (
-
-        enrollment.paymentStatus === "paid" ||
-
-        enrollment.paymentStatus === "free" ||
-
-        enrollment.status === "active" ||
-
-        enrollment.status === "approved" ||
-
-        enrollment.status === "paid" ||
-
-        enrollment.status === "completed"
-
-    );
-
+    if (!enrollment) return false;
+    const status = String(enrollment.status || "").trim().toLowerCase();
+    const paymentStatus = String(enrollment.paymentStatus || "").trim().toLowerCase();
+    if (["revoked","suspended","cancelled","canceled","rejected","pending"].includes(status)) return false;
+    if (enrollment.institutionId && ["active","approved","completed"].includes(status)) return true;
+    if (["active","approved","completed"].includes(status) && ["paid","free"].includes(paymentStatus)) return true;
+    return status === "paid" && (paymentStatus === "" || paymentStatus === "paid");
 }
 
 
