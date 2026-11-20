@@ -1,3 +1,4 @@
+import "./smart-connectivity.js";
 import "./ui-runtime.js";
 import "./ui-polish.js";
 import "./splash-screen.js";
