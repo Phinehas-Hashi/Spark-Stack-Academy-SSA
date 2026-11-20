@@ -33,11 +33,12 @@ firebase functions:secrets:set MPESA_CONSUMER_SECRET
 firebase functions:secrets:set MPESA_SHORTCODE
 firebase functions:secrets:set MPESA_PASSKEY
 firebase functions:secrets:set MPESA_ENVIRONMENT
+firebase functions:secrets:set MPESA_TRANSACTION_TYPE
 ```
 
-Set `MPESA_ENVIRONMENT` to `sandbox` while testing. Use `production` only after Safaricom has approved the production app and the merchant shortcode/passkey are ready.
+Set `MPESA_ENVIRONMENT` to `sandbox` while testing. Use `production` only after Safaricom has approved the production app and the merchant shortcode/passkey are ready. Set `MPESA_TRANSACTION_TYPE` to `CustomerPayBillOnline` for a PayBill shortcode or `CustomerBuyGoodsOnline` for an approved Till/Buy Goods shortcode.
 
-The shortcode and passkey must belong to the same Daraja app/merchant configuration. This implementation currently uses the PayBill STK transaction type `CustomerPayBillOnline`; a Till/Buy Goods shortcode requires changing the transaction type to the merchant-approved Daraja option before production.
+The shortcode and passkey must belong to the same Daraja app/merchant configuration. The transaction type must match the Safaricom-approved merchant shortcode configuration.
 
 ## Deploy after sandbox configuration
 
