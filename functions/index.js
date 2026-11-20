@@ -608,6 +608,84 @@ exports.founderModerateCourse = onCall(async request => {
   return { success: true, status: action === "delete" ? "deleted" : "pending_review" };
 });
 
+
+const SELLABLE_MARKETPLACE_TYPES = new Set([
+  "mentorship", "professional_service", "course_bundle", "bootcamp",
+  "digital_product", "addon", "corporate_training"
+]);
+
+exports.getMarketplaceProducts = onCall(async request => {
+  const founder = await requireFounder(request); // Founder is the platform Super Admin.
+  const snap = await db.collection("marketplaceItems").orderBy("updatedAt", "desc").limit(200).get();
+  return {
+    products: snap.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+    actor: { uid: founder.uid, role: "founder", accessLevel: "super_admin" }
+  };
+});
+
+exports.saveMarketplaceProduct = onCall(async request => {
+  const founder = await requireFounder(request); // Super Admin-only product governance.
+  const payload = request.data || {};
+  const productType = safeText(payload.productType);
+  const title = safeText(payload.title);
+  const description = safeText(payload.description);
+  const category = safeText(payload.category);
+  const currency = safeText(payload.currency, "KES");
+  const amount = Number(payload.price);
+  const status = safeText(payload.status, "draft");
+  const productId = safeText(payload.productId);
+  if (!SELLABLE_MARKETPLACE_TYPES.has(productType)) throw new HttpsError("invalid-argument", "Unsupported marketplace product type.");
+  if (title.length < 3 || title.length > 120) throw new HttpsError("invalid-argument", "Product title must be 3–120 characters.");
+  if (description.length < 10 || description.length > 3000) throw new HttpsError("invalid-argument", "Description must be 10–3,000 characters.");
+  if (category.length > 80) throw new HttpsError("invalid-argument", "Category is too long.");
+  if (!["KES", "USD", "EUR", "GBP"].includes(currency)) throw new HttpsError("invalid-argument", "Unsupported currency.");
+  if (!Number.isFinite(amount) || amount < 0 || amount > 100000000) throw new HttpsError("invalid-argument", "Enter a valid product price.");
+  if (!["draft", "published"].includes(status)) throw new HttpsError("invalid-argument", "Products can only be saved as draft or published.");
+  const pricingSnap = await db.doc("marketplacePricing/global").get();
+  const priceConfig = pricingSnap.data()?.prices?.[productType];
+  if (status === "published" && (!priceConfig || priceConfig.enabled !== true)) {
+    throw new HttpsError("failed-precondition", "Enable this product type in the Founder price book before publishing its catalogue listing.");
+  }
+  const now = Timestamp.now();
+  const ref = productId ? db.doc("marketplaceItems/" + productId) : db.collection("marketplaceItems").doc();
+  if (productId) {
+    const existing = await ref.get();
+    if (!existing.exists || existing.data().productType !== productType || existing.data().sourceCollection === "courses") {
+      throw new HttpsError("not-found", "Editable marketplace product not found.");
+    }
+  }
+  const data = {
+    itemId: ref.id, productType, title, description, category,
+    price: amount, currency, ownerType: "academy",
+    sourceCollection: "marketplaceProducts", sourceId: ref.id,
+    status, published: status === "published",
+    checkoutEnabled: false, fulfilmentStatus: "not_configured",
+    updatedAt: now, updatedBy: founder.uid
+  };
+  if (!productId) data.createdAt = now;
+  await ref.set(data, { merge: true });
+  await db.collection("audit_logs").add({
+    action: productId ? "marketplace_product_updated" : "marketplace_product_created",
+    actorId: founder.uid, targetId: ref.id, productType, status, createdAt: now
+  });
+  return { success: true, productId: ref.id, status, checkoutEnabled: false };
+});
+
+exports.archiveMarketplaceProduct = onCall(async request => {
+  const founder = await requireFounder(request); // Super Admin-only archival.
+  const productId = safeText(request.data?.productId);
+  if (!productId) throw new HttpsError("invalid-argument", "Product ID is required.");
+  const ref = db.doc("marketplaceItems/" + productId);
+  const snap = await ref.get();
+  if (!snap.exists || snap.data().sourceCollection !== "marketplaceProducts") {
+    throw new HttpsError("not-found", "Marketplace product not found.");
+  }
+  const now = Timestamp.now();
+  await ref.update({ status: "archived", published: false, checkoutEnabled: false, archivedAt: now, updatedAt: now, updatedBy: founder.uid });
+  await db.collection("audit_logs").add({ action: "marketplace_product_archived", actorId: founder.uid, targetId: productId, createdAt: now });
+  return { success: true, status: "archived" };
+});
+
 exports.syncPublishedCourseToMarketplace = onDocumentWritten("courses/{courseId}", async event => {
   const after = event.data?.after;
   if (!after?.exists) return;
