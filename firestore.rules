@@ -814,8 +814,11 @@ service cloud.firestore {
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid());
 
-      // Course deletion is retained as a trusted moderation operation.
-      allow delete: if staff();
+      // Instructors retain deletion access to their own course records.
+      // Founder moderation uses a soft-delete Cloud Function to preserve history.
+      allow delete: if staff()
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid());
     }
 
 
