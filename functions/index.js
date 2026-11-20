@@ -1,4 +1,5 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
@@ -9,6 +10,13 @@ initializeApp();
 const db = getFirestore();
 const adminAuth = getAuth();
 const platformRef = db.doc("platform_controls/global");
+
+// Safaricom Daraja credentials are managed in Firebase Secret Manager.
+const MPESA_CONSUMER_KEY = defineSecret("MPESA_CONSUMER_KEY");
+const MPESA_CONSUMER_SECRET = defineSecret("MPESA_CONSUMER_SECRET");
+const MPESA_SHORTCODE = defineSecret("MPESA_SHORTCODE");
+const MPESA_PASSKEY = defineSecret("MPESA_PASSKEY");
+const MPESA_ENVIRONMENT = defineSecret("MPESA_ENVIRONMENT");
 
 function safeText(value, fallback = "") { return String(value ?? fallback).trim(); }
 function eventKey(event, suffix) {
@@ -115,7 +123,281 @@ async function requireInstitutionReviewer(request) {
   return { uid, email: request.auth.token.email || "", role: isFounder ? "founder" : "admin" };
 }
 
-exports.approveInstitutionApplication = onCall(async request => {
+
+
+// ============================================================
+// DARAJA — INSTITUTION ONBOARDING COLLECTION
+// STK callbacks are independently verified using STK Query.
+// ============================================================
+
+const DARAJA_SECRETS = [
+  MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE,
+  MPESA_PASSKEY, MPESA_ENVIRONMENT
+];
+
+function darajaBaseUrl() {
+  return MPESA_ENVIRONMENT.value().toLowerCase() === "production"
+    ? "https://api.safaricom.co.ke"
+    : "https://sandbox.safaricom.co.ke";
+}
+
+function normalizeKenyanPhone(value) {
+  let phone = safeText(value).replace(/[\\s()+-]/g, "");
+  if (phone.startsWith("0")) phone = "254" + phone.slice(1);
+  if (phone.startsWith("7") || phone.startsWith("1")) phone = "254" + phone;
+  if (!/^254[17]\\d{8}$/.test(phone)) {
+    throw new HttpsError("invalid-argument", "The institution contact number must be a valid Kenyan M-Pesa number, for example 0712345678 or 254712345678.");
+  }
+  return phone;
+}
+
+function darajaTimestamp(date = new Date()) {
+  const pad = value => String(value).padStart(2, "0");
+  return date.getUTCFullYear()
+    + pad(date.getUTCMonth() + 1)
+    + pad(date.getUTCDate())
+    + pad(date.getUTCHours())
+    + pad(date.getUTCMinutes())
+    + pad(date.getUTCSeconds());
+}
+
+async function getDarajaAccessToken() {
+  const credentials = Buffer.from(
+    MPESA_CONSUMER_KEY.value() + ":" + MPESA_CONSUMER_SECRET.value()
+  ).toString("base64");
+  const response = await fetch(darajaBaseUrl() + "/oauth/v1/generate?grant_type=client_credentials", {
+    headers: { Authorization: "Basic " + credentials }
+  });
+  const payload = await response.json();
+  if (!response.ok || !payload.access_token) {
+    console.error("Daraja OAuth failed:", payload.errorCode || payload.errorMessage || response.status);
+    throw new HttpsError("failed-precondition", "M-Pesa payment service is not configured or could not authenticate.");
+  }
+  return payload.access_token;
+}
+
+function darajaCallbackUrl() {
+  const projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
+  if (!projectId) throw new Error("Firebase project ID is unavailable for the Daraja callback URL.");
+  return "https://us-central1-" + projectId + ".cloudfunctions.net/darajaInstitutionCallback";
+}
+
+async function startInstitutionStkPayment({ applicationId, institutionId, ownerUid, phone, amount, currency, initiatedBy }) {
+  if (currency !== "KES") throw new HttpsError("failed-precondition", "M-Pesa STK Push can collect this onboarding fee only when the pricing currency is KES.");
+  if (!Number.isInteger(Number(amount)) || Number(amount) < 1) throw new HttpsError("failed-precondition", "The M-Pesa onboarding amount must be a whole KES amount greater than zero.");
+  const phoneNumber = normalizeKenyanPhone(phone);
+  const shortcode = MPESA_SHORTCODE.value();
+  const passkey = MPESA_PASSKEY.value();
+  if (!shortcode || !passkey) throw new HttpsError("failed-precondition", "M-Pesa shortcode and passkey have not been configured.");
+
+  const paymentRef = db.collection("institutionPayments").doc();
+  const now = Timestamp.now();
+  await paymentRef.set({
+    paymentId: paymentRef.id, type: "institution_onboarding",
+    institutionId, applicationId, ownerUid, phoneNumber,
+    amount: Number(amount), currency: "KES", provider: "safaricom_daraja",
+    status: "initiating", initiatedBy, createdAt: now, updatedAt: now
+  });
+
+  try {
+    const token = await getDarajaAccessToken();
+    const timestamp = darajaTimestamp();
+    const password = Buffer.from(shortcode + passkey + timestamp).toString("base64");
+    const response = await fetch(darajaBaseUrl() + "/mpesa/stkpush/v1/processrequest", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        BusinessShortCode: shortcode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: "CustomerPayBillOnline",
+        Amount: Number(amount),
+        PartyA: phoneNumber,
+        PartyB: shortcode,
+        PhoneNumber: phoneNumber,
+        CallBackURL: darajaCallbackUrl(),
+        AccountReference: ("SSA" + applicationId.replace(/[^a-zA-Z0-9]/g, "").slice(-9)).slice(0, 12),
+        TransactionDesc: "Institution onboarding"
+      })
+    });
+    const result = await response.json();
+    if (!response.ok || String(result.ResponseCode) !== "0" || !result.CheckoutRequestID) {
+      console.error("Daraja STK initiation rejected:", result.errorCode || result.errorMessage || result.ResponseDescription || response.status);
+      throw new Error("Safaricom did not accept the STK Push request.");
+    }
+
+    await paymentRef.update({
+      status: "pending",
+      merchantRequestId: result.MerchantRequestID || "",
+      checkoutRequestId: result.CheckoutRequestID,
+      customerMessage: result.CustomerMessage || "STK Push sent.",
+      responseDescription: result.ResponseDescription || "",
+      updatedAt: Timestamp.now()
+    });
+    await db.doc("institutions/" + institutionId).set({
+      onboardingFee: {
+        status: "pending", amount: Number(amount), currency: "KES",
+        paymentId: paymentRef.id, provider: "safaricom_daraja",
+        phoneNumber, updatedAt: Timestamp.now()
+      },
+      updatedAt: Timestamp.now()
+    }, { merge: true });
+    await db.collection("audit_logs").add({
+      action: "institution_onboarding_stk_initiated",
+      actorId: initiatedBy, targetId: institutionId,
+      paymentId: paymentRef.id, amount: Number(amount), currency: "KES",
+      createdAt: Timestamp.now()
+    });
+    return { success: true, paymentId: paymentRef.id, status: "pending", customerMessage: result.CustomerMessage || "Check the institution phone and enter your M-Pesa PIN." };
+  } catch (error) {
+    await paymentRef.set({ status: "initiation_failed", failureMessage: "M-Pesa request could not be initiated.", updatedAt: Timestamp.now() }, { merge: true });
+    if (error instanceof HttpsError) throw error;
+    console.error("Institution STK initiation failed:", error.message);
+    throw new HttpsError("unavailable", "The M-Pesa prompt could not be sent. The application remains approved and payment can be retried from Institution Applications.");
+  }
+}
+
+async function verifyDarajaStkCheckout(checkoutRequestId) {
+  const token = await getDarajaAccessToken();
+  const shortcode = MPESA_SHORTCODE.value();
+  const timestamp = darajaTimestamp();
+  const password = Buffer.from(shortcode + MPESA_PASSKEY.value() + timestamp).toString("base64");
+  const response = await fetch(darajaBaseUrl() + "/mpesa/stkpushquery/v1/query", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      BusinessShortCode: shortcode,
+      Password: password,
+      Timestamp: timestamp,
+      CheckoutRequestID: checkoutRequestId
+    })
+  });
+  const result = await response.json();
+  return response.ok && String(result.ResultCode) === "0";
+}
+
+exports.retryInstitutionOnboardingPayment = onCall({ secrets: DARAJA_SECRETS }, async request => {
+  const reviewer = await requireInstitutionReviewer(request);
+  const applicationId = safeText(request.data?.applicationId);
+  if (!applicationId) throw new HttpsError("invalid-argument", "Application ID is required.");
+  const [applicationSnap, institutionSnap] = await Promise.all([
+    db.doc("institutionApplications/" + applicationId).get(),
+    db.doc("institutions/" + applicationId).get()
+  ]);
+  if (!applicationSnap.exists || !institutionSnap.exists) throw new HttpsError("not-found", "Institution application or workspace was not found.");
+  const application = applicationSnap.data();
+  const institution = institutionSnap.data();
+  if (application.status !== "approved_awaiting_payment" && institution.onboardingFee?.status !== "due" && institution.onboardingFee?.status !== "initiation_failed") {
+    throw new HttpsError("failed-precondition", "This institution does not currently have an unpaid onboarding fee eligible for retry.");
+  }
+  const fee = institution.pricingSnapshot || {};
+  if (fee.onboardingFeeEnabled !== true || Number(fee.onboardingFeeAmount) <= 0) {
+    throw new HttpsError("failed-precondition", "No payable onboarding fee is configured for this institution.");
+  }
+  return startInstitutionStkPayment({
+    applicationId, institutionId: applicationId,
+    ownerUid: application.institutionOwnerUid,
+    phone: application.institutionPhone,
+    amount: Number(fee.onboardingFeeAmount),
+    currency: fee.currency || "KES",
+    initiatedBy: reviewer.uid
+  });
+});
+
+exports.darajaInstitutionCallback = onRequest({ secrets: DARAJA_SECRETS, invoker: "public" }, async (req, res) => {
+  try {
+    const callback = req.body?.Body?.stkCallback;
+    const checkoutRequestId = safeText(callback?.CheckoutRequestID);
+    if (!checkoutRequestId) { res.status(400).json({ received: false }); return; }
+    const matches = await db.collection("institutionPayments")
+      .where("checkoutRequestId", "==", checkoutRequestId).limit(1).get();
+    if (matches.empty) { res.status(200).json({ ResultCode: 0, ResultDesc: "Callback acknowledged." }); return; }
+    const paymentDoc = matches.docs[0];
+    const payment = paymentDoc.data();
+    if (payment.status === "paid") { res.status(200).json({ ResultCode: 0, ResultDesc: "Already processed." }); return; }
+
+    if (Number(callback.ResultCode) !== 0) {
+      await paymentDoc.ref.set({
+        status: "failed",
+        resultCode: Number(callback.ResultCode),
+        resultDescription: safeText(callback.ResultDesc).slice(0, 250),
+        updatedAt: Timestamp.now()
+      }, { merge: true });
+      await db.doc("institutions/" + payment.institutionId).set({
+        onboardingFee: { status: "due", lastFailure: safeText(callback.ResultDesc).slice(0, 250), updatedAt: Timestamp.now() }
+      }, { merge: true });
+      res.status(200).json({ ResultCode: 0, ResultDesc: "Callback acknowledged." });
+      return;
+    }
+
+    const verified = await verifyDarajaStkCheckout(checkoutRequestId);
+    if (!verified) {
+      await paymentDoc.ref.set({ status: "verification_pending", callbackReceivedAt: Timestamp.now(), updatedAt: Timestamp.now() }, { merge: true });
+      res.status(200).json({ ResultCode: 0, ResultDesc: "Payment verification is pending." });
+      return;
+    }
+
+    const metadataItems = callback.CallbackMetadata?.Item || [];
+    const metadata = Object.fromEntries(metadataItems.map(item => [item.Name, item.Value]));
+    const now = Timestamp.now();
+    const institutionRef = db.doc("institutions/" + payment.institutionId);
+    const applicationRef = db.doc("institutionApplications/" + payment.applicationId);
+    const userRef = db.doc("users/" + payment.ownerUid);
+    await db.runTransaction(async transaction => {
+      const [institutionSnap, paymentSnap] = await Promise.all([
+        transaction.get(institutionRef), transaction.get(paymentDoc.ref)
+      ]);
+      if (!institutionSnap.exists) throw new Error("Institution record missing during payment verification.");
+      if (paymentSnap.data()?.status === "paid") return;
+      const institution = institutionSnap.data();
+      const requiresPaymentBeforeActivation = institution.pricingSnapshot?.onboardingTiming === "before_activation";
+      const trialDays = Number(institution.subscription?.trialDays ?? 14);
+      const trialEndsAt = Timestamp.fromMillis(now.toMillis() + trialDays * 86400000);
+      transaction.set(paymentDoc.ref, {
+        status: "paid", resultCode: 0, resultDescription: "Payment verified by Daraja STK Query.",
+        mpesaReceiptNumber: safeText(metadata.MpesaReceiptNumber),
+        transactionDate: metadata.TransactionDate || null,
+        paidAmount: Number(metadata.Amount ?? payment.amount),
+        paidPhoneNumber: String(metadata.PhoneNumber || payment.phoneNumber),
+        verifiedAt: now, updatedAt: now
+      }, { merge: true });
+      transaction.set(institutionRef, {
+        status: "active",
+        onboardingFee: {
+          status: "paid", amount: payment.amount, currency: "KES",
+          paymentId: paymentDoc.id, provider: "safaricom_daraja",
+          mpesaReceiptNumber: safeText(metadata.MpesaReceiptNumber), paidAt: now
+        },
+        ...(requiresPaymentBeforeActivation ? {
+          subscription: {
+            ...(institution.subscription || {}),
+            plan: "trial", status: "trialing",
+            trialStartedAt: now, trialEndsAt, trialDays
+          },
+          updatedAt: now
+        } : { updatedAt: now })
+      }, { merge: true });
+      if (requiresPaymentBeforeActivation) {
+        transaction.set(userRef, { status: "active", active: true, verified: true, activatedAt: now, updatedAt: now }, { merge: true });
+        transaction.set(applicationRef, { status: "approved", onboardingFeePaidAt: now, updatedAt: now }, { merge: true });
+      } else {
+        transaction.set(applicationRef, { onboardingFeePaidAt: now, updatedAt: now }, { merge: true });
+      }
+    });
+    await db.collection("audit_logs").add({
+      action: "institution_onboarding_payment_verified",
+      actorId: "daraja_callback", targetId: payment.institutionId,
+      paymentId: paymentDoc.id, receipt: safeText(metadata.MpesaReceiptNumber),
+      amount: payment.amount, currency: "KES", createdAt: now
+    });
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Payment processed." });
+  } catch (error) {
+    console.error("Daraja institution callback processing failed:", error.message);
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Callback received for processing." });
+  }
+});
+
+exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, async request => {
   const reviewer = await requireInstitutionReviewer(request);
   const applicationId = safeText(request.data?.applicationId);
   if (!applicationId || applicationId.length > 128) {
@@ -130,8 +412,10 @@ exports.approveInstitutionApplication = onCall(async request => {
   const institutionPricing = pricingSnap.exists
     ? { ...defaultInstitutionPricing(), ...pricingSnap.data() }
     : defaultInstitutionPricing();
+  const requiresPaymentBeforeActivation = institutionPricing.onboardingFeeEnabled === true
+    && institutionPricing.onboardingTiming === "before_activation";
   const trialDays = Number.isInteger(institutionPricing.trialDays) ? institutionPricing.trialDays : 14;
-  const trialEndsAt = Timestamp.fromMillis(now.toMillis() + trialDays * 24 * 60 * 60 * 1000);
+  const trialEndsAt = requiresPaymentBeforeActivation ? null : Timestamp.fromMillis(now.toMillis() + trialDays * 24 * 60 * 60 * 1000);
 
   try {
     await db.runTransaction(async transaction => {
@@ -160,9 +444,9 @@ exports.approveInstitutionApplication = onCall(async request => {
         institutionRole: "owner",
         institutionId: applicationId,
         institutionName: application.institutionName,
-        status: "active",
-        active: true,
-        verified: true,
+        status: requiresPaymentBeforeActivation ? "pending_payment" : "active",
+        active: !requiresPaymentBeforeActivation,
+        verified: !requiresPaymentBeforeActivation,
         createdAt: userSnap.exists ? (userSnap.data().createdAt || now) : now,
         approvedAt: now,
         approvedBy: reviewer.uid,
@@ -181,17 +465,23 @@ exports.approveInstitutionApplication = onCall(async request => {
         ownerName: application.ownerName,
         ownerEmail: application.ownerEmail,
         estimatedLearnerRange: application.learnerRange,
-        status: "active",
+        status: requiresPaymentBeforeActivation ? "pending_payment" : "active",
         verificationStatus: "verified",
         limits: { instructors: 20, courses: 100, students: 5000, adminAccounts: 10 },
         usage: { instructors: 0, courses: 0, students: 0, adminAccounts: 1 },
         subscription: {
           plan: "trial",
-          status: "trialing",
-          trialStartedAt: now,
+          status: requiresPaymentBeforeActivation ? "pending_payment" : "trialing",
+          trialStartedAt: requiresPaymentBeforeActivation ? null : now,
           trialEndsAt,
           trialDays
         },
+        onboardingFee: institutionPricing.onboardingFeeEnabled === true ? {
+          status: requiresPaymentBeforeActivation ? "due" : "due",
+          amount: institutionPricing.onboardingFeeAmount,
+          currency: institutionPricing.currency,
+          collectionTiming: institutionPricing.onboardingTiming
+        } : { status: "not_required", amount: 0, currency: institutionPricing.currency },
         pricingSnapshot: {
           currency: institutionPricing.currency,
           onboardingFeeEnabled: institutionPricing.onboardingFeeEnabled,
@@ -208,12 +498,12 @@ exports.approveInstitutionApplication = onCall(async request => {
       });
 
       transaction.update(applicationRef, {
-        status: "approved",
+        status: requiresPaymentBeforeActivation ? "approved_awaiting_payment" : "approved",
         reviewedAt: now,
         reviewedBy: reviewer.uid,
         reviewerRole: reviewer.role,
         institutionId: applicationId,
-        trialStartedAt: now,
+        trialStartedAt: requiresPaymentBeforeActivation ? null : now,
         trialEndsAt
       });
 
@@ -228,7 +518,30 @@ exports.approveInstitutionApplication = onCall(async request => {
       });
     });
 
-    return { success: true, institutionId: applicationId, trialDays, trialEndsAt: trialEndsAt.toDate().toISOString() };
+    if (institutionPricing.onboardingFeeEnabled === true && Number(institutionPricing.onboardingFeeAmount) > 0) {
+      try {
+        const payment = await startInstitutionStkPayment({
+          applicationId, institutionId: applicationId, ownerUid: applicationId,
+          phone: (await applicationRef.get()).data()?.institutionPhone,
+          amount: Number(institutionPricing.onboardingFeeAmount),
+          currency: institutionPricing.currency || "KES",
+          initiatedBy: reviewer.uid
+        });
+        return {
+          success: true, institutionId: applicationId,
+          activationPendingPayment: requiresPaymentBeforeActivation,
+          trialDays, payment
+        };
+      } catch (paymentError) {
+        console.error("Institution approved but onboarding payment prompt failed:", paymentError.message);
+        return {
+          success: true, institutionId: applicationId,
+          activationPendingPayment: requiresPaymentBeforeActivation,
+          trialDays, payment: { success: false, status: "initiation_failed", message: paymentError.message }
+        };
+      }
+    }
+    return { success: true, institutionId: applicationId, trialDays, trialEndsAt: trialEndsAt?.toDate?.().toISOString() || null };
   } catch (error) {
     if (error instanceof HttpsError) throw error;
     console.error("approveInstitutionApplication failed:", error);
