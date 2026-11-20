@@ -287,7 +287,8 @@ exports.retryInstitutionOnboardingPayment = onCall({ secrets: DARAJA_SECRETS }, 
   if (!applicationSnap.exists || !institutionSnap.exists) throw new HttpsError("not-found", "Institution application or workspace was not found.");
   const application = applicationSnap.data();
   const institution = institutionSnap.data();
-  if (application.status !== "approved_awaiting_payment" && institution.onboardingFee?.status !== "due" && institution.onboardingFee?.status !== "initiation_failed") {
+  if (application.status !== "approved_awaiting_payment" && application.onboardingFeeStatus !== "due"
+      && institution.onboardingFee?.status !== "due" && institution.onboardingFee?.status !== "initiation_failed") {
     throw new HttpsError("failed-precondition", "This institution does not currently have an unpaid onboarding fee eligible for retry.");
   }
   const fee = institution.pricingSnapshot || {};
@@ -304,6 +305,66 @@ exports.retryInstitutionOnboardingPayment = onCall({ secrets: DARAJA_SECRETS }, 
   });
 });
 
+
+async function completeInstitutionOnboardingPayment(paymentDoc, payment, metadata) {
+  if (Number(metadata.Amount) !== Number(payment.amount)) throw new Error("Daraja callback amount does not match the expected onboarding fee.");
+  if (String(metadata.PhoneNumber || "") !== String(payment.phoneNumber || "")) throw new Error("Daraja callback phone number does not match the STK recipient.");
+  if (!safeText(metadata.MpesaReceiptNumber)) throw new Error("Daraja callback did not contain an M-Pesa receipt number.");
+
+  const now = Timestamp.now();
+  const institutionRef = db.doc("institutions/" + payment.institutionId);
+  const applicationRef = db.doc("institutionApplications/" + payment.applicationId);
+  const userRef = db.doc("users/" + payment.ownerUid);
+  await db.runTransaction(async transaction => {
+    const [institutionSnap, paymentSnap] = await Promise.all([
+      transaction.get(institutionRef), transaction.get(paymentDoc.ref)
+    ]);
+    if (!institutionSnap.exists) throw new Error("Institution record missing during payment verification.");
+    if (paymentSnap.data()?.status === "paid") return;
+    const institution = institutionSnap.data();
+    const requiresPaymentBeforeActivation = institution.pricingSnapshot?.onboardingTiming === "before_activation";
+    const trialDays = Number(institution.subscription?.trialDays ?? 14);
+    const trialEndsAt = Timestamp.fromMillis(now.toMillis() + trialDays * 86400000);
+    transaction.set(paymentDoc.ref, {
+      status: "paid", resultCode: 0, resultDescription: "Payment verified by Daraja STK Query.",
+      mpesaReceiptNumber: safeText(metadata.MpesaReceiptNumber),
+      transactionDate: metadata.TransactionDate || null,
+      paidAmount: Number(metadata.Amount),
+      paidPhoneNumber: String(metadata.PhoneNumber),
+      verifiedAt: now, updatedAt: now
+    }, { merge: true });
+    transaction.set(institutionRef, {
+      status: "active",
+      onboardingFee: {
+        status: "paid", amount: payment.amount, currency: "KES",
+        paymentId: paymentDoc.id, provider: "safaricom_daraja",
+        mpesaReceiptNumber: safeText(metadata.MpesaReceiptNumber), paidAt: now
+      },
+      ...(requiresPaymentBeforeActivation ? {
+        subscription: {
+          ...(institution.subscription || {}),
+          plan: "trial", status: "trialing",
+          trialStartedAt: now, trialEndsAt, trialDays
+        },
+        updatedAt: now
+      } : { updatedAt: now })
+    }, { merge: true });
+    transaction.set(applicationRef, {
+      onboardingFeeStatus: "paid", onboardingFeePaidAt: now, updatedAt: now,
+      ...(requiresPaymentBeforeActivation ? { status: "approved" } : {})
+    }, { merge: true });
+    if (requiresPaymentBeforeActivation) {
+      transaction.set(userRef, { status: "active", active: true, verified: true, activatedAt: now, updatedAt: now }, { merge: true });
+    }
+  });
+  await db.collection("audit_logs").add({
+    action: "institution_onboarding_payment_verified",
+    actorId: "daraja_callback", targetId: payment.institutionId,
+    paymentId: paymentDoc.id, receipt: safeText(metadata.MpesaReceiptNumber),
+    amount: payment.amount, currency: "KES", createdAt: now
+  });
+}
+
 exports.darajaInstitutionCallback = onRequest({ secrets: DARAJA_SECRETS, invoker: "public" }, async (req, res) => {
   try {
     const callback = req.body?.Body?.stkCallback;
@@ -317,85 +378,57 @@ exports.darajaInstitutionCallback = onRequest({ secrets: DARAJA_SECRETS, invoker
     if (payment.status === "paid") { res.status(200).json({ ResultCode: 0, ResultDesc: "Already processed." }); return; }
 
     if (Number(callback.ResultCode) !== 0) {
+      const description = safeText(callback.ResultDesc).slice(0, 250);
       await paymentDoc.ref.set({
-        status: "failed",
-        resultCode: Number(callback.ResultCode),
-        resultDescription: safeText(callback.ResultDesc).slice(0, 250),
-        updatedAt: Timestamp.now()
+        status: "failed", resultCode: Number(callback.ResultCode),
+        resultDescription: description, updatedAt: Timestamp.now()
       }, { merge: true });
       await db.doc("institutions/" + payment.institutionId).set({
-        onboardingFee: { status: "due", lastFailure: safeText(callback.ResultDesc).slice(0, 250), updatedAt: Timestamp.now() }
+        onboardingFee: { status: "due", lastFailure: description, updatedAt: Timestamp.now() }
       }, { merge: true });
       res.status(200).json({ ResultCode: 0, ResultDesc: "Callback acknowledged." });
       return;
     }
 
+    const metadataItems = callback.CallbackMetadata?.Item || [];
+    const metadata = Object.fromEntries(metadataItems.map(item => [item.Name, item.Value]));
+    await paymentDoc.ref.set({
+      status: "verification_pending", callbackMetadata: metadata,
+      callbackReceivedAt: Timestamp.now(), updatedAt: Timestamp.now()
+    }, { merge: true });
     const verified = await verifyDarajaStkCheckout(checkoutRequestId);
     if (!verified) {
-      await paymentDoc.ref.set({ status: "verification_pending", callbackReceivedAt: Timestamp.now(), updatedAt: Timestamp.now() }, { merge: true });
       res.status(200).json({ ResultCode: 0, ResultDesc: "Payment verification is pending." });
       return;
     }
-
-    const metadataItems = callback.CallbackMetadata?.Item || [];
-    const metadata = Object.fromEntries(metadataItems.map(item => [item.Name, item.Value]));
-    const now = Timestamp.now();
-    const institutionRef = db.doc("institutions/" + payment.institutionId);
-    const applicationRef = db.doc("institutionApplications/" + payment.applicationId);
-    const userRef = db.doc("users/" + payment.ownerUid);
-    await db.runTransaction(async transaction => {
-      const [institutionSnap, paymentSnap] = await Promise.all([
-        transaction.get(institutionRef), transaction.get(paymentDoc.ref)
-      ]);
-      if (!institutionSnap.exists) throw new Error("Institution record missing during payment verification.");
-      if (paymentSnap.data()?.status === "paid") return;
-      const institution = institutionSnap.data();
-      const requiresPaymentBeforeActivation = institution.pricingSnapshot?.onboardingTiming === "before_activation";
-      const trialDays = Number(institution.subscription?.trialDays ?? 14);
-      const trialEndsAt = Timestamp.fromMillis(now.toMillis() + trialDays * 86400000);
-      transaction.set(paymentDoc.ref, {
-        status: "paid", resultCode: 0, resultDescription: "Payment verified by Daraja STK Query.",
-        mpesaReceiptNumber: safeText(metadata.MpesaReceiptNumber),
-        transactionDate: metadata.TransactionDate || null,
-        paidAmount: Number(metadata.Amount ?? payment.amount),
-        paidPhoneNumber: String(metadata.PhoneNumber || payment.phoneNumber),
-        verifiedAt: now, updatedAt: now
-      }, { merge: true });
-      transaction.set(institutionRef, {
-        status: "active",
-        onboardingFee: {
-          status: "paid", amount: payment.amount, currency: "KES",
-          paymentId: paymentDoc.id, provider: "safaricom_daraja",
-          mpesaReceiptNumber: safeText(metadata.MpesaReceiptNumber), paidAt: now
-        },
-        ...(requiresPaymentBeforeActivation ? {
-          subscription: {
-            ...(institution.subscription || {}),
-            plan: "trial", status: "trialing",
-            trialStartedAt: now, trialEndsAt, trialDays
-          },
-          updatedAt: now
-        } : { updatedAt: now })
-      }, { merge: true });
-      if (requiresPaymentBeforeActivation) {
-        transaction.set(userRef, { status: "active", active: true, verified: true, activatedAt: now, updatedAt: now }, { merge: true });
-        transaction.set(applicationRef, { status: "approved", onboardingFeePaidAt: now, updatedAt: now }, { merge: true });
-      } else {
-        transaction.set(applicationRef, { onboardingFeePaidAt: now, updatedAt: now }, { merge: true });
-      }
-    });
-    await db.collection("audit_logs").add({
-      action: "institution_onboarding_payment_verified",
-      actorId: "daraja_callback", targetId: payment.institutionId,
-      paymentId: paymentDoc.id, receipt: safeText(metadata.MpesaReceiptNumber),
-      amount: payment.amount, currency: "KES", createdAt: now
-    });
+    await completeInstitutionOnboardingPayment(paymentDoc, payment, metadata);
     res.status(200).json({ ResultCode: 0, ResultDesc: "Payment processed." });
   } catch (error) {
     console.error("Daraja institution callback processing failed:", error.message);
     res.status(200).json({ ResultCode: 0, ResultDesc: "Callback received for processing." });
   }
 });
+
+exports.reconcileInstitutionOnboardingPayments = onSchedule({
+  schedule: "every 5 minutes",
+  secrets: DARAJA_SECRETS,
+  timeZone: "Africa/Nairobi"
+}, async () => {
+  const pending = await db.collection("institutionPayments")
+    .where("status", "==", "verification_pending").limit(50).get();
+  for (const paymentDoc of pending.docs) {
+    const payment = paymentDoc.data();
+    try {
+      if (!payment.checkoutRequestId || !payment.callbackMetadata) continue;
+      if (await verifyDarajaStkCheckout(payment.checkoutRequestId)) {
+        await completeInstitutionOnboardingPayment(paymentDoc, payment, payment.callbackMetadata);
+      }
+    } catch (error) {
+      console.error("Pending institution payment reconciliation failed:", paymentDoc.id, error.message);
+    }
+  }
+});
+
 
 exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, async request => {
   const reviewer = await requireInstitutionReviewer(request);
@@ -504,7 +537,8 @@ exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, asyn
         reviewerRole: reviewer.role,
         institutionId: applicationId,
         trialStartedAt: requiresPaymentBeforeActivation ? null : now,
-        trialEndsAt
+        trialEndsAt,
+        onboardingFeeStatus: institutionPricing.onboardingFeeEnabled === true ? "due" : "not_required"
       });
 
       transaction.create(db.collection("audit_logs").doc(), {
