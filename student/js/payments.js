@@ -191,6 +191,7 @@ function updateCheckout(course) {
 // ============================================================
 
 async function startPayment() {
+    if (!window.SSAOnlineActionGuard?.requireOnline("Starting a course payment")) return;
     if (!currentUser || !selectedCourse) return;
 
     const amount = Number(selectedCourse.price || 0);
