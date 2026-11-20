@@ -165,8 +165,27 @@ function setupLogout() {
   });
 }
 
-function denyAccess() {
-  document.body.innerHTML = '<main style="max-width:560px;margin:12vh auto;padding:28px;font-family:Arial,sans-serif;text-align:center"><h1>Institution access required</h1><p>This account does not currently have an approved institution role. Contact Spark Stack Academy support if you believe this is an error.</p><a href="../login.html">Return to sign in</a></main>';
+function denyAccess(profile, user, reason = "profile_rejected") {
+  const details = {
+    reason,
+    uid: user?.uid || null,
+    profileFound: Boolean(profile),
+    role: profile?.role ?? null,
+    roleAllowed: ALLOWED_ROLES.has(String(profile?.role || "").trim().toLowerCase()),
+    status: profile?.status ?? null,
+    active: profile?.active ?? null,
+    activeType: typeof profile?.active,
+    verified: profile?.verified ?? null,
+    verifiedType: typeof profile?.verified,
+    statusIsActive: profile?.status === "active",
+    activeIsBooleanTrue: profile?.active === true,
+    verifiedIsBooleanTrue: profile?.verified === true,
+    institutionId: profile?.institutionId ?? null
+  };
+  console.error("Institution access diagnostic:", details);
+  document.body.innerHTML = '<main style="max-width:560px;margin:8vh auto;padding:24px;font-family:Arial,sans-serif"><h1>Institution access required</h1><p>The portal rejected this account. Temporary diagnostic details are shown below; no account data has been changed.</p><pre id="institutionAccessDiagnostic" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f7;padding:16px;border-radius:8px;font-size:13px;text-align:left"></pre><p><a href="../login.html">Return to sign in</a></p></main>';
+  const output = document.getElementById("institutionAccessDiagnostic");
+  if (output) output.textContent = JSON.stringify(details, null, 2);
 }
 
 async function boot() {
@@ -191,7 +210,7 @@ async function boot() {
     try {
       const snapshot = await getDoc(doc(db, "users", user.uid));
       if (!snapshot.exists()) {
-        denyAccess();
+        denyAccess(null, user, "users_document_missing");
         return;
       }
       const profile = snapshot.data();
@@ -199,7 +218,7 @@ async function boot() {
       const role = String(profile.role || "").trim().toLowerCase();
       const approved = profile.status === "active" && profile.active === true && profile.verified === true;
       if (!ALLOWED_ROLES.has(role) || !approved) {
-        denyAccess();
+        denyAccess(profile, user, "role_or_approval_check_failed");
         return;
       }
       const institutionId = profile.institutionId;
