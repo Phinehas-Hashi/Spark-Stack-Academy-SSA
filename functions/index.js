@@ -615,6 +615,7 @@ exports.syncPublishedCourseToMarketplace = onDocumentWritten("courses/{courseId}
   const listingRef = db.doc("marketplaceItems/course_" + event.params.courseId);
   const visible = (course.published === true || safeText(course.status).toLowerCase() === "published")
     && safeText(course.status).toLowerCase() !== "deleted"
+    && safeText(course.reviewStatus).toLowerCase() === "approved"
     && course.marketplaceVisibility !== "hidden";
   if (!visible) {
     await listingRef.delete().catch(() => {});
