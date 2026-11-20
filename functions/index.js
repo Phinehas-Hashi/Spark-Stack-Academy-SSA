@@ -755,6 +755,14 @@ exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, asyn
       if (ownerUid !== applicationId) {
         throw new HttpsError("failed-precondition", "Application owner identity does not match its record.");
       }
+      const institutionSnap = await transaction.get(institutionRef);
+      if (institutionSnap.exists) {
+        const existingInstitution = institutionSnap.data();
+        const existingOwnerUid = existingInstitution.ownerUid || existingInstitution.institutionOwnerUid;
+        if (existingOwnerUid && existingOwnerUid !== ownerUid) {
+          throw new HttpsError("already-exists", "An institution record with a different owner already exists. Manual review is required.");
+        }
+      }
       const userSnap = await transaction.get(userRef);
       if (userSnap.exists && userSnap.data().role && userSnap.data().role !== "institution_applicant") {
         throw new HttpsError("already-exists", "The applicant already has a different Academy account role. Manual review is required.");
@@ -779,7 +787,7 @@ exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, asyn
         updatedAt: now
       }, { merge: true });
 
-      transaction.create(institutionRef, {
+      transaction.set(institutionRef, {
         institutionId: applicationId,
         legalName: application.institutionName,
         institutionName: application.institutionName,
@@ -819,9 +827,9 @@ exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, asyn
           transactionFeePercent: institutionPricing.transactionFeePercent,
           capturedAt: now
         },
-        createdAt: now,
+        createdAt: institutionSnap.exists ? (institutionSnap.data().createdAt || now) : now,
         updatedAt: now
-      });
+      }, { merge: true });
 
       transaction.update(applicationRef, {
         status: requiresPaymentBeforeActivation ? "approved_awaiting_payment" : "approved",
