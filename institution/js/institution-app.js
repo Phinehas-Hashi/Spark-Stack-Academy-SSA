@@ -1,6 +1,6 @@
 import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc, getDocFromServer, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const LOGIN_PAGE = "../login.html";
@@ -208,7 +208,7 @@ async function boot() {
       return;
     }
     try {
-      const snapshot = await getDoc(doc(db, "users", user.uid));
+      const snapshot = await getDocFromServer(doc(db, "users", user.uid));
       if (!snapshot.exists()) {
         denyAccess(null, user, "users_document_missing");
         return;
