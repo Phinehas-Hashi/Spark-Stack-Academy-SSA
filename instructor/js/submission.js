@@ -54,6 +54,7 @@ function render(assignment,submission){
 }
 
 async function saveGrade(submission,max){
+  if (!window.SSAOnlineActionGuard?.requireOnline("Saving a grade and feedback")) return;
   const score=Number($("#score").value);
   const feedback=$("#feedback").value.trim();
   if(!Number.isFinite(score)||score<0||score>max){toast(`Enter a mark between 0 and ${max}.`,"warning");return;}
