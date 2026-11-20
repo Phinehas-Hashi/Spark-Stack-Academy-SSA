@@ -103,6 +103,7 @@ async function initializeClassroom() {
         showClassroom();
         await loadLessons();
         await loadStudentProgress();
+        await loadLiveClassSessions();
         renderLessons();
         updateProgress();
 
@@ -190,6 +191,46 @@ async function loadLessons() {
     });
 
     console.log(`COURSE PLAYER: loaded ${lessons.length} courseLessons for ${courseId}`);
+}
+
+
+async function loadLiveClassSessions() {
+    const container = $("liveClassSessions");
+    if (!container || !courseId) return;
+    try {
+        const snapshot = await getDocs(collection(db, "calendarEvents"));
+        const now = new Date();
+        const sessions = snapshot.docs.map(item => ({ id: item.id, ...item.data() }))
+            .filter(item => item.type === "live_class" && item.courseId === courseId &&
+                item.audience === "students" && item.meetingUrl &&
+                (item.startAt?.toDate ? item.startAt.toDate() : new Date(item.startAt)) >= new Date(now.getTime() - 2 * 60 * 60 * 1000))
+            .sort((a,b) => {
+                const da = a.startAt?.toDate ? a.startAt.toDate() : new Date(a.startAt);
+                const db = b.startAt?.toDate ? b.startAt.toDate() : new Date(b.startAt);
+                return da - db;
+            });
+        if (!sessions.length) {
+            container.innerHTML = '<p class="live-class-empty">No upcoming live sessions have been scheduled for this course.</p>';
+            return;
+        }
+        container.innerHTML = sessions.map(session => {
+            const start = session.startAt?.toDate ? session.startAt.toDate() : new Date(session.startAt);
+            const end = session.endAt?.toDate ? session.endAt.toDate() : new Date(session.endAt);
+            const dateLabel = Number.isNaN(start.getTime()) ? "Time to be confirmed" :
+                new Intl.DateTimeFormat(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"}).format(start);
+            const provider = session.meetingProvider === "google_meet" ? "Google Meet" : "Zoom";
+            const safeUrl = /^https:\/\//i.test(session.meetingUrl) ? session.meetingUrl : "";
+            return '<article class="live-class-session"><div class="live-class-session-info"><strong>' +
+                escapeHTML(session.title || "Live class") + '</strong><span>' + escapeHTML(provider) +
+                ' · ' + escapeHTML(dateLabel) + '</span>' +
+                (session.description ? '<p>' + escapeHTML(session.description) + '</p>' : '') +
+                '</div><a class="live-class-join" href="' + escapeAttr(safeUrl) +
+                '" target="_blank" rel="noopener noreferrer">Join class <span aria-hidden="true">↗</span></a></article>';
+        }).join("");
+    } catch (error) {
+        console.warn("Live class sessions could not be loaded:", error);
+        container.innerHTML = '<p class="live-class-empty">Live sessions are temporarily unavailable.</p>';
+    }
 }
 
 async function loadStudentProgress() {
