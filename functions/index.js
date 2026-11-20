@@ -212,7 +212,6 @@ exports.approveInstitutionApplication = onCall(async request => {
       });
     });
 
-    await adminAuth.updateUser(applicationId, { disabled: false });
     return { success: true, institutionId: applicationId, trialDays: 14, trialEndsAt: trialEndsAt.toDate().toISOString() };
   } catch (error) {
     if (error instanceof HttpsError) throw error;
