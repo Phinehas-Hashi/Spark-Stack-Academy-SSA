@@ -91,6 +91,181 @@ exports.createAdminAccount = onCall(async request => {
   }
 });
 
+
+// ============================================================
+// INSTITUTION APPLICATION REVIEW — TRUSTED ADMIN OPERATIONS
+// ============================================================
+
+async function requireInstitutionReviewer(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in before reviewing applications.");
+  const [userSnap, founderSnap] = await Promise.all([
+    db.doc(`users/${uid}`).get(),
+    db.doc(`founder/${uid}`).get()
+  ]);
+  const user = userSnap.exists ? userSnap.data() : {};
+  const founder = founderSnap.exists ? founderSnap.data() : {};
+  const isAdmin = ["admin", "administrator", "moderator"].includes(safeText(user.role).toLowerCase())
+    && user.active === true && user.status === "active";
+  const isFounder = founder.role === "founder" && founder.status === "active"
+    && founder.active !== false && founder.verified !== false;
+  if (!isAdmin && !isFounder) {
+    throw new HttpsError("permission-denied", "Only active Academy administrators or the Founder can review institution applications.");
+  }
+  return { uid, email: request.auth.token.email || "", role: isFounder ? "founder" : "admin" };
+}
+
+exports.approveInstitutionApplication = onCall(async request => {
+  const reviewer = await requireInstitutionReviewer(request);
+  const applicationId = safeText(request.data?.applicationId);
+  if (!applicationId || applicationId.length > 128) {
+    throw new HttpsError("invalid-argument", "A valid application ID is required.");
+  }
+
+  const applicationRef = db.doc(`institutionApplications/${applicationId}`);
+  const userRef = db.doc(`users/${applicationId}`);
+  const institutionRef = db.doc(`institutions/${applicationId}`);
+  const now = Timestamp.now();
+  const trialEndsAt = Timestamp.fromMillis(now.toMillis() + 14 * 24 * 60 * 60 * 1000);
+
+  try {
+    await db.runTransaction(async transaction => {
+      const applicationSnap = await transaction.get(applicationRef);
+      if (!applicationSnap.exists) throw new HttpsError("not-found", "Institution application not found.");
+      const application = applicationSnap.data();
+      if (application.status !== "pending_review") {
+        throw new HttpsError("failed-precondition", "This application has already been reviewed.");
+      }
+      const ownerUid = application.institutionOwnerUid;
+      if (ownerUid !== applicationId) {
+        throw new HttpsError("failed-precondition", "Application owner identity does not match its record.");
+      }
+      const userSnap = await transaction.get(userRef);
+      if (userSnap.exists && userSnap.data().role && userSnap.data().role !== "institution_applicant") {
+        throw new HttpsError("already-exists", "The applicant already has a different Academy account role. Manual review is required.");
+      }
+
+      transaction.set(userRef, {
+        uid: ownerUid,
+        email: application.ownerEmail,
+        fullName: application.ownerName,
+        name: application.ownerName,
+        displayName: application.ownerName,
+        role: "institution",
+        institutionRole: "owner",
+        institutionId: applicationId,
+        institutionName: application.institutionName,
+        status: "active",
+        active: true,
+        verified: true,
+        createdAt: userSnap.exists ? (userSnap.data().createdAt || now) : now,
+        approvedAt: now,
+        approvedBy: reviewer.uid,
+        updatedAt: now
+      }, { merge: true });
+
+      transaction.create(institutionRef, {
+        institutionId: applicationId,
+        legalName: application.institutionName,
+        institutionName: application.institutionName,
+        institutionType: application.institutionType,
+        country: application.country,
+        website: application.website || "",
+        contactPhone: application.institutionPhone,
+        ownerUid,
+        ownerName: application.ownerName,
+        ownerEmail: application.ownerEmail,
+        estimatedLearnerRange: application.learnerRange,
+        status: "active",
+        verificationStatus: "verified",
+        subscription: {
+          plan: "trial",
+          status: "trialing",
+          trialStartedAt: now,
+          trialEndsAt,
+          trialDays: 14
+        },
+        createdAt: now,
+        updatedAt: now
+      });
+
+      transaction.update(applicationRef, {
+        status: "approved",
+        reviewedAt: now,
+        reviewedBy: reviewer.uid,
+        reviewerRole: reviewer.role,
+        institutionId: applicationId,
+        trialStartedAt: now,
+        trialEndsAt
+      });
+
+      transaction.create(db.collection("audit_logs").doc(), {
+        action: "institution_application_approved",
+        actorId: reviewer.uid,
+        actorRole: reviewer.role,
+        targetId: applicationId,
+        targetEmail: application.ownerEmail,
+        targetName: application.institutionName,
+        createdAt: now
+      });
+    });
+
+    await adminAuth.updateUser(applicationId, { disabled: false });
+    return { success: true, institutionId: applicationId, trialDays: 14, trialEndsAt: trialEndsAt.toDate().toISOString() };
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    console.error("approveInstitutionApplication failed:", error);
+    throw new HttpsError("internal", "The institution could not be approved. No further action is required; check the application status before retrying.");
+  }
+});
+
+exports.rejectInstitutionApplication = onCall(async request => {
+  const reviewer = await requireInstitutionReviewer(request);
+  const applicationId = safeText(request.data?.applicationId);
+  const reason = safeText(request.data?.reason);
+  if (!applicationId || applicationId.length > 128) {
+    throw new HttpsError("invalid-argument", "A valid application ID is required.");
+  }
+  if (!reason || reason.length < 5 || reason.length > 500) {
+    throw new HttpsError("invalid-argument", "Provide a rejection reason between 5 and 500 characters.");
+  }
+
+  const applicationRef = db.doc(`institutionApplications/${applicationId}`);
+  const now = Timestamp.now();
+  try {
+    await db.runTransaction(async transaction => {
+      const snap = await transaction.get(applicationRef);
+      if (!snap.exists) throw new HttpsError("not-found", "Institution application not found.");
+      const application = snap.data();
+      if (application.status !== "pending_review") {
+        throw new HttpsError("failed-precondition", "This application has already been reviewed.");
+      }
+      transaction.update(applicationRef, {
+        status: "rejected",
+        rejectionReason: reason,
+        reviewedAt: now,
+        reviewedBy: reviewer.uid,
+        reviewerRole: reviewer.role
+      });
+      transaction.create(db.collection("audit_logs").doc(), {
+        action: "institution_application_rejected",
+        actorId: reviewer.uid,
+        actorRole: reviewer.role,
+        targetId: applicationId,
+        targetEmail: application.ownerEmail || "",
+        targetName: application.institutionName || "",
+        reason,
+        createdAt: now
+      });
+    });
+    return { success: true };
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    console.error("rejectInstitutionApplication failed:", error);
+    throw new HttpsError("internal", "The application could not be rejected. Check its status before retrying.");
+  }
+});
+
 async function writeNotification({ event, recipientId = null, role = null, audience = "user", title, message, type = "general", priority = "normal", metadata = {} }) {
   const id = eventKey(event, recipientId || role || audience);
   await db.collection("notifications").doc(id).set({
