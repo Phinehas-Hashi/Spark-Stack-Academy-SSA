@@ -1,12 +1,17 @@
 import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const LOGIN_PAGE = "../login.html";
 const ALLOWED_ROLES = new Set(["institution", "institution_owner", "institution_admin"]);
 const sidebar = document.getElementById("institutionSidebar");
 const topbar = document.getElementById("institutionTopbar");
 const overlay = document.getElementById("sidebarOverlay");
+const functions = getFunctions();
+const createTeamAccount = httpsCallable(functions, "createInstitutionTeamAccount");
+let currentInstitutionId = null;
+let currentProfile = null;
 
 async function loadComponent(target, path) {
   if (!target) throw new Error("Institution portal shell container is missing.");
@@ -49,6 +54,81 @@ function renderInstitutionQuotas(institution) {
   renderQuota("quotaCourses", "barCourses", usage.courses, limits.courses ?? 100);
   renderQuota("quotaStudents", "barStudents", usage.students, limits.students ?? 5000);
   renderQuota("quotaAdmins", "barAdmins", usage.adminAccounts, limits.adminAccounts ?? 10);
+}
+
+async function loadInstitutionTeam() {
+  const list = document.getElementById("institutionTeamList");
+  if (!list || !currentInstitutionId) return;
+  list.textContent = "Loading team accounts…";
+  try {
+    const snap = await getDocs(query(collection(db, "institutions", currentInstitutionId, "members"), orderBy("createdAt", "desc")));
+    list.replaceChildren();
+    if (snap.empty) {
+      const empty = document.createElement("div");
+      empty.className = "team-empty";
+      empty.textContent = "No additional team accounts have been created.";
+      list.append(empty);
+      return;
+    }
+    snap.forEach(memberDoc => {
+      const member = memberDoc.data();
+      const row = document.createElement("div");
+      row.className = "team-member";
+      const identity = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = member.fullName || "Team member";
+      const email = document.createElement("small");
+      email.textContent = member.email || "";
+      identity.append(name, email);
+      const role = document.createElement("em");
+      role.textContent = member.role === "institution_admin" ? "Administrator" : "Instructor";
+      row.append(identity, role);
+      list.append(row);
+    });
+  } catch (error) {
+    console.error("Institution team loading failed:", error);
+    list.textContent = "Team accounts could not be loaded. Check permissions and try again.";
+  }
+}
+
+function setupTeamForm() {
+  const form = document.getElementById("teamAccountForm");
+  if (!form) return;
+  const isOwner = currentProfile?.role === "institution" && currentProfile?.institutionRole === "owner";
+  if (!isOwner) {
+    form.hidden = true;
+    return;
+  }
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = document.getElementById("createTeamAccountBtn");
+    const message = document.getElementById("teamAccountMessage");
+    const values = new FormData(form);
+    const payload = {
+      fullName: String(values.get("fullName") || "").trim(),
+      email: String(values.get("email") || "").trim(),
+      role: String(values.get("role") || ""),
+      temporaryPassword: String(values.get("temporaryPassword") || "")
+    };
+    button.disabled = true;
+    message.className = "team-message";
+    message.textContent = "Creating account securely…";
+    try {
+      await createTeamAccount(payload);
+      form.reset();
+      message.className = "team-message success";
+      message.textContent = "Team account created successfully.";
+      await loadInstitutionTeam();
+      const institutionSnap = await getDoc(doc(db, "institutions", currentInstitutionId));
+      if (institutionSnap.exists()) renderInstitutionQuotas(institutionSnap.data());
+    } catch (error) {
+      console.error("Institution team account creation failed:", error);
+      message.className = "team-message error";
+      message.textContent = error.message || "Account creation failed. Check the limits and try again.";
+    } finally {
+      button.disabled = false;
+    }
+  });
 }
 
 function setupNavigation() {
@@ -115,6 +195,7 @@ async function boot() {
         return;
       }
       const profile = snapshot.data();
+      currentProfile = profile;
       const role = String(profile.role || "").trim().toLowerCase();
       const approved = profile.status === "active" && profile.active === true && profile.verified === true;
       if (!ALLOWED_ROLES.has(role) || !approved) {
@@ -122,12 +203,15 @@ async function boot() {
         return;
       }
       const institutionId = profile.institutionId;
+      currentInstitutionId = institutionId || null;
       if (institutionId) {
         const institutionSnapshot = await getDoc(doc(db, "institutions", institutionId));
         if (institutionSnapshot.exists()) renderInstitutionQuotas(institutionSnapshot.data());
       }
       const name = profile.institutionName || profile.organizationName || profile.displayName || profile.name || user.displayName || "Your institution";
       setInstitutionName(name);
+      setupTeamForm();
+      await loadInstitutionTeam();
       document.documentElement.dataset.institutionPortalReady = "true";
       window.lucide?.createIcons();
     } catch (error) {
