@@ -495,3 +495,96 @@ exports.applyScheduledMaintenance = onSchedule("every 5 minutes", async () => {
   await platformRef.update({ "maintenance.active": true, updated_at: Timestamp.now() });
   await db.collection("systemCommandLog").add({ command: "Scheduled maintenance activated", details: { target: maintenance.target, message: maintenance.message || "" }, actor: "system", createdAt: Timestamp.now() });
 });
+
+
+// ============================================================
+// CENTRALISED INSTITUTION PRICING — FOUNDER / FINANCE MANAGER
+// ============================================================
+
+const institutionPricingRef = db.doc("platform_pricing/institutions");
+
+async function requirePricingManager(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to access institution pricing.");
+  const [userSnap, founderSnap] = await Promise.all([
+    db.doc(`users/${uid}`).get(),
+    db.doc(`founder/${uid}`).get()
+  ]);
+  const user = userSnap.exists ? userSnap.data() : {};
+  const founder = founderSnap.exists ? founderSnap.data() : {};
+  const isFounder = founder.role === "founder" && founder.status === "active"
+    && founder.active !== false && founder.verified !== false;
+  const role = safeText(user.role).toLowerCase();
+  const permissions = user.permissions || {};
+  const financeDesignation = ["finance_manager", "financial_manager"].includes(safeText(user.adminRole || user.department || user.position).toLowerCase().replace(/\\s+/g, "_"));
+  const activeAdmin = ["admin", "administrator", "moderator", "finance_manager", "financial_manager"].includes(role)
+    && user.active === true && user.status === "active";
+  const canManagePricing = isFounder || (activeAdmin && (financeDesignation || permissions.manageInstitutionPricing === true || permissions.managePricing === true));
+  if (!canManagePricing) throw new HttpsError("permission-denied", "Institution pricing is restricted to the Founder/Super Admin and explicitly authorised Finance Managers.");
+  return { uid, role: isFounder ? "founder" : role, email: request.auth.token.email || "" };
+}
+
+function defaultInstitutionPricing() {
+  return {
+    currency: "KES",
+    onboardingFeeEnabled: false,
+    onboardingFeeAmount: 0,
+    onboardingTiming: "before_activation",
+    monthlySubscriptionAmount: 0,
+    annualSubscriptionAmount: 0,
+    transactionFeeEnabled: false,
+    transactionFeePercent: 0,
+    trialDays: 14
+  };
+}
+
+exports.getInstitutionPricing = onCall(async request => {
+  await requirePricingManager(request);
+  const snap = await institutionPricingRef.get();
+  return { pricing: snap.exists ? { ...defaultInstitutionPricing(), ...snap.data() } : defaultInstitutionPricing(), configured: snap.exists };
+});
+
+exports.saveInstitutionPricing = onCall(async request => {
+  const actor = await requirePricingManager(request);
+  const input = request.data || {};
+  const currency = safeText(input.currency).toUpperCase();
+  const allowedCurrencies = ["KES", "USD", "EUR", "GBP"];
+  const amountFields = ["onboardingFeeAmount", "monthlySubscriptionAmount", "annualSubscriptionAmount"];
+  if (!allowedCurrencies.includes(currency)) throw new HttpsError("invalid-argument", "Choose a supported currency.");
+  for (const field of amountFields) {
+    const value = Number(input[field]);
+    if (!Number.isSafeInteger(value) || value < 0 || value > 1000000000) {
+      throw new HttpsError("invalid-argument", `${field} must be a whole amount between 0 and 1,000,000,000.`);
+    }
+  }
+  const feePercent = Number(input.transactionFeePercent);
+  const trialDays = Number(input.trialDays);
+  if (!Number.isFinite(feePercent) || feePercent < 0 || feePercent > 20) throw new HttpsError("invalid-argument", "Transaction fee must be between 0 and 20 percent.");
+  if (!Number.isInteger(trialDays) || trialDays < 0 || trialDays > 90) throw new HttpsError("invalid-argument", "Trial duration must be between 0 and 90 days.");
+  if (!["before_activation", "after_approval"].includes(input.onboardingTiming)) throw new HttpsError("invalid-argument", "Choose a valid onboarding fee collection timing.");
+  if (input.onboardingFeeEnabled === true && Number(input.onboardingFeeAmount) <= 0) throw new HttpsError("failed-precondition", "Enter an onboarding fee greater than zero or disable the fee.");
+  if (input.transactionFeeEnabled === true && feePercent <= 0) throw new HttpsError("failed-precondition", "Enter a transaction fee percentage greater than zero or disable the fee.");
+
+  const pricing = {
+    currency,
+    onboardingFeeEnabled: input.onboardingFeeEnabled === true,
+    onboardingFeeAmount: Number(input.onboardingFeeAmount),
+    onboardingTiming: input.onboardingTiming,
+    monthlySubscriptionAmount: Number(input.monthlySubscriptionAmount),
+    annualSubscriptionAmount: Number(input.annualSubscriptionAmount),
+    transactionFeeEnabled: input.transactionFeeEnabled === true,
+    transactionFeePercent: feePercent,
+    trialDays
+  };
+  const now = Timestamp.now();
+  await institutionPricingRef.set({ ...pricing, updatedAt: now, updatedBy: actor.uid, updatedByRole: actor.role }, { merge: true });
+  await db.collection("audit_logs").add({
+    action: "institution_pricing_updated",
+    actorId: actor.uid,
+    actorRole: actor.role,
+    actorEmail: actor.email,
+    changes: pricing,
+    createdAt: now
+  });
+  return { success: true, pricing };
+});
