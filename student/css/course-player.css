@@ -934,3 +934,25 @@ RESPONSIVE
 }
 
 }
+
+/* ===== Focused classroom experience ===== */
+.course-player-page{background:radial-gradient(ellipse at 90% 0%,rgba(157,91,255,.10),transparent 32%),#f3f0ff!important}
+.classroom-header{padding:22px 24px;border:1px solid rgba(183,139,255,.45);border-radius:19px;background:linear-gradient(110deg,#0b082d,#171052 70%,#241064);box-shadow:0 12px 32px rgba(24,8,76,.14)}
+.classroom-course-info h1{color:#fff!important}
+.classroom-header .back-to-courses{color:#d6c8f6}
+.classroom-header .course-category{background:rgba(155,91,255,.22);color:#d9c1ff}
+.classroom-header .course-instructor{color:#e3dcf4}
+.classroom-header .instructor-avatar{background:linear-gradient(145deg,#7024f5,#20cde8)}
+.classroom-progress{border:1px solid rgba(183,139,255,.45);background:rgba(255,255,255,.97)}
+.classroom-progress .progress-header strong{color:#873cff}
+.classroom-progress .progress-fill{background:linear-gradient(90deg,#772cff,#bd42ff,#22d6ee)}
+.lesson-sidebar,.lesson-details{border:1px solid #e5def3!important;border-radius:17px!important;box-shadow:0 12px 32px rgba(31,15,83,.08)!important}
+.lesson-sidebar-header{background:#faf8ff}
+.lesson-sidebar-header h2,.lesson-details h2{color:#17113e}
+.lesson-item.active{background:linear-gradient(100deg,rgba(119,44,255,.13),rgba(32,216,242,.08))!important;color:#7024f5!important;box-shadow:inset 3px 0 #20d8f2}
+.lesson-summary{background:#f4efff}
+.summary-icon{background:#eee4ff;color:#8038f2}
+.lesson-player-card{border:1px solid rgba(183,139,255,.35);box-shadow:0 16px 38px rgba(18,8,55,.18)}
+.lesson-navigation button,.player-action{border-radius:10px}
+.lesson-navigation .primary-btn{background:linear-gradient(105deg,#7024f5,#a12bff)!important}
+@media(max-width:700px){.classroom-header{padding:18px;align-items:stretch;flex-direction:column}.course-player-page{padding:14px}}
