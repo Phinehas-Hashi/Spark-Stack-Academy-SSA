@@ -1435,6 +1435,16 @@ service cloud.firestore {
     }
 
     // ============================================================
+    // UNIFIED MARKETPLACE CATALOGUE
+    // Entries are created and maintained by trusted Cloud Functions.
+    // ============================================================
+    match /marketplaceItems/{itemId} {
+      allow get, list: if resource.data.get('status', '') == 'published'
+        && resource.data.get('published', false) == true;
+      allow create, update, delete: if false;
+    }
+
+    // ============================================================
     // DEFAULT DENY
     // ============================================================
 
