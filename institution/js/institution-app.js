@@ -98,7 +98,8 @@ async function boot() {
       }
       const profile = snapshot.data();
       const role = String(profile.role || "").trim().toLowerCase();
-      if (!ALLOWED_ROLES.has(role)) {
+      const approved = profile.status === "active" && profile.active === true && profile.verified === true;
+      if (!ALLOWED_ROLES.has(role) || !approved) {
         denyAccess();
         return;
       }
