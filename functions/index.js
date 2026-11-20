@@ -126,7 +126,12 @@ exports.approveInstitutionApplication = onCall(async request => {
   const userRef = db.doc(`users/${applicationId}`);
   const institutionRef = db.doc(`institutions/${applicationId}`);
   const now = Timestamp.now();
-  const trialEndsAt = Timestamp.fromMillis(now.toMillis() + 14 * 24 * 60 * 60 * 1000);
+  const pricingSnap = await institutionPricingRef.get();
+  const institutionPricing = pricingSnap.exists
+    ? { ...defaultInstitutionPricing(), ...pricingSnap.data() }
+    : defaultInstitutionPricing();
+  const trialDays = Number.isInteger(institutionPricing.trialDays) ? institutionPricing.trialDays : 14;
+  const trialEndsAt = Timestamp.fromMillis(now.toMillis() + trialDays * 24 * 60 * 60 * 1000);
 
   try {
     await db.runTransaction(async transaction => {
@@ -185,7 +190,18 @@ exports.approveInstitutionApplication = onCall(async request => {
           status: "trialing",
           trialStartedAt: now,
           trialEndsAt,
-          trialDays: 14
+          trialDays
+        },
+        pricingSnapshot: {
+          currency: institutionPricing.currency,
+          onboardingFeeEnabled: institutionPricing.onboardingFeeEnabled,
+          onboardingFeeAmount: institutionPricing.onboardingFeeAmount,
+          onboardingTiming: institutionPricing.onboardingTiming,
+          monthlySubscriptionAmount: institutionPricing.monthlySubscriptionAmount,
+          annualSubscriptionAmount: institutionPricing.annualSubscriptionAmount,
+          transactionFeeEnabled: institutionPricing.transactionFeeEnabled,
+          transactionFeePercent: institutionPricing.transactionFeePercent,
+          capturedAt: now
         },
         createdAt: now,
         updatedAt: now
@@ -212,7 +228,7 @@ exports.approveInstitutionApplication = onCall(async request => {
       });
     });
 
-    return { success: true, institutionId: applicationId, trialDays: 14, trialEndsAt: trialEndsAt.toDate().toISOString() };
+    return { success: true, institutionId: applicationId, trialDays, trialEndsAt: trialEndsAt.toDate().toISOString() };
   } catch (error) {
     if (error instanceof HttpsError) throw error;
     console.error("approveInstitutionApplication failed:", error);
@@ -516,10 +532,11 @@ async function requirePricingManager(request) {
     && founder.active !== false && founder.verified !== false;
   const role = safeText(user.role).toLowerCase();
   const permissions = user.permissions || {};
-  const financeDesignation = ["finance_manager", "financial_manager"].includes(safeText(user.adminRole || user.department || user.position).toLowerCase().replace(/\\s+/g, "_"));
+  const financeLabels = [user.adminRole, user.department, user.position].map(value => safeText(value).toLowerCase().replace(/\s+/g, "_"));
+  const financeDesignation = financeLabels.some(value => ["finance", "finance_manager", "financial_manager"].includes(value));
   const activeAdmin = ["admin", "administrator", "moderator", "finance_manager", "financial_manager"].includes(role)
     && user.active === true && user.status === "active";
-  const canManagePricing = isFounder || (activeAdmin && (financeDesignation || permissions.manageInstitutionPricing === true || permissions.managePricing === true));
+  const canManagePricing = isFounder || (activeAdmin && (["finance_manager", "financial_manager"].includes(role) || financeDesignation || permissions.manageInstitutionPricing === true || permissions.managePricing === true));
   if (!canManagePricing) throw new HttpsError("permission-denied", "Institution pricing is restricted to the Founder/Super Admin and explicitly authorised Finance Managers.");
   return { uid, role: isFounder ? "founder" : role, email: request.auth.token.email || "" };
 }
