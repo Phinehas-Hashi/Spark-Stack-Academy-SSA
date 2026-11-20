@@ -202,6 +202,7 @@
                 <select id="eventType" required>
                     <option value="event">Event</option>
                     <option value="course">Course Session</option>
+                    <option value="live_class">Live Class</option>
                     <option value="assignment">Assignment</option>
                     <option value="quiz">Quiz</option>
                     <option value="announcement">Announcement</option>
@@ -223,7 +224,12 @@
             </div>
 
             <label>
-                Course
+                Course ID (required for live classes)
+                <input id="eventCourseId" type="text" maxlength="128" placeholder="Paste the course ID">
+            </label>
+
+            <label>
+                Course name
                 <input
                     id="eventCourse"
                     type="text"
@@ -231,6 +237,20 @@
                     placeholder="Optional course name"
                 >
             </label>
+
+            <div id="liveMeetingFields" class="calendar-form-grid" hidden>
+                <label>
+                    Meeting provider
+                    <select id="meetingProvider">
+                        <option value="zoom">Zoom</option>
+                        <option value="google_meet">Google Meet</option>
+                    </select>
+                </label>
+                <label>
+                    Meeting link
+                    <input id="meetingUrl" type="url" maxlength="500" placeholder="https://..." inputmode="url">
+                </label>
+            </div>
 
             <label>
                 Description
