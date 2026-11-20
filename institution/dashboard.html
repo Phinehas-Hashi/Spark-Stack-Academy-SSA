@@ -55,7 +55,7 @@
           <p>Only the verified institution owner can create team accounts. The account limits are enforced by the server.</p>
           <label>Full name<input name="fullName" required minlength="2" maxlength="100" autocomplete="name"></label>
           <label>Work email<input name="email" type="email" required autocomplete="email"></label>
-          <label>Account type<select name="role" required><option value="instructor">Instructor (maximum 20)</option><option value="institution_admin">Institution administrator (maximum 10)</option></select></label>
+          <label>Account type<select name="role" required><option value="instructor">Instructor (maximum 20)</option><option value="institution_admin">Institution administrator (maximum 10 including owner; 9 additional)</option></select></label>
           <label>Temporary password<input name="temporaryPassword" type="password" required minlength="12" autocomplete="new-password"><small>At least 12 characters. Share it securely and ask the new member to change it after sign-in.</small></label>
           <button type="submit" id="createTeamAccountBtn">Create team account</button>
           <p id="teamAccountMessage" class="team-message" role="status" aria-live="polite"></p>
