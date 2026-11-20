@@ -143,10 +143,10 @@ function darajaBaseUrl() {
 }
 
 function normalizeKenyanPhone(value) {
-  let phone = safeText(value).replace(/[\\s()+-]/g, "");
+  let phone = safeText(value).replace(/[\s()+-]/g, "");
   if (phone.startsWith("0")) phone = "254" + phone.slice(1);
   if (phone.startsWith("7") || phone.startsWith("1")) phone = "254" + phone;
-  if (!/^254[17]\\d{8}$/.test(phone)) {
+  if (!/^254[17]\d{8}$/.test(phone)) {
     throw new HttpsError("invalid-argument", "The institution contact number must be a valid Kenyan M-Pesa number, for example 0712345678 or 254712345678.");
   }
   return phone;
@@ -662,7 +662,7 @@ exports.createInstitutionTeamAccount = onCall(async request => {
   const role = safeText(request.data?.role).toLowerCase();
   const password = String(request.data?.temporaryPassword || "");
   if (!institutionId || !["institution_admin", "instructor"].includes(role)) throw new HttpsError("invalid-argument", "Choose a valid team role.");
-  if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || fullName.length < 2 || password.length < 12) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || fullName.length < 2 || password.length < 12) {
     throw new HttpsError("invalid-argument", "Provide a valid email, full name and temporary password of at least 12 characters.");
   }
 
