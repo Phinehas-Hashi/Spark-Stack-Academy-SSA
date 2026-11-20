@@ -1,4 +1,5 @@
 import "./smart-connectivity.js";
+import "./online-action-guard.js";
 import "./ui-runtime.js";
 import "./ui-polish.js";
 import "./splash-screen.js";
