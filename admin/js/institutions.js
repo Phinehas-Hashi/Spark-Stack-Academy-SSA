@@ -1,0 +1,120 @@
+import { db } from "../../js/firebase.js";
+import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const functions = getFunctions(getApp());
+const approveApplication = httpsCallable(functions, "approveInstitutionApplication");
+const rejectApplication = httpsCallable(functions, "rejectInstitutionApplication");
+const list = document.getElementById("applicationsList");
+const filter = document.getElementById("applicationFilter");
+const message = document.getElementById("applicationMessage");
+let applications = [];
+
+function setMessage(text, kind = "") { message.textContent = text; message.className = "application-message " + kind; }
+function dateText(value) {
+  if (!value) return "Not recorded";
+  const date = value.toDate ? value.toDate() : new Date(value);
+  return Number.isNaN(date.getTime()) ? "Not recorded" : date.toLocaleString();
+}
+function node(tag, className, text) {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (text !== undefined) el.textContent = text;
+  return el;
+}
+function detail(parent, label, value) {
+  const wrap = node("div");
+  wrap.append(node("span", "", label), node("strong", "", value || "—"));
+  parent.append(wrap);
+}
+function render() {
+  const selected = filter.value;
+  const rows = applications.filter(item => selected === "all" || item.status === selected);
+  list.replaceChildren();
+  if (!rows.length) {
+    list.append(node("div", "application-empty", selected === "pending_review" ? "No institution applications are awaiting review." : "No applications found for this filter."));
+    return;
+  }
+  rows.forEach(item => {
+    const card = node("article", "application-card");
+    const head = node("div", "application-card-head");
+    const title = node("div");
+    title.append(node("h3", "", item.institutionName || "Unnamed institution"));
+    const meta = node("div", "application-meta");
+    meta.append(node("span", "", item.institutionType || "Type not supplied"), node("span", "", item.country || "Country not supplied"), node("span", "", "Submitted " + dateText(item.submittedAt)));
+    title.append(meta);
+    const status = node("span", "application-status " + item.status, String(item.status || "unknown").replaceAll("_", " "));
+    head.append(title, status);
+    card.append(head);
+    const details = node("div", "application-details");
+    detail(details, "Primary contact", item.ownerName);
+    detail(details, "Work email", item.ownerEmail);
+    detail(details, "Position", item.ownerPosition);
+    detail(details, "Phone", item.institutionPhone);
+    detail(details, "Estimated learners", item.learnerRange);
+    detail(details, "Website", item.website);
+    card.append(details);
+    if (item.rejectionReason) card.append(node("div", "application-reason", "Rejection reason: " + item.rejectionReason));
+    if (item.status === "pending_review") {
+      const actions = node("div", "application-actions");
+      const approve = node("button", "approve-button", "Approve & activate");
+      approve.type = "button";
+      approve.addEventListener("click", () => handleApprove(item, approve, reject));
+      const reject = node("button", "reject-button", "Reject application");
+      reject.type = "button";
+      reject.addEventListener("click", () => handleReject(item, reject, approve));
+      actions.append(approve, reject);
+      card.append(actions);
+    }
+    list.append(card);
+  });
+}
+async function loadApplications() {
+  list.replaceChildren(node("div", "application-empty", "Loading institution applications…"));
+  setMessage("");
+  try {
+    const snap = await getDocs(query(collection(db, "institutionApplications"), orderBy("submittedAt", "desc")));
+    applications = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    document.getElementById("pendingCount").textContent = applications.filter(x => x.status === "pending_review").length;
+    document.getElementById("approvedCount").textContent = applications.filter(x => x.status === "approved").length;
+    document.getElementById("rejectedCount").textContent = applications.filter(x => x.status === "rejected").length;
+    render();
+    window.lucide?.createIcons();
+  } catch (error) {
+    console.error("Institution applications load failed:", error);
+    list.replaceChildren(node("div", "application-empty", error.code === "permission-denied" ? "You do not have permission to view institution applications." : "Could not load applications. Check your connection and try again."));
+  }
+}
+async function handleApprove(item, button, otherButton) {
+  if (!window.confirm("Approve " + item.institutionName + " and activate its owner account with a 14-day trial?")) return;
+  button.disabled = true; otherButton.disabled = true; setMessage("Approving institution…");
+  try {
+    await approveApplication({ applicationId: item.id });
+    setMessage("Institution approved. Its 14-day trial has started.", "success");
+    await loadApplications();
+  } catch (error) {
+    console.error("Institution approval failed:", error);
+    setMessage(error.message || "Approval failed. Check application status before retrying.", "error");
+    button.disabled = false; otherButton.disabled = false;
+  }
+}
+async function handleReject(item, button, otherButton) {
+  const reason = window.prompt("Enter the reason for rejecting this institution application:");
+  if (reason === null) return;
+  if (reason.trim().length < 5) { setMessage("Please enter a reason of at least 5 characters.", "error"); return; }
+  button.disabled = true; otherButton.disabled = true; setMessage("Recording rejection…");
+  try {
+    await rejectApplication({ applicationId: item.id, reason: reason.trim() });
+    setMessage("Application rejected and the decision recorded.", "success");
+    await loadApplications();
+  } catch (error) {
+    console.error("Institution rejection failed:", error);
+    setMessage(error.message || "Rejection failed. Check application status before retrying.", "error");
+    button.disabled = false; otherButton.disabled = false;
+  }
+}
+filter.addEventListener("change", render);
+document.getElementById("refreshApplications").addEventListener("click", loadApplications);
+document.addEventListener("admin:ready", loadApplications);
+if (document.readyState === "complete") setTimeout(() => { if (window.AdminApp?.getCurrentUser?.()) loadApplications(); }, 0);
