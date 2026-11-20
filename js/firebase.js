@@ -1,4 +1,4 @@
-import "./smart-connectivity.js";
+import "./smart-connectivity.js?v=20261120-diagnostics1";
 import "./online-action-guard.js";
 import "./ui-runtime.js";
 import "./ui-polish.js";
