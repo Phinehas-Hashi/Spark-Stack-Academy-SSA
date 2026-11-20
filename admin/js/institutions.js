@@ -97,6 +97,7 @@ async function loadApplications() {
   }
 }
 async function handleApprove(item, button, otherButton) {
+  if (!window.SSAOnlineActionGuard?.requireOnline("Approving an institution")) return;
   if (!window.confirm("Approve " + item.institutionName + " using the current institution trial and onboarding fee settings? An M-Pesa payment prompt may be sent to its registered contact number.")) return;
   button.disabled = true; otherButton.disabled = true; setMessage("Approving institution…");
   try {
@@ -117,6 +118,7 @@ async function handleApprove(item, button, otherButton) {
   }
 }
 async function handleRetryPayment(item, button) {
+  if (!window.SSAOnlineActionGuard?.requireOnline("Sending an institution M-Pesa prompt")) return;
   if (!window.confirm("Send a new M-Pesa STK Push to " + (item.institutionPhone || "the registered institution phone") + "?")) return;
   button.disabled = true;
   setMessage("Sending a new M-Pesa payment prompt…");
@@ -131,6 +133,7 @@ async function handleRetryPayment(item, button) {
   }
 }
 async function handleReject(item, button, otherButton) {
+  if (!window.SSAOnlineActionGuard?.requireOnline("Rejecting an institution application")) return;
   const reason = window.prompt("Enter the reason for rejecting this institution application:");
   if (reason === null) return;
   if (reason.trim().length < 5) { setMessage("Please enter a reason of at least 5 characters.", "error"); return; }
