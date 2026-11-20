@@ -1132,3 +1132,73 @@
         transition: none !important;
     }
 }
+
+/* ============================================================
+   STUDENT SIDEBAR — FIXED FOOTER / SCROLLABLE NAV
+   Mirrors the Founder dashboard shell behavior:
+   profile and logout remain stationary; only navigation scrolls.
+============================================================ */
+.sidebar,
+.ssa-student-sidebar {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-profile {
+    flex: 0 0 auto;
+}
+
+.sidebar-menu {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(190, 177, 255, .45) transparent;
+    padding: 0 2px 8px;
+}
+
+.sidebar-menu::-webkit-scrollbar {
+    width: 5px;
+}
+.sidebar-menu::-webkit-scrollbar-thumb {
+    background: rgba(190, 177, 255, .4);
+    border-radius: 99px;
+}
+
+.sidebar-footer {
+    flex: 0 0 auto;
+    margin-top: 8px;
+    padding-top: 10px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(13, 10, 53, 0), rgba(13, 10, 53, .98) 22%);
+}
+
+.sidebar-footer .logout-btn {
+    min-height: 44px;
+    flex: 0 0 auto;
+}
+
+@media (max-height: 700px) {
+    .sidebar-profile {
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+    .sidebar-menu {
+        gap: 2px;
+    }
+    .sidebar-link {
+        min-height: 39px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+    .sidebar-footer {
+        margin-top: 5px;
+        padding-top: 7px;
+    }
+}
