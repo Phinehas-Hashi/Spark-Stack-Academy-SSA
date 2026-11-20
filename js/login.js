@@ -28,6 +28,7 @@ const DASHBOARDS = {
     founder: "founder/dashboard.html",
     admin: "admin/dashboard.html",
     instructor: "instructor/dashboard.html",
+    institution: "institution/dashboard.html",
     student: "student/dashboard.html"
 };
 
