@@ -33,17 +33,27 @@ function showLoading() {
   grid.innerHTML = '<div class="library-state loading-card"><div class="state-icon"><i data-lucide="loader-circle"></i></div><h3>Loading your institution courses</h3><p>Checking your current enrolments.</p></div>';
   window.lucide?.createIcons();
 }
-function showEmpty() {
+function showEmpty(noMatches = false) {
   grid.innerHTML = "";
   grid.hidden = true;
   error.hidden = true;
   empty.hidden = false;
   const heading = empty.querySelector("h3");
   const paragraph = empty.querySelector("p");
-  if (heading) heading.textContent = "No institution courses yet";
-  if (paragraph) paragraph.textContent = "When an institution you belong to enrols you in a course, it will appear here. Browse global offerings in the Academy Marketplace.";
+  if (heading) heading.textContent = noMatches ? "No matching institution courses" : "No institution courses yet";
+  if (paragraph) paragraph.textContent = noMatches
+    ? "Try a different search or reset the course filters."
+    : "When an institution you belong to enrols you in a course, it will appear here. Browse global offerings in the Academy Marketplace.";
   const action = empty.querySelector("#resetCourseFilters");
-  if (action) { action.textContent = "Explore Academy Marketplace"; action.onclick = () => window.location.href = "marketplace.html"; }
+  if (action) {
+    action.textContent = noMatches ? "Clear search and filters" : "Explore Academy Marketplace";
+    action.onclick = noMatches ? () => {
+      term = ""; filter = "all";
+      if (search) search.value = "";
+      filters.forEach(button => { const active = button.dataset.filter === "all"; button.classList.toggle("active",active); button.setAttribute("aria-pressed",String(active)); });
+      render();
+    } : () => { window.location.href = "marketplace.html"; };
+  }
 }
 function showError() {
   grid.hidden = true; empty.hidden = true; error.hidden = false;
@@ -88,7 +98,7 @@ function render() {
     return matchesFilter && (!term || text.includes(term));
   });
   count.textContent = shown.length+" "+(shown.length===1?"course":"courses");
-  if (!shown.length) { showEmpty(); return; }
+  if (!shown.length) { showEmpty(courses.length > 0); return; }
   empty.hidden = true; error.hidden = true; grid.hidden = false;
   grid.innerHTML = shown.map(c=>{
     const p = Math.min(100,Math.max(0,c.progress));
@@ -112,6 +122,7 @@ onAuthStateChanged(auth,async current=>{
   await loadInstitutionCourses();
 });
 search?.addEventListener("input",()=>{term=search.value.trim().toLowerCase();render();});
+$("clearCourseSearch")?.addEventListener("click",()=>{if(search)search.value="";term="";render();});
 filters.forEach(button=>button.addEventListener("click",()=>{
   filter=button.dataset.filter || "all";
   filters.forEach(item=>{const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-pressed",String(active));});
