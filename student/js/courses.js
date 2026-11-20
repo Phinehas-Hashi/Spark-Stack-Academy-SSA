@@ -1,6 +1,6 @@
 import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let currentUser = null;
 let myCourses = [];
@@ -31,55 +31,43 @@ async function loadMyCourses() {
     myCourses = [];
 
     try {
-        // Canonical source: students/{uid}/enrollments
-        const nestedRef = collection(db, "students", currentUser.uid, "enrollments");
-        const nestedSnap = await getDocs(nestedRef);
-
-        console.log("📦 Student enrollment records:", nestedSnap.size);
-
-        const records = nestedSnap.docs.map(s => ({
-            id: s.id,
-            ...s.data()
-        }));
-
-        // The nested student enrollment collection is the canonical
-        // source. Do not fall back to an unscoped top-level query:
-        // production Firestore rules intentionally forbid that.
-        const seen = new Set();
-
+        // Merge institution-issued enrolments with Academy marketplace enrolments.
+        const [nestedSnap, academySnap] = await Promise.all([
+            getDocs(collection(db, "students", currentUser.uid, "enrollments")),
+            getDocs(query(collection(db, "enrollments"), where("userId", "==", currentUser.uid)))
+        ]);
+        const records = [
+            ...nestedSnap.docs.map(s => ({ id: s.id, ...s.data(), source: "institution" })),
+            ...academySnap.docs.map(s => ({ id: s.id, ...s.data(), source: "academy" }))
+        ];
+        const byCourse = new Map();
         for (const enrollment of records) {
             const courseId = enrollment.courseId || enrollment.courseID || enrollment.course;
-            if (!courseId || seen.has(String(courseId))) continue;
-
-            const status = String(enrollment.status || "active").trim().toLowerCase();
-            if (["rejected", "revoked", "cancelled", "canceled", "suspended", "pending"].includes(status)) {
-                continue;
-            }
-
+            if (!courseId) continue;
+            const status = String(enrollment.status || "").trim().toLowerCase();
+            const paymentStatus = String(enrollment.paymentStatus || "").trim().toLowerCase();
+            if (["rejected","revoked","cancelled","canceled","suspended","pending"].includes(status)) continue;
+            const institutionEntitlement = Boolean(enrollment.institutionId) && ["active","approved","completed"].includes(status);
+            const academyEntitlement = (["active","approved","completed"].includes(status) && ["paid","free"].includes(paymentStatus)) || (status === "paid" && (paymentStatus === "" || paymentStatus === "paid"));
+            if (!institutionEntitlement && !academyEntitlement) continue;
+            const key = String(courseId);
+            if (!byCourse.has(key)) byCourse.set(key, enrollment);
+        }
+        for (const [courseId, enrollment] of byCourse.entries()) {
             try {
-                const courseSnap = await getDoc(doc(db, "courses", String(courseId)));
-                if (!courseSnap.exists()) {
-                    console.warn("⚠️ Course missing:", courseId);
-                    continue;
-                }
-
+                const courseSnap = await getDoc(doc(db, "courses", courseId));
+                if (!courseSnap.exists()) { console.warn("Course missing:", courseId); continue; }
                 const course = courseSnap.data();
-                seen.add(String(courseId));
-
                 myCourses.push({
-                    id: String(courseId),
-                    ...course,
-                    enrollmentId: enrollment.id,
+                    id: courseId, ...course, enrollmentId: enrollment.id,
+                    enrollmentSource: enrollment.source, institutionId: enrollment.institutionId || "",
+                    institutionName: enrollment.institutionName || enrollment.schoolName || "",
                     progress: Number(enrollment.progress ?? enrollment.progressPercent ?? 0),
-                    enrollmentStatus: status,
-                    paymentStatus: enrollment.paymentStatus || "",
+                    enrollmentStatus: statusValue(enrollment.status), paymentStatus: enrollment.paymentStatus || "",
                     joinedAt: enrollment.enrolledAt || enrollment.joinedAt || enrollment.createdAt || null
                 });
-            } catch (courseError) {
-                console.warn("Could not load course", courseId, courseError);
-            }
+            } catch (courseError) { console.warn("Could not load course", courseId, courseError); }
         }
-
         myCourses.sort((a, b) => getTime(b.joinedAt) - getTime(a.joinedAt));
         console.log("🎓 Signed-in student's courses:", myCourses);
 
@@ -189,7 +177,7 @@ function showLoading() {
 
 function showEmpty() {
     if (!coursesContainer) return;
-    coursesContainer.innerHTML = `<div class="courses-state empty-state"><div class="state-icon"><i data-lucide="book-open"></i></div><h3>No Courses Yet</h3><p>You haven't enrolled in any courses yet. Explore the library and start learning.</p><a href="course-library.html" class="primary-btn"><i data-lucide="compass"></i> Explore Courses</a></div>`;
+    coursesContainer.innerHTML = `<div class="courses-state empty-state"><div class="state-icon"><i data-lucide="book-open"></i></div><h3>No Courses Yet</h3><p>Your institution courses and Academy purchases will appear here after enrolment. Explore the global marketplace to find your next course.</p><a href="marketplace.html" class="primary-btn"><i data-lucide="compass"></i> Explore Marketplace</a></div>`;
     updateStats();
     refreshIcons();
 }
@@ -200,6 +188,8 @@ function showError(error) {
     $("retryCourses")?.addEventListener("click", loadMyCourses);
     refreshIcons();
 }
+
+function statusValue(value) { return String(value || "active").trim().toLowerCase(); }
 
 function getCourseHours(duration) {
     if (typeof duration === "number") return duration;
