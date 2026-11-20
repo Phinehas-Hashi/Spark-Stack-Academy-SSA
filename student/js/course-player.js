@@ -247,8 +247,39 @@ function renderLessons() {
     refreshIcons();
 }
 
+function isCoursePlaybackOnline() {
+    const state = window.SSASmartConnectivity?.getState?.();
+    return navigator.onLine !== false && state !== "offline";
+}
+
+function showOfflineLessonState() {
+    const message = "You are offline. Lessons are not available offline yet. Download support will be introduced in a future phase, and access will require an eligible course entitlement.";
+    if (lessonDescription) lessonDescription.textContent = message;
+    if (videoBox) videoBox.innerHTML = `<div class="video-placeholder"><div class="video-placeholder-icon"><i data-lucide="wifi-off"></i></div><h3>Internet connection required</h3><p>${escapeHTML(message)}</p></div>`;
+    if (courseResources) courseResources.innerHTML = "";
+    if (lessonNotes) lessonNotes.disabled = true;
+    if (saveNotesBtn) saveNotesBtn.disabled = true;
+    if (completeLessonBtn) completeLessonBtn.disabled = true;
+    if (previousLessonBtn) previousLessonBtn.disabled = true;
+    if (nextLessonBtn) nextLessonBtn.disabled = true;
+    const video = videoBox?.querySelector("video");
+    video?.pause?.();
+    refreshIcons();
+}
+
+function restoreOnlineLessonControls() {
+    if (lessonNotes) lessonNotes.disabled = false;
+    if (saveNotesBtn) saveNotesBtn.disabled = false;
+}
+
 async function showLesson(index) {
     if (!lessons[index]) return;
+    if (!isCoursePlaybackOnline()) {
+        currentLessonIndex = index;
+        showOfflineLessonState();
+        return;
+    }
+    restoreOnlineLessonControls();
 
     currentLessonIndex = index;
     const lesson = lessons[index];
@@ -358,6 +389,7 @@ nextLessonBtn?.addEventListener("click", () => showLesson(currentLessonIndex + 1
 completeLessonBtn?.addEventListener("click", completeCurrentLesson);
 
 async function completeCurrentLesson() {
+    if (!isCoursePlaybackOnline()) { showOfflineLessonState(); return; }
     const lesson = lessons[currentLessonIndex];
     if (!lesson || !currentUser || completedLessons.includes(lesson.id)) return;
 
@@ -440,6 +472,7 @@ async function loadNotes(lesson) {
 }
 
 saveNotesBtn?.addEventListener("click", async () => {
+    if (!isCoursePlaybackOnline()) { showOfflineLessonState(); return; }
     const lesson = lessons[currentLessonIndex];
     if (!lesson || !currentUser || !lessonNotes) return;
     try {
@@ -495,5 +528,18 @@ if (!new URLSearchParams(window.location.search).get("id")) {
         window.history.replaceState({}, "", url);
     }
 }
+
+window.addEventListener("ssa:connectivity-change", event => {
+    if (event.detail?.online !== true) {
+        showOfflineLessonState();
+        return;
+    }
+    restoreOnlineLessonControls();
+    if (lessons.length && currentUser) showLesson(currentLessonIndex);
+});
+window.addEventListener("offline", showOfflineLessonState);
+window.addEventListener("online", () => {
+    if (lessons.length && currentUser) showLesson(currentLessonIndex);
+});
 
 refreshIcons();
