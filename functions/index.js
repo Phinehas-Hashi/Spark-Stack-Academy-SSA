@@ -179,7 +179,7 @@ exports.approveInstitutionApplication = onCall(async request => {
         status: "active",
         verificationStatus: "verified",
         limits: { instructors: 20, courses: 100, students: 5000, adminAccounts: 10 },
-        usage: { instructors: 0, courses: 0, students: 0, adminAccounts: 0 },
+        usage: { instructors: 0, courses: 0, students: 0, adminAccounts: 1 },
         subscription: {
           plan: "trial",
           status: "trialing",
@@ -308,7 +308,7 @@ exports.createInstitutionTeamAccount = onCall(async request => {
       if (!freshInstitution.exists || freshInstitution.data().status !== "active") throw new HttpsError("failed-precondition", "Institution workspace is not active.");
       const limits = freshInstitution.data().limits || {};
       const max = Number(limits[limitKey] ?? (role === "instructor" ? 20 : 10));
-      if (members.size >= max) throw new HttpsError("resource-exhausted", `Institution limit reached: maximum ${max} ${limitKey === "instructors" ? "instructors" : "admin accounts"}.`);
+      const effectiveMax = role === "institution_admin" ? Math.max(0, max - 1) : max;\n      if (members.size >= effectiveMax) throw new HttpsError("resource-exhausted", `Institution limit reached: maximum ${max} ${limitKey === "instructors" ? "instructors" : "admin accounts including the owner"}.`);
       const memberRef = db.doc(`institutions/${institutionId}/members/${created.uid}`);
       transaction.create(db.doc(`users/${created.uid}`), {
         uid: created.uid, email, fullName, name: fullName, displayName: fullName,
@@ -322,7 +322,7 @@ exports.createInstitutionTeamAccount = onCall(async request => {
         createdAt: Timestamp.now(), createdBy: callerUid
       });
       transaction.update(institutionRef, {
-        usage: { ...(freshInstitution.data().usage || {}), [limitKey]: members.size + 1 },
+        usage: { ...(freshInstitution.data().usage || {}), [limitKey]: role === "institution_admin" ? members.size + 2 : members.size + 1 },
         updatedAt: Timestamp.now()
       });
     });
