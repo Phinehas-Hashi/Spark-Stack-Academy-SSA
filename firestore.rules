@@ -297,10 +297,17 @@ service cloud.firestore {
 
     match /leaderboardPublic/{studentId} {
       allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
+        if (
+          (staff() || (isStudent() && studentPortalOpen()))
+          && resource.data.keys().hasOnly([
+            'publicName',
+            'xp',
+            'level',
+            'updatedAt',
+            'avatarUrl'
+          ])
+          && resource.data.publicName is string
+          && resource.data.xp is number
         );
 
       allow create, update, delete:
