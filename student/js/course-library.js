@@ -30,6 +30,8 @@ function showLoading() {
   window.lucide?.createIcons();
 }
 function showEmpty(noMatches = false) {
+  const clearButton = $("clearCourseSearch");
+  if (clearButton) clearButton.hidden = !term;
   grid.innerHTML = ""; grid.hidden = true; error.hidden = true; empty.hidden = false;
   const heading = empty.querySelector("h3"), paragraph = empty.querySelector("p");
   if (heading) heading.textContent = noMatches ? "No matching institution courses" : "No institution courses yet";
@@ -46,7 +48,7 @@ function showEmpty(noMatches = false) {
     } : () => { window.location.href = "marketplace.html"; };
   }
 }
-function showError() { grid.hidden = true; empty.hidden = true; error.hidden = false; }
+function showError() { grid.hidden = true; empty.hidden = true; error.hidden = false; if (count) count.textContent = "Courses unavailable"; }
 
 async function loadInstitutionCourses() {
   if (!user) return;
@@ -148,6 +150,8 @@ function render() {
     return matchesFilter && (!term || text.includes(term));
   });
   count.textContent = shown.length+" "+(shown.length===1?"course":"courses");
+  const clearButton = $("clearCourseSearch");
+  if (clearButton) clearButton.hidden = !term;
   if (!shown.length) { showEmpty(courses.length > 0); return; }
   empty.hidden = true; error.hidden = true; grid.hidden = false;
   grid.innerHTML = shown.map(c=>{
@@ -171,5 +175,4 @@ filters.forEach(button=>button.addEventListener("click",()=>{
   filters.forEach(item=>{const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-pressed",String(active));});
   render();
 }));
-reset?.addEventListener("click",()=>{window.location.href="marketplace.html";});
 retry?.addEventListener("click",loadInstitutionCourses);
