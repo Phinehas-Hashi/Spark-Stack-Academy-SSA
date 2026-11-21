@@ -393,11 +393,6 @@
    TOPBAR
 ============================================================ */
 
-.topbar-container {
-    width: 100%;
-    min-width: 0;
-}
-
 .topbar {
     position: sticky;
 
