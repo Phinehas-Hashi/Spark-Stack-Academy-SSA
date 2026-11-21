@@ -290,6 +290,24 @@ service cloud.firestore {
 
 
     // ============================================================
+    // PUBLIC STUDENT LEADERBOARD
+    // Only trusted backend/admin processes may publish opt-in entries.
+    // Entries must contain publicName, xp, level and updatedAt only.
+    // ============================================================
+
+    match /leaderboardPublic/{studentId} {
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+        );
+
+      allow create, update, delete:
+        if false;
+    }
+
+
     // STUDENT PROFILES
     // ============================================================
 
