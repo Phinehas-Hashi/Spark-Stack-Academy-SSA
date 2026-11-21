@@ -2,6 +2,9 @@
     max-width: 1500px;
     margin: 0 auto;
     padding-bottom: 50px;
+
+    padding:28px 32px 50px;
+    box-sizing:border-box;
 }.take-quiz-page .take-quiz-header{
     display: flex;
     justify-content: space-between;
@@ -737,3 +740,4 @@
     }.take-quiz-page .modal-actions button{
         width: 100%;
     }}
+@media(max-width:700px){.take-quiz-page{padding:20px 16px 32px}}
