@@ -867,6 +867,57 @@ function normalizeManualMpesaPhone(value) {
   return phone;
 }
 
+exports.getFounderManualMpesaPaymentConfig = onCall(async request => {
+  await requireFounder(request);
+  const snap = await db.doc("platform_controls/global").get();
+  const config = snap.data()?.manualMpesa || {};
+  return {
+    enabled: config.enabled === true,
+    receiverName: safeText(config.receiverName),
+    receiverPhone: safeText(config.receiverPhone),
+    instructions: safeText(config.instructions)
+  };
+});
+
+exports.saveFounderManualMpesaPaymentConfig = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data || {};
+  const enabled = input.enabled === true;
+  const receiverName = safeText(input.receiverName);
+  const receiverPhone = safeText(input.receiverPhone);
+  const instructions = safeText(input.instructions);
+  if (enabled && (!receiverName || receiverName.length < 2 || receiverName.length > 100)) {
+    throw new HttpsError("invalid-argument", "Enter the personal M-Pesa account holder name.");
+  }
+  let normalizedPhone = "";
+  if (enabled) normalizedPhone = normalizeManualMpesaPhone(receiverPhone);
+  if (instructions.length > 300) throw new HttpsError("invalid-argument", "Payment instructions must be 300 characters or fewer.");
+  const now = Timestamp.now();
+  await db.doc("platform_controls/global").set({
+    manualMpesa: {
+      enabled,
+      receiverName,
+      receiverPhone: normalizedPhone,
+      instructions,
+      receivingArrangement: "personal",
+      currency: "KES",
+      updatedBy: founder.uid,
+      updatedAt: now
+    },
+    updatedAt: now
+  }, { merge: true });
+  await db.collection("audit_logs").add({
+    action: "manual_mpesa_collection_settings_updated",
+    actorId: founder.uid,
+    enabled,
+    receiverName,
+    receiverPhone: normalizedPhone,
+    receivingArrangement: "personal",
+    createdAt: now
+  });
+  return { success: true, enabled, receiverName, receiverPhone: normalizedPhone };
+});
+
 exports.getManualMpesaPaymentConfig = onCall(async request => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Sign in to view payment instructions.");
