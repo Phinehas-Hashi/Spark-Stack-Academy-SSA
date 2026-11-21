@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="css/certificates.css">
     <link rel="stylesheet" href="css/responsive.css">
 <link rel="stylesheet" href="css/student-theme.css?v=20261121-theme1">
+    <link rel="stylesheet" href="css/portal-shell.css?v=20261121-ui4">
 
 </head>
 
@@ -30,22 +31,24 @@
          STUDENT APP
     ====================================== -->
 
-    <div id="studentApp">
+    <div id="studentApp" class="student-layout">
 
 
         <!-- SIDEBAR -->
 
-        <aside id="studentSidebar"></aside>
+        <aside id="sidebarContainer" class="sidebar-container"></aside>
+        <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
 
 
         <!-- MAIN -->
 
         <main class="student-main">
+            <header id="topbarContainer" class="topbar-container"></header>
 
 
             <!-- TOPBAR -->
 
-            <header id="studentTopbar"></header>
+            
 
 
             <!-- =================================
