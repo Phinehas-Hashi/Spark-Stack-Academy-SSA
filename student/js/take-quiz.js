@@ -13,6 +13,8 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+import { awardXP, XP_REWARDS } from "./achievements.js";
+
 import {
     collection,
     query,
@@ -1780,87 +1782,24 @@ async function submitQuiz() {
         };
 
 
-        await runTransaction(
-            db,
-            async transaction => {
+        await runTransaction(db, async transaction => {
+            const existingSubmission = await transaction.get(submissionRef);
+            if (existingSubmission.exists()) return;
+            transaction.set(submissionRef, submissionData);
+        });
 
-                const studentRef =
-                    doc(
-                        db,
-                        "students",
-                        currentUser.uid
-                    );
-
-
-                const studentSnap =
-                    await transaction.get(
-                        studentRef
-                    );
-
-
-                const existingSubmission =
-                    await transaction.get(
-                        submissionRef
-                    );
-
-
-                if (
-                    existingSubmission.exists()
-                ) {
-
-                    return;
-
-                }
-
-
-                transaction.set(
-                    submissionRef,
-                    submissionData
-                );
-
-
-                if (
-                    studentSnap.exists()
-                ) {
-
-                    const student =
-                        studentSnap.data();
-
-
-                    const currentXP =
-                        Number(
-                            student.xp || 0
-                        );
-
-
-                    const currentQuizXP =
-                        Number(
-                            student.quizXP || 0
-                        );
-
-
-                    transaction.update(
-                        studentRef,
-                        {
-
-                            xp:
-                                currentXP +
-                                xpEarned,
-
-                            quizXP:
-                                currentQuizXP +
-                                xpEarned,
-
-                            lastQuizAt:
-                                serverTimestamp()
-
-                        }
-                    );
-
-                }
-
-            }
-        );
+        // XP is awarded through the shared, idempotent academy XP engine.
+        try {
+            await awardXP(
+                currentUser.uid,
+                xpEarned,
+                `Completed quiz: ${quiz.title || "Quiz"}`,
+                `quiz_${quiz.id}_${attemptNumber}`
+            );
+        } catch (xpError) {
+            console.warn("Quiz was submitted, but XP could not be synchronized:", xpError);
+            showToast("Quiz submitted. XP synchronization is pending.");
+        }
 
 
         localStorage.removeItem(
@@ -2034,7 +1973,7 @@ function calculateQuizXP(result) {
         Number(
             quiz.xpReward ??
             quiz.xp ??
-            50
+            XP_REWARDS.quiz
         );
 
 
