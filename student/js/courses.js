@@ -130,6 +130,7 @@ function createCourseCard(course) {
                 <span><i data-lucide="signal"></i>${escapeHTML(level)}</span>
                 <span><i data-lucide="clock-3"></i>${escapeHTML(String(duration))}</span>
             </div>
+            <span class="course-access-source">${escapeHTML(course.entitlementSource || "Enrolled")}</span>
             <h3>${escapeHTML(title)}</h3>
             <p>${escapeHTML(description)}</p>
             <div class="course-instructor-row">
