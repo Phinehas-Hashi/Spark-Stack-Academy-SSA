@@ -991,6 +991,56 @@ service cloud.firestore {
 
 
     // ============================================================
+    // COURSE PROGRESS
+    // Students can maintain progress only for courses they can access.
+    // ============================================================
+
+    match /courseProgress/{progressId} {
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.userId == uid()
+          && hasActiveCourseEntitlement(resource.data.courseId)
+        );
+
+      allow create:
+        if isStudent()
+        && studentPortalOpen()
+        && request.resource.data.userId == uid()
+        && request.resource.data.courseId is string
+        && hasActiveCourseEntitlement(request.resource.data.courseId)
+        && request.resource.data.keys().hasOnly([
+          'userId',
+          'courseId',
+          'completedLessons',
+          'currentLessonId',
+          'currentLesson',
+          'progress',
+          'updatedAt'
+        ]);
+
+      allow update:
+        if isStudent()
+        && studentPortalOpen()
+        && resource.data.userId == uid()
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.courseId == resource.data.courseId
+        && hasActiveCourseEntitlement(resource.data.courseId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'completedLessons',
+          'currentLessonId',
+          'currentLesson',
+          'progress',
+          'updatedAt'
+        ]);
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
     // COURSE MODULES
     // ============================================================
 
