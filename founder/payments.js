@@ -29,6 +29,8 @@ onAuthStateChanged
 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
 
 /* ===================================
    AUTH GUARD
@@ -124,6 +126,8 @@ doc(db,"system","payment_settings");
 =================================== */
 
 async function initializePayments(){
+
+loadManualMpesaSettings();
 
 loadGatewaySettings();
 
@@ -915,3 +919,68 @@ function showToast(message, type="success") {
 }
 
 initPayments();
+
+
+// ============================================================
+// FOUNDER — PERSONAL M-PESA COLLECTION CONTROLS
+// ============================================================
+
+const founderFunctions = getFunctions(auth.app, "us-central1");
+const getManualMpesaSettings = httpsCallable(founderFunctions, "getFounderManualMpesaPaymentConfig");
+const saveManualMpesaSettings = httpsCallable(founderFunctions, "saveFounderManualMpesaPaymentConfig");
+
+async function loadManualMpesaSettings() {
+    const form = document.getElementById("manualMpesaSettingsForm");
+    if (!form) return;
+    const message = document.getElementById("manualMpesaSettingsMessage");
+    if (message) message.textContent = "Loading secure receiving settings…";
+    try {
+        const response = await getManualMpesaSettings();
+        const settings = response.data || {};
+        document.getElementById("manualMpesaName").value = settings.receiverName || "";
+        document.getElementById("manualMpesaPhone").value = settings.receiverPhone || "";
+        document.getElementById("manualMpesaInstructions").value = settings.instructions || "";
+        document.getElementById("manualMpesaEnabled").checked = settings.enabled === true;
+        if (message) message.textContent = settings.enabled ? "Personal M-Pesa collection is enabled." : "Collection is currently disabled.";
+    } catch (error) {
+        console.error("Manual M-Pesa settings load failed:", error);
+        if (message) {
+            message.className = "error";
+            message.textContent = error.message || "Unable to load payment settings. Founder access is required.";
+        }
+    }
+}
+
+document.getElementById("manualMpesaSettingsForm")?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = document.getElementById("saveManualMpesaSettings");
+    const message = document.getElementById("manualMpesaSettingsMessage");
+    const payload = {
+        receiverName: document.getElementById("manualMpesaName").value.trim(),
+        receiverPhone: document.getElementById("manualMpesaPhone").value.trim(),
+        instructions: document.getElementById("manualMpesaInstructions").value.trim(),
+        enabled: document.getElementById("manualMpesaEnabled").checked
+    };
+    button.disabled = true;
+    button.textContent = "Saving securely…";
+    if (message) {
+        message.className = "";
+        message.textContent = "Saving settings through the trusted backend…";
+    }
+    try {
+        await saveManualMpesaSettings(payload);
+        if (message) {
+            message.className = "";
+            message.textContent = payload.enabled ? "Personal M-Pesa collection enabled." : "Personal M-Pesa collection disabled.";
+        }
+    } catch (error) {
+        console.error("Manual M-Pesa settings save failed:", error);
+        if (message) {
+            message.className = "error";
+            message.textContent = error.message || "Unable to save receiving details.";
+        }
+    } finally {
+        button.disabled = false;
+        button.textContent = "Save receiving details";
+    }
+});
