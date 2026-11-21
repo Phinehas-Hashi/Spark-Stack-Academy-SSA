@@ -2,7 +2,7 @@ import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const LEVEL_XP = 250;
+const LEVEL_XP = 100;
 const $ = id => document.getElementById(id);
 
 function levelData(xp){
