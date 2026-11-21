@@ -1622,7 +1622,11 @@ exports.getFounderGlobalStats = onCall(async request => {
 
   const countryRows = Object.values(countries).map(row => ({ ...row, popularCourses: Object.entries(row.courseCounts || {}).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([courseId,sales])=>({courseId,sales})) })).sort((a,b) => b.users-a.users);
   const recentMonths = Object.entries(monthlyRegistrations).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12).map(([month,count])=>({month,count}));
-  const courses = Object.values(topCourses).sort((a,b)=>b.sales-a.sales).slice(0,10);
+  const courses = await Promise.all(Object.values(topCourses).sort((a,b)=>b.sales-a.sales).slice(0,10).map(async item => {
+    const courseSnap = await db.doc("courses/" + item.courseId).get();
+    const course = courseSnap.exists ? courseSnap.data() : {};
+    return { ...item, title: safeText(course.title || course.name, item.courseId) };
+  }));
   return {
     generatedAt: Timestamp.now().toDate().toISOString(),
     ...totals,
