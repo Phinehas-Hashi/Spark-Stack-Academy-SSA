@@ -1281,3 +1281,13 @@
     }
 
 }
+/* INSTRUCTOR SIDEBAR — fixed profile/footer, independently scrollable nav */
+#instructorSidebar{height:100dvh;min-height:0;overflow:hidden}
+#instructorSidebar .sidebar{height:100%;min-height:0;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box}
+#instructorSidebar .sidebar-logo,#instructorSidebar .instructor-profile{flex:0 0 auto}
+#instructorSidebar .sidebar-nav{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(190,177,255,.42) transparent}
+#instructorSidebar .sidebar-nav::-webkit-scrollbar{width:5px}
+#instructorSidebar .sidebar-nav::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(190,177,255,.4)}
+#instructorSidebar .sidebar-bottom{flex:0 0 auto;margin-top:8px;padding-top:10px;padding-bottom:max(4px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(13,10,53,0),rgba(13,10,53,.98) 22%)}
+#instructorSidebar .logout-btn{min-height:44px}
+@media(max-height:700px){#instructorSidebar .sidebar{padding-top:12px;padding-bottom:10px}#instructorSidebar .sidebar-logo{padding-bottom:14px}#instructorSidebar .instructor-profile{margin-top:10px;margin-bottom:8px;padding:8px}#instructorSidebar .nav-section-title{margin-top:12px}#instructorSidebar .nav-link{min-height:38px}#instructorSidebar .sidebar-bottom{margin-top:5px;padding-top:7px}}
