@@ -14,11 +14,13 @@ import {
     getDoc,
     updateDoc,
     increment,
+    runTransaction,
     serverTimestamp,
     collection,
     query,
     orderBy,
     limit,
+    where,
     getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -81,6 +83,12 @@ const BADGES = {
         icon: "🚀",
         name: "Project Builder",
         description: "Submitted your first project."
+    },
+
+    assignment_starter: {
+        icon: "📝",
+        name: "Assignment Starter",
+        description: "Submitted your first assignment."
     },
 
     streak_7: {
@@ -197,181 +205,73 @@ function renderLevel(student) {
 // AWARD XP
 // ============================================================
 
-export async function awardXP(
-    userId,
-    amount,
-    reason = "Learning activity",
-    source = "system"
-) {
+export async function awardXP(userId, amount, reason = "Learning activity", source = "system") {
+    if (!userId) throw new Error("Missing user ID.");
+    amount = Number(amount);
+    if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid XP amount.");
 
-    if (!userId) {
+    const studentRef = doc(db, "students", userId);
+    const sourceKey = String(source || "").trim();
+    const eventId = sourceKey && sourceKey !== "system"
+        ? "xp_" + encodeURIComponent(sourceKey).replaceAll("%", "_").slice(0, 140)
+        : doc(collection(db, "students", userId, "activity")).id;
+    const eventRef = doc(db, "students", userId, "activity", eventId);
 
-        throw new Error(
-            "Missing user ID."
-        );
+    const counterField =
+        sourceKey.startsWith("lesson_") ? "lessonsCompleted" :
+        sourceKey.startsWith("quiz_") ? "quizzesCompleted" :
+        sourceKey.startsWith("assignment_") ? "assignmentsSubmitted" :
+        sourceKey.startsWith("course_") ? "coursesCompleted" :
+        sourceKey.startsWith("project_") ? "projectsSubmitted" : null;
 
+    const result = await runTransaction(db, async transaction => {
+        const studentSnap = await transaction.get(studentRef);
+        const eventSnap = await transaction.get(eventRef);
+        if (!studentSnap.exists()) throw new Error("Student profile not found.");
+        if (eventSnap.exists()) return { duplicate: true };
+
+        const student = studentSnap.data();
+        const oldXP = Number(student.xp || 0);
+        const newXP = oldXP + amount;
+        const oldLevel = calculateLevel(oldXP);
+        const newLevel = calculateLevel(newXP);
+        const updates = {
+            xp: increment(amount),
+            lastXPReward: serverTimestamp(),
+            lastXPReason: reason
+        };
+        if (counterField) updates[counterField] = increment(1);
+        if (sourceKey.startsWith("quiz_")) updates.quizXP = increment(amount);
+
+        transaction.update(studentRef, updates);
+        transaction.set(eventRef, {
+            type: "xp_earned", amount, reason, source: sourceKey || "system",
+            previousXP: oldXP, newXP, previousLevel: oldLevel, newLevel,
+            createdAt: serverTimestamp()
+        });
+
+        return {
+            duplicate: false,
+            student: {
+                ...student, xp: newXP,
+                ...(counterField ? { [counterField]: Number(student[counterField] || 0) + 1 } : {})
+            },
+            xpAdded: amount, oldXP, newXP, oldLevel, newLevel,
+            levelUp: newLevel > oldLevel
+        };
+    });
+
+    if (result.duplicate) {
+        const current = await getDoc(studentRef);
+        const xp = Number(current.data()?.xp || 0);
+        return { duplicate: true, xp, level: calculateLevel(xp) };
     }
-
-
-    amount =
-        Number(amount);
-
-
-    if (
-        !Number.isFinite(amount) ||
-        amount <= 0
-    ) {
-
-        throw new Error(
-            "Invalid XP amount."
-        );
-
-    }
-
-
-    const studentRef =
-        doc(
-            db,
-            "students",
-            userId
-        );
-
-
-    const snapshot =
-        await getDoc(
-            studentRef
-        );
-
-
-    if (!snapshot.exists()) {
-
-        throw new Error(
-            "Student profile not found."
-        );
-
-    }
-
-
-    const student =
-        snapshot.data();
-
-
-    const oldXP =
-        Number(student.xp || 0);
-
-    const oldLevel =
-        calculateLevel(oldXP);
-
-
-    const newXP =
-        oldXP + amount;
-
-    const newLevel =
-        calculateLevel(newXP);
-
-
-    // ========================================================
-    // UPDATE STUDENT XP
-    // ========================================================
-
-    await updateDoc(
-        studentRef,
-        {
-
-            xp:
-                increment(amount),
-
-            lastXPReward:
-                serverTimestamp(),
-
-            lastXPReason:
-                reason
-
-        }
-    );
-
-
-    // ========================================================
-    // XP ACTIVITY
-    // ========================================================
-
-    await createActivity(
-        userId,
-        {
-
-            type:
-                "xp_earned",
-
-            amount,
-
-            reason,
-
-            source,
-
-            previousXP:
-                oldXP,
-
-            newXP,
-
-            previousLevel:
-                oldLevel,
-
-            newLevel
-
-        }
-    );
-
-
-    // ========================================================
-    // LEVEL UP
-    // ========================================================
-
-    if (newLevel > oldLevel) {
-
-        await handleLevelUp(
-            userId,
-            oldLevel,
-            newLevel
-        );
-
-    }
-
-
-    // ========================================================
-    // BADGES
-    // ========================================================
-
-    await processBadges(
-        userId,
-        {
-            ...student,
-            xp: newXP
-        }
-    );
-
-
-    return {
-
-        xpAdded:
-            amount,
-
-        oldXP,
-
-        newXP,
-
-        oldLevel,
-
-        newLevel,
-
-        levelUp:
-            newLevel > oldLevel
-
-    };
-
+    if (result.levelUp) await handleLevelUp(userId, result.oldLevel, result.newLevel);
+    await processBadges(userId, result.student);
+    return result;
 }
 
 
-// ============================================================
 // ACTIVITY CREATOR
 // ============================================================
 
@@ -759,6 +659,9 @@ function getEligibleBadges(student) {
     }
 
 
+    // ASSIGNMENTS
+    if (Number(student.assignmentsSubmitted || 0) >= 1) eligible.push("assignment_starter");
+
     // STREAKS
 
     if (streak >= 7) {
@@ -1091,176 +994,53 @@ function renderStreak(student) {
 // ============================================================
 
 async function loadLeaderboard() {
-
+    const container = document.querySelector(".leaderboard");
+    if (container) container.innerHTML = '<div class="leaderboard-message">Loading verified rankings…</div>';
     try {
-
-        const studentsRef =
-            collection(
-                db,
-                "students"
-            );
-
-
-        const leaderboardQuery =
-            query(
-                studentsRef,
-                orderBy(
-                    "xp",
-                    "desc"
-                ),
-                limit(10)
-            );
-
-
-        const snapshot =
-            await getDocs(
-                leaderboardQuery
-            );
-
-
-        const leaders =
-            snapshot.docs.map(
-                (item, index) => ({
-
-                    id:
-                        item.id,
-
-                    rank:
-                        index + 1,
-
-                    ...item.data()
-
-                })
-            );
-
-
-        renderLeaderboard(
-            leaders
-        );
-
-
+        const snapshot = await getDocs(query(collection(db, "leaderboardPublic"), orderBy("xp", "desc"), limit(10)));
+        const leaders = snapshot.docs.map((item, index) => ({ id: item.id, rank: index + 1, ...item.data() }));
+        renderLeaderboard(leaders);
         await renderCurrentUserRank();
-
+    } catch (error) {
+        console.warn("Verified leaderboard is not available:", error);
+        if (container) container.innerHTML = '<div class="leaderboard-message">Global rankings are waiting for the secure leaderboard service to be enabled. Your personal XP and badges remain available.</div>';
+        if ($("rankPosition")) $("rankPosition").textContent = "—";
+        if ($("ranknumber")) $("ranknumber").textContent = "Not ranked";
     }
-
-    catch(error) {
-
-        console.error(
-            "❌ Leaderboard error:",
-            error
-        );
-
-    }
-
 }
 
 
-// ============================================================
-// CURRENT USER RANK
-// ============================================================
-
+// CURRENT USER RANK — PUBLIC OPT-IN ENTRIES ONLY
 async function renderCurrentUserRank() {
-
-    const user =
-        auth.currentUser;
-
-
-    if (!user)
-        return;
-
-
-    const currentStudentRef =
-        doc(
-            db,
-            "students",
-            user.uid
-        );
-
-
-    const currentSnapshot =
-        await getDoc(
-            currentStudentRef
-        );
-
-
-    if (!currentSnapshot.exists())
-        return;
-
-
-    const currentXP =
-        Number(
-            currentSnapshot.data().xp || 0
-        );
-
-
-    const studentsRef =
-        collection(
-            db,
-            "students"
-        );
-
-
-    const snapshot =
-        await getDocs(
-            studentsRef
-        );
-
-
-    let rank = 1;
-
-
-    snapshot.forEach(
-        studentDoc => {
-
-            if (
-                studentDoc.id ===
-                user.uid
-            ) {
-
-                return;
-
-            }
-
-
-            const xp =
-                Number(
-                    studentDoc.data().xp || 0
-                );
-
-
-            if (
-                xp > currentXP
-            ) {
-
-                rank++;
-
-            }
-
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+        const ownEntry = await getDoc(doc(db, "leaderboardPublic", user.uid));
+        if (!ownEntry.exists()) {
+            if ($("rankPosition")) $("rankPosition").textContent = "—";
+            if ($("ranknumber")) $("ranknumber").textContent = "Not ranked";
+            return;
         }
-    );
-
-
-    if ($("rankPosition")) {
-
-        $("rankPosition").textContent =
-            `#${rank}`;
-
+        const currentXP = Number(ownEntry.data().xp || 0);
+        const higher = await getDocs(query(collection(db, "leaderboardPublic"), where("xp", ">", currentXP)));
+        const rank = higher.size + 1;
+        if ($("rankPosition")) $("rankPosition").textContent = "#" + rank;
+        if ($("ranknumber")) $("ranknumber").textContent = "#" + rank;
+    } catch (error) {
+        console.warn("Personal public rank unavailable:", error);
+        if ($("rankPosition")) $("rankPosition").textContent = "—";
+        if ($("ranknumber")) $("ranknumber").textContent = "Not ranked";
     }
-
-
-    if ($("rankNumber")) {
-
-        $("rankNumber").textContent =
-            `#${rank}`;
-
-    }
-
 }
 
 
 // ============================================================
 // RENDER LEADERBOARD
 // ============================================================
+
+function escapeHTML(value) {
+    return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+}
 
 function renderLeaderboard(
     leaders
@@ -1314,8 +1094,8 @@ function renderLeaderboard(
 
 
             const name =
+                student.publicName ||
                 student.displayName ||
-                student.name ||
                 "Student";
 
 
