@@ -1500,43 +1500,139 @@ exports.saveMarketplaceCurrencyConfig = onCall(async request => {
 
 // Founder-only country-level aggregate. Country is taken only from explicit account/profile fields;
 // no IP geolocation or inferred location is used.
+
 exports.getFounderGlobalStats = onCall(async request => {
   await requireFounder(request);
   const countries = {};
   const roles = {};
-  let totalUsers = 0, activeUsers = 0, unknownCountry = 0, scanned = 0;
-  let cursor = null;
+  const monthlyRegistrations = {};
+  const topCourses = {};
+  const userCountries = {};
+  const totals = {
+    totalUsers: 0, activeUsers: 0, unknownCountry: 0,
+    institutions: 0, activeInstitutions: 0, unknownInstitutionCountry: 0,
+    verifiedCourseSales: 0, verifiedCourseRevenueKES: 0,
+    verifiedOnboardingPayments: 0, verifiedOnboardingRevenueKES: 0,
+    courseRevenueByCurrency: {}, onboardingRevenueByCurrency: {}
+  };
+  const limits = { users: 20000, institutions: 10000, paymentLedger: 20000, institutionPayments: 10000 };
+  const scanned = { users: 0, institutions: 0, paymentLedger: 0, institutionPayments: 0 };
   const pageSize = 500;
-  const scanLimit = 20000;
-  while (scanned < scanLimit) {
-    let query = db.collection("users").orderBy("__name__").limit(Math.min(pageSize, scanLimit - scanned));
-    if (cursor) query = query.startAfter(cursor);
-    const snap = await query.get();
-    if (snap.empty) break;
-    for (const doc of snap.docs) {
-      const u = doc.data() || {};
-      scanned++; totalUsers++;
-      const role = safeText(u.role, "unknown").toLowerCase() || "unknown";
-      roles[role] = (roles[role] || 0) + 1;
-      const active = u.active !== false && ["active", "approved"].includes(safeText(u.status, "active").toLowerCase());
-      if (active) activeUsers++;
-      const rawCountry = safeText(u.countryCode || u.country || u.location?.countryCode || u.location?.country || u.address?.countryCode || u.address?.country).toUpperCase();
-      const code = /^[A-Z]{2,3}$/.test(rawCountry) ? rawCountry : "";
-      if (!code) { unknownCountry++; continue; }
-      if (!countries[code]) countries[code] = { countryCode: code, users: 0, activeUsers: 0, roles: {} };
-      countries[code].users++;
-      if (active) countries[code].activeUsers++;
-      countries[code].roles[role] = (countries[code].roles[role] || 0) + 1;
+  const getCountry = data => {
+    const raw = safeText(data?.countryCode || data?.country || data?.location?.countryCode || data?.location?.country || data?.address?.countryCode || data?.address?.country).toUpperCase();
+    return /^[A-Z]{2,3}$/.test(raw) ? raw : "";
+  };
+  const ensureCountry = code => {
+    if (!countries[code]) countries[code] = {
+      countryCode: code, users: 0, activeUsers: 0, roles: {},
+      institutions: 0, activeInstitutions: 0,
+      courseSales: 0, courseRevenueKES: 0,
+      onboardingPayments: 0, onboardingRevenueKES: 0
+    };
+    return countries[code];
+  };
+  const scanCollection = async (name, max, handler) => {
+    let cursor = null;
+    while (scanned[name] < max) {
+      let q = db.collection(name).orderBy("__name__").limit(Math.min(pageSize, max - scanned[name]));
+      if (cursor) q = q.startAfter(cursor);
+      const snap = await q.get();
+      if (snap.empty) break;
+      for (const doc of snap.docs) {
+        scanned[name]++;
+        await handler(doc.id, doc.data() || {});
+      }
+      cursor = snap.docs[snap.docs.length - 1];
+      if (snap.size < pageSize) break;
     }
-    cursor = snap.docs[snap.docs.length - 1];
-    if (snap.size < pageSize) break;
-  }
+  };
+
+  await scanCollection("users", limits.users, async (uid, u) => {
+    totals.totalUsers++;
+    const role = safeText(u.role, "unknown").toLowerCase() || "unknown";
+    roles[role] = (roles[role] || 0) + 1;
+    const status = safeText(u.status, "active").toLowerCase();
+    const active = u.active !== false && ["active", "approved"].includes(status);
+    if (active) totals.activeUsers++;
+    const code = getCountry(u);
+    userCountries[uid] = code;
+    if (!code) totals.unknownCountry++;
+    else {
+      const row = ensureCountry(code);
+      row.users++;
+      if (active) row.activeUsers++;
+      row.roles[role] = (row.roles[role] || 0) + 1;
+    }
+    const created = u.createdAt?.toDate ? u.createdAt.toDate() : (u.createdAt ? new Date(u.createdAt) : null);
+    if (created && !Number.isNaN(created.getTime())) {
+      const month = created.getUTCFullYear() + "-" + String(created.getUTCMonth()+1).padStart(2,"0");
+      monthlyRegistrations[month] = (monthlyRegistrations[month] || 0) + 1;
+    }
+  });
+
+  await scanCollection("institutions", limits.institutions, async (_id, institution) => {
+    totals.institutions++;
+    const active = safeText(institution.status).toLowerCase() === "active" || safeText(institution.subscription?.status).toLowerCase() === "active";
+    if (active) totals.activeInstitutions++;
+    const code = getCountry(institution);
+    if (!code) { totals.unknownInstitutionCountry++; return; }
+    const row = ensureCountry(code);
+    row.institutions++;
+    if (active) row.activeInstitutions++;
+  });
+
+  await scanCollection("paymentLedger", limits.paymentLedger, async (_id, ledger) => {
+    if (ledger.status !== "posted" || ledger.source !== "manual_mpesa") return;
+    const amount = Number(ledger.grossAmount);
+    const currency = safeText(ledger.currency, "KES").toUpperCase();
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    totals.verifiedCourseSales++;
+    totals.courseRevenueByCurrency[currency] = (totals.courseRevenueByCurrency[currency] || 0) + amount;
+    if (currency === "KES") totals.verifiedCourseRevenueKES += amount;
+    const code = userCountries[safeText(ledger.studentUid)] || "";
+    if (code) {
+      const row = ensureCountry(code);
+      row.courseSales++;
+      if (currency === "KES") row.courseRevenueKES += amount;
+    }
+    const courseId = safeText(ledger.courseId);
+    if (courseId) {
+      if (!topCourses[courseId]) topCourses[courseId] = { courseId, sales: 0, revenueKES: 0 };
+      topCourses[courseId].sales++;
+      if (currency === "KES") topCourses[courseId].revenueKES += amount;
+    }
+  });
+
+  await scanCollection("institutionPayments", limits.institutionPayments, async (_id, payment) => {
+    if (payment.status !== "paid") return;
+    const amount = Number(payment.paidAmount || payment.amount);
+    const currency = safeText(payment.currency, "KES").toUpperCase();
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    totals.verifiedOnboardingPayments++;
+    totals.onboardingRevenueByCurrency[currency] = (totals.onboardingRevenueByCurrency[currency] || 0) + amount;
+    if (currency === "KES") totals.verifiedOnboardingRevenueKES += amount;
+    const code = userCountries[safeText(payment.ownerUid)] || "";
+    if (code) {
+      const row = ensureCountry(code);
+      row.onboardingPayments++;
+      if (currency === "KES") row.onboardingRevenueKES += amount;
+    }
+  });
+
   const countryRows = Object.values(countries).sort((a,b) => b.users-a.users);
+  const recentMonths = Object.entries(monthlyRegistrations).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12).map(([month,count])=>({month,count}));
+  const courses = Object.values(topCourses).sort((a,b)=>b.sales-a.sales).slice(0,10);
   return {
     generatedAt: Timestamp.now().toDate().toISOString(),
-    totalUsers, activeUsers, unknownCountry, countriesTracked: countryRows.length,
-    scannedUsers: scanned, scanLimitReached: scanned >= scanLimit,
-    roles, countries: countryRows
+    ...totals,
+    countriesTracked: countryRows.filter(row=>row.users>0).length,
+    countries: countryRows,
+    roles,
+    monthlyRegistrations: recentMonths,
+    topCourses: courses,
+    scanned,
+    scanLimits: limits,
+    scanLimitReached: Object.keys(limits).some(key=>scanned[key]>=limits[key])
   };
 });
 
