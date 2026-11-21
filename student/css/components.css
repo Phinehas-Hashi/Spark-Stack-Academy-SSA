@@ -32,13 +32,7 @@
 
     overscroll-behavior: contain;
 
-    background:
-        linear-gradient(
-            180deg,
-            #071a38 0%,
-            #0a2450 52%,
-            #071a38 100%
-        );
+    background:radial-gradient(circle at 15% 0%,rgba(132,47,255,.30),transparent 34%),linear-gradient(180deg,#090625 0%,#100b3e 58%,#080522 100%);
 
     color: #fff;
 
@@ -409,14 +403,10 @@
 
     padding: 12px 28px;
 
-    background:
-        rgba(255,255,255,.94);
-
-    border-bottom:
-        1px solid rgba(148,163,184,.18);
-
-    box-shadow:
-        0 8px 30px rgba(8,28,58,.06);
+    background:linear-gradient(105deg,#0b082d 0%,#171052 100%);
+    color:#fff;
+    border-bottom:1px solid rgba(164,112,255,.36);
+    box-shadow:0 8px 24px rgba(12,5,48,.12);
 
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
@@ -461,16 +451,16 @@
 
     border-radius: 12px;
 
-    background: #f4f7fc;
+    background: rgba(255,255,255,.09);
 
-    color: #081c3a;
+    color: #fff;
 }
 
 .menu-btn:hover,
 .theme-btn:hover,
 .icon-btn:hover {
-    background: #e8f0ff;
-    color: #762cff;
+    background: rgba(255,255,255,.16);
+    color: #20cfe8;
 }
 
 .menu-btn:active,
@@ -496,10 +486,10 @@
 
     padding: 11px 15px;
 
-    border: 1px solid #e5eaf2;
+    border: 1px solid rgba(255,255,255,.16);
     border-radius: 14px;
 
-    background: #f5f7fb;
+    background: rgba(255,255,255,.08);
 
     transition:
         border-color .18s ease,
@@ -508,9 +498,9 @@
 }
 
 .top-search:focus-within {
-    border-color: #762cff;
+    border-color: #a98aff;
 
-    background: #fff;
+    background: rgba(255,255,255,.13);
 
     box-shadow:
         0 0 0 4px rgba(118,44,255,.10);
@@ -523,7 +513,7 @@
 
     flex: 0 0 18px;
 
-    color: #64748b;
+    color: #c9c1e4;
 }
 
 .top-search input {
@@ -536,7 +526,7 @@
 
     background: transparent;
 
-    color: #081c3a;
+    color: #fff;
 
     font: inherit;
 
@@ -544,7 +534,7 @@
 }
 
 .top-search input::placeholder {
-    color: #94a3b8;
+    color: #b9b1d8;
 }
 
 
@@ -568,9 +558,9 @@
 
     border-radius: 50%;
 
-    background: #f4f7fc;
+    background: rgba(255,255,255,.09);
 
-    color: #081c3a;
+    color: #fff;
 }
 
 .theme-btn svg,
@@ -742,7 +732,7 @@
 
 .profile-menu:hover,
 .profile-menu:focus-visible {
-    background: #f4f7fc;
+    background: rgba(255,255,255,.08);
 }
 
 .student-avatar {
@@ -782,7 +772,7 @@
 
     overflow: hidden;
 
-    color: #081c3a;
+    color: #fff;
 
     font-size: 13px;
     font-weight: 700;
@@ -796,7 +786,7 @@
 
     margin-top: 2px;
 
-    color: #7b879d;
+    color: #b9b1d8;
 
     font-size: 10px;
 }
