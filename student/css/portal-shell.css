@@ -1,7 +1,86 @@
-/* Student portal shell — layout only. */
-.student-layout{display:flex;width:100%;min-width:320px;min-height:100vh;min-height:100dvh;background:var(--ssa-color-canvas,#f5f4fb)}
-.student-layout>.sidebar-container{flex:0 0 280px;width:280px;min-width:280px}
-.student-layout>.student-main{flex:1 1 auto;min-width:0;width:calc(100% - 280px);min-height:100vh;min-height:100dvh;overflow-x:clip;background:var(--ssa-color-canvas,#f5f4fb)}
-.student-layout>.student-main>.topbar-container{width:100%;min-width:0}
-.student-layout .sidebar-overlay{position:fixed;inset:0;z-index:1190}
-@media(max-width:900px){.student-layout>.sidebar-container{flex:0 0 0;width:0;min-width:0}.student-layout>.student-main{width:100%}}
+/* Spark Stack Academy — Student Portal shell.
+   Owns only the Student page frame. Page content belongs in page CSS.
+   Load after student-core.css, components.css and responsive.css. */
+
+.student-layout,
+.student-layout * {
+  box-sizing: border-box;
+}
+
+.student-layout {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ssa-color-canvas, #f5f4fb);
+}
+
+.student-layout > .sidebar-container {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 280px;
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+}
+
+.student-layout > .student-main {
+  position: relative;
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: clip;
+  background: var(--ssa-color-canvas, #f5f4fb);
+}
+
+.student-layout > .student-main > .topbar-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-width: 0;
+}
+
+.student-layout .sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1190;
+}
+
+@media (max-width: 900px) {
+  .student-layout > .sidebar-container {
+    flex: 0 0 0;
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+  }
+
+  .student-layout > .student-main {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .student-layout {
+    min-width: 0;
+  }
+
+  .student-layout > .student-main {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-layout *,
+  .student-layout *::before,
+  .student-layout *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
