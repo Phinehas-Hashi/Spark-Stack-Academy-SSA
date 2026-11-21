@@ -1,0 +1,418 @@
+.announcements-page{
+
+    width: 100%;
+
+    animation:
+        announcementPageLoad
+        .4s ease;
+
+}@keyframes announcementPageLoad{
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(10px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}.announcements-page .announcements-hero{
+
+    width: 100%;
+
+    background: white;
+
+    padding: 35px;
+
+    border-radius: 26px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 25px;
+
+    border:
+        1px solid #e8edf5;
+
+    margin-bottom: 25px;
+
+    box-sizing: border-box;
+
+}.announcements-page .hero-content{
+
+    max-width: 750px;
+
+}.announcements-page .page-badge{
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding:
+        8px 13px;
+
+    border-radius: 30px;
+
+    background:
+        rgba(118,44,255,.08);
+
+    color: #762cff;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+}.announcements-page .page-badge svg{
+
+    width: 15px;
+
+    height: 15px;
+
+}.announcements-page .announcements-hero h1{
+
+    margin:
+        16px 0 8px;
+
+    color: #17152f;
+
+    font-size: 34px;
+
+    font-weight: 800;
+
+}.announcements-page .announcements-hero p{
+
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+
+}.announcements-page .hero-icon{
+
+    width: 70px;
+
+    height: 70px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 22px;
+
+    background:
+        #17152f;
+
+    color: white;
+
+}.announcements-page .hero-icon svg{
+
+    width: 32px;
+
+    height: 32px;
+
+}.announcements-page .announcements-container{
+
+    width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 18px;
+
+}.announcements-page .announcement-card{
+
+    width: 100%;
+
+    background: white;
+
+    padding: 24px;
+
+    border-radius: 22px;
+
+    border:
+        1px solid #e8edf5;
+
+    box-sizing: border-box;
+
+    transition:
+        .25s ease;
+
+}.announcements-page .announcement-card:hover{
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 15px 40px
+        rgba(8,28,58,.08);
+
+}.announcements-page .announcement-card-header{
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 14px;
+
+}.announcements-page .announcement-card h3{
+
+    margin: 0;
+
+    color: #17152f;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+}.announcements-page .announcement-category{
+
+    padding:
+        6px 11px;
+
+    border-radius: 30px;
+
+    background:
+        rgba(118,44,255,.08);
+
+    color: #762cff;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+}.announcements-page .announcement-message{
+
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+}.announcements-page .announcement-footer{
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-top: 20px;
+
+    padding-top: 15px;
+
+    border-top:
+        1px solid #eef2f7;
+
+}.announcements-page .announcement-author,.announcements-page .announcement-date{
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+}.announcements-page .announcement-author{
+
+    font-weight: 600;
+
+}.announcements-page .announcement-loading{
+
+    background: white;
+
+    padding: 50px 30px;
+
+    border-radius: 22px;
+
+    border:
+        1px solid #e8edf5;
+
+    text-align: center;
+
+}.announcements-page .loading-icon{
+
+    width: 52px;
+
+    height: 52px;
+
+    margin:
+        0 auto 15px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 16px;
+
+    background:
+        rgba(118,44,255,.08);
+
+    color: #762cff;
+
+}.announcements-page .loading-icon svg{
+
+    width: 24px;
+
+    height: 24px;
+
+    animation:
+        announcementSpin
+        1s linear infinite;
+
+}.announcements-page .announcement-loading h3{
+
+    margin:
+        0 0 7px;
+
+    color: #17152f;
+
+    font-size: 17px;
+
+}.announcements-page .announcement-loading p{
+
+    margin: 0;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+
+}.announcements-page .announcement-empty{
+
+    background: white;
+
+    padding: 60px 30px;
+
+    border-radius: 22px;
+
+    border:
+        1px solid #e8edf5;
+
+    text-align: center;
+
+}.announcements-page .announcement-empty svg{
+
+    width: 40px;
+
+    height: 40px;
+
+    margin-bottom: 15px;
+
+    color: #94a3b8;
+
+}.announcements-page .announcement-empty h3{
+
+    margin:
+        0 0 7px;
+
+    color: #17152f;
+
+}.announcements-page .announcement-empty p{
+
+    margin: 0;
+
+    color: #94a3b8;
+
+    font-size: 14px;
+
+}@keyframes announcementSpin{
+
+    from {
+
+        transform:
+            rotate(0deg);
+
+    }
+
+    to {
+
+        transform:
+            rotate(360deg);
+
+    }
+
+}@media(max-width:900px){.announcements-page .announcements-hero{
+
+        padding: 28px;
+
+    }}@media(max-width:700px){.announcements-page .announcements-hero{
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        padding: 25px;
+
+    }.announcements-page .hero-icon{
+
+        display: none;
+
+    }.announcements-page .announcements-hero h1{
+
+        font-size: 30px;
+
+    }.announcements-page .announcement-card{
+
+        padding: 20px;
+
+        border-radius: 18px;
+
+    }.announcements-page .announcement-card-header{
+
+        flex-direction: column;
+
+        gap: 10px;
+
+    }.announcements-page .announcement-footer{
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 6px;
+
+    }}@media(max-width:480px){.announcements-page .announcements-hero{
+
+        padding: 22px;
+
+        border-radius: 20px;
+
+    }.announcements-page .announcements-hero h1{
+
+        font-size: 27px;
+
+    }.announcements-page .announcements-hero p{
+
+        font-size: 13px;
+
+    }}
