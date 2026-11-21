@@ -1204,3 +1204,12 @@
 }
 
 .student-sidebar-brand{display:flex;align-items:center;gap:10px;flex:0 0 auto;margin:0 0 15px;padding:4px 5px 13px;border-bottom:1px solid rgba(255,255,255,.12);color:#fff;text-decoration:none}.student-sidebar-brand img{width:36px;height:36px;border-radius:11px}.student-sidebar-brand span{display:grid;gap:2px}.student-sidebar-brand strong{font-size:11px;letter-spacing:.08em}.student-sidebar-brand small{font-size:7px;letter-spacing:.16em;color:#aaa0d4}
+
+/* STUDENT DASHBOARD SIDEBAR — explicit shell visibility and drawer behavior */
+#sidebarContainer{position:relative;flex:0 0 280px;width:280px;min-width:280px;max-width:280px}
+#sidebarContainer>.sidebar,#sidebarContainer>.ssa-student-sidebar{visibility:visible;pointer-events:auto;transform:translateX(0)}
+@media(max-width:900px){
+  #sidebarContainer{flex:0 0 0;width:0;min-width:0;max-width:0}
+  #sidebarContainer>.sidebar,#sidebarContainer>.ssa-student-sidebar{visibility:hidden;pointer-events:none;transform:translateX(-110%)}
+  #sidebarContainer>.sidebar.open,#sidebarContainer>.ssa-student-sidebar.open{visibility:visible;pointer-events:auto;transform:translateX(0)}
+}
