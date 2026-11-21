@@ -34,7 +34,7 @@ The first live listing integration is for approved courses. Other product types 
 
 ## Proposed starting prices
 
-These are editable proposals in KES. All price types default to disabled. Saving the price book stores proposals and an audit record; it does not enable checkout or change existing transactions.
+The Founder price book supports independently configured KES, USD, EUR and GBP amounts for every product family. Prices are not automatically converted from a base currency; this avoids using stale or misleading exchange rates. Blank currency amounts are unavailable in that currency. All price types default to disabled. Saving creates an immutable version and audit record; it does not enable checkout or change existing transactions.
 
 | Product | Proposed price | Unit |
 |---|---:|---|
@@ -53,7 +53,7 @@ These are editable proposals in KES. All price types default to disabled. Saving
 | Student membership | KSh 4,999 | per student / year |
 | Institution transaction fee | 2% | optional; disabled |
 
-The central marketplace proposal price book is currently separate from the existing Daraja institution onboarding pricing configuration. Before charging institutions, the two settings must be reconciled so there is only one authoritative price source for the payment workflow.
+The central marketplace price book stores independent local-currency prices in KES, USD, EUR and GBP. Country-specific overrides, tax/VAT treatment, and automated exchange-rate feeds remain future work. The price book is currently separate from the existing Daraja institution onboarding pricing configuration. Before charging institutions, the two settings must be reconciled so there is only one authoritative price source for the payment workflow.
 
 The 25% Academy / 75% instructor course revenue split remains the approved instructor policy. Institution direct settlement remains separate. No new commission rates for mentorship, services, bundles, boot camps, digital products, add-ons or corporate training have been approved.
 
