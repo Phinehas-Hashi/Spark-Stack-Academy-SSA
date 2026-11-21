@@ -86,6 +86,8 @@ async function loadProfile(user) {
                 ? studentSnap.data()
                 : {};
 
+        populateCountrySelect(countrySelect, student.countryCode || "");
+
 
         renderProfile(
             user,
