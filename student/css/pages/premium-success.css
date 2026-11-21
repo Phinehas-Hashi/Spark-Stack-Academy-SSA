@@ -1,0 +1,89 @@
+.success-page{
+
+    min-height:100vh;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:25px;
+
+}.success-page .success-card{
+
+    width:100%;
+    max-width:520px;
+
+    background:#fff;
+
+    border:1px solid #e8edf5;
+
+    border-radius:28px;
+
+    padding:45px 30px;
+
+    text-align:center;
+
+    box-shadow:0 20px 60px rgba(8,28,58,.10);
+
+}.success-page .success-icon{
+
+    width:80px;
+    height:80px;
+
+    margin:0 auto 25px;
+
+    border-radius:50%;
+
+    background:#eafaf0;
+
+    color:#16a34a;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+}.success-page .success-icon svg{
+
+    width:42px;
+    height:42px;
+
+}.success-page .success-card h1{
+
+    color:#17152f;
+
+    margin-bottom:12px;
+
+}.success-page .success-card p{
+
+    color:#64748b;
+
+    line-height:1.7;
+
+}.success-page .success-btn{
+
+    display:inline-block;
+
+    margin-top:25px;
+
+    padding:14px 24px;
+
+    border-radius:14px;
+
+    background:#762cff;
+
+    color:#fff;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+}.success-page #paymentStatus{
+
+    margin-top:20px;
+
+    font-size:14px;
+
+}
