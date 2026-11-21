@@ -230,3 +230,5 @@
 @media (prefers-reduced-motion: reduce) {
   .sidebar, .sidebar-menu > a, .sidebar-ai-btn { transition: none; }
 }
+
+.founder-sidebar .brand-icon{background:transparent!important;box-shadow:none!important}.founder-sidebar .brand-icon img{width:38px;height:38px;display:block;border-radius:11px}
