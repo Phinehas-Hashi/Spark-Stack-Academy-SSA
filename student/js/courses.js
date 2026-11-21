@@ -1,4 +1,9 @@
 import { auth, db } from "../../js/firebase.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const functions = getFunctions(getApp());
+const syncCourseEntitlements = httpsCallable(functions, "syncMyCourseEntitlements");
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -31,50 +36,61 @@ async function loadMyCourses() {
     myCourses = [];
 
     try {
-        // Merge institution-issued enrolments with Academy marketplace enrolments.
-        const [nestedSnap, academySnap] = await Promise.all([
-            getDocs(collection(db, "students", currentUser.uid, "enrollments")),
-            getDocs(query(collection(db, "enrollments"), where("userId", "==", currentUser.uid)))
-        ]);
-        const records = [
-            ...nestedSnap.docs.map(s => ({ id: s.id, ...s.data(), source: "institution" })),
-            ...academySnap.docs.map(s => ({ id: s.id, ...s.data(), source: "academy" }))
-        ];
-        const byCourse = new Map();
-        for (const enrollment of records) {
-            const courseId = enrollment.courseId || enrollment.courseID || enrollment.course;
-            if (!courseId) continue;
-            const status = String(enrollment.status || "").trim().toLowerCase();
-            const paymentStatus = String(enrollment.paymentStatus || "").trim().toLowerCase();
-            if (["rejected","revoked","cancelled","canceled","suspended","pending"].includes(status)) continue;
-            const institutionEntitlement = Boolean(enrollment.institutionId) && ["active","approved","completed"].includes(status);
-            const academyEntitlement = (["active","approved","completed"].includes(status) && ["paid","free"].includes(paymentStatus)) || (status === "paid" && (paymentStatus === "" || paymentStatus === "paid"));
-            if (!institutionEntitlement && !academyEntitlement) continue;
-            const key = String(courseId);
-            if (!byCourse.has(key)) byCourse.set(key, enrollment);
-        }
-        for (const [courseId, enrollment] of byCourse.entries()) {
-            try {
-                const courseSnap = await getDoc(doc(db, "courses", courseId));
-                if (!courseSnap.exists()) { console.warn("Course missing:", courseId); continue; }
-                const course = courseSnap.data();
-                myCourses.push({
-                    id: courseId, ...course, enrollmentId: enrollment.id,
-                    enrollmentSource: enrollment.source, institutionId: enrollment.institutionId || "",
-                    institutionName: enrollment.institutionName || enrollment.schoolName || "",
-                    progress: Number(enrollment.progress ?? enrollment.progressPercent ?? 0),
-                    enrollmentStatus: statusValue(enrollment.status), paymentStatus: enrollment.paymentStatus || "",
-                    joinedAt: enrollment.enrolledAt || enrollment.joinedAt || enrollment.createdAt || null
-                });
-            } catch (courseError) { console.warn("Could not load course", courseId, courseError); }
-        }
-        myCourses.sort((a, b) => getTime(b.joinedAt) - getTime(a.joinedAt));
-        console.log("🎓 Signed-in student's courses:", myCourses);
+        // Synchronize trusted legacy grants before reading the canonical list.
+        await syncCourseEntitlements();
+        const entitlementQuery = query(
+            collection(db, "courseEntitlements"),
+            where("studentUid", "==", currentUser.uid)
+        );
+        const entitlementSnap = await getDocs(entitlementQuery);
+        const entitlements = entitlementSnap.docs
+            .map(s => ({ id: s.id, ...s.data() }))
+            .filter(item => item.status === "active" && item.courseId);
 
+        for (const entitlement of entitlements) {
+            const courseId = String(entitlement.courseId);
+            try {
+                const [courseSnap, progressSnap] = await Promise.all([
+                    getDoc(doc(db, "courses", courseId)),
+                    getDoc(doc(db, "courseProgress", `${currentUser.uid}_${courseId}`))
+                ]);
+                if (!courseSnap.exists()) continue;
+
+                const course = courseSnap.data();
+                const grants = Object.values(entitlement.grants || {}).filter(g => g?.status === "active");
+                const institutionGrant = grants.find(g => g.source === "institution_enrollment");
+                const purchaseGrant = grants.find(g => g.source === "verified_legacy_purchase");
+                const freeGrant = grants.find(g => g.source === "approved_free_enrollment");
+                const sourceLabel = institutionGrant
+                    ? "Institution"
+                    : purchaseGrant
+                        ? "Purchased"
+                        : freeGrant
+                            ? "Free enrolment"
+                            : "Granted access";
+                const progressData = progressSnap.exists() ? progressSnap.data() : {};
+
+                myCourses.push({
+                    id: courseId,
+                    ...course,
+                    entitlementId: entitlement.id,
+                    entitlementSource: sourceLabel,
+                    institutionId: institutionGrant?.institutionId || "",
+                    progress: Number(progressData.progress ?? progressData.progressPercent ?? 0),
+                    enrollmentStatus: "active",
+                    paymentStatus: purchaseGrant ? "paid" : (freeGrant ? "free" : ""),
+                    joinedAt: entitlement.createdAt || entitlement.updatedAt || null
+                });
+            } catch (courseError) {
+                console.warn("Could not load entitled course", courseId, courseError);
+            }
+        }
+
+        myCourses.sort((a, b) => getTime(b.joinedAt) - getTime(a.joinedAt));
         renderCourses();
         updateStats();
     } catch (error) {
-        console.error("❌ MY COURSES FAILED:", error);
+        console.error("MY LEARNING FAILED:", error);
         showError(error);
     }
 }
