@@ -12,7 +12,7 @@
 
 <link rel="stylesheet" href="css/student-core.css">
 <link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/achievements.css">
+<link rel="stylesheet" href="css/achievements.css?v=20261121-rewards2">
 <link rel="stylesheet" href="css/responsive.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,155 +30,7 @@
 
 <body>
 
-<div class="achievements-page">
-
-
-<!-- =====================================================
-     COMMAND HEADER
-===================================================== -->
-
-<header class="achievement-command">
-
-    <div class="command-brand">
-
-        <div class="brand-mark">
-            ⚡
-        </div>
-
-        <div>
-            <strong>SPARK OS</strong>
-            <span>Student Achievement System</span>
-        </div>
-
-    </div>
-
-
-    <div class="command-status">
-
-        <span class="status-dot"></span>
-
-        <span>LIVE PROFILE</span>
-
-    </div>
-
-</header>
-
-
-
-<!-- =====================================================
-     HERO / IDENTITY
-===================================================== -->
-
-<section class="achievement-hero">
-
-    <div class="hero-grid"></div>
-
-    <div class="hero-glow glow-one"></div>
-    <div class="hero-glow glow-two"></div>
-
-
-    <div class="hero-content">
-
-
-        <div class="identity-line">
-
-            <span class="identity-badge">
-                STUDENT IDENTITY
-            </span>
-
-            <span class="verified-indicator">
-                ✓ VERIFIED
-            </span>
-
-        </div>
-
-
-        <div class="hero-title-row">
-
-            <div class="student-orbit">
-
-                <div class="orbit-ring ring-one"></div>
-                <div class="orbit-ring ring-two"></div>
-
-                <div class="student-avatar">
-                    S
-                </div>
-
-            </div>
-
-
-            <div class="hero-title">
-
-                <p class="eyebrow">
-                    SPARK STACK ACADEMY
-                </p>
-
-                <h1>
-                    Achievement
-                    <span>OS</span>
-                </h1>
-
-                <p>
-                    Your skills. Your streak. Your evolution.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- LEVEL CORE -->
-
-        <div class="level-core">
-
-            <div class="level-number">
-                <span>LEVEL</span>
-                <strong id="studentLevel">
-                    1
-                </strong>
-            </div>
-
-
-            <div class="level-progress">
-
-                <div class="level-meta">
-
-                    <span>
-                        Builder Progress
-                    </span>
-
-                    <strong>
-                        <span id="studentXP">0</span>
-                        /
-                        <span id="nextXP">1000</span>
-                        XP
-                    </strong>
-
-                </div>
-
-
-                <div class="xp-bar">
-
-                    <div
-                        id="xpProgress"
-                        class="xp-progress">
-                    </div>
-
-                </div>
-
-
-                <small>
-                    Keep building. Your next level is closer than you think.
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
+<div id="studentApp"><aside id="studentSidebar"></aside><main class="student-main"><header id="studentTopbar"></header><div class="achievements-page">
 
 
 <!-- =====================================================
@@ -288,11 +140,11 @@
     <div class="premium-copy">
 
         <span>
-            PREMIUM VERIFIED
+            XP &amp; LEVEL SYSTEM
         </span>
 
         <h2>
-            You're building at another level.
+            Your learning activity powers your progress.
         </h2>
 
         <p>
@@ -395,89 +247,6 @@
 
 
 <!-- =====================================================
-     SKILL DNA
-===================================================== -->
-
-<section class="skill-dna">
-
-    <div class="section-heading">
-
-        <div>
-            <span>01 / SKILL DNA</span>
-
-            <h2>
-                Your Builder Profile
-            </h2>
-        </div>
-
-        <p>
-            Your learning activity shapes your technical identity.
-        </p>
-
-    </div>
-
-
-    <div class="skills-wall">
-
-
-        <div class="skill">
-
-            <div class="skill-head">
-
-                <span>CODING</span>
-
-                <strong>80%</strong>
-
-            </div>
-
-            <div class="skill-bar">
-                <div class="skill-fill coding"></div>
-            </div>
-
-        </div>
-
-
-        <div class="skill">
-
-            <div class="skill-head">
-
-                <span>DESIGN</span>
-
-                <strong>60%</strong>
-
-            </div>
-
-            <div class="skill-bar">
-                <div class="skill-fill design"></div>
-            </div>
-
-        </div>
-
-
-        <div class="skill">
-
-            <div class="skill-head">
-
-                <span>INNOVATION</span>
-
-                <strong>40%</strong>
-
-            </div>
-
-            <div class="skill-bar">
-                <div class="skill-fill innovation"></div>
-            </div>
-
-        </div>
-
-
-    </div>
-
-</section>
-
-
-
-<!-- =====================================================
      DAILY QUESTS
 ===================================================== -->
 
@@ -489,7 +258,7 @@
             <span>02 / DAILY QUESTS</span>
 
             <h2>
-                Today's Missions
+                Ways to Earn XP
             </h2>
         </div>
 
@@ -516,11 +285,11 @@
             <div class="mission-info">
 
                 <h3>
-                    Watch a lesson
+                    Complete a lesson
                 </h3>
 
                 <p>
-                    Learn something new today.
+                    Earn XP when a lesson is marked complete.
                 </p>
 
             </div>
@@ -550,7 +319,7 @@
                 </h3>
 
                 <p>
-                    Prove what you've learned.
+                    Earn XP when you submit a quiz attempt.
                 </p>
 
             </div>
@@ -576,11 +345,11 @@
             <div class="mission-info">
 
                 <h3>
-                    Submit a project
+                    Submit an assignment
                 </h3>
 
                 <p>
-                    Turn knowledge into something real.
+                    Earn XP when your assignment is submitted.
                 </p>
 
             </div>
@@ -634,110 +403,6 @@
 
 
 <!-- =====================================================
-     JOURNEY
-===================================================== -->
-
-<section class="journey-section">
-
-    <div class="section-heading">
-
-        <div>
-            <span>04 / EVOLUTION LOG</span>
-
-            <h2>
-                Your Journey
-            </h2>
-        </div>
-
-    </div>
-
-
-    <div class="timeline">
-
-
-        <div class="timeline-item">
-
-            <span class="timeline-node">
-                🌱
-            </span>
-
-            <div>
-                <strong>
-                    Joined Spark Stack Academy
-                </strong>
-
-                <p>
-                    The beginning of your builder journey.
-                </p>
-            </div>
-
-        </div>
-
-
-        <div class="timeline-item">
-
-            <span class="timeline-node">
-                🏅
-            </span>
-
-            <div>
-                <strong>
-                    First Course Completed
-                </strong>
-
-                <p>
-                    Knowledge converted into progress.
-                </p>
-            </div>
-
-        </div>
-
-
-        <div class="timeline-item">
-
-            <span class="timeline-node">
-                🔥
-            </span>
-
-            <div>
-                <strong>
-                    Learning Streak Started
-                </strong>
-
-                <p>
-                    Consistency became part of the journey.
-                </p>
-            </div>
-
-        </div>
-
-
-        <div class="timeline-item">
-
-            <span class="timeline-node">
-                🚀
-            </span>
-
-            <div>
-                <strong>
-                    First Project Submitted
-                </strong>
-
-                <p>
-                    From learner to builder.
-                </p>
-            </div>
-
-        </div>
-
-
-    </div>
-
-</section>
-
-
-
-<!-- =====================================================
      LEADERBOARD
 ===================================================== -->
 
@@ -760,73 +425,7 @@
     </div>
 
 
-    <div class="leaderboard">
-
-
-        <div class="leader-card first">
-
-            <span class="leader-rank">
-                01
-            </span>
-
-            <div class="leader-avatar">
-                👑
-            </div>
-
-            <span>
-                Student Name
-            </span>
-
-            <strong>
-                ⚡ 1200 XP
-            </strong>
-
-        </div>
-
-
-        <div class="leader-card">
-
-            <span class="leader-rank">
-                02
-            </span>
-
-            <div class="leader-avatar">
-                🔥
-            </div>
-
-            <span>
-                Student Name
-            </span>
-
-            <strong>
-                ⚡ 950 XP
-            </strong>
-
-        </div>
-
-
-        <div class="leader-card">
-
-            <span class="leader-rank">
-                03
-            </span>
-
-            <div class="leader-avatar">
-                🚀
-            </div>
-
-            <span>
-                Student Name
-            </span>
-
-            <strong>
-                ⚡ 700 XP
-            </strong>
-
-        </div>
-
-
-    </div>
+    <div class="leaderboard" id="leaderboardList"><div class="leaderboard-message">Loading verified rankings…</div></div>
 
 </section>
 
@@ -893,7 +492,7 @@
 </section>
 
 
-</div>
+</div></main></div>
 
 
 
@@ -908,7 +507,7 @@
 
 <script
     type="module"
-    src="js/achievements.js">
+    src="js/achievements.js?v=20261121-rewards2">
 </script>
 
 
