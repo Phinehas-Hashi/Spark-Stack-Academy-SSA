@@ -1,5 +1,7 @@
 import { db } from "../js/firebase.js";
-import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";\nimport { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";\nconst getGlobalStats = httpsCallable(getFunctions(), "getFounderGlobalStats");
+import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+const getGlobalStats = httpsCallable(getFunctions(), "getFounderGlobalStats");
 
 const money = new Intl.NumberFormat("en-KE", { style:"currency", currency:"KES", maximumFractionDigits:0 });
 const $ = (id) => document.getElementById(id);
@@ -54,12 +56,54 @@ function renderGlobalStats(data) {
     const value=document.createElement("strong");value.textContent=Number(count).toLocaleString();
     line.append(label,value);$("globalRoleRows").append(line);
   });
-  $("globalDataNote").textContent=(data.scanLimitReached?"Showing the first "+Number(data.scannedUsers).toLocaleString()+" user records. ":"")+Number(data.unknownCountry||0).toLocaleString()+" accounts have no recognized country field. No location is inferred from IP addresses.";
+  $("globalDataNote").textContent=(data.scanLimitReached?"One or more data scans reached a safety limit. ":"")+Number(data.unknownCountry||0).toLocaleString()+" accounts have no recognized country field. No location is inferred from IP addresses.";
+}
+
+function renderGrowthStats(data){
+  const fmt=n=>Number(n||0).toLocaleString();
+  $("globalInstitutions").textContent=fmt(data.institutions);
+  $("globalActiveInstitutions").textContent=fmt(data.activeInstitutions);
+  $("globalCourseSales").textContent=fmt(data.verifiedCourseSales);
+  $("globalOnboardingPayments").textContent=fmt(data.verifiedOnboardingPayments);
+  const months=data.monthlyRegistrations||[];
+  const max=Math.max(...months.map(x=>Number(x.count||0)),1);
+  const trend=$("registrationTrend");trend.replaceChildren();
+  if(!months.length){const p=document.createElement("p");p.className="empty";p.textContent="No valid account creation dates were found.";trend.append(p);}
+  months.forEach(item=>{
+    const row=document.createElement("div");row.className="registration-month";
+    const label=document.createElement("span");label.textContent=item.month;
+    const track=document.createElement("div");track.className="registration-track";
+    const fill=document.createElement("i");fill.style.width=(Number(item.count||0)/max*100)+"%";track.append(fill);
+    const value=document.createElement("strong");value.textContent=fmt(item.count);
+    row.append(label,track,value);trend.append(row);
+  });
+  const revenue=$("verifiedRevenueBreakdown");revenue.replaceChildren();
+  const streams=[
+    ["Course sales · KES",data.verifiedCourseRevenueKES],
+    ["Institution onboarding · KES",data.verifiedOnboardingRevenueKES]
+  ];
+  streams.forEach(([label,value])=>{const row=document.createElement("div");row.className="global-role-row";const a=document.createElement("span");a.textContent=label;const b=document.createElement("strong");b.textContent=money.format(Number(value||0));row.append(a,b);revenue.append(row);});
+  [["Course sales",data.courseRevenueByCurrency],["Onboarding",data.onboardingRevenueByCurrency]].forEach(([label,values])=>{
+    Object.entries(values||{}).filter(([code])=>code!=="KES").forEach(([code,value])=>{const row=document.createElement("div");row.className="global-role-row";const a=document.createElement("span");a.textContent=label+" · "+code;const b=document.createElement("strong");b.textContent=Number(value).toLocaleString(undefined,{maximumFractionDigits:2})+" "+code;row.append(a,b);revenue.append(row);});
+  });
+  const countryList=$("countryCommerceRows");countryList.replaceChildren();
+  (data.countries||[]).filter(x=>x.users||x.institutions||x.courseSales).forEach(country=>{
+    const row=document.createElement("div");row.className="country-commerce-row";
+    const title=document.createElement("strong");title.textContent=(countryNames.of(country.countryCode)||country.countryCode)+" ("+country.countryCode+")";
+    const detail=document.createElement("span");detail.textContent=fmt(country.institutions)+" institutions · "+fmt(country.courseSales)+" verified course sales · "+money.format(Number(country.courseRevenueKES||0))+" course revenue · "+money.format(Number(country.onboardingRevenueKES||0))+" onboarding";
+    const popular=document.createElement("small");popular.textContent=(country.popularCourses||[]).map(x=>x.courseId+" ("+x.sales+")").join(" · ")||"No course sales recorded";
+    row.append(title,detail,popular);countryList.append(row);
+  });
+  const top=$("globalTopCourses");top.replaceChildren();
+  (data.topCourses||[]).forEach((course,index)=>{const row=document.createElement("div");row.className="global-role-row";const a=document.createElement("span");a.textContent=(index+1)+". "+course.courseId;const b=document.createElement("strong");b.textContent=fmt(course.sales)+" sales";row.append(a,b);top.append(row);});
+  if(!(data.topCourses||[]).length){const p=document.createElement("p");p.className="empty";p.textContent="No posted course sales yet.";top.append(p);}
+  const scanned=data.scanned||{},limits=data.scanLimits||{};
+  $("globalGrowthDataNote").textContent="Scanned "+fmt(scanned.users)+" user profiles, "+fmt(scanned.institutions)+" institutions, "+fmt(scanned.paymentLedger)+" posted-ledger records and "+fmt(scanned.institutionPayments)+" institution payment records. "+(data.scanLimitReached?"At least one scan reached its safety limit; totals may be partial. ":"")+fmt(data.unknownInstitutionCountry)+" institutions have no recognized country. Course labels currently use course IDs; revenue totals are shown in KES separately from other currencies.";
 }
 async function loadGlobalStats(){
   const button=$("refreshGlobalStats");if(button)button.disabled=true;
   $("globalStatsUpdated").textContent="Refreshing…";
-  try{const result=await getGlobalStats();renderGlobalStats(result.data||{});}
+  try{const result=await getGlobalStats();renderGlobalStats(result.data||{});renderGrowthStats(result.data||{});}
   catch(error){console.error("Global country analytics failed:",error);$("globalCountryRows").innerHTML='<p class="empty">Global statistics unavailable: '+String(error.message||"permission or network error")+'</p>';$("globalStatsUpdated").textContent="Refresh failed";}
   finally{if(button)button.disabled=false;}
 }
