@@ -1526,7 +1526,7 @@ exports.getFounderGlobalStats = onCall(async request => {
     if (!countries[code]) countries[code] = {
       countryCode: code, users: 0, activeUsers: 0, roles: {},
       institutions: 0, activeInstitutions: 0,
-      courseSales: 0, courseRevenueKES: 0,
+      courseSales: 0, courseRevenueKES: 0, courseCounts: {},
       onboardingPayments: 0, onboardingRevenueKES: 0
     };
     return countries[code];
@@ -1593,6 +1593,7 @@ exports.getFounderGlobalStats = onCall(async request => {
     if (code) {
       const row = ensureCountry(code);
       row.courseSales++;
+      row.courseCounts[safeText(ledger.courseId, "unknown")] = (row.courseCounts[safeText(ledger.courseId, "unknown")] || 0) + 1;
       if (currency === "KES") row.courseRevenueKES += amount;
     }
     const courseId = safeText(ledger.courseId);
@@ -1619,7 +1620,7 @@ exports.getFounderGlobalStats = onCall(async request => {
     }
   });
 
-  const countryRows = Object.values(countries).sort((a,b) => b.users-a.users);
+  const countryRows = Object.values(countries).map(row => ({ ...row, popularCourses: Object.entries(row.courseCounts || {}).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([courseId,sales])=>({courseId,sales})) })).sort((a,b) => b.users-a.users);
   const recentMonths = Object.entries(monthlyRegistrations).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12).map(([month,count])=>({month,count}));
   const courses = Object.values(topCourses).sort((a,b)=>b.sales-a.sales).slice(0,10);
   return {
