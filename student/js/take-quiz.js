@@ -1734,7 +1734,7 @@ async function submitQuiz() {
         // SAFE XP AWARD
         // ====================================================
 
-        const xpEarned =
+        let xpEarned =
             calculateQuizXP(result);
 
 
@@ -1798,6 +1798,7 @@ async function submitQuiz() {
             );
         } catch (xpError) {
             console.warn("Quiz was submitted, but XP could not be synchronized:", xpError);
+            xpEarned = 0;
             showToast("Quiz submitted. XP synchronization is pending.");
         }
 
