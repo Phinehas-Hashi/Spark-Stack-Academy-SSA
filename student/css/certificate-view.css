@@ -493,3 +493,11 @@ footer {
     }
 
 }
+
+.certificate-status{margin:0 0 16px;padding:12px 16px;border-radius:10px;background:#e8eef7;color:#18345c;font:600 14px/1.4 Arial,sans-serif;text-align:center}
+.certificate-status.valid{background:#e7f6ed;color:#17643a}
+.certificate-status.invalid{background:#fff0f0;color:#9d2424}
+.certificate-unverified{opacity:.48;filter:grayscale(1)}
+.certificate-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){.certificate-status{font-size:12px;padding:10px}.certificate-details{align-items:center}.certificate-inner{overflow:hidden}}
+@media print{.certificate-status{display:none}.certificate-unverified{opacity:1;filter:none}}
