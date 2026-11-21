@@ -11,7 +11,7 @@ const dateOf = (item) => { const value=item.paidAt || item.createdAt || item.upd
 
 function render() {
   const days = Number($("analyticsPeriod")?.value || 30); const start = new Date(); start.setDate(start.getDate() - days + 1); start.setHours(0,0,0,0);
-  const periodPayments = state.payments.filter((item) => { const date=dateOf(item); return date && !Number.isNaN(date) && date >= start; });
+  const periodPayments = state.payments.filter((item) => { const status=String(item.status||"").toLowerCase(); const settled=["paid","success","successful","completed"].includes(status); if(!settled) return false; if(item.provider==="manual_safaricom_receipt" && item.verificationStatus!=="verified") return false; const date=dateOf(item); return date && !Number.isNaN(date) && date >= start; });
   const total = periodPayments.reduce((sum,item) => sum + amount(item), 0);
   $("analyticsStudents").textContent = state.students.toLocaleString(); $("analyticsEnrollments").textContent = state.enrollments.length.toLocaleString();
   $("analyticsConversion").textContent = state.students ? `${Math.round((state.enrollments.length / state.students) * 100)}%` : "—"; $("analyticsRevenue").textContent = money.format(total); $("chartTotal").textContent = money.format(total);
@@ -91,11 +91,11 @@ function renderGrowthStats(data){
     const row=document.createElement("div");row.className="country-commerce-row";
     const title=document.createElement("strong");title.textContent=(countryNames.of(country.countryCode)||country.countryCode)+" ("+country.countryCode+")";
     const detail=document.createElement("span");detail.textContent=fmt(country.institutions)+" institutions · "+fmt(country.courseSales)+" verified course sales · "+money.format(Number(country.courseRevenueKES||0))+" course revenue · "+money.format(Number(country.onboardingRevenueKES||0))+" onboarding";
-    const popular=document.createElement("small");popular.textContent=(country.popularCourses||[]).map(x=>x.courseId+" ("+x.sales+")").join(" · ")||"No course sales recorded";
+    const titleMap=new Map((data.topCourses||[]).map(x=>[x.courseId,x.title||x.courseId]));const popular=document.createElement("small");popular.textContent=(country.popularCourses||[]).map(x=>(titleMap.get(x.courseId)||x.courseId)+" ("+x.sales+")").join(" · ")||"No course sales recorded";
     row.append(title,detail,popular);countryList.append(row);
   });
   const top=$("globalTopCourses");top.replaceChildren();
-  (data.topCourses||[]).forEach((course,index)=>{const row=document.createElement("div");row.className="global-role-row";const a=document.createElement("span");a.textContent=(index+1)+". "+course.courseId;const b=document.createElement("strong");b.textContent=fmt(course.sales)+" sales";row.append(a,b);top.append(row);});
+  (data.topCourses||[]).forEach((course,index)=>{const row=document.createElement("div");row.className="global-role-row";const a=document.createElement("span");a.textContent=(index+1)+". "+(course.title||course.courseId);const b=document.createElement("strong");b.textContent=fmt(course.sales)+" sales";row.append(a,b);top.append(row);});
   if(!(data.topCourses||[]).length){const p=document.createElement("p");p.className="empty";p.textContent="No posted course sales yet.";top.append(p);}
   const scanned=data.scanned||{},limits=data.scanLimits||{};
   $("globalGrowthDataNote").textContent="Scanned "+fmt(scanned.users)+" user profiles, "+fmt(scanned.institutions)+" institutions, "+fmt(scanned.paymentLedger)+" posted-ledger records and "+fmt(scanned.institutionPayments)+" institution payment records. "+(data.scanLimitReached?"At least one scan reached its safety limit; totals may be partial. ":"")+fmt(data.unknownInstitutionCountry)+" institutions have no recognized country. Course labels currently use course IDs; revenue totals are shown in KES separately from other currencies.";
