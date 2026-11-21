@@ -530,6 +530,190 @@ exports.submitInstitutionCourseForReview = onCall(async request => {
 });
 
 
+
+/* ============================================================
+   CANONICAL COURSE ENTITLEMENTS — LEGACY COMPATIBILITY BRIDGE
+   A student can only receive grants derived from trusted records.
+   Client applications cannot create or modify courseEntitlements.
+============================================================ */
+
+function entitlementRecordStatus(value) {
+  return safeText(value).toLowerCase();
+}
+
+function safeGrantKey(source, recordId) {
+  return (source + "_" + recordId).replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 140);
+}
+
+exports.syncMyCourseEntitlements = onCall(async request => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to check your course access.");
+
+  const userSnap = await db.doc("users/" + uid).get();
+  const user = userSnap.exists ? userSnap.data() : {};
+  if (user.role !== "student" || user.status !== "active" || user.active !== true) {
+    throw new HttpsError("permission-denied", "An active student account is required.");
+  }
+
+  const [nestedSnap, userEnrollmentSnap, studentEnrollmentSnap, existingSnap] = await Promise.all([
+    db.collection("students").doc(uid).collection("enrollments").limit(400).get(),
+    db.collection("enrollments").where("userId", "==", uid).limit(400).get(),
+    db.collection("enrollments").where("studentId", "==", uid).limit(400).get(),
+    db.collection("courseEntitlements").where("studentUid", "==", uid).limit(400).get()
+  ]);
+
+  const currentLegacyGrants = new Map();
+  const courseCache = new Map();
+  const institutionCache = new Map();
+  const membershipCache = new Map();
+
+  async function getCourse(courseId) {
+    if (!courseCache.has(courseId)) {
+      courseCache.set(courseId, db.doc("courses/" + courseId).get());
+    }
+    return courseCache.get(courseId);
+  }
+
+  async function institutionIsValid(institutionId) {
+    if (!institutionCache.has(institutionId)) {
+      institutionCache.set(institutionId, (async () => {
+        const [institutionSnap, membershipSnap] = await Promise.all([
+          db.doc("institutions/" + institutionId).get(),
+          db.doc("institutions/" + institutionId + "/members/" + uid).get()
+        ]);
+        const institution = institutionSnap.exists ? institutionSnap.data() : {};
+        const member = membershipSnap.exists ? membershipSnap.data() : {};
+        const institutionActive = institutionSnap.exists && institution.status === "active";
+        const canonicalMemberActive = membershipSnap.exists
+          && member.status === "active" && member.active !== false;
+        const legacyMemberActive = user.institutionId === institutionId
+          && user.status === "active" && user.active === true;
+        return institutionActive && (canonicalMemberActive || legacyMemberActive);
+      })());
+    }
+    return institutionCache.get(institutionId);
+  }
+
+  function addGrant(courseId, grantKey, grant) {
+    if (!currentLegacyGrants.has(courseId)) currentLegacyGrants.set(courseId, {});
+    currentLegacyGrants.get(courseId)[grantKey] = grant;
+  }
+
+  const institutionRecords = nestedSnap.docs.map(s => ({ id: s.id, data: s.data(), kind: "institution" }));
+  const marketplaceRecords = [...userEnrollmentSnap.docs, ...studentEnrollmentSnap.docs]
+    .map(s => ({ id: s.id, data: s.data(), kind: "marketplace" }));
+  const checks = [];
+
+  for (const record of institutionRecords) {
+    checks.push((async () => {
+      const data = record.data || {};
+      const courseId = safeText(data.courseId || data.courseID || data.course);
+      const institutionId = safeText(data.institutionId);
+      const status = entitlementRecordStatus(data.status);
+      if (!courseId || !institutionId || !["active", "approved", "completed"].includes(status)) return;
+      if (!(await institutionIsValid(institutionId))) return;
+      const courseSnap = await getCourse(courseId);
+      if (!courseSnap.exists) return;
+      const course = courseSnap.data();
+      if (course.institutionId && course.institutionId !== institutionId) return;
+      addGrant(courseId, safeGrantKey("legacy_institution", record.id), {
+        source: "institution_enrollment",
+        sourceRecordId: record.id,
+        institutionId,
+        status: "active",
+        validatedAt: Timestamp.now()
+      });
+    })());
+  }
+
+  for (const record of marketplaceRecords) {
+    checks.push((async () => {
+      const data = record.data || {};
+      const recordUid = safeText(data.userId || data.studentId);
+      if (recordUid !== uid) return;
+      const courseId = safeText(data.courseId || data.courseID || data.course);
+      if (!courseId) return;
+      const status = entitlementRecordStatus(data.status);
+      const paymentStatus = entitlementRecordStatus(data.paymentStatus);
+      if (["revoked", "suspended", "cancelled", "canceled", "rejected", "pending"].includes(status)) return;
+      const isPaid = (["active", "approved", "completed"].includes(status) && paymentStatus === "paid")
+        || (status === "paid" && (paymentStatus === "" || paymentStatus === "paid"));
+      const courseSnap = await getCourse(courseId);
+      if (!courseSnap.exists) return;
+      const course = courseSnap.data();
+      const isFree = ["active", "approved", "completed"].includes(status)
+        && paymentStatus === "free" && course.isFree === true;
+      if (!isPaid && !isFree) return;
+      addGrant(courseId, safeGrantKey("legacy_marketplace", record.id), {
+        source: isPaid ? "verified_legacy_purchase" : "approved_free_enrollment",
+        sourceRecordId: record.id,
+        paymentStatus: isPaid ? "paid" : "free",
+        status: "active",
+        validatedAt: Timestamp.now()
+      });
+    })());
+  }
+
+  await Promise.all(checks);
+
+  const existingByCourse = new Map(existingSnap.docs.map(s => [s.id, s.data()]));
+  const courseIds = new Set([
+    ...existingSnap.docs.map(s => safeText(s.data().courseId)),
+    ...currentLegacyGrants.keys()
+  ]);
+  const batch = db.batch();
+  const now = Timestamp.now();
+  const entitledCourseIds = [];
+
+  for (const courseId of courseIds) {
+    if (!courseId) continue;
+    const entitlementId = uid + "_" + courseId;
+    const existing = existingByCourse.get(entitlementId) || {};
+    const grants = { ...(existing.grants || {}) };
+
+    // Rebuild only migration grants. Future trusted payment/institution
+    // grants remain intact and can coexist with legacy access grants.
+    for (const key of Object.keys(grants)) {
+      if (key.startsWith("legacy_institution_") || key.startsWith("legacy_marketplace_")) delete grants[key];
+    }
+    Object.assign(grants, currentLegacyGrants.get(courseId) || {});
+
+    const activeGrants = Object.values(grants).filter(g => g && g.status === "active");
+    const status = activeGrants.length ? "active" : "revoked";
+    if (status === "active") entitledCourseIds.push(courseId);
+
+    const payload = {
+      studentUid: uid,
+      courseId,
+      status,
+      grants,
+      activeGrantCount: activeGrants.length,
+      migrationVersion: 1,
+      updatedAt: now
+    };
+    if (!existing.createdAt) payload.createdAt = now;
+    batch.set(db.doc("courseEntitlements/" + entitlementId), payload, { merge: true });
+  }
+
+  if (courseIds.size) await batch.commit();
+
+  await db.collection("audit_logs").add({
+    action: "student_course_entitlements_synchronized",
+    actorId: uid,
+    activeCourseCount: entitledCourseIds.length,
+    legacyInstitutionRecordsChecked: institutionRecords.length,
+    legacyMarketplaceRecordsChecked: marketplaceRecords.length,
+    createdAt: now
+  });
+
+  return {
+    success: true,
+    entitledCourseIds,
+    activeCourseCount: entitledCourseIds.length,
+    checkedRecords: institutionRecords.length + marketplaceRecords.length
+  };
+});
+
 const MARKETPLACE_PRICE_TYPES = [
   { key: "course", label: "Individual courses", unit: "per course", proposed: 2500 },
   { key: "mentorship", label: "Mentorship", unit: "per session", proposed: 1500 },
