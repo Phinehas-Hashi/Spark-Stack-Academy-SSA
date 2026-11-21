@@ -565,7 +565,6 @@ exports.syncMyCourseEntitlements = onCall(async request => {
   const currentLegacyGrants = new Map();
   const courseCache = new Map();
   const institutionCache = new Map();
-  const membershipCache = new Map();
 
   async function getCourse(courseId) {
     if (!courseCache.has(courseId)) {
@@ -622,8 +621,7 @@ exports.syncMyCourseEntitlements = onCall(async request => {
         institutionId,
         institutionName: safeText(data.institutionName || data.schoolName),
         progress: Number(data.progress ?? data.progressPercent ?? 0),
-        status: "active",
-        validatedAt: Timestamp.now()
+        status: "active"
       });
     })());
   }
@@ -651,8 +649,7 @@ exports.syncMyCourseEntitlements = onCall(async request => {
         sourceRecordId: record.id,
         paymentStatus: isPaid ? "paid" : "free",
         progress: Number(data.progress ?? data.progressPercent ?? 0),
-        status: "active",
-        validatedAt: Timestamp.now()
+        status: "active"
       });
     })());
   }
@@ -685,6 +682,12 @@ exports.syncMyCourseEntitlements = onCall(async request => {
     const activeGrants = Object.values(grants).filter(g => g && g.status === "active");
     const status = activeGrants.length ? "active" : "revoked";
     if (status === "active") entitledCourseIds.push(courseId);
+
+    const grantsUnchanged = JSON.stringify(existing.grants || {}) === JSON.stringify(grants);
+    const statusUnchanged = existing.status === status
+      && Number(existing.activeGrantCount || 0) === activeGrants.length
+      && existing.migrationVersion === 1;
+    if (grantsUnchanged && statusUnchanged) continue;
 
     const payload = {
       studentUid: uid,
