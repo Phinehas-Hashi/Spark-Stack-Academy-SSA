@@ -1,5 +1,8 @@
 .courses-page{
     padding-bottom: 60px;
+
+    padding:28px 32px 60px;
+    box-sizing:border-box;
 }.courses-page .courses-hero{
     display: flex;
     align-items: flex-end;
@@ -541,3 +544,4 @@
     }.courses-page .my-course-body{
         padding: 17px;
     }}
+@media(max-width:700px){.courses-page{padding:20px 16px 32px}}
