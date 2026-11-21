@@ -1487,9 +1487,9 @@ onAuthStateChanged(
         }
 
 
-        await loadAchievementOS(
-            user
-        );
+        if (document.querySelector(".achievements-page")) {
+            await loadAchievementOS(user);
+        }
 
     }
 );
