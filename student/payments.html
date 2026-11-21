@@ -1,636 +1,139 @@
-<!DOCTYPE html><html lang="en"><head>
-    <meta charset="UTF-8"><meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<meta
-    name="description"
-    content="Manage your Spark Stack Academy payments, course fees and transaction history."
->
-
-<title>Payments | Spark Stack Academy</title>
-
-<!-- =========================================
-     CORE STYLES
-========================================== -->
-
-<link
-    rel="stylesheet"
-    href="css/student-core.css"
->
-
-<link
-    rel="stylesheet"
-    href="css/components.css"
->
-
-<link
-    rel="stylesheet"
-    href="css/payments.css"
->
-
-<link
-    rel="stylesheet"
-    href="css/responsive.css"
->
-
-<!-- =========================================
-     FONT
-========================================== -->
-
-<link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
->
-
-<link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
->
-
-<link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
->
-
-<!-- =========================================
-     ICONS
-========================================== -->
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
-</head><body><!-- =========================================
-     SSA STUDENT SHELL
-========================================== -->
-
-<aside
-    id="sidebarContainer"
-    class="sidebar-container"
-></aside>
-
-
-<div
-    id="sidebarOverlay"
-    class="sidebar-overlay"
-    aria-hidden="true"
-></div>
-
-
-<div class="student-shell">
-
-    <!-- =====================================
-         TOPBAR
-    ====================================== -->
-
-    <div
-        id="topbarContainer"
-        class="topbar-container"
-    ></div>
-
-
-    <!-- =====================================
-         MAIN CONTENT
-    ====================================== -->
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07152d">
+  <meta name="description" content="Secure M-Pesa course payments and transaction verification at Spark Stack Academy.">
+  <title>Smart Payments Centre | Spark Stack Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/student-core.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/payments.css?v=20261121-securecentre1">
+  <link rel="stylesheet" href="css/responsive.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <aside id="sidebarContainer" class="sidebar-container"></aside>
+  <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+  <div class="student-shell">
+    <div id="topbarContainer" class="topbar-container"></div>
     <main class="student-main">
-
-        <div class="payments-page">
-
-
-            <!-- =====================================
-                 HEADER
-            ====================================== -->
-
-            <header class="payments-header">
-
-                <div class="payments-header-left">
-
-                    <button
-                        id="backBtn"
-                        class="header-btn"
-                        type="button"
-                        aria-label="Go back"
-                    >
-                        <i data-lucide="arrow-left"></i>
-                    </button>
-
-
-                    <div class="payments-title">
-
-                        <span class="page-eyebrow">
-                            STUDENT FINANCE
-                        </span>
-
-                        <h1>
-                            Payments
-                        </h1>
-
-                        <p>
-                            Manage your academy fees and transactions.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="payment-secure-badge">
-
-                    <i data-lucide="shield-check"></i>
-
-                    <span>
-                        Secure Payments
-                    </span>
-
-                </div>
-
-            </header>
-
-
-
-            <!-- =====================================
-                 PAYMENT SUMMARY
-            ====================================== -->
-
-            <section class="payment-summary">
-
-                <!-- TOTAL PAID -->
-
-                <div class="summary-card paid-card">
-
-                    <div class="summary-icon">
-                        <i data-lucide="wallet"></i>
-                    </div>
-
-
-                    <div class="summary-content">
-
-                        <span>
-                            Total Paid
-                        </span>
-
-                        <h2 id="totalPaid">
-                            KSh 0
-                        </h2>
-
-                        <small>
-                            All completed payments
-                        </small>
-
-                    </div>
-
-                </div>
-
-
-                <!-- BALANCE -->
-
-                <div class="summary-card balance-card">
-
-                    <div class="summary-icon">
-                        <i data-lucide="receipt"></i>
-                    </div>
-
-
-                    <div class="summary-content">
-
-                        <span>
-                            Outstanding Balance
-                        </span>
-
-                        <h2 id="balance">
-                            KSh 0
-                        </h2>
-
-                        <small>
-                            Amount remaining
-                        </small>
-
-                    </div>
-
-                </div>
-
-
-                <!-- STATUS -->
-
-                <div class="summary-card status-card">
-
-                    <div class="summary-icon">
-                        <i data-lucide="circle-check"></i>
-                    </div>
-
-
-                    <div class="summary-content">
-
-                        <span>
-                            Payment Status
-                        </span>
-
-                        <h2 id="paymentStatus">
-                            Pending
-                        </h2>
-
-                        <small>
-                            Current account status
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =====================================
-                 COURSE FEES
-            ====================================== -->
-
-            <section class="course-payments">
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <span>
-                            COURSE FEES
-                        </span>
-
-                        <h2>
-                            My Courses
-                        </h2>
-
-                        <p>
-                            View your course fees and make payments securely.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div id="courseList">
-
-                    <div class="empty-payment">
-
-                        <div class="empty-payment-icon">
-                            <i data-lucide="loader-circle"></i>
-                        </div>
-
-                        <h3>
-                            Loading courses...
-                        </h3>
-
-                        <p>
-                            Fetching your payment information.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =====================================
-                 PAYMENT MODAL
-            ====================================== -->
-
-            <div
-                id="paymentModal"
-                class="receipt-modal hidden"
-            >
-
-                <div class="receipt-box payment-modal-box">
-
-                    <button
-                        id="closePayment"
-                        class="modal-close-btn"
-                        type="button"
-                        aria-label="Close payment"
-                    >
-                        <i data-lucide="x"></i>
-                    </button>
-
-
-                    <div class="modal-icon payment-modal-icon">
-                        <i data-lucide="credit-card"></i>
-                    </div>
-
-
-                    <span class="modal-eyebrow">
-                        COURSE PAYMENT
-                    </span>
-
-
-                    <h2>
-                        Make Payment
-                    </h2>
-
-
-                    <p
-                        id="selectedCourse"
-                        class="selected-course"
-                    >
-                        Course
-                    </p>
-
-
-                    <!-- AMOUNT -->
-
-                    <div class="payment-summary-box">
-
-                        <span>
-                            Amount Due
-                        </span>
-
-                        <h2 id="displayAmount">
-                            KSh 0
-                        </h2>
-
-                    </div>
-
-
-                    <!-- PAYMENT METHOD -->
-
-                    <div class="mpesa-note">
-
-                        <i data-lucide="smartphone"></i>
-
-                        <div>
-
-                            <strong>
-                                M-PESA / Co-op Payment
-                            </strong>
-
-                            <span>
-                                Use the instructions below to complete your payment.
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- INSTRUCTIONS -->
-
-                    <div class="till-payment-box">
-
-                        <div class="payment-instruction-header">
-
-                            <div>
-
-                                <span>
-                                    PAYMENT INSTRUCTIONS
-                                </span>
-
-                                <h3>
-                                    Complete your payment
-                                </h3>
-
-                            </div>
-
-                            <i data-lucide="arrow-down"></i>
-
-                        </div>
-
-
-                        <div class="payment-detail">
-
-                            <span>
-                                Paybill / Till
-                            </span>
-
-                            <strong>
-                                400200
-                            </strong>
-
-                        </div>
-
-
-                        <div class="payment-detail">
-
-                            <span>
-                                Account Number
-                            </span>
-
-                            <strong>
-                                1078687
-                            </strong>
-
-                        </div>
-
-
-                        <div class="payment-detail">
-
-                            <span>
-                                Amount
-                            </span>
-
-                            <strong id="tillAmount">
-                                KSh 0
-                            </strong>
-
-                        </div>
-
-
-                        <div class="payment-detail">
-
-                            <span>
-                                Reference
-                            </span>
-
-                            <strong id="courseReference">
-                                SSA Course
-                            </strong>
-
-                        </div>
-
-
-                        <input
-                            id="paymentAmount"
-                            type="hidden"
-                        >
-
-                    </div>
-
-
-                    <!-- CONFIRM -->
-
-                    <button
-                        id="confirmPayment"
-                        class="confirm-payment-btn"
-                        type="button"
-                    >
-
-                        <i data-lucide="check-circle"></i>
-
-                        I Have Paid
-
-                    </button>
-
-
-                    <p
-                        id="paymentMessage"
-                        class="payment-message"
-                    ></p>
-
-                </div>
-
+      <div class="payments-page">
+        <header class="payments-header">
+          <div class="payments-header-copy">
+            <button id="backBtn" class="payment-back" type="button" aria-label="Go back"><i data-lucide="arrow-left"></i></button>
+            <div>
+              <span class="page-eyebrow">SPARK STACK FINANCIAL SERVICES</span>
+              <h1>Smart Payments Centre</h1>
+              <p>Clear pricing. Verified payments. Protected course access.</p>
             </div>
+          </div>
+          <div class="secure-status"><span class="secure-pulse"></span><i data-lucide="shield-check"></i><span>Secure payment review</span></div>
+        </header>
 
+        <section class="payment-trust-strip" aria-label="Payment safeguards">
+          <div><i data-lucide="lock-keyhole"></i><span><strong>Protected submission</strong><small>Encrypted connection</small></span></div>
+          <div><i data-lucide="scan-search"></i><span><strong>Receipt verification</strong><small>Finance checks actual funds</small></span></div>
+          <div><i data-lucide="book-lock"></i><span><strong>Access control</strong><small>Unlocks after confirmation</small></span></div>
+        </section>
 
+        <section class="payment-overview">
+          <article class="overview-card">
+            <div class="overview-icon"><i data-lucide="wallet"></i></div>
+            <span>Total verified payments</span>
+            <strong id="totalPaid">KSh 0</strong>
+            <small>Confirmed transactions</small>
+          </article>
+          <article class="overview-card">
+            <div class="overview-icon amber"><i data-lucide="receipt-text"></i></div>
+            <span>Selected course fee</span>
+            <strong id="balance">—</strong>
+            <small>Final amount shown before payment</small>
+          </article>
+          <article class="overview-card">
+            <div class="overview-icon green"><i data-lucide="badge-check"></i></div>
+            <span>Payment status</span>
+            <strong id="paymentStatus">Loading</strong>
+            <small>Updated from payment records</small>
+          </article>
+        </section>
 
-            <!-- =====================================
-                 TRANSACTION HISTORY
-            ====================================== -->
-
-            <section class="payment-history">
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <span>
-                            TRANSACTIONS
-                        </span>
-
-                        <h2>
-                            Transaction History
-                        </h2>
-
-                        <p>
-                            Keep track of your recent academy payments.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div id="transactionList">
-
-                    <div class="empty-payment">
-
-                        <div class="empty-payment-icon">
-                            <i data-lucide="receipt"></i>
-                        </div>
-
-                        <h3>
-                            No transactions yet
-                        </h3>
-
-                        <p>
-                            Your completed payments will appear here.
-                        </p>
-
-                    </div>
-
-                </div>
-
+        <section class="payment-workspace">
+          <div class="payment-main-column">
+            <section class="payment-panel course-panel">
+              <div class="panel-heading">
+                <div><span class="panel-kicker">YOUR CHECKOUT</span><h2>Course payment</h2><p>Review the course and amount before sending funds.</p></div>
+                <span class="panel-step">01 / 03</span>
+              </div>
+              <div id="courseList" class="course-checkout">
+                <div class="checkout-skeleton"><span></span><span></span><span></span></div>
+              </div>
             </section>
 
+            <section class="payment-panel mpesa-panel">
+              <div class="panel-heading">
+                <div><span class="panel-kicker">MANUAL M-PESA</span><h2>Pay and submit receipt</h2><p>Use the personal M-Pesa receiving number configured by Spark Stack Academy.</p></div>
+                <div class="mpesa-mark">M-PESA</div>
+              </div>
+              <div id="receiverUnavailable" class="receiver-unavailable" hidden>
+                <i data-lucide="clock-3"></i><div><strong>Payment collection is being configured</strong><p>The Academy has not enabled its receiving details yet. No payment should be sent until the official number appears here.</p></div>
+              </div>
+              <div id="receiverDetails" class="receiver-details" hidden>
+                <div class="receiver-topline"><span>OFFICIAL RECEIVING DETAILS</span><span class="verified-label"><i data-lucide="shield-check"></i> Academy verified</span></div>
+                <div class="receiver-identity"><div class="receiver-avatar"><i data-lucide="smartphone"></i></div><div><small>Pay to</small><strong id="receiverName">Spark Stack Academy</strong><span>Personal M-Pesa number</span></div></div>
+                <div class="receiver-number-row"><div><small>Send to this number</small><strong id="receiverPhone">—</strong></div><button id="copyReceiver" class="copy-number" type="button"><i data-lucide="copy"></i> Copy</button></div>
+                <p id="receiverInstructions" class="receiver-instructions">Send the exact amount and keep the Safaricom confirmation message.</p>
+              </div>
 
+              <div class="payment-steps">
+                <div class="step-item"><span>1</span><div><strong>Send exact amount</strong><p>Pay the amount displayed above to the official personal M-Pesa number.</p></div></div>
+                <div class="step-item"><span>2</span><div><strong>Copy Safaricom receipt</strong><p>Use the transaction code from the confirmation SMS. Do not use the phone number as the receipt.</p></div></div>
+                <div class="step-item"><span>3</span><div><strong>Submit for verification</strong><p>Finance matches the receipt against incoming account records before granting access.</p></div></div>
+              </div>
 
-            <!-- =====================================
-                 RECEIPT MODAL
-            ====================================== -->
+              <form id="manualPaymentForm" class="receipt-submission" autocomplete="off">
+                <div class="form-heading"><span class="panel-kicker">PAYMENT CONFIRMATION</span><h3>Submit your M-Pesa receipt</h3><p>Enter the details exactly as they appear in your Safaricom message.</p></div>
+                <label for="payerPhone">Phone number used to pay</label>
+                <input id="payerPhone" name="payerPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XX XXX XXX" maxlength="16" required>
+                <label for="mpesaCode">M-Pesa transaction code</label>
+                <input id="mpesaCode" name="mpesaCode" type="text" autocapitalize="characters" spellcheck="false" maxlength="12" minlength="8" placeholder="e.g. QWE12RTY90" required>
+                <p class="form-security-note"><i data-lucide="shield-check"></i> Receipt codes are checked for duplicate submissions. Submitting a code does not itself confirm payment.</p>
+                <button id="submitPaymentBtn" class="submit-payment-btn" type="submit" disabled><i data-lucide="lock-keyhole"></i><span>Submit receipt securely</span><i data-lucide="arrow-right"></i></button>
+                <p id="paymentMessage" class="payment-message" role="status" aria-live="polite"></p>
+              </form>
+            </section>
+          </div>
 
-            <div
-                id="receiptModal"
-                class="receipt-modal hidden"
-            >
+          <aside class="payment-side-column">
+            <section class="security-card">
+              <div class="security-emblem"><i data-lucide="shield-check"></i></div>
+              <span class="panel-kicker">PAYMENT PROTECTION</span>
+              <h3>Your payment is reviewed before access is granted.</h3>
+              <ul>
+                <li><i data-lucide="check-circle-2"></i> Amount is calculated by the server</li>
+                <li><i data-lucide="check-circle-2"></i> Duplicate receipt codes are blocked</li>
+                <li><i data-lucide="check-circle-2"></i> Pending receipts do not unlock lessons</li>
+                <li><i data-lucide="check-circle-2"></i> Every verification is audit logged</li>
+              </ul>
+              <div class="security-foot"><i data-lucide="info"></i><span>Never share your M-Pesa PIN or one-time password with anyone.</span></div>
+            </section>
+            <section class="support-card"><i data-lucide="headset"></i><div><strong>Need payment assistance?</strong><p>Contact Academy support if your receipt is delayed or you believe a payment was matched incorrectly.</p></div></section>
+          </aside>
+        </section>
 
-                <div class="receipt-box receipt-modal-box">
-
-                    <button
-                        id="closeReceipt"
-                        class="modal-close-btn"
-                        type="button"
-                        aria-label="Close receipt"
-                    >
-                        <i data-lucide="x"></i>
-                    </button>
-
-
-                    <div class="receipt-logo">
-
-                        <div class="receipt-logo-icon">
-                            <i data-lucide="sparkles"></i>
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Spark Stack Academy
-                            </strong>
-
-                            <span>
-                                Official Payment Receipt
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div id="receiptContent"></div>
-
-
-                    <button
-                        id="printReceiptBtn"
-                        class="print-receipt-btn"
-                        type="button"
-                    >
-
-                        <i data-lucide="printer"></i>
-
-                        Print Receipt
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
+        <section class="payment-panel history-panel">
+          <div class="panel-heading"><div><span class="panel-kicker">ACCOUNT ACTIVITY</span><h2>Transaction history</h2><p>Recent course payments and their verification status.</p></div><span class="history-count">Latest 20</span></div>
+          <div id="transactionList" class="transaction-list"><div class="history-empty">Your transaction history will appear here.</div></div>
+        </section>
+        <footer class="payment-footer"><span>SPARK STACK ACADEMY</span><span><i data-lucide="lock"></i> Secure student finance</span><span>Payments are subject to manual verification</span></footer>
+      </div>
     </main>
-
-</div>
-
-
-<!-- =========================================
-     APPLICATION
-========================================== -->
-
-<script
-    type="module"
-    src="js/student-app.js"
-></script>
-
-<script
-    type="module"
-    src="js/payments.js"
-></script>
-
-
-<script>
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        () => {
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-
-        }
-    );
-
-</script>
-
-</body></html>
+  </div>
+  <script type="module" src="js/student-app.js"></script>
+  <script type="module" src="js/payments.js?v=20261121-securecentre1"></script>
+  <script>document.addEventListener("DOMContentLoaded",()=>window.lucide?.createIcons());</script>
+</body>
+</html>
