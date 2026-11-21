@@ -1,0 +1,226 @@
+.assignments-page{
+
+    width:100%;
+    animation:fadePage .4s ease;
+
+}@keyframes fadePage{
+
+    from{
+
+        opacity:0;
+        transform:translateY(10px);
+
+    }
+
+    to{
+
+        opacity:1;
+        transform:translateY(0);
+
+    }
+
+}.assignments-page .assignments-header{
+
+    background:#17152f;
+    color:#fff;
+    border-radius:26px;
+    padding:35px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:30px;
+    margin-bottom:25px;
+
+}.assignments-page .assignments-header h1{
+
+    margin:15px 0 10px;
+    font-size:34px;
+
+}.assignments-page .assignments-header p{
+
+    color:#c8d7f3;
+    max-width:600px;
+
+}.assignments-page .assignment-summary{
+
+    display:flex;
+    gap:15px;
+
+}.assignments-page .summary-card{
+
+    min-width:110px;
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(8px);
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+
+}.assignments-page .summary-card strong{
+
+    display:block;
+    font-size:28px;
+
+}.assignments-page .summary-card span{
+
+    font-size:13px;
+    color:#dbe5ff;
+
+}.assignments-page .assignment-filter{
+
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:25px;
+
+}.assignments-page .assignment-filter input,.assignments-page .assignment-filter select{
+
+    border:none;
+    outline:none;
+    background:white;
+    border:1px solid #e6edf7;
+    border-radius:14px;
+    padding:14px 16px;
+    font-family:inherit;
+
+}.assignments-page .assignment-filter input{
+
+    flex:1;
+
+}.assignments-page .assignment-grid{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+    gap:24px;
+
+}.assignments-page .assignment-card{
+
+    background:white;
+    border-radius:24px;
+    border:1px solid #e8edf5;
+    overflow:hidden;
+    transition:.3s;
+
+}.assignments-page .assignment-card:hover{
+
+    transform:translateY(-6px);
+    box-shadow:0 18px 45px rgba(0,0,0,.08);
+
+}.assignments-page .assignment-top{
+
+    background:#f7f9fd;
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+}.assignments-page .assignment-top h3{
+
+    margin:0;
+    color:#17152f;
+
+}.assignments-page .status{
+
+    padding:6px 12px;
+    border-radius:30px;
+    font-size:12px;
+    font-weight:600;
+
+}.assignments-page .status.pending{
+
+    background:#fff3cd;
+    color:#b7791f;
+
+}.assignments-page .status.submitted{
+
+    background:#dbeafe;
+    color:#2563eb;
+
+}.assignments-page .status.graded{
+
+    background:#dcfce7;
+    color:#15803d;
+
+}.assignments-page .status.overdue{
+
+    background:#fee2e2;
+    color:#dc2626;
+
+}.assignments-page .assignment-body{
+
+    padding:22px;
+
+}.assignments-page .assignment-body p{
+
+    color:#64748b;
+    line-height:1.7;
+
+}.assignments-page .assignment-meta{
+
+    display:flex;
+    justify-content:space-between;
+    margin:18px 0;
+    color:#64748b;
+    font-size:14px;
+
+}.assignments-page .grade-box{
+
+    margin-top:15px;
+    background:#eef6ff;
+    border-radius:16px;
+    padding:15px;
+
+}.assignments-page .grade-box strong{
+
+    color:#762cff;
+    font-size:24px;
+
+}.assignments-page .assignment-actions{
+
+    display:flex;
+    gap:12px;
+    margin-top:22px;
+
+}.assignments-page .assignment-actions button{
+
+    flex:1;
+
+}.assignments-page .empty-state{
+
+    grid-column:1/-1;
+    background:white;
+    padding:60px 30px;
+    border-radius:24px;
+    text-align:center;
+    border:1px dashed #d6dfec;
+
+}.assignments-page .empty-state svg{
+
+    width:55px;
+    height:55px;
+    color:#762cff;
+    margin-bottom:15px;
+
+}@media(max-width:900px){.assignments-page .assignments-header{
+
+flex-direction:column;
+align-items:flex-start;
+
+}.assignments-page .assignment-summary{
+
+width:100%;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+
+}.assignments-page .assignment-filter{
+
+flex-direction:column;
+
+}}@media(max-width:600px){.assignments-page .assignment-summary{
+
+grid-template-columns:1fr;
+
+}.assignments-page .assignment-actions{
+
+flex-direction:column;
+
+}}
