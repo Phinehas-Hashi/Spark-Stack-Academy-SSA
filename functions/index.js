@@ -977,7 +977,7 @@ exports.submitManualCoursePayment = onCall(async request => {
   const discountPrice = Number(course.discountPrice || 0);
   const amount = discountPrice > 0 && discountPrice < basePrice ? discountPrice : basePrice;
   const currency = safeText(course.currency, "KES").toUpperCase();
-  if (!Number.isFinite(amount) || amount <= 0 || currency !== "KES") {
+  if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount) || currency !== "KES") {
     throw new HttpsError("failed-precondition", "This course does not have a valid KES price for manual M-Pesa payment.");
   }
 
