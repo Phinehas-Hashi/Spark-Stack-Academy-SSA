@@ -1417,6 +1417,87 @@ exports.saveMarketplacePricing = onCall(async request => {
 });
 
 
+
+const GLOBAL_CURRENCY_CODES = ["KES","USD","EUR","GBP","UGX","TZS","NGN","ZAR","INR","AED","CAD","AUD"];
+const GLOBAL_PRICE_KEYS = MARKETPLACE_PRICE_TYPES.map(item => item.key);
+
+exports.getMarketplaceCurrencyConfig = onCall(async request => {
+  await requireFounder(request);
+  const ref = db.doc("marketplaceCurrencyConfig/global");
+  const [snap, versionsSnap] = await Promise.all([ref.get(), ref.collection("versions").limit(12).get()]);
+  const saved = snap.exists ? snap.data() : {};
+  const rates = {};
+  for (const code of GLOBAL_CURRENCY_CODES) {
+    rates[code] = code === "KES" ? 1 : (Number.isFinite(Number(saved.rates?.[code])) && Number(saved.rates?.[code]) > 0 ? Number(saved.rates[code]) : null);
+  }
+  const overrides = {};
+  for (const key of GLOBAL_PRICE_KEYS) {
+    overrides[key] = {};
+    for (const code of GLOBAL_CURRENCY_CODES) {
+      const value = saved.regionalOverrides?.[key]?.[code];
+      overrides[key][code] = value === null || value === undefined || value === "" ? null : Number(value);
+    }
+  }
+  const history = versionsSnap.docs.map(doc => {
+    const v = doc.data();
+    return { version: v.version || 0, createdAt: v.createdAt?.toDate?.()?.toISOString?.() || null, actorEmail: v.actorEmail || "", summary: v.summary || "Currency configuration updated" };
+  }).sort((a,b) => b.version-a.version);
+  return { baseCurrency: "KES", supportedCurrencies: GLOBAL_CURRENCY_CODES, rates, regionalOverrides: overrides, version: Number(saved.version || 0), status: saved.status || "proposed", history };
+});
+
+exports.saveMarketplaceCurrencyConfig = onCall(async request => {
+  const founder = await requireFounder(request);
+  const payload = request.data || {};
+  if (payload.baseCurrency && safeText(payload.baseCurrency).toUpperCase() !== "KES") {
+    throw new HttpsError("failed-precondition", "KES remains the accounting and settlement base currency in this phase.");
+  }
+  const incomingRates = payload.rates || {};
+  const rates = { KES: 1 };
+  for (const code of GLOBAL_CURRENCY_CODES.filter(code => code !== "KES")) {
+    const raw = incomingRates[code];
+    if (raw === null || raw === undefined || raw === "") { rates[code] = null; continue; }
+    const rate = Number(raw);
+    if (!Number.isFinite(rate) || rate <= 0 || rate > 100000000 || Number(rate.toFixed(6)) !== rate) {
+      throw new HttpsError("invalid-argument", "Exchange rate for " + code + " must be a positive KES-per-unit value with up to six decimal places.");
+    }
+    rates[code] = rate;
+  }
+  const incomingOverrides = payload.regionalOverrides || {};
+  const regionalOverrides = {};
+  for (const key of GLOBAL_PRICE_KEYS) {
+    regionalOverrides[key] = {};
+    for (const code of GLOBAL_CURRENCY_CODES) {
+      const raw = incomingOverrides[key]?.[code];
+      if (raw === null || raw === undefined || raw === "") { regionalOverrides[key][code] = null; continue; }
+      const amount = Number(raw);
+      if (!Number.isFinite(amount) || amount < 0 || amount > 100000000 || Number(amount.toFixed(2)) !== amount) {
+        throw new HttpsError("invalid-argument", "Invalid " + code + " regional override for " + key + ".");
+      }
+      regionalOverrides[key][code] = amount;
+    }
+  }
+  const now = Timestamp.now();
+  const rootRef = db.doc("marketplaceCurrencyConfig/global");
+  const version = await db.runTransaction(async tx => {
+    const current = await tx.get(rootRef);
+    const nextVersion = Number(current.data()?.version || 0) + 1;
+    const snapshot = {
+      version: nextVersion, baseCurrency: "KES", supportedCurrencies: GLOBAL_CURRENCY_CODES,
+      rates, regionalOverrides, status: "proposed", createdAt: now,
+      actorId: founder.uid, actorEmail: request.auth.token.email || "",
+      summary: "Global currency configuration revision " + nextVersion
+    };
+    tx.set(rootRef, { ...snapshot, updatedAt: now, updatedBy: founder.uid }, { merge: true });
+    tx.create(rootRef.collection("versions").doc(String(nextVersion).padStart(8, "0")), snapshot);
+    return nextVersion;
+  });
+  await db.collection("audit_logs").add({
+    action: "marketplace_currency_config_updated", actorId: founder.uid,
+    version, baseCurrency: "KES", createdAt: now
+  });
+  return { success: true, status: "proposed", version };
+});
+
 // Founder-only country-level aggregate. Country is taken only from explicit account/profile fields;
 // no IP geolocation or inferred location is used.
 exports.getFounderGlobalStats = onCall(async request => {
