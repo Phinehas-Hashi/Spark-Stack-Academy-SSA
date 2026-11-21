@@ -1298,3 +1298,13 @@
 .topbar-profile{gap:7px;min-width:0;align-items:center}
 .topbar-profile>svg{display:block;flex:0 0 14px;width:14px;height:14px;margin:0 1px 0 0;align-self:center}
 .topbar-profile-info{min-width:0}
+
+
+/* Unified mobile drawer hardening — Instructor portal */
+@media(max-width:900px){
+ #instructorSidebar{position:fixed;inset:0 auto 0 0;width:min(292px,calc(100vw - 44px));height:100dvh;max-height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);z-index:1201;overflow:hidden;overscroll-behavior:contain;touch-action:pan-y}
+ #instructorSidebar>.sidebar{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+ #instructorSidebar .sidebar-nav{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ #sidebarOverlay{position:fixed;inset:0;z-index:1200}
+ body.sidebar-open{overflow:hidden;overscroll-behavior:none}
+}
