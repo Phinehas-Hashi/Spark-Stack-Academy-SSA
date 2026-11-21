@@ -56,7 +56,6 @@ async function loadInstitutionCourses() {
     const addRecord = (courseId, record) => {
       const id = String(courseId || "");
       if (!id || records.has(id) || !validStatus(record.status)) return;
-      if (!record.institutionId && !record.institutionName) return;
       records.set(id, { courseId:id, ...record });
     };
 
@@ -113,9 +112,11 @@ async function loadInstitutionCourses() {
         const course = snap.data() || {};
         const status = String(course.status || "").toLowerCase();
         if (course.published !== true && status !== "published") return null;
+        const institutionId = record.institutionId || course.institutionId || "";
+        if (!institutionId && !record.institutionName && !course.institutionName) return null;
         return {
           id:record.courseId,...course,
-          institutionId:record.institutionId || course.institutionId || "",
+          institutionId,
           institutionName:record.institutionName || course.institutionName || "Your institution",
           enrollmentStatus:record.status || "active",
           progress:Math.min(100,Math.max(0,Number(record.progress)||0)),
