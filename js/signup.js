@@ -1,3 +1,4 @@
+import { populateCountrySelect } from "./countries.js";
 import { auth, db } from "./firebase.js";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, setDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -6,6 +7,8 @@ const $ = id => document.getElementById(id);
 const signupForm = $("signupForm");
 const nameInput = $("name");
 const emailInput = $("email");
+const countryInput = $("country");
+populateCountrySelect(countryInput);
 const passwordInput = $("password");
 const confirmPasswordInput = $("confirmPassword");
 const roleSelect = $("role");
@@ -41,15 +44,15 @@ function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 function strongPassword(v) { return v.length >= 8 && /[A-Z]/.test(v) && /[a-z]/.test(v) && /\d/.test(v); }
 function setButtons(disabled) { if (signupBtn) signupBtn.disabled = disabled; if (googleSignupBtn) googleSignupBtn.disabled = disabled; }
 
-async function createStudentApplication({ uid, fullName, email, providerName = "email" }) {
+async function createStudentApplication({ uid, fullName, email, countryCode, providerName = "email" }) {\n    const countryName = countryInput?.selectedOptions?.[0]?.textContent || "";
     await setDoc(doc(db, "users", uid), {
-        uid, fullName, email, role: "student", bio: "", expertise: "", profilePhoto: "",
+        uid, fullName, email, countryCode, country: countryName, role: "student", bio: "", expertise: "", profilePhoto: "",
         active: true, verified: false, status: "pending_admission", provider: providerName,
         createdAt: serverTimestamp(), lastLogin: serverTimestamp()
     }, { merge: true });
 
     await setDoc(doc(db, "students", uid), {
-        uid, name: fullName, email, role: "student", status: "Pending",
+        uid, name: fullName, email, countryCode, country: countryName, role: "student", status: "Pending",
         onboardingStatus: "awaiting_admission", admissionNumber: "Pending",
         level: 1, xp: 0, streak: 0, badges: [],
         stats: { coursesEnrolled: 0, lessonsCompleted: 0, progress: 0, certificates: 0 },
@@ -69,9 +72,9 @@ async function createStudentApplication({ uid, fullName, email, providerName = "
     });
 }
 
-async function createInstructorProfile({ uid, fullName, email, bio, expertise }) {
+async function createInstructorProfile({ uid, fullName, email, bio, expertise, countryCode }) {\n    const countryName = countryInput?.selectedOptions?.[0]?.textContent || "";
     await setDoc(doc(db, "users", uid), {
-        uid, fullName, email, role: "instructor", bio, expertise, profilePhoto: "",
+        uid, fullName, email, countryCode, country: countryName, role: "instructor", bio, expertise, profilePhoto: "",
         active: true, verified: false, status: "pending_review", createdAt: serverTimestamp(), lastLogin: serverTimestamp()
     }, { merge: true });
 }
@@ -82,12 +85,12 @@ signupForm?.addEventListener("submit", async e => {
     const email = emailInput?.value.trim() || "";
     const password = passwordInput?.value || "";
     const confirmPassword = confirmPasswordInput?.value || "";
-    const role = roleSelect?.value || "";
+    const role = roleSelect?.value || "";\n    const countryCode = countryInput?.value || "";
     const bio = bioInput?.value.trim() || "";
     const expertise = expertiseInput?.value.trim() || "";
 
     if (!fullName) return showToast("Enter your full name", "error");
-    if (!validEmail(email)) return showToast("Enter a valid email", "error");
+    if (!validEmail(email)) return showToast("Enter a valid email", "error");\n    if (!countryCode) return showToast("Select your country to continue", "error");
     if (!strongPassword(password)) return showToast("Password must contain uppercase, lowercase, number and 8 characters", "error");
     if (password !== confirmPassword) return showToast("Passwords do not match", "error");
     if (!role) return showToast("Select account type", "error");
@@ -101,7 +104,7 @@ signupForm?.addEventListener("submit", async e => {
         await updateProfile(user, { displayName: fullName });
 
         if (role === "student") {
-            await createStudentApplication({ uid: user.uid, fullName, email });
+            await createStudentApplication({ uid: user.uid, fullName, email, countryCode });
             await signOut(auth);
             hideLoader();
             showToast("Application submitted! Wait for Founder approval before accessing your student portal.", "success");
@@ -109,7 +112,7 @@ signupForm?.addEventListener("submit", async e => {
             return;
         }
 
-        await createInstructorProfile({ uid: user.uid, fullName, email, bio, expertise });
+        await createInstructorProfile({ uid: user.uid, fullName, email, bio, expertise, countryCode });
         await signOut(auth);
         hideLoader();
         showToast("Instructor application created. Please wait for review.", "success");
@@ -130,7 +133,7 @@ googleSignupBtn?.addEventListener("click", async () => {
         const user = result.user;
         const fullName = user.displayName || "Student";
         const email = user.email || "";
-        await createStudentApplication({ uid: user.uid, fullName, email, providerName: "google" });
+        const countryCode = countryInput?.value || "";\n        if (!countryCode) throw new Error("Select your country before continuing with Google.");\n        await createStudentApplication({ uid: user.uid, fullName, email, countryCode, providerName: "google" });
         await signOut(auth);
         hideLoader();
         showToast("Application submitted! Your account is waiting for Founder approval.", "success");
