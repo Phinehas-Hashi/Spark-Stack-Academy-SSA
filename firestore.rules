@@ -94,6 +94,23 @@ service cloud.firestore {
         && userData().get('institutionRole', '') == 'owner';
     }
 
+    // Paid and institution course content is readable only when a trusted
+    // backend entitlement exists for the signed-in student and course.
+    function hasActiveCourseEntitlement(courseId) {
+      let entitlementPath = /databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId);
+      return signedIn()
+        && courseId is string
+        && exists(entitlementPath)
+        && get(entitlementPath).data.get('studentUid', '') == uid()
+        && get(entitlementPath).data.get('courseId', '') == courseId
+        && get(entitlementPath).data.get('status', '') == 'active'
+        && (
+          !('expiresAt' in get(entitlementPath).data)
+          || get(entitlementPath).data.expiresAt == null
+          || get(entitlementPath).data.expiresAt > request.time
+        );
+    }
+
 
     // ============================================================
     // PLATFORM CONTROL
@@ -914,6 +931,23 @@ service cloud.firestore {
 
 
     // ============================================================
+    // CANONICAL COURSE ENTITLEMENTS
+    // Only trusted backend functions may create, update or revoke grants.
+    // ============================================================
+
+    match /courseEntitlements/{entitlementId} {
+      allow get, list:
+        if staff()
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && resource.data.studentUid == uid()
+        );
+      allow create, update, delete: if false;
+    }
+
+
+    // ============================================================
     // ASSIGNMENTS
     // ============================================================
 
@@ -924,6 +958,7 @@ service cloud.firestore {
         || (
           isStudent()
           && studentPortalOpen()
+          && hasActiveCourseEntitlement(resource.data.courseId)
         )
         || (
           isInstructor()
