@@ -1,0 +1,7 @@
+/* Student portal shell — layout only. */
+.student-layout{display:flex;width:100%;min-width:320px;min-height:100vh;min-height:100dvh;background:var(--ssa-color-canvas,#f5f4fb)}
+.student-layout>.sidebar-container{flex:0 0 280px;width:280px;min-width:280px}
+.student-layout>.student-main{flex:1 1 auto;min-width:0;width:calc(100% - 280px);min-height:100vh;min-height:100dvh;overflow-x:clip;background:var(--ssa-color-canvas,#f5f4fb)}
+.student-layout>.student-main>.topbar-container{width:100%;min-width:0}
+.student-layout .sidebar-overlay{position:fixed;inset:0;z-index:1190}
+@media(max-width:900px){.student-layout>.sidebar-container{flex:0 0 0;width:0;min-width:0}.student-layout>.student-main{width:100%}}
