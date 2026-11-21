@@ -50,10 +50,7 @@ async function loadMyCourses() {
         for (const entitlement of entitlements) {
             const courseId = String(entitlement.courseId);
             try {
-                const [courseSnap, progressSnap] = await Promise.all([
-                    getDoc(doc(db, "courses", courseId)),
-                    getDoc(doc(db, "courseProgress", `${currentUser.uid}_${courseId}`))
-                ]);
+                const courseSnap = await getDoc(doc(db, "courses", courseId));
                 if (!courseSnap.exists()) continue;
 
                 const course = courseSnap.data();
@@ -68,15 +65,13 @@ async function loadMyCourses() {
                         : freeGrant
                             ? "Free enrolment"
                             : "Granted access";
-                const progressData = progressSnap.exists() ? progressSnap.data() : {};
-
                 myCourses.push({
                     id: courseId,
                     ...course,
                     entitlementId: entitlement.id,
                     entitlementSource: sourceLabel,
                     institutionId: institutionGrant?.institutionId || "",
-                    progress: Number(progressData.progress ?? progressData.progressPercent ?? 0),
+                    progress: Number(institutionGrant?.progress ?? purchaseGrant?.progress ?? freeGrant?.progress ?? 0),
                     enrollmentStatus: "active",
                     paymentStatus: purchaseGrant ? "paid" : (freeGrant ? "free" : ""),
                     joinedAt: entitlement.createdAt || entitlement.updatedAt || null
