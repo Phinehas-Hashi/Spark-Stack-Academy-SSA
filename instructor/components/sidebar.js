@@ -17,7 +17,7 @@ let menuButton = null;
 export function initSidebar() {
 
     sidebarContainer =
-        document.getElementById("sidebarContainer");
+        document.getElementById("instructorSidebar") || document.getElementById("sidebarContainer");
 
     sidebar =
         sidebarContainer?.querySelector(".sidebar");
