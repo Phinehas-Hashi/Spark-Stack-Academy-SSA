@@ -844,7 +844,7 @@ async function requirePaymentReviewer(request) {
   const isFounder = founder.role === "founder" && founder.status === "active"
     && founder.active !== false && founder.verified !== false;
   const labels = [user.adminRole, user.department, user.position]
-    .map(value => safeText(value).toLowerCase().replace(/\\s+/g, "_"));
+    .map(value => safeText(value).toLowerCase().replace(/\s+/g, "_"));
   const financeRole = ["finance", "finance_manager", "financial_manager"].includes(safeText(user.role).toLowerCase())
     || labels.some(value => ["finance", "finance_manager", "financial_manager"].includes(value));
   const financePermission = user.permissions?.verifyPayments === true
@@ -858,10 +858,10 @@ async function requirePaymentReviewer(request) {
 }
 
 function normalizeManualMpesaPhone(value) {
-  let phone = safeText(value).replace(/[\\s()+-]/g, "");
+  let phone = safeText(value).replace(/[\s()+-]/g, "");
   if (phone.startsWith("0")) phone = "254" + phone.slice(1);
   if (phone.startsWith("7") || phone.startsWith("1")) phone = "254" + phone;
-  if (!/^254[17]\\d{8}$/.test(phone)) {
+  if (!/^254[17]\d{8}$/.test(phone)) {
     throw new HttpsError("invalid-argument", "Enter a valid Kenyan M-Pesa phone number.");
   }
   return phone;
