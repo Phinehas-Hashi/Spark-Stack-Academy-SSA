@@ -1416,6 +1416,49 @@ exports.saveMarketplacePricing = onCall(async request => {
   return { success: true, pricingStatus: "proposed", version, prices };
 });
 
+
+// Founder-only country-level aggregate. Country is taken only from explicit account/profile fields;
+// no IP geolocation or inferred location is used.
+exports.getFounderGlobalStats = onCall(async request => {
+  await requireFounder(request);
+  const countries = {};
+  const roles = {};
+  let totalUsers = 0, activeUsers = 0, unknownCountry = 0, scanned = 0;
+  let cursor = null;
+  const pageSize = 500;
+  const scanLimit = 20000;
+  while (scanned < scanLimit) {
+    let query = db.collection("users").orderBy("__name__").limit(Math.min(pageSize, scanLimit - scanned));
+    if (cursor) query = query.startAfter(cursor);
+    const snap = await query.get();
+    if (snap.empty) break;
+    for (const doc of snap.docs) {
+      const u = doc.data() || {};
+      scanned++; totalUsers++;
+      const role = safeText(u.role, "unknown").toLowerCase() || "unknown";
+      roles[role] = (roles[role] || 0) + 1;
+      const active = u.active !== false && ["active", "approved"].includes(safeText(u.status, "active").toLowerCase());
+      if (active) activeUsers++;
+      const rawCountry = safeText(u.countryCode || u.country || u.location?.countryCode || u.location?.country || u.address?.countryCode || u.address?.country).toUpperCase();
+      const code = /^[A-Z]{2,3}$/.test(rawCountry) ? rawCountry : "";
+      if (!code) { unknownCountry++; continue; }
+      if (!countries[code]) countries[code] = { countryCode: code, users: 0, activeUsers: 0, roles: {} };
+      countries[code].users++;
+      if (active) countries[code].activeUsers++;
+      countries[code].roles[role] = (countries[code].roles[role] || 0) + 1;
+    }
+    cursor = snap.docs[snap.docs.length - 1];
+    if (snap.size < pageSize) break;
+  }
+  const countryRows = Object.values(countries).sort((a,b) => b.users-a.users);
+  return {
+    generatedAt: Timestamp.now().toDate().toISOString(),
+    totalUsers, activeUsers, unknownCountry, countriesTracked: countryRows.length,
+    scannedUsers: scanned, scanLimitReached: scanned >= scanLimit,
+    roles, countries: countryRows
+  };
+});
+
 exports.founderModerateCourse = onCall(async request => {
   const founder = await requireFounder(request);
   const courseId = safeText(request.data?.courseId);
