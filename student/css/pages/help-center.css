@@ -1,7 +1,7 @@
 .help-page{
     min-height: 100vh;
     background: #f5f4fb;
-    color: #0b1f3a;
+    color: #17152f;
     font-family: "Poppins", sans-serif;
     overflow-x: hidden;
 }.help-page .help-command{
@@ -33,7 +33,7 @@
     justify-content: center;
 
     border-radius: 12px;
-    color: #0b1f3a;
+    color: #17152f;
     background: #f1f4f9;
 
     text-decoration: none;
@@ -283,7 +283,7 @@
 }.help-page .section-heading h2{
     margin: 7px 0 6px;
 
-    color: #0b1f3a;
+    color: #17152f;
 
     font-size: clamp(25px, 3vw, 34px);
     font-weight: 800;
@@ -729,7 +729,7 @@
 }.help-page .support-modal-card h2{
     margin: 7px 0 5px;
 
-    color: #0b1f3a;
+    color: #17152f;
 
     font-size: 25px;
 }.help-page .support-modal-card > p{
