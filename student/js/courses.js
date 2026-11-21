@@ -54,6 +54,13 @@ async function loadMyCourses() {
                 if (!courseSnap.exists()) continue;
 
                 const course = courseSnap.data();
+                let progressData = {};
+                try {
+                    const progressSnap = await getDoc(doc(db, "courseProgress", `${currentUser.uid}_${courseId}`));
+                    if (progressSnap.exists()) progressData = progressSnap.data() || {};
+                } catch (progressError) {
+                    console.warn("Course progress is unavailable for", courseId, progressError);
+                }
                 const grants = Object.values(entitlement.grants || {}).filter(g => g?.status === "active");
                 const institutionGrant = grants.find(g => g.source === "institution_enrollment");
                 const purchaseGrant = grants.find(g => g.source === "verified_legacy_purchase");
@@ -71,7 +78,7 @@ async function loadMyCourses() {
                     entitlementId: entitlement.id,
                     entitlementSource: sourceLabel,
                     institutionId: institutionGrant?.institutionId || "",
-                    progress: Number(institutionGrant?.progress ?? purchaseGrant?.progress ?? freeGrant?.progress ?? 0),
+                    progress: Number(progressData.progress ?? institutionGrant?.progress ?? purchaseGrant?.progress ?? freeGrant?.progress ?? 0),
                     enrollmentStatus: "active",
                     paymentStatus: purchaseGrant ? "paid" : (freeGrant ? "free" : ""),
                     joinedAt: entitlement.createdAt || entitlement.updatedAt || null
