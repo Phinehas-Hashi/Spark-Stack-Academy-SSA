@@ -244,8 +244,6 @@ export async function awardXP(userId, amount, reason = "Learning activity", sour
             lastXPReason: reason,
             level: newLevel
         };
-        if (counterField) updates[counterField] = increment(1);
-        if (sourceKey.startsWith("quiz_")) updates.quizXP = increment(amount);
 
         transaction.update(studentRef, updates);
         transaction.set(eventRef, {
