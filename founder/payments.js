@@ -567,6 +567,10 @@ View
 
 </button>
 
+${payment.provider === "manual_safaricom_receipt" && payment.status === "pending_verification" ? `
+<button class="table-action verify-manual-payment" type="button" data-verify-manual="${payment.id}">Verify M-Pesa</button>
+` : ""}
+
 </div>
 
 </td>
@@ -928,6 +932,7 @@ initPayments();
 const founderFunctions = getFunctions(auth.app, "us-central1");
 const getManualMpesaSettings = httpsCallable(founderFunctions, "getFounderManualMpesaPaymentConfig");
 const saveManualMpesaSettings = httpsCallable(founderFunctions, "saveFounderManualMpesaPaymentConfig");
+const verifyManualPayment = httpsCallable(founderFunctions, "verifyManualCoursePayment");
 
 async function loadManualMpesaSettings() {
     const form = document.getElementById("manualMpesaSettingsForm");
@@ -982,5 +987,46 @@ document.getElementById("manualMpesaSettingsForm")?.addEventListener("submit", a
     } finally {
         button.disabled = false;
         button.textContent = "Save receiving details";
+    }
+});
+
+
+document.getElementById("transactionsTable")?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-verify-manual]");
+    if (!button) return;
+    const paymentId = button.dataset.verifyManual;
+    const payment = allTransactions.find(item => item.id === paymentId);
+    if (!payment || payment.status !== "pending_verification") return;
+
+    const amountInput = window.prompt(
+        "Enter the exact amount you matched against the incoming personal M-Pesa account record (KES):",
+        String(payment.amount || "")
+    );
+    if (amountInput === null) return;
+    const verifiedAmount = Number(amountInput);
+    if (!Number.isFinite(verifiedAmount) || verifiedAmount !== Number(payment.amount)) {
+        window.alert("The amount must exactly match the submitted course payment. No changes were made.");
+        return;
+    }
+    const confirmed = window.confirm(
+        "Confirm that you personally checked the receiving M-Pesa account records and matched this exact receipt code, payer and amount. This action grants course access and posts the financial ledger."
+    );
+    if (!confirmed) return;
+
+    button.disabled = true;
+    button.textContent = "Verifying…";
+    try {
+        await verifyManualPayment({
+            paymentId,
+            verifiedAmount,
+            verificationNote: "Matched against incoming personal M-Pesa account records by Founder."
+        });
+        showToast("Payment verified. Course access has been granted.", "success");
+    } catch (error) {
+        console.error("Manual M-Pesa verification failed:", error);
+        window.alert(error.message || "Payment verification failed.");
+    } finally {
+        button.disabled = false;
+        button.textContent = "Verify M-Pesa";
     }
 });
