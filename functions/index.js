@@ -1350,7 +1350,8 @@ const MARKETPLACE_PRICE_TYPES = [
 
 exports.getMarketplacePricing = onCall(async request => {
   await requireFounder(request);
-  const snap = await db.doc("marketplacePricing/global").get();
+  const ref = db.doc("marketplacePricing/global");
+  const [snap, versionsSnap] = await Promise.all([ref.get(), ref.collection("versions").limit(12).get()]);
   const saved = snap.exists ? snap.data() : {};
   const prices = Object.fromEntries(MARKETPLACE_PRICE_TYPES.map(item => {
     const configured = saved.prices?.[item.key] || {};
@@ -1358,38 +1359,52 @@ exports.getMarketplacePricing = onCall(async request => {
       label: item.label, unit: item.unit,
       proposedAmount: item.proposed,
       amount: Number.isFinite(Number(configured.amount)) ? Number(configured.amount) : item.proposed,
-      currency: configured.currency || "KES",
+      currency: configured.currency || saved.currency || "KES",
       enabled: configured.enabled === true
     }];
   }));
-  return { currency: saved.currency || "KES", prices, transactionFeeEnabled: saved.transactionFeeEnabled === true, transactionFeePercent: Number(saved.transactionFeePercent || 0), pricingStatus: saved.pricingStatus || "proposed" };
+  const history = versionsSnap.docs.map(doc => {
+    const value = doc.data();
+    return { version: value.version || 0, currency: value.currency || "KES", createdAt: value.createdAt?.toDate?.()?.toISOString?.() || null, actorEmail: value.actorEmail || "", summary: value.summary || "Price book updated" };
+  }).sort((a,b) => (b.version || 0) - (a.version || 0));
+  return { currency: saved.currency || "KES", prices, transactionFeeEnabled: saved.transactionFeeEnabled === true, transactionFeePercent: Number(saved.transactionFeePercent || 0), pricingStatus: saved.pricingStatus || "proposed", version: Number(saved.version || 0), history };
 });
 
 exports.saveMarketplacePricing = onCall(async request => {
   const founder = await requireFounder(request);
   const payload = request.data || {};
-  const currency = safeText(payload.currency, "KES");
+  const currency = safeText(payload.currency, "KES").toUpperCase();
   if (!["KES", "USD", "EUR", "GBP"].includes(currency)) throw new HttpsError("invalid-argument", "Unsupported marketplace currency.");
   const incoming = payload.prices || {};
   const prices = {};
   for (const item of MARKETPLACE_PRICE_TYPES) {
     const value = incoming[item.key] || {};
     const amount = Number(value.amount);
-    if (!Number.isFinite(amount) || amount < 0 || amount > 100000000) throw new HttpsError("invalid-argument", "Invalid price for " + item.label + ".");
+    if (!Number.isFinite(amount) || amount < 0 || amount > 100000000 || Number(amount.toFixed(2)) !== amount) throw new HttpsError("invalid-argument", "Invalid price for " + item.label + ".");
     prices[item.key] = { amount, currency, enabled: value.enabled === true, unit: item.unit, label: item.label };
   }
   const transactionFeePercent = Number(payload.transactionFeePercent || 0);
   if (!Number.isFinite(transactionFeePercent) || transactionFeePercent < 0 || transactionFeePercent > 20) throw new HttpsError("invalid-argument", "Transaction fee must be between 0 and 20 percent.");
+  if (payload.transactionFeeEnabled === true && transactionFeePercent <= 0) throw new HttpsError("failed-precondition", "Enter a transaction fee above zero or disable the fee.");
   const now = Timestamp.now();
-  await db.doc("marketplacePricing/global").set({
-    currency, prices,
-    transactionFeeEnabled: payload.transactionFeeEnabled === true,
-    transactionFeePercent,
-    pricingStatus: "proposed",
-    updatedAt: now, updatedBy: founder.uid
-  }, { merge: true });
-  await db.collection("audit_logs").add({ action: "marketplace_pricing_proposals_updated", actorId: founder.uid, currency, createdAt: now });
-  return { success: true, pricingStatus: "proposed", prices };
+  const rootRef = db.doc("marketplacePricing/global");
+  const version = await db.runTransaction(async tx => {
+    const current = await tx.get(rootRef);
+    const nextVersion = Number(current.data()?.version || 0) + 1;
+    const snapshot = {
+      version: nextVersion, currency, prices,
+      transactionFeeEnabled: payload.transactionFeeEnabled === true,
+      transactionFeePercent, pricingStatus: "proposed",
+      createdAt: now, actorId: founder.uid,
+      actorEmail: request.auth.token.email || "",
+      summary: "Founder price book revision " + nextVersion
+    };
+    tx.set(rootRef, { ...snapshot, updatedAt: now, updatedBy: founder.uid }, { merge: true });
+    tx.create(rootRef.collection("versions").doc(String(nextVersion).padStart(8, "0")), snapshot);
+    return nextVersion;
+  });
+  await db.collection("audit_logs").add({ action: "marketplace_pricing_proposals_updated", actorId: founder.uid, currency, version, createdAt: now });
+  return { success: true, pricingStatus: "proposed", version, prices };
 });
 
 exports.founderModerateCourse = onCall(async request => {
