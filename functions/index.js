@@ -661,7 +661,8 @@ exports.syncMyCourseEntitlements = onCall(async request => {
     ...existingSnap.docs.map(s => safeText(s.data().courseId)),
     ...currentLegacyGrants.keys()
   ]);
-  const batch = db.batch();
+  let batch = db.batch();
+  let pendingWrites = 0;
   const now = Timestamp.now();
   const entitledCourseIds = [];
 
@@ -693,18 +694,15 @@ exports.syncMyCourseEntitlements = onCall(async request => {
     };
     if (!existing.createdAt) payload.createdAt = now;
     batch.set(db.doc("courseEntitlements/" + entitlementId), payload, { merge: true });
+    pendingWrites++;
+    if (pendingWrites >= 400) {
+      await batch.commit();
+      batch = db.batch();
+      pendingWrites = 0;
+    }
   }
 
-  if (courseIds.size) await batch.commit();
-
-  await db.collection("audit_logs").add({
-    action: "student_course_entitlements_synchronized",
-    actorId: uid,
-    activeCourseCount: entitledCourseIds.length,
-    legacyInstitutionRecordsChecked: institutionRecords.length,
-    legacyMarketplaceRecordsChecked: marketplaceRecords.length,
-    createdAt: now
-  });
+  if (pendingWrites > 0) await batch.commit();
 
   return {
     success: true,
