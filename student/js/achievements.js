@@ -29,6 +29,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
+    XP_REWARDS,
     calculateLevel,
     getLevelData,
     getLevelTitle
@@ -42,7 +43,7 @@ import {
 const $ = id =>
     document.getElementById(id);
 
-export const XP_REWARDS = Object.freeze({ lesson: 20, quiz: 30, assignment: 40, course: 50, project: 75 });
+export { XP_REWARDS };
 
 
 // ============================================================
@@ -240,7 +241,8 @@ export async function awardXP(userId, amount, reason = "Learning activity", sour
         const updates = {
             xp: increment(amount),
             lastXPReward: serverTimestamp(),
-            lastXPReason: reason
+            lastXPReason: reason,
+            level: newLevel
         };
         if (counterField) updates[counterField] = increment(1);
         if (sourceKey.startsWith("quiz_")) updates.quizXP = increment(amount);
