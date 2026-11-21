@@ -95,7 +95,7 @@ async function loadLearningData(uid, student) {
     const completedLessons = Number(stats.lessonsCompleted ?? student.lessonsCompleted ?? 0);
     const certificates = Number(stats.certificates ?? student.certificates ?? 0);
     const xp = Math.max(0, Number(student.xp ?? 0));
-    const level = Math.max(1, Number(student.level ?? Math.floor(xp / 250) + 1));
+    const level = Math.max(1, Number(student.level ?? Math.floor(xp / 100) + 1));
     const streak = Math.max(0, Number(student.streak ?? 0));
     const badges = Array.isArray(student.badges) ? student.badges : [];
 
@@ -137,7 +137,7 @@ function renderStudent(student, learning) {
     if (progressBar) progressBar.style.width = `${learning.progress}%`;
 
     const xpProgress = $("xpProgress");
-    if (xpProgress) xpProgress.style.width = `${(learning.xp % 250) / 250 * 100}%`;
+    if (xpProgress) xpProgress.style.width = `${(learning.xp % 100) / 100 * 100}%`;
 }
 
 async function loadCourses(learning) {
