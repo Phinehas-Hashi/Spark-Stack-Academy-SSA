@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#081c3a">
+<title>Learner Management | Spark Stack Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/institution.css"><link rel="stylesheet" href="css/learners.css?v=20261121-learnermgr1">
+<script src="https://unpkg.com/lucide@latest"></script><link rel="stylesheet" href="../css/brand-system.css?v=20261121-brand2">
+</head>
+<body>
+<div class="institution-app">
+<aside id="institutionSidebar" class="institution-sidebar"></aside><div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="institution-main"><header id="institutionTopbar" class="institution-topbar"></header>
+<section class="learners-page">
+<section class="learners-hero"><div><span class="learners-eyebrow">INSTITUTION WORKSPACE / PEOPLE</span><h1>Learner management</h1><p>Manage your institution's learners, assign published courses and control institution-granted access.</p></div><div class="hero-shield"><i data-lucide="shield-check"></i><span>SECURE ENROLMENT</span></div></section>
+<section class="learner-stats">
+<article><span>Active learners</span><strong id="learnerCount">—</strong><small>Institution members</small><i data-lucide="users"></i></article>
+<article><span>Course enrolments</span><strong id="enrolmentCount">—</strong><small>All recorded assignments</small><i data-lucide="book-open-check"></i></article>
+<article><span>Published courses</span><strong id="publishedCourseCount">—</strong><small>Available to assign</small><i data-lucide="graduation-cap"></i></article>
+<article><span>Student capacity</span><strong id="capacityCount">—</strong><small>Active learner limit</small><i data-lucide="gauge"></i></article>
+</section>
+<section class="learner-layout">
+<div class="learner-panel enrol-panel">
+<div class="learner-panel-heading"><div><span class="learners-eyebrow">NEW ASSIGNMENT</span><h2>Enrol a learner</h2><p>Use the email address linked to the learner's active Spark Stack account.</p></div><span class="step-chip">01 / ASSIGN</span></div>
+<form id="learnerEnrolForm">
+<label for="learnerEmail">Learner email address</label><input id="learnerEmail" type="email" autocomplete="email" placeholder="student@example.com" required>
+<label for="learnerCourse">Select published course</label><select id="learnerCourse" required><option value="">Loading courses…</option></select>
+<div class="enrol-policy"><i data-lucide="info"></i><span>Only published courses belonging to this institution can be assigned. The learner must already have an active Spark Stack student account.</span></div>
+<button type="submit" id="enrolLearnerBtn"><i data-lucide="user-plus"></i> Enrol learner securely</button>
+<p id="learnerFormMessage" role="status" aria-live="polite"></p>
+</form>
+</div>
+<div class="learner-panel access-panel">
+<div class="learner-panel-heading"><div><span class="learners-eyebrow">ACCESS CONTROL</span><h2>Enrolment protection</h2><p>Each institution grant is tracked independently.</p></div><i data-lucide="lock-keyhole" class="access-lock"></i></div>
+<ul class="access-points">
+<li><i data-lucide="check-circle-2"></i><span>Verified staff actions are recorded in the audit log.</span></li>
+<li><i data-lucide="check-circle-2"></i><span>Access is synchronised through trusted backend triggers.</span></li>
+<li><i data-lucide="check-circle-2"></i><span>Revoking this institution's grant does not remove a separate purchase or grant.</span></li>
+<li><i data-lucide="check-circle-2"></i><span>Course content remains protected by server-enforced entitlements.</span></li>
+</ul>
+</div>
+</section>
+<section class="learner-panel roster-panel">
+<div class="learner-panel-heading roster-heading"><div><span class="learners-eyebrow">LEARNER REGISTER</span><h2>Institution learners</h2><p>Search your active learners and inspect their institution course assignments.</p></div><button id="refreshLearners" class="refresh-learners" type="button"><i data-lucide="refresh-cw"></i> Refresh</button></div>
+<div class="roster-tools"><div class="roster-search"><i data-lucide="search"></i><input id="learnerSearch" type="search" placeholder="Search name or email"></div><select id="enrolmentFilter"><option value="all">All learners</option><option value="enrolled">Has course access</option><option value="none">No course access</option></select></div>
+<div id="learnerRoster" class="learner-roster"><div class="roster-loading"><i data-lucide="loader-circle"></i><span>Loading learner register…</span></div></div>
+<div class="roster-footer"><span id="rosterCount">—</span><span>Institution access only</span></div>
+</section>
+<section class="learners-footnote"><i data-lucide="shield-check"></i><div><strong>Access changes are audited</strong><p>Revoking an enrolment removes only the matching institution grant. Other active course access sources remain intact.</p></div></section>
+</section></main></div>
+<script type="module" src="js/institution-app.js"></script><script type="module" src="js/learners.js?v=20261121-learnermgr1"></script>
+</body></html>
