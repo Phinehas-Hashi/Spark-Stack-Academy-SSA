@@ -23,7 +23,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-console.log("👤 Profile Module Loaded");\nconst countryForm = document.getElementById("countryProfileForm");\nconst countrySelect = document.getElementById("profileCountry");\nconst countryMessage = document.getElementById("countryProfileMessage");\nconst saveCountryButton = document.getElementById("saveCountryProfile");\nconst saveMyCountry = httpsCallable(getFunctions(auth.app), "updateMyCountry");
+console.log("👤 Profile Module Loaded");
+const countryForm = document.getElementById("countryProfileForm");
+const countrySelect = document.getElementById("profileCountry");
+const countryMessage = document.getElementById("countryProfileMessage");
+const saveCountryButton = document.getElementById("saveCountryProfile");
+const saveMyCountry = httpsCallable(getFunctions(auth.app), "updateMyCountry");
 
 
 // =====================================
