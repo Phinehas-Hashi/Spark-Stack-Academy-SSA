@@ -97,17 +97,16 @@ service cloud.firestore {
     // Paid and institution course content is readable only when a trusted
     // backend entitlement exists for the signed-in student and course.
     function hasActiveCourseEntitlement(courseId) {
-      let entitlementPath = /databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId);
       return signedIn()
         && courseId is string
-        && exists(entitlementPath)
-        && get(entitlementPath).data.get('studentUid', '') == uid()
-        && get(entitlementPath).data.get('courseId', '') == courseId
-        && get(entitlementPath).data.get('status', '') == 'active'
+        && exists(/databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId))
+        && get(/databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId)).data.get('studentUid', '') == uid()
+        && get(/databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId)).data.get('courseId', '') == courseId
+        && get(/databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId)).data.get('status', '') == 'active'
         && (
-          !('expiresAt' in get(entitlementPath).data)
-          || get(entitlementPath).data.expiresAt == null
-          || get(entitlementPath).data.expiresAt > request.time
+          !('expiresAt' in get(/databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId)).data)
+          || get(/databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId)).data.expiresAt == null
+          || get(/databases/$(database)/documents/courseEntitlements/$(uid() + '_' + courseId)).data.expiresAt > request.time
         );
     }
 
