@@ -620,6 +620,7 @@ exports.syncMyCourseEntitlements = onCall(async request => {
         source: "institution_enrollment",
         sourceRecordId: record.id,
         institutionId,
+        progress: Number(data.progress ?? data.progressPercent ?? 0),
         status: "active",
         validatedAt: Timestamp.now()
       });
@@ -648,6 +649,7 @@ exports.syncMyCourseEntitlements = onCall(async request => {
         source: isPaid ? "verified_legacy_purchase" : "approved_free_enrollment",
         sourceRecordId: record.id,
         paymentStatus: isPaid ? "paid" : "free",
+        progress: Number(data.progress ?? data.progressPercent ?? 0),
         status: "active",
         validatedAt: Timestamp.now()
       });
