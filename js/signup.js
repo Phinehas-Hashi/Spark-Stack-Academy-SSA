@@ -130,15 +130,15 @@ signupForm?.addEventListener("submit", async e => {
 });
 
 googleSignupBtn?.addEventListener("click", async () => {
+    if (!countryInput?.value) return showToast("Select your country before continuing with Google.", "warning");
     try {
         setButtons(true);
         showLoader("Connecting your Google account...");
+        const countryCode = countryInput.value;
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
         const fullName = user.displayName || "Student";
         const email = user.email || "";
-        const countryCode = countryInput?.value || "";
-        if (!countryCode) throw new Error("Select your country before continuing with Google.");
         await createStudentApplication({ uid: user.uid, fullName, email, countryCode, providerName: "google" });
         await signOut(auth);
         hideLoader();
