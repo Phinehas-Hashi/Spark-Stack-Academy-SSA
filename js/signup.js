@@ -44,7 +44,8 @@ function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 function strongPassword(v) { return v.length >= 8 && /[A-Z]/.test(v) && /[a-z]/.test(v) && /\d/.test(v); }
 function setButtons(disabled) { if (signupBtn) signupBtn.disabled = disabled; if (googleSignupBtn) googleSignupBtn.disabled = disabled; }
 
-async function createStudentApplication({ uid, fullName, email, countryCode, providerName = "email" }) {\n    const countryName = countryInput?.selectedOptions?.[0]?.textContent || "";
+async function createStudentApplication({ uid, fullName, email, countryCode, providerName = "email" }) {
+    const countryName = countryInput?.selectedOptions?.[0]?.textContent || "";
     await setDoc(doc(db, "users", uid), {
         uid, fullName, email, countryCode, country: countryName, role: "student", bio: "", expertise: "", profilePhoto: "",
         active: true, verified: false, status: "pending_admission", provider: providerName,
@@ -72,7 +73,8 @@ async function createStudentApplication({ uid, fullName, email, countryCode, pro
     });
 }
 
-async function createInstructorProfile({ uid, fullName, email, bio, expertise, countryCode }) {\n    const countryName = countryInput?.selectedOptions?.[0]?.textContent || "";
+async function createInstructorProfile({ uid, fullName, email, bio, expertise, countryCode }) {
+    const countryName = countryInput?.selectedOptions?.[0]?.textContent || "";
     await setDoc(doc(db, "users", uid), {
         uid, fullName, email, countryCode, country: countryName, role: "instructor", bio, expertise, profilePhoto: "",
         active: true, verified: false, status: "pending_review", createdAt: serverTimestamp(), lastLogin: serverTimestamp()
@@ -85,12 +87,14 @@ signupForm?.addEventListener("submit", async e => {
     const email = emailInput?.value.trim() || "";
     const password = passwordInput?.value || "";
     const confirmPassword = confirmPasswordInput?.value || "";
-    const role = roleSelect?.value || "";\n    const countryCode = countryInput?.value || "";
+    const role = roleSelect?.value || "";
+    const countryCode = countryInput?.value || "";
     const bio = bioInput?.value.trim() || "";
     const expertise = expertiseInput?.value.trim() || "";
 
     if (!fullName) return showToast("Enter your full name", "error");
-    if (!validEmail(email)) return showToast("Enter a valid email", "error");\n    if (!countryCode) return showToast("Select your country to continue", "error");
+    if (!validEmail(email)) return showToast("Enter a valid email", "error");
+    if (!countryCode) return showToast("Select your country to continue", "error");
     if (!strongPassword(password)) return showToast("Password must contain uppercase, lowercase, number and 8 characters", "error");
     if (password !== confirmPassword) return showToast("Passwords do not match", "error");
     if (!role) return showToast("Select account type", "error");
@@ -133,7 +137,9 @@ googleSignupBtn?.addEventListener("click", async () => {
         const user = result.user;
         const fullName = user.displayName || "Student";
         const email = user.email || "";
-        const countryCode = countryInput?.value || "";\n        if (!countryCode) throw new Error("Select your country before continuing with Google.");\n        await createStudentApplication({ uid: user.uid, fullName, email, countryCode, providerName: "google" });
+        const countryCode = countryInput?.value || "";
+        if (!countryCode) throw new Error("Select your country before continuing with Google.");
+        await createStudentApplication({ uid: user.uid, fullName, email, countryCode, providerName: "google" });
         await signOut(auth);
         hideLoader();
         showToast("Application submitted! Your account is waiting for Founder approval.", "success");
