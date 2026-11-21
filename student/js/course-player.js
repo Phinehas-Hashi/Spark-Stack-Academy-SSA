@@ -10,6 +10,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { awardXP, XP_REWARDS, updateLearningStreak } from "./achievements.js";
 import { issueCertificate } from "./certificate-engine.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const functions = getFunctions(getApp());
+const syncCourseEntitlements = httpsCallable(functions, "syncMyCourseEntitlements");
 
 let currentUser = null;
 let course = null;
@@ -129,44 +134,17 @@ async function loadCourse() {
 }
 
 async function checkCourseAccess() {
-    // A public listing or a zero price is not an entitlement.
-    // Access requires a trusted active enrolment record.
-    const activeStatuses = ["active", "approved", "completed"];
-    const hasEntitlement = data => {
-        if (!data) return false;
-        const status = String(data.status || "").trim().toLowerCase();
-        const paymentStatus = String(data.paymentStatus || "").trim().toLowerCase();
-        if (["revoked", "suspended", "cancelled", "canceled", "rejected", "pending"].includes(status)) return false;
-
-        // Institution-issued enrolments are valid when tied to an institution
-        // and active; the institution is responsible for the learner's access.
-        if (data.institutionId && activeStatuses.includes(status)) return true;
-
-        // Marketplace/free enrolments must have both an active state and
-        // a trusted paid/free payment state.
-        if (activeStatuses.includes(status) && ["paid", "free"].includes(paymentStatus)) return true;
-
-        // Older trusted payment records may use status="paid".
-        return status === "paid" && (paymentStatus === "" || paymentStatus === "paid");
-    };
-
-    // Canonical marketplace enrolment: deterministic uid_courseId document.
+    // The server validates legacy enrolments and synchronizes trusted grants.
+    // Firestore rules independently enforce the same entitlement before
+    // lesson/module documents can be read.
     try {
-        const canonical = await getDoc(doc(db, "enrollments", `${currentUser.uid}_${courseId}`));
-        if (canonical.exists() && hasEntitlement(canonical.data())) return true;
+        const response = await syncCourseEntitlements();
+        const ids = response.data?.entitledCourseIds;
+        return Array.isArray(ids) && ids.includes(courseId);
     } catch (error) {
-        console.warn("Canonical enrolment check failed:", error);
+        console.error("Secure course entitlement check failed:", error);
+        return false;
     }
-
-    // Institution and legacy enrolments live under the student's record.
-    try {
-        const nested = await getDoc(doc(db, "students", currentUser.uid, "enrollments", courseId));
-        if (nested.exists() && hasEntitlement(nested.data())) return true;
-    } catch (error) {
-        console.warn("Institution/legacy enrolment check failed:", error);
-    }
-
-    return false;
 }
 
 async function loadLessons() {
