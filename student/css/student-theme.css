@@ -1,0 +1,16 @@
+/* Student portal visual theme. Loaded only by Student Portal pages. */
+:root{--ssa-night:#080522;--ssa-navy:#0d0a35;--ssa-navy-2:#171052;--ssa-violet:#762cff;--ssa-violet-bright:#a12bff;--ssa-cyan:#20d8f2;--ssa-gold:#ffc857;--ssa-lavender:#f3f0ff;--ssa-ink:#151338}
+body{font-family:"Poppins",Arial,sans-serif!important;background:#f3f0ff!important;color:#151338}
+h1,h2,h3,h4{font-family:"Montserrat","Poppins",sans-serif}
+.sidebar,.ssa-student-sidebar,.sidebar-container>.sidebar{background:radial-gradient(circle at 15% 0%,rgba(132,47,255,.30),transparent 34%),linear-gradient(180deg,#090625 0%,#100b3e 58%,#080522 100%)!important;color:#fff!important;border-right:1px solid rgba(176,129,255,.25)!important;box-shadow:12px 0 36px rgba(13,5,48,.20)!important}
+.sidebar-brand,.student-sidebar-brand,.sidebar-header{border-color:rgba(255,255,255,.13)!important}
+.sidebar-link{color:#d5cfee!important;border-radius:11px!important;transition:background .2s ease,color .2s ease,box-shadow .2s ease}
+.sidebar-link:hover,.sidebar-link.active{color:#fff!important;background:linear-gradient(100deg,rgba(119,44,255,.42),rgba(32,216,242,.12))!important;box-shadow:inset 3px 0 #20d8f2,0 0 18px rgba(126,48,255,.16)!important}
+.nav-section-title,.nav-section-label,.nav-label{color:#a99ad5!important;letter-spacing:.13em}
+.topbar,.topbar-container{background:linear-gradient(105deg,#0b082d 0%,#171052 100%)!important;color:#fff!important;border-bottom:1px solid rgba(164,112,255,.36)!important;box-shadow:0 8px 24px rgba(12,5,48,.12)!important}
+.topbar button,.topbar a,.topbar-container button,.topbar-container a{color:inherit}
+.welcome-card,.dashboard-hero,.welcome-panel{border:1px solid rgba(183,139,255,.58)!important;border-radius:22px!important;background:radial-gradient(circle at 88% 18%,rgba(32,216,242,.20),transparent 27%),radial-gradient(circle at 76% 100%,rgba(161,43,255,.34),transparent 38%),linear-gradient(120deg,#090625 0%,#171052 58%,#25116a 100%)!important;box-shadow:0 14px 38px rgba(24,8,76,.20),0 0 22px rgba(134,53,255,.13)!important;color:#fff!important}
+.stat-card,.metric-card,.card,.panel,.content-card,.chart-card,.table-card,.settings-card{border:1px solid #e6e0fa!important;border-radius:17px!important;box-shadow:0 14px 38px rgba(31,15,83,.10)!important}
+button.primary-btn,.primary-btn,.action-btn{background:linear-gradient(105deg,#7024f5 0%,#a12bff 58%,#23cbe8 150%)!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:11px!important;box-shadow:0 8px 22px rgba(117,39,239,.25)!important}
+input:focus,select:focus,textarea:focus{border-color:#8c43ff!important;box-shadow:0 0 0 3px rgba(140,67,255,.13)!important}
+@media(max-width:600px){.welcome-card,.dashboard-hero,.welcome-panel{border-radius:17px!important}.stat-card,.metric-card,.card,.panel{border-radius:14px!important}}
