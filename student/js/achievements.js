@@ -42,6 +42,8 @@ import {
 const $ = id =>
     document.getElementById(id);
 
+export const XP_REWARDS = Object.freeze({ lesson: 20, quiz: 30, assignment: 40, course: 50, project: 75 });
+
 
 // ============================================================
 // BADGE DEFINITIONS
@@ -662,6 +664,9 @@ function getEligibleBadges(student) {
     // ASSIGNMENTS
     if (Number(student.assignmentsSubmitted || 0) >= 1) eligible.push("assignment_starter");
 
+    // ASSIGNMENTS
+    if (Number(student.assignmentsSubmitted || 0) >= 1) eligible.push("assignment_starter");
+
     // STREAKS
 
     if (streak >= 7) {
@@ -711,7 +716,7 @@ function getEligibleBadges(student) {
 // PROCESS BADGES
 // ============================================================
 
-async function processBadges(
+async async function processBadges(
     userId,
     student
 ) {
@@ -722,8 +727,23 @@ async function processBadges(
             : [];
 
 
-    const eligible =
-        getEligibleBadges(student);
+    const eligible = getEligibleBadges(student);
+
+    // Count quiz completion events without exposing other student profiles.
+    if (!eligible.includes("quiz_master")) {
+        try {
+            const activitySnapshot = await getDocs(query(
+                collection(db, "students", userId, "activity"),
+                where("type", "==", "xp_earned")
+            ));
+            const quizCount = activitySnapshot.docs.filter(item =>
+                String(item.data().source || "").startsWith("quiz_")
+            ).length;
+            if (quizCount >= 10) eligible.push("quiz_master");
+        } catch (error) {
+            console.warn("Quiz badge count could not be refreshed:", error);
+        }
+    }
 
 
     const newBadges =
