@@ -1511,10 +1511,15 @@ exports.updateMyCountry = onCall(async request => {
   const countryNames = {"KE":"Kenya","UG":"Uganda","TZ":"Tanzania","RW":"Rwanda","BI":"Burundi","ET":"Ethiopia","SO":"Somalia","SS":"South Sudan","SD":"Sudan","ZA":"South Africa","NG":"Nigeria","GH":"Ghana","EG":"Egypt","MA":"Morocco","DZ":"Algeria","SN":"Senegal","CI":"Côte d’Ivoire","CM":"Cameroon","ZM":"Zambia","ZW":"Zimbabwe","MW":"Malawi","MZ":"Mozambique","BW":"Botswana","NA":"Namibia","US":"United States","CA":"Canada","GB":"United Kingdom","IE":"Ireland","FR":"France","DE":"Germany","ES":"Spain","IT":"Italy","NL":"Netherlands","BE":"Belgium","CH":"Switzerland","SE":"Sweden","NO":"Norway","DK":"Denmark","FI":"Finland","PL":"Poland","PT":"Portugal","GR":"Greece","TR":"Türkiye","AE":"United Arab Emirates","SA":"Saudi Arabia","QA":"Qatar","IN":"India","PK":"Pakistan","BD":"Bangladesh","CN":"China","JP":"Japan","KR":"South Korea","SG":"Singapore","MY":"Malaysia","ID":"Indonesia","PH":"Philippines","TH":"Thailand","VN":"Vietnam","AU":"Australia","NZ":"New Zealand","BR":"Brazil","MX":"Mexico","AR":"Argentina","CL":"Chile","CO":"Colombia","RU":"Russia","UA":"Ukraine","IL":"Israel","JO":"Jordan","LB":"Lebanon","OM":"Oman","KW":"Kuwait","BH":"Bahrain"};
   const country = countryNames[countryCode];
   const now = Timestamp.now();
+  const userSnap = await db.doc("users/" + uid).get();
+  const role = safeText(userSnap.data()?.role).toLowerCase();
+  const profileCollection = role === "student" ? "students" : role === "instructor" ? "instructors" : "";
   const writes = [
-    db.doc("users/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true }),
-    (async () => { const userSnap = await db.doc("users/" + uid).get(); const role = safeText(userSnap.data()?.role).toLowerCase(); const profileCollection = role === "student" ? "students" : role === "instructor" ? "instructors" : ""; if (profileCollection) await db.doc(profileCollection + "/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true }); })()
+    db.doc("users/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true })
   ];
+  if (profileCollection) {
+    writes.push(db.doc(profileCollection + "/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true }));
+  }
   await Promise.all(writes);
   await db.collection("audit_logs").add({ action: "profile_country_updated", actorId: uid, countryCode, createdAt: now });
   return { success: true, countryCode, country };
