@@ -1293,3 +1293,8 @@
 @media(max-height:700px){#instructorSidebar .sidebar{padding-top:12px;padding-bottom:10px}#instructorSidebar .sidebar-logo{padding-bottom:14px}#instructorSidebar .instructor-profile{margin-top:10px;margin-bottom:8px;padding:8px}#instructorSidebar .nav-section-title{margin-top:12px}#instructorSidebar .nav-link{min-height:38px}#instructorSidebar .sidebar-bottom{margin-top:5px;padding-top:7px}}
 
 #instructorSidebar .sidebar-logo-icon{background:transparent!important;box-shadow:none!important;padding:0!important}#instructorSidebar .sidebar-logo-icon img{width:38px;height:38px;display:block;border-radius:11px}
+
+/* Instructor profile chevron alignment */
+.topbar-profile{gap:7px;min-width:0;align-items:center}
+.topbar-profile>svg{display:block;flex:0 0 14px;width:14px;height:14px;margin:0 1px 0 0;align-self:center}
+.topbar-profile-info{min-width:0}
