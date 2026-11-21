@@ -378,117 +378,15 @@ function updateStats(
 // OPEN CERTIFICATE
 // =====================================
 
-function openCertificate(
-    certificate
-) {
-
-    const certificateData =
-        encodeURIComponent(
-            JSON.stringify(
-                certificate
-            )
-        );
-
-
-    window.open(
-        `certificate-view.html?data=${certificateData}`,
-        "_blank"
-    );
-
+function openCertificate(certificate) {
+    if (!certificate?.id) return;
+    window.open(`certificate-view.html?id=${encodeURIComponent(certificate.id)}`, "_blank", "noopener");
 }
 
-
-// =====================================
-// DOWNLOAD CERTIFICATE
-// =====================================
-
-function downloadCertificate(
-    certificate
-) {
-
-    const certificateData =
-        encodeURIComponent(
-            JSON.stringify(
-                certificate
-            )
-        );
-
-
-    window.open(
-        `certificate-view.html?data=${certificateData}&download=true`,
-        "_blank"
-    );
-
+function downloadCertificate(certificate) {
+    if (!certificate?.id) return;
+    window.open(`certificate-view.html?id=${encodeURIComponent(certificate.id)}&download=true`, "_blank", "noopener");
 }
-
-
-// =====================================
-// LOADING
-// =====================================
-
-function showLoading() {
-
-    if (!certificatesContainer)
-        return;
-
-
-    certificatesContainer.innerHTML = `
-
-        <div class="certificate-loading">
-
-            <i data-lucide="loader"></i>
-
-            <h3>
-                Loading certificates...
-            </h3>
-
-            <p>
-                Fetching your achievements.
-            </p>
-
-        </div>
-
-    `;
-
-
-    refreshIcons();
-
-}
-
-
-// =====================================
-// ERROR
-// =====================================
-
-function showError() {
-
-    if (!certificatesContainer)
-        return;
-
-
-    certificatesContainer.innerHTML = `
-
-        <div class="certificate-empty">
-
-            <i data-lucide="alert-circle"></i>
-
-            <h3>
-                Unable to load certificates
-            </h3>
-
-            <p>
-                Please refresh the page and try again.
-            </p>
-
-        </div>
-
-    `;
-
-
-    refreshIcons();
-
-}
-
 
 // =====================================
 // FORMAT DATE
