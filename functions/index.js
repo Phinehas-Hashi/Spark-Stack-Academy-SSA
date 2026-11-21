@@ -1513,7 +1513,7 @@ exports.updateMyCountry = onCall(async request => {
   const now = Timestamp.now();
   const writes = [
     db.doc("users/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true }),
-    db.doc("students/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true })
+    (async () => { const userSnap = await db.doc("users/" + uid).get(); const role = safeText(userSnap.data()?.role).toLowerCase(); const profileCollection = role === "student" ? "students" : role === "instructor" ? "instructors" : ""; if (profileCollection) await db.doc(profileCollection + "/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true }); })()
   ];
   await Promise.all(writes);
   await db.collection("audit_logs").add({ action: "profile_country_updated", actorId: uid, countryCode, createdAt: now });
@@ -1840,6 +1840,8 @@ exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, asyn
 
       transaction.set(userRef, {
         uid: ownerUid,
+        countryCode: application.countryCode || "",
+        country: application.country || "",
         email: application.ownerEmail,
         fullName: application.ownerName,
         name: application.ownerName,
@@ -1862,6 +1864,7 @@ exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, asyn
         legalName: application.institutionName,
         institutionName: application.institutionName,
         institutionType: application.institutionType,
+        countryCode: application.countryCode || "",
         country: application.country,
         website: application.website || "",
         contactPhone: application.institutionPhone,
