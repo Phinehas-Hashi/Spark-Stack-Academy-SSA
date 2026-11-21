@@ -22,6 +22,7 @@ let lessons = [];
 let currentLessonIndex = 0;
 let completedLessons = [];
 let courseId = null;
+let isCompletingLesson = false;
 
 const $ = id => document.getElementById(id);
 const courseLocked = $("courseLocked");
@@ -66,6 +67,35 @@ function toast(message) {
 function refreshIcons() {
     if (window.lucide?.createIcons) window.lucide.createIcons();
 }
+
+/* Classroom controls: mobile curriculum drawer, media actions and accessibility. */
+const mobileLessonsBtn = $("mobileLessonsBtn");
+const closeLessonsBtn = $("closeLessonsBtn");
+const lessonSidebar = $("lessonSidebar");
+const lessonDrawerOverlay = $("lessonDrawerOverlay");
+const fullscreenBtn = $("fullscreenBtn");
+const orientationBtn = $("orientationBtn");
+function setLessonDrawer(open) {
+  if (!lessonSidebar || !lessonDrawerOverlay) return;
+  lessonSidebar.classList.toggle("open", open); lessonDrawerOverlay.classList.toggle("open", open);
+  document.body.classList.toggle("lesson-drawer-open", open); mobileLessonsBtn?.setAttribute("aria-expanded", String(open));
+  lessonSidebar.setAttribute("aria-hidden", String(!open && window.matchMedia("(max-width: 820px)").matches));
+  if (open) closeLessonsBtn?.focus(); else mobileLessonsBtn?.focus();
+}
+mobileLessonsBtn?.addEventListener("click", () => setLessonDrawer(true));
+closeLessonsBtn?.addEventListener("click", () => setLessonDrawer(false));
+lessonDrawerOverlay?.addEventListener("click", () => setLessonDrawer(false));
+document.addEventListener("keydown", event => { if (event.key === "Escape" && lessonSidebar?.classList.contains("open")) setLessonDrawer(false); });
+window.addEventListener("resize", () => { if (window.matchMedia("(min-width: 821px)").matches) { lessonSidebar?.classList.remove("open"); lessonDrawerOverlay?.classList.remove("open"); document.body.classList.remove("lesson-drawer-open"); lessonSidebar?.removeAttribute("aria-hidden"); mobileLessonsBtn?.setAttribute("aria-expanded", "false"); } });
+async function toggleClassroomFullscreen() {
+  const target = videoBox || document.querySelector(".lesson-player-card");
+  try { if (document.fullscreenElement) await document.exitFullscreen(); else if (target?.requestFullscreen) await target.requestFullscreen(); else toast("Fullscreen is not supported by this browser."); }
+  catch (error) { console.warn("Fullscreen request was blocked:", error); toast("Your browser couldn't open fullscreen mode."); }
+}
+fullscreenBtn?.addEventListener("click", toggleClassroomFullscreen);
+document.addEventListener("fullscreenchange", () => { if (!fullscreenBtn) return; const active = Boolean(document.fullscreenElement); fullscreenBtn.innerHTML = active ? '<i data-lucide="minimize"></i><span>Exit fullscreen</span>' : '<i data-lucide="maximize"></i><span>Fullscreen</span>'; refreshIcons(); });
+orientationBtn?.addEventListener("click", async () => { try { if (screen.orientation?.lock) { await screen.orientation.lock("landscape"); toast("Landscape orientation enabled where supported."); } else toast("Rotate your device to use landscape view."); } catch (error) { toast("Rotate your device manually for landscape view."); } });
+$("discussionBtn")?.addEventListener("click", () => toast("Class discussion is not connected yet."));
 
 function escapeHTML(value) {
     return String(value ?? "")
@@ -127,6 +157,8 @@ async function loadCourse() {
     course = { id: snap.id, ...snap.data() };
 
     if (courseTitle) courseTitle.textContent = course.title || "Course";
+    const categoryLabel = $("courseCategory");
+    if (categoryLabel) categoryLabel.textContent = course.category || "Course";
     if (courseDescription) courseDescription.textContent = course.description || "Welcome to your classroom.";
     if (instructorName) instructorName.textContent = course.instructorName || "SSA Instructor";
     if (instructorAvatar) instructorAvatar.textContent = (course.instructorName || "S").charAt(0).toUpperCase();
@@ -217,7 +249,8 @@ async function loadStudentProgress() {
         if (!snap.exists()) return;
 
         const data = snap.data() || {};
-        completedLessons = Array.isArray(data.completedLessons) ? data.completedLessons : [];
+        const validLessonIds = new Set(lessons.map(lesson => lesson.id));
+        completedLessons = Array.isArray(data.completedLessons) ? [...new Set(data.completedLessons.filter(id => validLessonIds.has(id)))] : [];
 
         if (data.currentLessonId) {
             const index = lessons.findIndex(l => l.id === data.currentLessonId);
@@ -254,7 +287,7 @@ function renderLessons() {
                 <small>${escapeHTML(lesson.duration ? `${lesson.duration} min` : lesson.type || "Lesson")}</small>
             </span>
             <i data-lucide="${completed ? "check-circle" : "play-circle"}"></i>`;
-        button.addEventListener("click", () => showLesson(index));
+        button.addEventListener("click", () => { showLesson(index); if (window.matchMedia("(max-width: 820px)").matches) setLessonDrawer(false); });
         lessonList.appendChild(button);
     });
 
@@ -405,10 +438,13 @@ nextLessonBtn?.addEventListener("click", () => showLesson(currentLessonIndex + 1
 completeLessonBtn?.addEventListener("click", completeCurrentLesson);
 
 async function completeCurrentLesson() {
+    if (isCompletingLesson) return;
     if (!isCoursePlaybackOnline()) { showOfflineLessonState(); return; }
     const lesson = lessons[currentLessonIndex];
     if (!lesson || !currentUser || completedLessons.includes(lesson.id)) return;
 
+    isCompletingLesson = true;
+    if (completeLessonBtn) completeLessonBtn.disabled = true;
     completedLessons.push(lesson.id);
     renderLessons();
     updateProgress();
@@ -434,6 +470,9 @@ async function completeCurrentLesson() {
         updateProgress();
         updateNavigation();
         toast("We couldn't save your progress. Please try again.");
+    } finally {
+        isCompletingLesson = false;
+        updateNavigation();
     }
 }
 
