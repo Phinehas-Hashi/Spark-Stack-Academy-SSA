@@ -24,7 +24,7 @@
 <p>Create your secure account and unlock world-class technology education.</p>
 <form id="signupForm" autocomplete="on">
 <div class="input-group"><i class="fa-solid fa-user"></i><input type="text" id="name" name="name" placeholder="Full name" autocomplete="name" required></div>
-<div class="input-group"><i class="fa-solid fa-envelope"></i><input type="email" id="email" name="email" placeholder="Email address" autocomplete="email" required></div>
+<div class="input-group"><i class="fa-solid fa-globe"></i><select id="country" name="countryCode" required aria-label="Country"><option value="">Select your country</option></select></div>\n<div class="input-group"><i class="fa-solid fa-envelope"></i><input type="email" id="email" name="email" placeholder="Email address" autocomplete="email" required></div>
 <div class="input-group password-group"><i class="fa-solid fa-lock"></i><input type="password" id="password" name="password" placeholder="Password" autocomplete="new-password" required><i class="fa-solid fa-eye toggle-password" data-target="password"></i></div>
 <div class="password-strength"><div id="strengthBar"></div></div><span id="strengthText">Enter password</span>
 <div class="input-group password-group"><i class="fa-solid fa-shield-halved"></i><input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" autocomplete="new-password" required><i class="fa-solid fa-eye toggle-password" data-target="confirmPassword"></i></div>
@@ -46,6 +46,6 @@
 <div id="toastContainer" class="toast-container"></div>
 <button id="scrollTopBtn" class="scroll-top" type="button" aria-label="Back to Top"><i class="fa-solid fa-arrow-up"></i></button>
 <script src="js/auth-ui.js?v=20261121-rebrand1"></script>
-<script type="module" src="js/signup.js?v=20261121-rebrand1"></script>
+<script type="module" src="js/signup.js?v=global-country1"></script>
 </body>
 </html>
