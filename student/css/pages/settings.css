@@ -4,6 +4,9 @@
 
     animation: settingsLoad .4s ease;
 
+
+    padding:28px 32px 44px;
+    box-sizing:border-box;
 }@keyframes settingsLoad{
 
     from {
@@ -596,3 +599,4 @@
         font-size: 10px;
 
     }}
+@media(max-width:700px){.settings-page{padding:20px 16px 32px}}
