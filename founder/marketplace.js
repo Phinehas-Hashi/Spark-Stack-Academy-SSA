@@ -11,3 +11,31 @@ async function load(){try{const r=await getPricing();const data=r.data||{};price
 $("marketplaceCurrency").addEventListener("change",render);
 $("saveMarketplacePricing").addEventListener("click",async()=>{const button=$("saveMarketplacePricing");button.disabled=true;const next={};for(const [key] of definitions){const previous=prices[key]||{};const amounts={...(previous.amounts||{})};const raw=document.querySelector('[data-price="'+key+'"]').value.trim();amounts[$("marketplaceCurrency").value]=raw===""?null:Number(raw);next[key]={amounts,enabled:document.querySelector('[data-enabled="'+key+'"]').value==="on"};}try{await savePricing({currency:$("marketplaceCurrency").value,prices:next,transactionFeeEnabled:$("transactionFeeEnabled").checked,transactionFeePercent:Number($("transactionFeePercent").value)});prices=next;const refreshed=await getPricing();history=refreshed.data?.history||history;renderHistory();$("marketplacePricingMessage").textContent="Saved revision v"+(refreshed.data?.version||"")+" . Price settings are recorded; checkout and payment fulfilment remain separately controlled."; }catch(e){console.error(e);$("marketplacePricingMessage").textContent=e.message||"Could not save price proposals.";}finally{button.disabled=false;}});
 load();
+
+
+const getCurrencyConfig=httpsCallable(functions,"getMarketplaceCurrencyConfig");
+const saveCurrencyConfig=httpsCallable(functions,"saveMarketplaceCurrencyConfig");
+const currencyCodes=["KES","USD","EUR","GBP","UGX","TZS","NGN","ZAR","INR","AED","CAD","AUD"];
+const currencyNames={KES:"Kenyan Shilling",USD:"US Dollar",EUR:"Euro",GBP:"Pound Sterling",UGX:"Ugandan Shilling",TZS:"Tanzanian Shilling",NGN:"Nigerian Naira",ZAR:"South African Rand",INR:"Indian Rupee",AED:"UAE Dirham",CAD:"Canadian Dollar",AUD:"Australian Dollar"};
+let currencyConfig={rates:{KES:1},regionalOverrides:{},history:[]};
+function renderCurrencyConfig(){
+  $("globalCurrencyRates").innerHTML=currencyCodes.map(code=>'<label class="currency-rate-card"><span><strong>'+code+'</strong><small>'+currencyNames[code]+'</small></span><span class="rate-input-wrap"><small>'+(code==="KES"?"Base rate":"KES per 1 "+code)+'</small><input type="number" min="0" step=".000001" data-fx="'+code+'" value="'+(code==="KES"?"1":(currencyConfig.rates?.[code]??""))+'" '+(code==="KES"?"disabled":"")+' placeholder="Not set"></span></label>').join("");
+  $("regionalCurrencyOverrides").innerHTML=definitions.map(([key,label])=>'<tr><th>'+label+'</th>'+currencyCodes.filter(code=>code!=="KES").map(code=>'<td><input type="number" min="0" step=".01" data-override="'+key+'" data-code="'+code+'" value="'+(currencyConfig.regionalOverrides?.[key]?.[code]??"")+'" placeholder="—" aria-label="'+label+' '+code+' override"></td>').join("")+'</tr>').join("");
+  $("currencyConfigVersion").textContent=currencyConfig.version?"v"+currencyConfig.version:"Not yet saved";
+  $("currencyConfigStatus").textContent="Status: "+(currencyConfig.status||"proposed")+" · Manual rates only · Checkout not activated";
+  $("currencyConfigHistory").innerHTML=currencyConfig.history?.length?currencyConfig.history.map(v=>'<div class="pricing-history-row"><strong>Version '+Number(v.version)+'</strong><span>'+v.summary+'</span><small>'+(v.createdAt?new Date(v.createdAt).toLocaleString():"Timestamp unavailable")+(v.actorEmail?" · "+v.actorEmail:"")+'</small></div>').join(""):"<p>No currency revisions saved yet.</p>";
+}
+async function loadCurrencyConfig(){
+  try{const result=await getCurrencyConfig();currencyConfig=result.data||currencyConfig;renderCurrencyConfig();$("currencyConfigMessage").textContent="Manual currency configuration loaded.";}
+  catch(error){console.error(error);$("currencyConfigMessage").textContent=error.message||"Unable to load currency configuration.";}
+}
+$("saveCurrencyConfig").addEventListener("click",async()=>{
+  const button=$("saveCurrencyConfig");button.disabled=true;
+  const rates={KES:1},regionalOverrides={};
+  currencyCodes.filter(code=>code!=="KES").forEach(code=>{const raw=document.querySelector('[data-fx="'+code+'"]').value.trim();rates[code]=raw===""?null:Number(raw);});
+  definitions.forEach(([key])=>{regionalOverrides[key]={};currencyCodes.filter(code=>code!=="KES").forEach(code=>{const raw=document.querySelector('[data-override="'+key+'"][data-code="'+code+'"]').value.trim();regionalOverrides[key][code]=raw===""?null:Number(raw);});});
+  try{await saveCurrencyConfig({baseCurrency:"KES",rates,regionalOverrides});const refreshed=await getCurrencyConfig();currencyConfig=refreshed.data||currencyConfig;renderCurrencyConfig();$("currencyConfigMessage").textContent="Saved currency revision v"+currencyConfig.version+". Settings remain proposals and do not activate checkout.";}
+  catch(error){console.error(error);$("currencyConfigMessage").textContent=error.message||"Could not save currency configuration.";}
+  finally{button.disabled=false;}
+});
+loadCurrencyConfig();
