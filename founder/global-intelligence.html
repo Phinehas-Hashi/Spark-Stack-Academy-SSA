@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>Global Intelligence | Spark Stack Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="founder-unified.css">
+<link rel="stylesheet" href="global-intelligence.css?v=1">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="global-intel-page">
+<div class="founder-app global-intel-app">
+<aside id="sidebarContainer" class="founder-sidebar"></aside><div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="founder-main global-intel-main">
+<header id="topbarContainer" class="founder-topbar"></header>
+<section class="global-intel-content">
+<div class="intel-heading"><div><span class="eyebrow">FOUNDER · WORLDWIDE OPERATIONS</span><h1>Global Intelligence</h1><p>Explore the Academy's international footprint, country activity and institutional reach.</p></div><div class="intel-actions"><button id="refreshMap" class="intel-button secondary" type="button"><i data-lucide="refresh-cw"></i> Refresh data</button><button id="landscapeButton" class="intel-button primary" type="button"><i data-lucide="maximize"></i> Landscape view</button></div></div>
+<div class="intel-stat-grid">
+<article><span>Countries represented</span><strong id="countryCount">—</strong></article>
+<article><span>Registered users</span><strong id="userCount">—</strong></article>
+<article><span>Institutions</span><strong id="institutionCount">—</strong></article>
+<article><span>Profiles without country</span><strong id="unknownCount">—</strong></article>
+</div>
+<div class="intel-workspace">
+<section class="intel-map-card">
+<div class="map-toolbar"><div><span class="eyebrow">LIVE COUNTRY FOOTPRINT</span><h2>World activity map</h2></div><div class="map-tools"><label class="country-search"><i data-lucide="search"></i><input id="countrySearch" type="search" placeholder="Find a country…" autocomplete="off"></label><button id="resetMap" class="icon-button" type="button" title="Show the whole world" aria-label="Show the whole world"><i data-lucide="scan"></i></button></div></div>
+<div id="academyWorldMap" role="application" aria-label="Interactive world map. Select a country to inspect user and institution counts."></div>
+<div class="map-footer"><span><i class="activity-key"></i> Country activity · users + institutions</span><span id="mapSource">Connecting to profile data…</span><span id="mapCoverage">Country coverage loading…</span></div>
+</section>
+<aside class="country-inspector">
+<div class="inspector-top"><span class="eyebrow">COUNTRY INSPECTOR</span><i data-lucide="map-pin"></i></div>
+<div id="selectedCountry" class="selected-country"><div class="country-globe"><i data-lucide="globe-2"></i></div><h2>Select a country</h2><p>Tap or click any highlighted country on the map to inspect its registered users and institutions.</p></div>
+<div class="inspector-metrics"><div><span>Registered users</span><strong id="selectedUsers">—</strong></div><div><span>Active users</span><strong id="selectedActive">—</strong></div><div><span>Institutions</span><strong id="selectedInstitutions">—</strong></div></div>
+<div class="inspector-note" id="dataNote">Country information is based on details explicitly supplied in account profiles. No IP-based location inference is used.</div>
+</aside>
+</div>
+<div class="intel-footnote"><i data-lucide="shield-check"></i><span>Location data is profile-supplied. This screen does not infer a person's location from their IP address. Revenue and payment verification remain in the trusted financial reporting systems.</span></div>
+</section></main></div>
+<div class="portrait-guide" id="portraitGuide"><div class="rotate-device"><div class="phone-shape"></div><div class="rotate-arrow">↻</div></div><span class="eyebrow">LANDSCAPE EXPERIENCE</span><h2>Turn your phone sideways</h2><p>Global Intelligence is designed as a wide command screen. Rotate your device to landscape for the full map and country inspector.</p><button type="button" id="rotateNow" class="intel-button primary">Try landscape mode</button><small>If automatic rotation is locked, enable Auto-rotate in your phone settings.</small></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script type="module" src="./js/founder-app.js"></script>
+<script type="module" src="global-intelligence.js?v=1"></script>
+</body></html>
