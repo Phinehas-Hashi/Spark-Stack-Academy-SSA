@@ -736,7 +736,8 @@ async async function processBadges(
         try {
             const activitySnapshot = await getDocs(query(
                 collection(db, "students", userId, "activity"),
-                where("type", "==", "xp_earned")
+                where("type", "==", "xp_earned"),
+                limit(100)
             ));
             const quizCount = activitySnapshot.docs.filter(item =>
                 String(item.data().source || "").startsWith("quiz_")
@@ -1085,11 +1086,7 @@ function renderLeaderboard(
 
         container.innerHTML = `
 
-            <div class="empty-state">
-
-                The ranking board is ready. Verified rankings will appear when the secure public leaderboard is connected.
-
-            </div>
+            <div class="leaderboard-message">The ranking board is ready. Verified rankings will appear when the secure public leaderboard is connected.</div>
 
         `;
 
