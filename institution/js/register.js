@@ -1,3 +1,4 @@
+import { populateCountrySelect } from "../../js/countries.js";
 import { auth, db } from "../../js/firebase.js";
 import { createUserWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -5,6 +6,8 @@ import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs
 const form = document.getElementById("institutionRegistrationForm");
 const button = document.getElementById("submitInstitutionApplication");
 const message = document.getElementById("registrationMessage");
+const countrySelect = document.getElementById("institutionCountry");
+populateCountrySelect(countrySelect, "KE");
 const value = name => String(new FormData(form).get(name) || "").trim();
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -38,7 +41,7 @@ form?.addEventListener("submit", async event => {
       institutionOwnerUid: createdUser.uid,
       institutionName: value("institutionName"),
       institutionType: value("institutionType"),
-      country: value("country"),
+      countryCode: value("countryCode"),\n      country: countrySelect?.selectedOptions?.[0]?.textContent || "",
       website: value("website"),
       learnerRange: value("learnerRange"),
       institutionPhone: value("institutionPhone"),
