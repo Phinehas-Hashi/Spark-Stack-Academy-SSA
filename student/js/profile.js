@@ -1,3 +1,5 @@
+import { populateCountrySelect } from "../../js/countries.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 // =====================================
 // SPARK STACK ACADEMY
 // STUDENT PROFILE
@@ -21,7 +23,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-console.log("👤 Profile Module Loaded");
+console.log("👤 Profile Module Loaded");\nconst countryForm = document.getElementById("countryProfileForm");\nconst countrySelect = document.getElementById("profileCountry");\nconst countryMessage = document.getElementById("countryProfileMessage");\nconst saveCountryButton = document.getElementById("saveCountryProfile");\nconst saveMyCountry = httpsCallable(getFunctions(auth.app), "updateMyCountry");
 
 
 // =====================================
@@ -411,3 +413,17 @@ function formatDate(
     }
 
 }
+countryForm?.addEventListener("submit", async event => {
+  event.preventDefault();
+  const countryCode = countrySelect?.value || "";
+  if (!countryCode) { countryMessage.textContent = "Select a country first."; return; }
+  saveCountryButton.disabled = true;
+  countryMessage.textContent = "Saving country…";
+  try {
+    await saveMyCountry({ countryCode });
+    countryMessage.textContent = "Country saved successfully.";
+  } catch (error) {
+    console.error("Country profile update failed:", error);
+    countryMessage.textContent = error.message || "Unable to save your country. Please try again.";
+  } finally { saveCountryButton.disabled = false; }
+});
