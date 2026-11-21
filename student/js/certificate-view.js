@@ -1,242 +1,64 @@
-// =====================================
-// SPARK STACK ACADEMY
-// CERTIFICATE VIEW CONTROLLER
-// =====================================
+// Spark Stack Academy — authenticated certificate viewer.
+// Certificate details are fetched from Firestore by document ID.
+// URL parameters never supply trusted certificate content.
+import { auth, db } from "../../js/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-console.log(
-    "🏆 Certificate Viewer Loaded"
-);
+const params = new URLSearchParams(location.search);
+const certificateId = params.get("id");
+const statusNode = document.getElementById("certificateStatus");
+const printButton = document.getElementById("printCertificate");
+const closeButton = document.getElementById("closeCertificate");
+let verified = false;
 
-
-const params =
-    new URLSearchParams(
-        window.location.search
-    );
-
-
-const encodedData =
-    params.get("data");
-
-
-if (!encodedData) {
-
-    document.getElementById(
-        "studentName"
-    ).textContent =
-        "Certificate Not Found";
-
+function setStatus(kind,message){
+  if(!statusNode)return;
+  statusNode.className="certificate-status "+kind;
+  statusNode.textContent=message;
 }
-else {
-
-    try {
-
-        const certificate =
-            JSON.parse(
-                decodeURIComponent(
-                    encodedData
-                )
-            );
-
-
-        renderCertificate(
-            certificate
-        );
-
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Certificate parsing failed:",
-            error
-        );
-
-    }
-
+function dateText(value){
+  if(!value)return "—";
+  const date=typeof value.toDate==="function"?value.toDate():new Date(value);
+  return Number.isNaN(date.getTime())?"—":date.toLocaleDateString("en-KE",{day:"numeric",month:"long",year:"numeric"});
 }
-
-
-// =====================================
-// RENDER
-// =====================================
-
-function renderCertificate(
-    certificate
-) {
-
-
-    document.getElementById(
-        "studentName"
-    ).textContent =
-        certificate.studentName ||
-        "Student";
-
-
-    document.getElementById(
-        "courseTitle"
-    ).textContent =
-        certificate.courseTitle ||
-        "Course Completion";
-
-
-    document.getElementById(
-        "certificateNumber"
-    ).textContent =
-        certificate.certificateNumber ||
-        "—";
-
-
-    document.getElementById(
-        "admissionNumber"
-    ).textContent =
-        certificate.admissionNumber ||
-        "—";
-
-
-    document.getElementById(
-        "instructorName"
-    ).textContent =
-        certificate.instructorName ||
-        "Academy Instructor";
-
-
-    document.getElementById(
-        "headquarters"
-    ).textContent =
-        certificate.headquarters ||
-        "Kenya";
-
-
-    document.getElementById(
-        "website"
-    ).textContent =
-        certificate.website ||
-        "sparkstackacademy.com";
-
-
-    document.getElementById(
-        "issuedAt"
-    ).textContent =
-        formatDate(
-            certificate.issuedAt
-        );
-
-
-    document.title =
-        `${certificate.courseTitle || "Certificate"} | Spark Stack Academy`;
-
-
-    // ---------------------------------
-    // AUTO DOWNLOAD MODE
-    // ---------------------------------
-
-    const download =
-        params.get("download");
-
-
-    if (download === "true") {
-
-        setTimeout(
-            () => {
-
-                window.print();
-
-            },
-            800
-        );
-
-    }
-
+function render(c){
+  const put=(id,value,fallback="—")=>{const el=document.getElementById(id);if(el)el.textContent=value||fallback;};
+  put("studentName",c.studentName,"Student");
+  put("courseTitle",c.courseTitle,"Course Completion");
+  put("certificateNumber",c.certificateNumber||c.id);
+  put("admissionNumber",c.admissionNumber);
+  put("instructorName",c.instructorName,"Academy Instructor");
+  put("headquarters",c.headquarters,"Kenya");
+  put("website",c.website,"sparkstackacademy.com");
+  put("issuedAt",dateText(c.issuedAt));
+  document.title=(c.courseTitle||"Certificate")+" | Spark Stack Academy";
 }
-
-
-// =====================================
-// DATE
-// =====================================
-
-function formatDate(
-    value
-) {
-
-    if (!value)
-        return "—";
-
-
-    try {
-
-        let date;
-
-
-        if (
-            typeof value.toDate ===
-            "function"
-        ) {
-
-            date =
-                value.toDate();
-
-        }
-
-        else {
-
-            date =
-                new Date(value);
-
-        }
-
-
-        return date.toLocaleDateString(
-            "en-KE",
-            {
-                day: "numeric",
-                month: "long",
-                year: "numeric"
-            }
-        );
-
-    }
-
-    catch {
-
-        return "—";
-
-    }
-
+function showFailure(message){
+  setStatus("invalid",message);
+  if(printButton)printButton.disabled=true;
+  document.getElementById("certificate").classList.add("certificate-unverified");
+  document.getElementById("studentName").textContent="Certificate unavailable";
 }
-
-
-// =====================================
-// PRINT
-// =====================================
-
-document
-    .getElementById(
-        "printCertificate"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
-
-            window.print();
-
-        }
-    );
-
-
-// =====================================
-// CLOSE
-// =====================================
-
-document
-    .getElementById(
-        "closeCertificate"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
-
-            window.close();
-
-        }
-    );
+onAuthStateChanged(auth,async user=>{
+  if(!user){location.replace("../login.html");return;}
+  if(!certificateId){showFailure("No certificate reference was provided. This certificate cannot be verified.");return;}
+  try{
+    const snap=await getDoc(doc(db,"certificates",certificateId));
+    if(!snap.exists()){showFailure("Certificate not found. No matching issued record exists.");return;}
+    const certificate={id:snap.id,...snap.data()};
+    if(certificate.studentId!==user.uid){showFailure("Access denied. This certificate belongs to another student account.");return;}
+    const state=String(certificate.status||"valid").toLowerCase();
+    if(!["valid","active","issued"].includes(state)){showFailure("This certificate is marked "+state+" and is not currently valid.");return;}
+    if(!certificate.issuedAt){showFailure("The certificate record has no verified issue date.");return;}
+    render(certificate);
+    verified=true;
+    setStatus("valid","Verified certificate · Issued by Spark Stack Academy");
+    if(params.get("download")==="true")setTimeout(()=>{if(verified)window.print();},700);
+  }catch(error){
+    console.error("Certificate verification failed:",error);
+    showFailure("Unable to verify this certificate. Check your connection and try again.");
+  }
+});
+printButton?.addEventListener("click",()=>{if(verified)window.print();});
+closeButton?.addEventListener("click",()=>{if(history.length>1)history.back();else location.href="certificates.html";});
