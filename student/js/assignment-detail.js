@@ -285,7 +285,18 @@ function setupAssignmentSubmission(user) {
         status.textContent = "Submitted";
         status.className = "status submitted";
       }
-      alert("Assignment submitted successfully.");
+      try {
+        await awardXP(
+          user.uid,
+          XP_REWARDS.assignment,
+          `Submitted assignment: ${assignmentData.title || "Assignment"}`,
+          `assignment_${assignmentId}`
+        );
+        alert("Assignment submitted successfully. +" + XP_REWARDS.assignment + " XP earned.");
+      } catch (xpError) {
+        console.warn("Assignment saved, but XP synchronization is pending:", xpError);
+        alert("Assignment submitted successfully. XP synchronization is pending.");
+      }
     } catch (error) {
       console.error("Assignment submission failed:", error);
       alert(error.message || "The assignment could not be submitted. Check your connection and try again.");
