@@ -137,6 +137,7 @@ function setupNavigation() {
   menu?.addEventListener("click", () => {
     sidebar?.classList.add("open");
     overlay?.classList.add("active");
+    document.body.classList.add("institution-menu-open");
   });
   overlay?.addEventListener("click", closeNavigation);
   sidebar?.querySelectorAll("a").forEach(link => link.addEventListener("click", closeNavigation));
@@ -148,6 +149,7 @@ function setupNavigation() {
 function closeNavigation() {
   sidebar?.classList.remove("open");
   overlay?.classList.remove("active");
+  document.body.classList.remove("institution-menu-open");
 }
 
 function setupLogout() {
