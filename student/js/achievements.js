@@ -152,7 +152,7 @@ function renderLevel(student) {
     if ($("studentXP")) {
 
         $("studentXP").textContent =
-            (xp - levelData.currentLevelXP).toLocaleString();
+            (xp - data.currentLevelXP).toLocaleString();
 
     }
 
