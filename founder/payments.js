@@ -510,19 +510,19 @@ const row = document.createElement("tr");
 
 row.innerHTML = `
 
-<td>${payment.receiptNumber || "-"}</td>
+<td>${payment.receiptNumber || payment.mpesaCode || "-"}</td>
 
 <td>${payment.studentName || "-"}</td>
 
 <td>${payment.admissionNumber || "-"}</td>
 
-<td>${payment.paymentType || "-"}</td>
+<td>${payment.paymentType || payment.courseName || "Course payment"}</td>
 
 <td>${payment.method || "-"}</td>
 
 <td>KES ${Number(payment.amount || 0).toLocaleString()}</td>
 
-<td>${payment.transactionId || "-"}</td>
+<td>${payment.transactionId || payment.mpesaCode || "-"}</td>
 
 <td>
 
@@ -614,13 +614,13 @@ todayCount++;
 
 }
 
-if(payment.status==="pending"){
+if(payment.status==="pending" || payment.status==="pending_verification"){
 
 pending++;
 
 }
 
-if(payment.status==="completed"){
+if(["completed","paid","success","successful"].includes(payment.status)){
 
 successful++;
 
