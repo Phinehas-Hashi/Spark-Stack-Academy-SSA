@@ -101,6 +101,16 @@ function renderGrowthStats(data){
   $("globalGrowthDataNote").textContent="Scanned "+fmt(scanned.users)+" user profiles, "+fmt(scanned.institutions)+" institutions, "+fmt(scanned.paymentLedger)+" posted-ledger records and "+fmt(scanned.institutionPayments)+" institution payment records. "+(data.scanLimitReached?"At least one scan reached its safety limit; totals may be partial. ":"")+fmt(data.unknownInstitutionCountry)+" institutions have no recognized country. Course labels currently use course IDs; revenue totals are shown in KES separately from other currencies.";
 }
 
+function normalizeCountryCode(data){
+  const raw=String(data.countryCode||data.location?.countryCode||data.address?.countryCode||"").trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(raw)?raw:"";
+}
+function aggregateBrowserCountryData(userDocs,institutionDocs){
+  const countries={};let unknownUsers=0,unknownInstitutions=0;
+  userDocs.forEach(doc=>{const data=doc.data();const code=normalizeCountryCode(data);if(!code){unknownUsers++;return;}countries[code]??={countryCode:code,users:0,activeUsers:0,institutions:0};countries[code].users++;if(data.active===true||data.status==="active")countries[code].activeUsers++;});
+  institutionDocs.forEach(doc=>{const data=doc.data();const code=normalizeCountryCode(data);if(!code){unknownInstitutions++;return;}countries[code]??={countryCode:code,users:0,activeUsers:0,institutions:0};countries[code].institutions++;});
+  return {countries:Object.values(countries).sort((a,b)=>(b.users+b.institutions)-(a.users+a.institutions)),totalUsers:userDocs.length,totalInstitutions:institutionDocs.length,unknownUsers,unknownInstitutions};
+}
 async function loadBrowserCountryFallback(){
   const [users,institutions]=await Promise.all([getDocs(collection(db,"users")),getDocs(collection(db,"institutions"))]);
   const stats=aggregateBrowserCountryData(users.docs,institutions.docs);
@@ -113,7 +123,7 @@ async function loadGlobalStats(){
   const button=$("refreshGlobalStats");if(button)button.disabled=true;
   $("globalStatsUpdated").textContent="Refreshing…";
   try{const result=await getGlobalStats();renderGlobalStats(result.data||{});renderGrowthStats(result.data||{});}
-  catch(error){console.warn("Server-side global stats unavailable; trying Founder-authorized browser fallback:",error);try{await loadBrowserCountryFallback();$("globalStatsUpdated").textContent="Browser-only data";}catch(fallbackError){console.error("Browser country fallback failed:",fallbackError);$("globalCountryRows").innerHTML='<p class="empty">Country analytics unavailable. Check Founder Firestore read permissions and network access.</p>';$("globalStatsUpdated").textContent="Refresh failed";$("mapDataSource").textContent="No map data";}}
+  catch(error){console.warn("Server-side global stats unavailable; trying Founder-authorized browser fallback:",error);try{await loadBrowserCountryFallback();$("globalStatsUpdated").textContent="Browser-only data";}catch(fallbackError){console.error("Browser country fallback failed:",fallbackError);$("globalCountryRows").innerHTML='<p class="empty">Country analytics unavailable. Check Founder Firestore read permissions and network access.</p>';$("globalStatsUpdated").textContent="Refresh failed";}}
   finally{if(button)button.disabled=false;}
 }
 $("refreshGlobalStats")?.addEventListener("click",loadGlobalStats);
