@@ -1,6 +1,7 @@
 // Shared student XP compatibility layer.
 // All XP is stored on the canonical students/{uid} profile.
-import { awardXP, XP_REWARDS, calculateLevel, getLevelData } from "./achievements.js";
+import { awardXP, XP_REWARDS } from "./achievements.js";
+import { calculateLevel, getLevelData } from "./xp-engine.js";
 
 export { XP_REWARDS };
 
