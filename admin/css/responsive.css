@@ -356,3 +356,67 @@ body.admin-modal-open {
         border-radius: 16px;
     }
 }
+
+
+/* ============================================================
+   ADMIN MODAL SURFACE NORMALISATION
+   All Admin dialogs must read as foreground panels, never inline
+   page content. Keep page-specific inner layouts intact.
+============================================================ */
+.admin-modal {
+    box-sizing: border-box;
+    isolation: isolate;
+    background: transparent !important;
+}
+
+.admin-modal > [role="dialog"],
+.admin-modal > .admin-modal-panel,
+.admin-modal > .admin-modal-content {
+    box-sizing: border-box;
+    display: block !important;
+    position: relative !important;
+    z-index: 2 !important;
+    flex: 0 1 680px;
+    width: min(680px, 100%) !important;
+    max-width: 100% !important;
+    max-height: min(90dvh, 820px) !important;
+    min-height: 0;
+    margin: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    background: #fff !important;
+    color: #17243a;
+    border: 1px solid rgba(148, 163, 184, .28) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 28px 90px rgba(2, 8, 23, .34) !important;
+}
+
+.admin-modal > .admin-modal-backdrop {
+    z-index: 1 !important;
+    background: rgba(3, 10, 27, .68) !important;
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+}
+
+.admin-modal > [role="dialog"] :is(input, select, textarea, button),
+.admin-modal > .admin-modal-panel :is(input, select, textarea, button),
+.admin-modal > .admin-modal-content :is(input, select, textarea, button) {
+    max-width: 100%;
+}
+
+@media (max-width: 640px) {
+    .admin-modal {
+        padding: max(12px, env(safe-area-inset-top)) 12px
+                 max(12px, env(safe-area-inset-bottom)) !important;
+    }
+
+    .admin-modal > [role="dialog"],
+    .admin-modal > .admin-modal-panel,
+    .admin-modal > .admin-modal-content {
+        width: 100% !important;
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px) !important;
+        border-radius: 17px !important;
+    }
+}
