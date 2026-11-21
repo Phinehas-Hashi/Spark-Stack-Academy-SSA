@@ -48,7 +48,7 @@ jobs:
         run: node --check functions/index.js
       - name: Validate portal JavaScript module syntax
         run: |
-          for file in institution/js/institution-courses.js student/js/marketplace.js student/js/course-player.js student/js/courses.js student/js/course-library.js founder/marketplace.js founder/marketplace-products.js founder/courses.js admin/js/courses.js instructor/js/course-builder.js; do
+          for file in institution/js/institution-courses.js student/js/marketplace.js student/js/course-player.js student/js/courses.js student/js/course-library.js student/js/payments.js founder/marketplace.js founder/marketplace-products.js founder/courses.js admin/js/courses.js instructor/js/course-builder.js; do
             node --check --input-type=module < "$file"
           done
       - name: Validate Functions package metadata
