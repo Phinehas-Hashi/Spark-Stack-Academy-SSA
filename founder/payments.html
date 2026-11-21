@@ -108,6 +108,24 @@ id="refreshPayments">
 
 </section>
 <!-- ===================================
+     PERSONAL M-PESA COLLECTION SETTINGS
+=================================== -->
+<section class="manual-mpesa-settings glass-card">
+  <div class="section-title">
+    <h2>Personal M-Pesa Collection</h2>
+    <p>Configure the official receiving account used for manual course payments. Do not enter a Paybill or Till number here.</p>
+  </div>
+  <form id="manualMpesaSettingsForm" class="manual-mpesa-form">
+    <label>Account holder / recipient name<input id="manualMpesaName" type="text" maxlength="100" placeholder="Name shown on the personal M-Pesa account" required></label>
+    <label>Personal M-Pesa phone number<input id="manualMpesaPhone" type="tel" maxlength="16" placeholder="07XX XXX XXX" required></label>
+    <label class="manual-mpesa-wide">Student payment instructions<textarea id="manualMpesaInstructions" maxlength="300" rows="3" placeholder="Send the exact course amount and keep your Safaricom confirmation message."></textarea></label>
+    <label class="manual-mpesa-toggle"><input id="manualMpesaEnabled" type="checkbox"><span><strong>Enable student M-Pesa checkout</strong><small>Students will see the receiving number only when enabled.</small></span></label>
+    <div class="manual-mpesa-actions"><button type="submit" class="primary-btn" id="saveManualMpesaSettings">Save receiving details</button><span id="manualMpesaSettingsMessage" role="status" aria-live="polite"></span></div>
+  </form>
+  <div class="manual-mpesa-warning"><strong>Security control:</strong> Students can submit a receipt code, but course access is granted only after an authorised reviewer matches the receipt against actual incoming M-Pesa account records.</div>
+</section>
+
+<!-- ===================================
      PAYMENT PROVIDERS
 =================================== -->
 
