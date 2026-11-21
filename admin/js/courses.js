@@ -844,15 +844,14 @@ function openModal(course) {
     }
 
 
-    $("courseDetailsModal")
-        ?.classList.remove("hidden");
+    const modal = $("courseDetailsModal");
+    modal?.classList.remove("hidden");
+    modal?.setAttribute("aria-hidden", "false");
+    document.body.classList.add("admin-modal-open");
 
-
-    $("courseDetailsModal")
-        ?.setAttribute(
-            "aria-hidden",
-            "false"
-        );
+    // Keep the dialog above the portal shell and focus its close control.
+    modal?.parentElement?.appendChild(modal);
+    requestAnimationFrame(() => $("closeCourseDetails")?.focus());
 
 
     if (window.lucide) {
@@ -873,12 +872,8 @@ function closeModal() {
 
 
     modal?.classList.add("hidden");
-
-
-    modal?.setAttribute(
-        "aria-hidden",
-        "true"
-    );
+    modal?.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("admin-modal-open");
 
 
     currentCourse = null;
