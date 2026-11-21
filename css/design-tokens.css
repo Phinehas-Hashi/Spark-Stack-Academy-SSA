@@ -1,0 +1,10 @@
+/* Spark Stack Academy — shared design tokens.
+   Tokens only: no element or page selectors belong here. */
+:root {
+  --ssa-color-ink:#17152f;--ssa-color-muted:#77758f;--ssa-color-canvas:#f5f4fb;--ssa-color-surface:#fff;--ssa-color-line:#e8e6f0;
+  --ssa-color-brand:#762cff;--ssa-color-brand-strong:#5d1ed6;--ssa-color-accent:#20cfe8;--ssa-color-success:#16845b;--ssa-color-warning:#a96a08;--ssa-color-danger:#c43d52;
+  --ssa-radius-sm:8px;--ssa-radius-md:14px;--ssa-radius-lg:20px;--ssa-radius-xl:26px;
+  --ssa-shadow-sm:0 4px 14px rgba(27,20,65,.06);--ssa-shadow-md:0 12px 34px rgba(27,20,65,.10);
+  --ssa-space-1:4px;--ssa-space-2:8px;--ssa-space-3:12px;--ssa-space-4:16px;--ssa-space-5:20px;--ssa-space-6:24px;--ssa-space-8:32px;
+  --ssa-font-body:"Poppins",Arial,sans-serif;--ssa-font-display:"Montserrat","Poppins",sans-serif;--ssa-content-max:1440px;
+}
