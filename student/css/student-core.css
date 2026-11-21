@@ -3,7 +3,7 @@
    Shared interactive components are owned by components.css. */
 *,*::before,*::after{box-sizing:border-box}
 html{width:100%;min-height:100%;scroll-behavior:smooth}
-body{width:100%;min-width:0;min-height:100vh;min-height:100dvh;margin:0;font-family:"Poppins",Arial,sans-serif;background:#f6f8fc;color:#081c3a;overflow-x:hidden}
+body{width:100%;min-width:0;min-height:100vh;min-height:100dvh;margin:0;font-family:var(--ssa-font-body,"Poppins",Arial,sans-serif);background:var(--ssa-color-canvas,#f5f4fb);color:var(--ssa-color-ink,#17152f);overflow-x:hidden}
 .dashboard-content{width:100%;min-width:0}
 img,video,canvas,svg{max-width:100%}
 img{display:block}
