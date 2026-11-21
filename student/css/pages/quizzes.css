@@ -1,6 +1,9 @@
 .quizzes-page{
     max-width: 1400px;
     margin: 0 auto;
+
+    padding:28px 32px 44px;
+    box-sizing:border-box;
 }.quizzes-page .page-header{
     margin-bottom: 28px;
 }.quizzes-page .page-badge{
@@ -470,3 +473,4 @@
     }.quizzes-page .quiz-card-meta{
         gap: 9px;
     }}
+@media(max-width:700px){.quizzes-page{padding:20px 16px 32px}}
