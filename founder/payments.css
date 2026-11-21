@@ -2006,3 +2006,26 @@ body{
     }
 
 }
+
+/* ============================================================
+   PERSONAL M-PESA COLLECTION SETTINGS
+============================================================ */
+.manual-mpesa-settings{padding:28px;border:1px solid rgba(34,211,238,.2);background:linear-gradient(145deg,rgba(15,23,42,.92),rgba(10,25,49,.92))}
+.manual-mpesa-settings .section-title h2{color:#f8fafc}
+.manual-mpesa-settings .section-title p{max-width:760px;color:#9eacc2}
+.manual-mpesa-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.manual-mpesa-form>label{display:flex;flex-direction:column;gap:8px;color:#e7eef9;font-size:13px;font-weight:600}
+.manual-mpesa-form input:not([type=checkbox]),.manual-mpesa-form textarea{width:100%;padding:13px 15px;border:1px solid rgba(148,163,184,.2);border-radius:12px;background:rgba(255,255,255,.055);color:#fff;font:500 14px Inter,sans-serif;outline:none}
+.manual-mpesa-form input:focus,.manual-mpesa-form textarea:focus{border-color:#22d3ee;box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+.manual-mpesa-form input::placeholder,.manual-mpesa-form textarea::placeholder{color:#71819a}
+.manual-mpesa-wide{grid-column:1/-1}
+.manual-mpesa-toggle{grid-column:1/-1;display:flex!important;flex-direction:row!important;align-items:center;gap:12px!important;padding:14px;border:1px solid rgba(34,197,94,.18);border-radius:13px;background:rgba(34,197,94,.06)}
+.manual-mpesa-toggle input{width:18px;height:18px;accent-color:#22c55e}
+.manual-mpesa-toggle span{display:grid;gap:4px}
+.manual-mpesa-toggle small{color:#9eacc2;font-size:11px;font-weight:400}
+.manual-mpesa-actions{grid-column:1/-1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.manual-mpesa-actions span{color:#86efac;font-size:12px}
+.manual-mpesa-actions span.error{color:#fca5a5}
+.manual-mpesa-warning{margin-top:18px;padding:14px;border:1px solid rgba(245,158,11,.2);border-radius:12px;background:rgba(245,158,11,.07);color:#d6c5a4;font-size:11px;line-height:1.65}
+.manual-mpesa-warning strong{color:#fbbf24}
+@media(max-width:720px){.manual-mpesa-settings{padding:19px}.manual-mpesa-form{grid-template-columns:1fr}.manual-mpesa-wide,.manual-mpesa-toggle,.manual-mpesa-actions{grid-column:1}}
