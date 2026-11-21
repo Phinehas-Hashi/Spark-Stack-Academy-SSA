@@ -1,10 +1,12 @@
 (() => {
   const roleSelect = document.getElementById("role");
   const choices = [...document.querySelectorAll("[data-role-choice]")];
+  const instructorFields = document.getElementById("instructorFields");
   function chooseRole(role) {
     if (!roleSelect || !["student","instructor"].includes(role)) return;
     roleSelect.value = role;
     roleSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    if (instructorFields) instructorFields.style.display = role === "instructor" ? "block" : "none";
     choices.forEach(button => {
       const active = button.dataset.roleChoice === role;
       button.classList.toggle("active", active);
