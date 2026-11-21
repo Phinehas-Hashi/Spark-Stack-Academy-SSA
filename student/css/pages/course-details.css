@@ -1,6 +1,9 @@
 .course-details-page{
     max-width: 1400px;
     margin: 0 auto;
+
+    padding:28px 32px 44px;
+    box-sizing:border-box;
 }.course-details-page .back-btn{
     display: inline-flex;
     align-items: center;
@@ -842,3 +845,4 @@
         transition: none;
 
     }}
+@media(max-width:700px){.course-details-page{padding:20px 16px 32px}}
