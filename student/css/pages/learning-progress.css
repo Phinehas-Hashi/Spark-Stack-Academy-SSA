@@ -4,6 +4,9 @@
 
     animation: progressPageLoad .4s ease;
 
+
+    padding:28px 32px 44px;
+    box-sizing:border-box;
 }@keyframes progressPageLoad{
 
     from {
@@ -530,3 +533,4 @@
         width: 100%;
 
     }}
+@media(max-width:700px){.learning-progress-page{padding:20px 16px 32px}}
