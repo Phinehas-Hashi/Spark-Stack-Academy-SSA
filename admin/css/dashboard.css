@@ -827,3 +827,5 @@ RESPONSIVE
 }
 
 }
+.page-header{position:relative;overflow:hidden}.admin-portal-art{width:150px;height:95px;object-fit:cover;border-radius:14px;border:1px solid rgba(139,90,235,.2);box-shadow:0 10px 24px rgba(22,12,55,.12)}
+@media(max-width:700px){.admin-portal-art{display:none}}
