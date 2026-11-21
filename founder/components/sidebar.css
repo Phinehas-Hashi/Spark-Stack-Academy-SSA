@@ -232,3 +232,11 @@
 }
 
 .founder-sidebar .brand-icon{background:transparent!important;box-shadow:none!important}.founder-sidebar .brand-icon img{width:38px;height:38px;display:block;border-radius:11px}
+
+/* Unified mobile drawer hardening — Founder portal */
+@media(max-width:900px){
+ #sidebarContainer .sidebar{inset:0 auto 0 0;width:min(292px,calc(100vw - 44px));height:100dvh;max-height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);z-index:1201;overflow:hidden;overscroll-behavior:contain}
+ #sidebarContainer .sidebar-nav{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ #sidebarOverlay{position:fixed;inset:0;z-index:1200}
+ body.sidebar-open{overflow:hidden;overscroll-behavior:none}
+}
