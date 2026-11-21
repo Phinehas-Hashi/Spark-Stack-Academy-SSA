@@ -3,6 +3,9 @@
     width:100%;
     animation:pageFade .4s ease;
 
+
+    padding:28px 32px 44px;
+    box-sizing:border-box;
 }@keyframes pageFade{
 
     from{
@@ -236,3 +239,4 @@ align-items:flex-start;
 gap:18px;
 
 }}
+@media(max-width:700px){.assignment-details-page{padding:20px 16px 32px}}
