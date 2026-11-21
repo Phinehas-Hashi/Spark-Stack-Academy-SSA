@@ -1353,15 +1353,16 @@ exports.getMarketplacePricing = onCall(async request => {
   const ref = db.doc("marketplacePricing/global");
   const [snap, versionsSnap] = await Promise.all([ref.get(), ref.collection("versions").limit(12).get()]);
   const saved = snap.exists ? snap.data() : {};
+  const supportedCurrencies = ["KES", "USD", "EUR", "GBP"];
   const prices = Object.fromEntries(MARKETPLACE_PRICE_TYPES.map(item => {
     const configured = saved.prices?.[item.key] || {};
-    return [item.key, {
-      label: item.label, unit: item.unit,
-      proposedAmount: item.proposed,
-      amount: Number.isFinite(Number(configured.amount)) ? Number(configured.amount) : item.proposed,
-      currency: configured.currency || saved.currency || "KES",
-      enabled: configured.enabled === true
-    }];
+    const amounts = {};
+    for (const code of supportedCurrencies) {
+      const legacyAmount = configured.currency === code || (!configured.currency && (saved.currency || "KES") === code) ? configured.amount : undefined;
+      const candidate = configured.amounts?.[code] ?? legacyAmount ?? (code === "KES" ? item.proposed : null);
+      amounts[code] = Number.isFinite(Number(candidate)) && candidate !== null ? Number(candidate) : null;
+    }
+    return [item.key, { label: item.label, unit: item.unit, proposedAmount: item.proposed, amounts, enabled: configured.enabled === true }];
   }));
   const history = versionsSnap.docs.map(doc => {
     const value = doc.data();
@@ -1375,13 +1376,21 @@ exports.saveMarketplacePricing = onCall(async request => {
   const payload = request.data || {};
   const currency = safeText(payload.currency, "KES").toUpperCase();
   if (!["KES", "USD", "EUR", "GBP"].includes(currency)) throw new HttpsError("invalid-argument", "Unsupported marketplace currency.");
+  const supportedCurrencies = ["KES", "USD", "EUR", "GBP"];
   const incoming = payload.prices || {};
   const prices = {};
   for (const item of MARKETPLACE_PRICE_TYPES) {
     const value = incoming[item.key] || {};
-    const amount = Number(value.amount);
-    if (!Number.isFinite(amount) || amount < 0 || amount > 100000000 || Number(amount.toFixed(2)) !== amount) throw new HttpsError("invalid-argument", "Invalid price for " + item.label + ".");
-    prices[item.key] = { amount, currency, enabled: value.enabled === true, unit: item.unit, label: item.label };
+    const amounts = {};
+    for (const code of supportedCurrencies) {
+      const raw = value.amounts && Object.prototype.hasOwnProperty.call(value.amounts, code) ? value.amounts[code] : (code === currency ? value.amount : null);
+      if (raw === null || raw === undefined || raw === "") { amounts[code] = null; continue; }
+      const amount = Number(raw);
+      if (!Number.isFinite(amount) || amount < 0 || amount > 100000000 || Number(amount.toFixed(2)) !== amount) throw new HttpsError("invalid-argument", "Invalid " + code + " price for " + item.label + ".");
+      amounts[code] = amount;
+    }
+    if (amounts[currency] === null) throw new HttpsError("invalid-argument", "Enter a price in the selected primary currency for " + item.label + ".");
+    prices[item.key] = { amounts, amount: amounts[currency], currency, enabled: value.enabled === true, unit: item.unit, label: item.label };
   }
   const transactionFeePercent = Number(payload.transactionFeePercent || 0);
   if (!Number.isFinite(transactionFeePercent) || transactionFeePercent < 0 || transactionFeePercent > 20) throw new HttpsError("invalid-argument", "Transaction fee must be between 0 and 20 percent.");
@@ -1392,7 +1401,7 @@ exports.saveMarketplacePricing = onCall(async request => {
     const current = await tx.get(rootRef);
     const nextVersion = Number(current.data()?.version || 0) + 1;
     const snapshot = {
-      version: nextVersion, currency, prices,
+      version: nextVersion, currency, supportedCurrencies: ["KES", "USD", "EUR", "GBP"], prices,
       transactionFeeEnabled: payload.transactionFeeEnabled === true,
       transactionFeePercent, pricingStatus: "proposed",
       createdAt: now, actorId: founder.uid,
