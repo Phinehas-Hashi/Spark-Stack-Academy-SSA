@@ -1,1 +1,28 @@
-.report-page{max-width:1000px;margin:auto;padding:32px}.report-page .report-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:28px;margin-bottom:22px}.report-page h1{margin-bottom:8px}.report-page p{color:#94a3b8}.report-page .report-form{display:grid;gap:16px}.report-page .report-form label{display:grid;gap:7px;color:#cbd5e1;font-weight:600}.report-page .report-form input,.report-page .report-form select,.report-page .report-form textarea{width:100%;box-sizing:border-box;padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:#0b172b;color:inherit}.report-page .report-form textarea{min-height:150px;resize:vertical}.report-page .report-form button{border:0;border-radius:12px;padding:14px 18px;background:#762cff;color:#fff;font-weight:800;cursor:pointer}.report-page .report-result{margin-top:14px;padding:14px;border-radius:12px;background:rgba(118,44,255,.1);color:#dbeafe}.report-page .report-history-item{padding:16px;border:1px solid rgba(255,255,255,.07);border-radius:14px;margin-top:10px}.report-page .report-history-item>div{display:flex;justify-content:space-between;gap:15px}.report-page .report-history-item span{display:block;color:#94a3b8;margin-top:4px}.report-page .report-status{font-size:12px;text-transform:capitalize}.report-page .report-status.resolved{color:#4ade80}.report-page .report-status.pending{color:#fbbf24}.report-page .report-status.reviewing{color:#20cfe8}.report-page .report-empty{padding:25px;text-align:center;color:#94a3b8}
+/* Student issue reporting — dedicated premium page styles. */
+.report-page{width:100%;max-width:1000px;margin:0 auto;padding:28px 32px 44px;color:var(--ssa-color-ink,#17152f);font-family:var(--ssa-font-body,"Poppins",sans-serif);box-sizing:border-box}
+.report-page h1,.report-page h2{color:var(--ssa-color-ink,#17152f);font-family:var(--ssa-font-display,"Poppins",sans-serif)}
+.report-page h1{margin:0 0 8px;font-size:clamp(26px,3vw,34px);letter-spacing:-.6px}
+.report-page h2{margin:0 0 8px;font-size:19px}
+.report-page p{color:var(--ssa-color-muted,#77758f);font-size:12px;line-height:1.7}
+.report-page .report-card{margin:0 0 18px;padding:26px;border:1px solid var(--ssa-color-line,#e8e6f0);border-radius:20px;background:#fff;box-shadow:var(--ssa-shadow-sm,0 4px 14px rgba(27,20,65,.06))}
+.report-page .report-form{display:grid;gap:15px}
+.report-page .report-form label{display:grid;gap:7px;color:var(--ssa-color-ink,#17152f);font-size:12px;font-weight:700}
+.report-page .report-form input,.report-page .report-form select,.report-page .report-form textarea{width:100%;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid var(--ssa-color-line,#e8e6f0);border-radius:12px;outline:0;background:#fbfaff;color:var(--ssa-color-ink,#17152f);font:inherit;font-size:13px}
+.report-page .report-form input:focus,.report-page .report-form select:focus,.report-page .report-form textarea:focus{border-color:var(--ssa-color-brand,#762cff);box-shadow:0 0 0 4px rgba(118,44,255,.1);background:#fff}
+.report-page .report-form textarea{min-height:150px;resize:vertical}
+.report-page .report-form button{min-height:46px;padding:12px 18px;border:0;border-radius:12px;background:linear-gradient(105deg,#7024f5,#9b48f2 70%,#20cfe8);color:#fff;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.report-page .report-form button:disabled{opacity:.65;cursor:wait}
+.report-page .report-result{margin-top:14px;padding:14px;border:1px solid rgba(118,44,255,.15);border-radius:12px;background:rgba(118,44,255,.07);color:#4f2b91;font-size:12px;line-height:1.6}
+.report-page #myReports{display:grid;gap:10px}
+.report-page .report,.report-page .report-history-item{padding:16px;border:1px solid var(--ssa-color-line,#e8e6f0);border-radius:14px;background:#fcfbff}
+.report-page .report strong{display:block;margin-bottom:5px;color:var(--ssa-color-brand,#762cff);font-size:11px}
+.report-page .report span,.report-page .report-history-item span{display:block;color:var(--ssa-color-muted,#77758f);font-size:11px}
+.report-page .report p{margin:8px 0 0}
+.report-page .report-history-item>div{display:flex;justify-content:space-between;gap:15px}
+.report-page .report-status{font-size:11px;text-transform:capitalize}
+.report-page .report-status.resolved{color:#16845b}
+.report-page .report-status.pending{color:#a96a08}
+.report-page .report-status.reviewing{color:#762cff}
+.report-page .report-empty{padding:22px;border:1px dashed #dcd6ec;border-radius:14px;color:var(--ssa-color-muted,#77758f);font-size:12px;text-align:center}
+@media(max-width:700px){.report-page{padding:20px 16px 32px}.report-page .report-card{padding:20px;border-radius:17px}}
+@media(max-width:390px){.report-page{padding-right:12px;padding-left:12px}.report-page .report-card{padding:16px}}
