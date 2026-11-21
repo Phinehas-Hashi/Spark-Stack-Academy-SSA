@@ -3,6 +3,9 @@
     width:100%;
     animation:fadePage .4s ease;
 
+
+    padding:28px 32px 44px;
+    box-sizing:border-box;
 }@keyframes fadePage{
 
     from{
@@ -224,3 +227,4 @@ grid-template-columns:1fr;
 flex-direction:column;
 
 }}
+@media(max-width:700px){.assignments-page{padding:20px 16px 32px}}
