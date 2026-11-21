@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login | Spark Stack Academy</title>
 <meta name="description" content="Login to your Spark Stack Academy account and continue your learning journey.">
-<link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/auth.css?v=20261121-rebrand1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,8 +15,9 @@
 <a href="index.html" class="back-home"><i class="fa-solid fa-arrow-left"></i><span>Back Home</span></a>
 <div class="auth-background"><div class="bg-circle circle-one"></div><div class="bg-circle circle-two"></div><div class="bg-circle circle-three"></div></div>
 <main class="login-container">
+<aside class="auth-visual auth-login-visual"><div class="auth-visual-brand"><img src="assets/images/spark-stack-logo.svg" alt="Spark Stack Academy"></div><span class="auth-kicker">YOUR NEXT CHAPTER STARTS HERE</span><h2>Build skills that move the world forward.</h2><p>One connected academy for ambitious learners, educators and institutions.</p><img class="auth-portal-art" src="assets/images/portal-student.svg" alt="Student learning illustration"><div class="auth-visual-points"><span><i class="fa-solid fa-shield-halved"></i> Secure access</span><span><i class="fa-solid fa-globe"></i> Global-ready learning</span></div></aside>
 <div class="login-card">
-<div class="brand-logo"><img src="assets/images/ssa-logo.png" alt="Spark Stack Academy Logo"></div>
+<div class="brand-logo"><img src="assets/images/spark-stack-logo.svg" alt="Spark Stack Academy Logo"></div>
 <div class="welcome-badge"><i class="fa-solid fa-graduation-cap"></i> Welcome Back</div>
 <h1>Login to Your Account</h1>
 <p>Continue learning, building and innovating with Spark Stack Academy.</p>
@@ -33,9 +34,10 @@
 </div>
 </main>
 <div id="resetModal" class="auth-loader"><div class="loader-box" style="max-width:440px"><h2>Reset your password</h2><p>Enter your email and we'll send you a password reset link.</p><div class="input-group"><i class="fa-solid fa-envelope"></i><input type="email" id="resetEmail" placeholder="Email address" autocomplete="email"></div><button type="button" id="sendReset" class="primary-btn">Send Reset Link</button><button type="button" id="cancelReset" class="google-btn" style="margin-top:12px">Cancel</button></div></div>
-<div id="authLoader" class="auth-loader"><div class="loader-box"><img src="assets/images/ssa-logo.png" alt="Spark Stack Academy Logo"><h2 id="loaderText">Securely signing you in...</h2><p>Verifying your secure session.</p><div class="progress-track"><div class="progress-energy"><span></span></div></div></div></div>
+<div id="authLoader" class="auth-loader"><div class="loader-box"><img src="assets/images/spark-stack-logo.svg" alt="Spark Stack Academy Logo"><h2 id="loaderText">Securely signing you in...</h2><p>Verifying your secure session.</p><div class="progress-track"><div class="progress-energy"><span></span></div></div></div></div>
 <div id="toastContainer" class="toast-container"></div>
 <button id="scrollTopBtn" class="scroll-top" type="button" aria-label="Scroll to Top"><i class="fa-solid fa-arrow-up"></i></button>
-<script type="module" src="js/login.js?v=20260903-debug2"></script>
+<script src="js/auth-ui.js?v=20261121-rebrand1"></script>
+<script type="module" src="js/login.js?v=20261121-rebrand1"></script>
 </body>
 </html>
