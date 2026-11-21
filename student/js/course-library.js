@@ -4,6 +4,12 @@
 import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const functions = getFunctions(getApp());
+const syncCourseEntitlements = httpsCallable(functions, "syncMyCourseEntitlements");
 
 const $ = id => document.getElementById(id);
 const grid = $("libraryCourses");
@@ -62,25 +68,40 @@ async function loadInstitutionCourses() {
   if (!user) return;
   showLoading();
   try {
-    const ref = collection(db,"students",user.uid,"enrollments");
-    const snap = await getDocs(ref);
-    const records = snap.docs.map(d=>({id:d.id,...d.data()})).filter(validInstitutionEnrollment);
+    await syncCourseEntitlements();
+    const entitlementRef = query(
+      collection(db,"courseEntitlements"),
+      where("studentUid","==",user.uid)
+    );
+    const snap = await getDocs(entitlementRef);
+    const institutionEntitlements = snap.docs
+      .map(d=>({id:d.id,...d.data()}))
+      .filter(item=>{
+        if(item.status!=="active") return false;
+        return Object.values(item.grants || {}).some(grant =>
+          grant?.status==="active" && grant?.source==="institution_enrollment"
+        );
+      });
+
     const unique = new Map();
-    for (const record of records) {
-      const courseId = String(record.courseId || record.courseID || record.course || "");
+    for (const entitlement of institutionEntitlements) {
+      const courseId = String(entitlement.courseId || "");
       if (!courseId || unique.has(courseId)) continue;
       const courseSnap = await getDoc(doc(db,"courses",courseId));
       if (!courseSnap.exists()) continue;
       const course = courseSnap.data();
       const status = String(course.status || "").toLowerCase();
       if (course.published !== true && status !== "published") continue;
+      const grant = Object.values(entitlement.grants || {}).find(item =>
+        item?.status==="active" && item?.source==="institution_enrollment"
+      );
       unique.set(courseId,{
         id:courseId,...course,
-        institutionId:record.institutionId,
-        institutionName:record.institutionName || record.schoolName || course.institutionName || "Your institution",
-        enrollmentStatus:String(record.status || "active").toLowerCase(),
-        progress:Number(record.progress ?? record.progressPercent ?? 0),
-        enrolledAt:record.enrolledAt || record.createdAt || null
+        institutionId:grant?.institutionId || "",
+        institutionName:grant?.institutionName || course.institutionName || "Your institution",
+        enrollmentStatus:"active",
+        progress:Number(grant?.progress || 0),
+        enrolledAt:entitlement.createdAt || entitlement.updatedAt || null
       });
     }
     courses = [...unique.values()].sort((a,b)=>time(b.enrolledAt)-time(a.enrolledAt));
@@ -90,6 +111,7 @@ async function loadInstitutionCourses() {
     showError();
   }
 }
+
 function render() {
   const shown = courses.filter(c=>{
     const progress = Math.min(100,Math.max(0,c.progress));
