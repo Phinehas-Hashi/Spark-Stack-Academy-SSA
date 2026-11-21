@@ -1085,7 +1085,7 @@ function renderLeaderboard(
 
             <div class="empty-state">
 
-                No builders ranked yet.
+                The ranking board is ready. Verified rankings will appear when the secure public leaderboard is connected.
 
             </div>
 
@@ -1410,6 +1410,9 @@ async function loadAchievementOS(
         const student =
             snapshot.data();
 
+        const displayName = student.displayName || student.name || student.fullName || user.displayName || "Builder";
+        if ($("achievementStudentName")) $("achievementStudentName").textContent = displayName;
+        if ($("achievementStudentAvatar")) $("achievementStudentAvatar").textContent = displayName.trim().charAt(0).toUpperCase() || "S";
 
         // CORE
 
