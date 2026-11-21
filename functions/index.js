@@ -825,6 +825,174 @@ exports.syncInstitutionTopLevelEnrollmentEntitlement = onDocumentWritten(
 
 
 // ============================================================
+
+/* ============================================================
+   INSTITUTION LEARNER MANAGER — TRUSTED ENROLMENT OPERATIONS
+============================================================ */
+
+exports.getInstitutionLearnerManagerData = onCall(async request => {
+  const actor = await requireActiveInstitutionMember(request);
+  const institutionRef = db.doc("institutions/" + actor.institutionId);
+  const institutionSnap = await institutionRef.get();
+  if (!institutionSnap.exists || institutionSnap.data().status !== "active") {
+    throw new HttpsError("failed-precondition", "The institution workspace is not active.");
+  }
+  const [membersSnap, enrolmentsSnap, coursesSnap] = await Promise.all([
+    db.collection("institutions").doc(actor.institutionId).collection("members")
+      .where("role", "==", "student").limit(5000).get(),
+    db.collection("enrollments").where("institutionId", "==", actor.institutionId).limit(5000).get(),
+    db.collection("courses").where("institutionId", "==", actor.institutionId).limit(100).get()
+  ]);
+  const learners = membersSnap.docs.map(item => ({ uid: item.id, ...item.data() }))
+    .filter(item => item.status === "active" && item.active !== false)
+    .map(item => ({
+      uid: item.uid,
+      fullName: safeText(item.fullName || item.name, "Student"),
+      email: safeText(item.email),
+      phone: safeText(item.phone),
+      status: item.status
+    }));
+  const courses = coursesSnap.docs.map(item => ({ id: item.id, ...item.data() }))
+    .filter(item => item.status === "published" || item.published === true)
+    .map(item => ({ id: item.id, title: safeText(item.title, "Untitled course"), category: safeText(item.category), status: safeText(item.status) }));
+  const enrolments = enrolmentsSnap.docs.map(item => {
+    const data = item.data();
+    return {
+      id: item.id,
+      studentUid: safeText(data.studentId || data.userId || data.studentUid),
+      courseId: safeText(data.courseId || data.courseID || data.course),
+      status: safeText(data.status, "pending"),
+      createdAt: data.createdAt?.toMillis?.() || null
+    };
+  });
+  return {
+    success: true,
+    institutionId: actor.institutionId,
+    institutionName: safeText(institutionSnap.data().institutionName || institutionSnap.data().legalName),
+    learners,
+    courses,
+    enrolments,
+    limits: { students: Number(institutionSnap.data().limits?.students || 5000), currentStudents: learners.length }
+  };
+});
+
+exports.enrollStudentInInstitutionCourse = onCall(async request => {
+  const actor = await requireActiveInstitutionMember(request);
+  const email = safeText(request.data?.studentEmail).toLowerCase();
+  const courseId = safeText(request.data?.courseId);
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new HttpsError("invalid-argument", "Enter the learner's registered email address.");
+  }
+  if (!courseId) throw new HttpsError("invalid-argument", "Choose a course.");
+  const institutionRef = db.doc("institutions/" + actor.institutionId);
+  const courseRef = db.doc("courses/" + courseId);
+  const [institutionSnap, courseSnap] = await Promise.all([institutionRef.get(), courseRef.get()]);
+  if (!institutionSnap.exists || institutionSnap.data().status !== "active") {
+    throw new HttpsError("failed-precondition", "The institution workspace is not active.");
+  }
+  if (!courseSnap.exists) throw new HttpsError("not-found", "The selected course does not exist.");
+  const course = courseSnap.data();
+  if (course.institutionId !== actor.institutionId) {
+    throw new HttpsError("permission-denied", "You can only enrol learners in your institution's courses.");
+  }
+  if (course.status !== "published" && course.published !== true) {
+    throw new HttpsError("failed-precondition", "Only published institution courses can be assigned to learners.");
+  }
+  let studentAuth;
+  try {
+    studentAuth = await adminAuth.getUserByEmail(email);
+  } catch (error) {
+    if (error.code === "auth/user-not-found") {
+      throw new HttpsError("not-found", "No Spark Stack student account uses that email. Ask the learner to create an account first.");
+    }
+    throw error;
+  }
+  const studentUid = studentAuth.uid;
+  const studentRef = db.doc("users/" + studentUid);
+  const memberRef = db.doc("institutions/" + actor.institutionId + "/members/" + studentUid);
+  const enrolmentId = ("inst_" + actor.institutionId + "_" + studentUid + "_" + courseId)
+    .replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 240);
+  const enrolmentRef = db.doc("enrollments/" + enrolmentId);
+  const now = Timestamp.now();
+  await db.runTransaction(async transaction => {
+    const [studentSnap, memberSnap, existingEnrolmentSnap, freshInstitutionSnap] = await Promise.all([
+      transaction.get(studentRef), transaction.get(memberRef),
+      transaction.get(enrolmentRef), transaction.get(institutionRef)
+    ]);
+    const student = studentSnap.exists ? studentSnap.data() : {};
+    if (!studentSnap.exists || student.role !== "student" || student.status !== "active" || student.active !== true) {
+      throw new HttpsError("failed-precondition", "Only active Spark Stack student accounts can be enrolled.");
+    }
+    if (!freshInstitutionSnap.exists || freshInstitutionSnap.data().status !== "active") {
+      throw new HttpsError("failed-precondition", "The institution workspace is no longer active.");
+    }
+    if (memberSnap.exists && memberSnap.data().role !== "student") {
+      throw new HttpsError("failed-precondition", "This account is already registered in the institution under another role.");
+    }
+    const memberIsActive = memberSnap.exists && memberSnap.data().status === "active" && memberSnap.data().active !== false;
+    const limits = freshInstitutionSnap.data().limits || {};
+    const usage = freshInstitutionSnap.data().usage || {};
+    const maximum = Number(limits.students || 5000);
+    const current = Number(usage.students || 0);
+    if (!memberIsActive && current >= maximum) {
+      throw new HttpsError("resource-exhausted", "The institution has reached its learner capacity.");
+    }
+    transaction.set(memberRef, {
+      uid: studentUid,
+      email: safeText(student.email || studentAuth.email).toLowerCase(),
+      fullName: safeText(student.fullName || student.name || student.displayName, "Student"),
+      name: safeText(student.fullName || student.name || student.displayName, "Student"),
+      phone: safeText(student.phone),
+      role: "student", status: "active", active: true,
+      enrolledBy: actor.uid, institutionId: actor.institutionId,
+      createdAt: memberSnap.exists ? (memberSnap.data().createdAt || now) : now,
+      updatedAt: now
+    }, { merge: true });
+    transaction.set(enrolmentRef, {
+      enrollmentId: enrolmentId,
+      studentId: studentUid, userId: studentUid,
+      courseId, institutionId: actor.institutionId,
+      institutionName: safeText(freshInstitutionSnap.data().institutionName || freshInstitutionSnap.data().legalName),
+      status: "active", paymentStatus: "institution_grant",
+      source: "institution_enrollment", createdBy: actor.uid,
+      createdAt: existingEnrolmentSnap.exists ? (existingEnrolmentSnap.data().createdAt || now) : now,
+      updatedAt: now,
+      ...(existingEnrolmentSnap.exists ? { reactivatedAt: now, reactivatedBy: actor.uid } : {})
+    }, { merge: true });
+    if (!memberIsActive) {
+      transaction.update(institutionRef, { "usage.students": current + 1, updatedAt: now });
+    }
+  });
+  await db.collection("audit_logs").add({
+    action: "institution_student_course_enrolled", actorId: actor.uid,
+    targetId: studentUid, targetEmail: email, institutionId: actor.institutionId,
+    courseId, enrollmentId: enrolmentId, createdAt: now
+  });
+  return { success: true, studentUid, enrollmentId: enrolmentId, message: "Learner enrolled. Course access is being synchronised securely." };
+});
+
+exports.revokeInstitutionCourseEnrollment = onCall(async request => {
+  const actor = await requireActiveInstitutionMember(request);
+  const enrollmentId = safeText(request.data?.enrollmentId);
+  if (!enrollmentId) throw new HttpsError("invalid-argument", "Choose an enrolment to revoke.");
+  const enrollmentRef = db.doc("enrollments/" + enrollmentId);
+  const snapshot = await enrollmentRef.get();
+  if (!snapshot.exists || snapshot.data().institutionId !== actor.institutionId) {
+    throw new HttpsError("not-found", "The institution enrolment could not be found.");
+  }
+  if (snapshot.data().status === "revoked") return { success: true, alreadyRevoked: true };
+  const now = Timestamp.now();
+  await enrollmentRef.set({ status: "revoked", revokedAt: now, revokedBy: actor.uid, updatedAt: now }, { merge: true });
+  await db.collection("audit_logs").add({
+    action: "institution_student_course_access_revoked", actorId: actor.uid,
+    targetId: safeText(snapshot.data().studentId || snapshot.data().userId),
+    institutionId: actor.institutionId,
+    courseId: safeText(snapshot.data().courseId || snapshot.data().courseID),
+    enrollmentId, createdAt: now
+  });
+  return { success: true, message: "This institution's course access has been revoked." };
+});
+
 // MANUAL M-PESA COURSE PAYMENTS
 // Students submit a Safaricom receipt code after paying the
 // configured personal M-Pesa receiver. No entitlement is granted
