@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b082d">
+<title>Spark AI Companion | Spark Stack Academy</title>
+<link rel="stylesheet" href="css/student-core.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/ai-companion.css?v=20261121-ai1">
+<link rel="stylesheet" href="../css/brand-system.css?v=20261121-brand1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="student-layout">
+  <aside id="sidebarContainer" class="sidebar-container"></aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <main class="student-main">
+    <div id="topbarContainer" class="topbar-container"></div>
+    <section class="ai-page">
+      <header class="ai-hero">
+        <div class="ai-hero-copy">
+          <span class="ai-eyebrow"><i data-lucide="sparkles"></i> YOUR PERSONAL LEARNING PARTNER</span>
+          <h1>Meet <span>Spark AI</span></h1>
+          <p>A smarter way to understand difficult topics, revise confidently and keep your learning moving forward.</p>
+          <div class="ai-hero-tags"><span><i data-lucide="graduation-cap"></i> Study smarter</span><span><i data-lucide="brain"></i> Learn at your pace</span><span><i data-lucide="shield-check"></i> You stay in control</span></div>
+        </div>
+        <div class="ai-orb" aria-hidden="true"><div class="orb-ring ring-one"></div><div class="orb-ring ring-two"></div><div class="orb-core"><i data-lucide="brain-circuit"></i></div><span class="orb-spark spark-a">✦</span><span class="orb-spark spark-b">✧</span></div>
+      </header>
+
+      <div class="ai-status"><span class="status-dot"></span><div><strong>Early access preview</strong><small>The learning experience is being prepared. AI responses are not connected yet.</small></div><span class="preview-pill">PREVIEW</span></div>
+
+      <div class="ai-workspace">
+        <section class="chat-panel">
+          <div class="chat-heading"><div class="chat-heading-icon"><i data-lucide="messages-square"></i></div><div><h2>Learning conversation</h2><p>Ask questions. Explore ideas. Build understanding.</p></div><button class="icon-quiet" id="clearChat" type="button" title="Clear conversation" aria-label="Clear conversation"><i data-lucide="rotate-ccw"></i></button></div>
+          <div class="chat-messages" id="chatMessages" aria-live="polite">
+            <article class="message assistant-message"><div class="message-avatar"><i data-lucide="sparkles"></i></div><div class="message-body"><span class="message-author">Spark AI <small>LEARNING COMPANION</small></span><div class="message-bubble"><strong>Your next breakthrough starts here.</strong><p>Choose a learning goal below or type a question. This preview lets you explore the interface; live AI tutoring will be enabled after its secure service is connected.</p></div><div class="message-meta">Designed to support your learning, not replace your instructor.</div></div></article>
+          </div>
+          <div class="suggestion-area"><span class="suggestion-label">TRY ASKING</span><div class="suggestion-chips"><button type="button" data-prompt="Explain a difficult concept in simple steps">Explain a concept</button><button type="button" data-prompt="Create five revision questions for me">Create revision questions</button><button type="button" data-prompt="Help me build a weekly study plan">Build a study plan</button><button type="button" data-prompt="Summarise these notes into key points">Summarise notes</button></div></div>
+          <form class="chat-composer" id="chatForm"><label class="sr-only" for="chatInput">Ask Spark AI a question</label><textarea id="chatInput" rows="1" maxlength="1200" placeholder="Ask Spark AI anything about your learning..." disabled></textarea><button id="sendMessage" type="submit" disabled aria-label="Send message"><i data-lucide="arrow-up"></i></button></form>
+          <div class="composer-note"><i data-lucide="lock"></i> Messaging will activate when the secure AI service is connected.</div>
+        </section>
+
+        <aside class="ai-side">
+          <section class="side-card plan-card"><div class="side-card-top"><span class="plan-icon"><i data-lucide="zap"></i></span><span class="plan-label">YOUR PLAN</span><span class="free-pill">FREE</span></div><h3>Spark AI Basic</h3><p>Everyday learning support for your study journey.</p><ul><li><i data-lucide="check"></i> Concept explanations</li><li><i data-lucide="check"></i> Short summaries</li><li><i data-lucide="check"></i> Basic revision support</li><li><i data-lucide="check"></i> Study guidance</li></ul><div class="plan-foot"><span>Daily usage allowance</span><strong>Set by Academy</strong></div></section>
+          <section class="side-card plus-card"><div class="plus-top"><span><i data-lucide="crown"></i> GO FURTHER</span><span class="coming-pill">COMING SOON</span></div><h3>Spark AI <em>Plus</em></h3><p>Deeper tutoring for ambitious learners.</p><div class="plus-feature"><i data-lucide="workflow"></i><span>Step-by-step tutoring</span></div><div class="plus-feature"><i data-lucide="calendar-check"></i><span>Personal study plans</span></div><div class="plus-feature"><i data-lucide="target"></i><span>Advanced exam preparation</span></div><div class="plus-feature"><i data-lucide="book-open-check"></i><span>Course-aware learning support</span></div><button type="button" class="plus-button" disabled>Explore Plus <i data-lucide="arrow-right"></i></button></section>
+          <section class="side-card quick-tools"><div class="tools-heading"><i data-lucide="wand-sparkles"></i><h3>Study tools</h3></div><button type="button" data-prompt="Help me understand a topic using a real-world example"><span class="tool-icon"><i data-lucide="lightbulb"></i></span><span><strong>Explain with examples</strong><small>Connect ideas to real life</small></span><i data-lucide="chevron-right"></i></button><button type="button" data-prompt="Give me a quick practice quiz on a topic I choose"><span class="tool-icon"><i data-lucide="clipboard-list"></i></span><span><strong>Practice quiz</strong><small>Check what you understand</small></span><i data-lucide="chevron-right"></i></button><button type="button" data-prompt="Help me break a big learning goal into small tasks"><span class="tool-icon"><i data-lucide="list-checks"></i></span><span><strong>Break down a goal</strong><small>Turn plans into small steps</small></span><i data-lucide="chevron-right"></i></button></section>
+        </aside>
+      </div>
+      <p class="ai-disclaimer"><i data-lucide="info"></i> Spark AI is a learning aid. Verify important information with your course materials and instructor. Grades, certificates and other academic decisions remain under authorised human control.</p>
+    </section>
+  </main>
+</div>
+<script type="module" src="js/student-app.js"></script>
+<script type="module" src="js/ai-companion.js?v=20261121-ai1"></script>
+<script>document.addEventListener('DOMContentLoaded',()=>window.lucide?.createIcons());</script>
+</body>
+</html>
