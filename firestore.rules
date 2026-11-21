@@ -958,7 +958,6 @@ service cloud.firestore {
         || (
           isStudent()
           && studentPortalOpen()
-          && hasActiveCourseEntitlement(resource.data.courseId)
         )
         || (
           isInstructor()
@@ -1003,6 +1002,7 @@ service cloud.firestore {
         || (
           isStudent()
           && studentPortalOpen()
+          && hasActiveCourseEntitlement(resource.data.courseId)
         )
         || (
           isInstructor()
@@ -1039,6 +1039,7 @@ service cloud.firestore {
         || (
           isStudent()
           && studentPortalOpen()
+          && hasActiveCourseEntitlement(resource.data.courseId)
         )
         || (
           isInstructor()
@@ -1075,6 +1076,7 @@ service cloud.firestore {
         || (
           isStudent()
           && studentPortalOpen()
+          && hasActiveCourseEntitlement(resource.data.courseId)
         )
         || (
           isInstructor()
