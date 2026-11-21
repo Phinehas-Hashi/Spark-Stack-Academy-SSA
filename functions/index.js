@@ -620,6 +620,7 @@ exports.syncMyCourseEntitlements = onCall(async request => {
         source: "institution_enrollment",
         sourceRecordId: record.id,
         institutionId,
+        institutionName: safeText(data.institutionName || data.schoolName),
         progress: Number(data.progress ?? data.progressPercent ?? 0),
         status: "active",
         validatedAt: Timestamp.now()
