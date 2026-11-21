@@ -1,11 +1,14 @@
 import { db } from "../js/firebase.js";
-import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 const getGlobalStats = httpsCallable(getFunctions(), "getFounderGlobalStats");
 
 const money = new Intl.NumberFormat("en-KE", { style:"currency", currency:"KES", maximumFractionDigits:0 });
 const $ = (id) => document.getElementById(id);
 const state = { students:0, enrollments:[], courses:[], instructors:0, certificates:0, payments:[] };
+let academyMap = null;
+let countryGeoLayer = null;
+let mapCountryStats = {};
 const amount = (item) => Number(item.amount || item.total || item.price || 0) || 0;
 const dateOf = (item) => { const value=item.paidAt || item.createdAt || item.updatedAt; return value?.toDate ? value.toDate() : value ? new Date(value) : null; };
 
@@ -100,11 +103,49 @@ function renderGrowthStats(data){
   const scanned=data.scanned||{},limits=data.scanLimits||{};
   $("globalGrowthDataNote").textContent="Scanned "+fmt(scanned.users)+" user profiles, "+fmt(scanned.institutions)+" institutions, "+fmt(scanned.paymentLedger)+" posted-ledger records and "+fmt(scanned.institutionPayments)+" institution payment records. "+(data.scanLimitReached?"At least one scan reached its safety limit; totals may be partial. ":"")+fmt(data.unknownInstitutionCountry)+" institutions have no recognized country. Course labels currently use course IDs; revenue totals are shown in KES separately from other currencies.";
 }
+
+function normalizeCountryCode(data){
+  const raw=String(data.countryCode||data.location?.countryCode||data.address?.countryCode||"").trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(raw)?raw:"";
+}
+function aggregateBrowserCountryData(userDocs,institutionDocs){
+  const countries={};let unknownUsers=0,unknownInstitutions=0;
+  userDocs.forEach(doc=>{const data=doc.data();const code=normalizeCountryCode(data);if(!code){unknownUsers++;return;}countries[code]??={countryCode:code,users:0,activeUsers:0,institutions:0};countries[code].users++;if(data.active===true||data.status==="active")countries[code].activeUsers++;});
+  institutionDocs.forEach(doc=>{const data=doc.data();const code=normalizeCountryCode(data);if(!code){unknownInstitutions++;return;}countries[code]??={countryCode:code,users:0,activeUsers:0,institutions:0};countries[code].institutions++;});
+  return {countries:Object.values(countries).sort((a,b)=>(b.users+b.institutions)-(a.users+a.institutions)),totalUsers:userDocs.length,totalInstitutions:institutionDocs.length,unknownUsers,unknownInstitutions};
+}
+function mapColor(count,max){if(!count)return "#182b43";const intensity=Math.min(1,count/Math.max(max,1));return intensity>.7?"#12b8a6":intensity>.35?"#2878d0":"#526b9b";}
+async function renderAcademyWorldMap(stats){
+  mapCountryStats={};(stats.countries||[]).forEach(row=>{mapCountryStats[row.countryCode]=row;});
+  const source=$("mapDataSource"),coverage=$("mapCoverageNote");
+  if(!window.L){if(source)source.textContent="Map library unavailable";if(coverage)coverage.textContent="Country ranking remains available above.";return;}
+  if(!academyMap){academyMap=L.map("academyWorldMap",{scrollWheelZoom:false,worldCopyJump:true}).setView([15,10],2);L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:6}).addTo(academyMap);}
+  if(countryGeoLayer){countryGeoLayer.remove();countryGeoLayer=null;}
+  try{
+    const response=await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");
+    if(!response.ok)throw new Error("Country boundary data unavailable");
+    const geo=await response.json();
+    const max=Math.max(...Object.values(mapCountryStats).map(x=>Number(x.users||0)+Number(x.institutions||0)),1);
+    countryGeoLayer=L.geoJSON(geo,{style:feature=>{const p=feature.properties||{};const code=String(p.ISO_A2||p.ISO_A2_EH||"").toUpperCase();const row=mapCountryStats[code];return {color:"#8da3c1",weight:.55,fillColor:mapColor(row?Number(row.users||0)+Number(row.institutions||0):0,max),fillOpacity:row?.users||row?.institutions?.65:0.16};},onEachFeature:(feature,layer)=>{const p=feature.properties||{};const code=String(p.ISO_A2||p.ISO_A2_EH||"").toUpperCase();const row=mapCountryStats[code];const name=p.ADMIN||p.name||code;layer.bindPopup("<strong>"+name+"</strong><br>Users: "+Number(row?.users||0).toLocaleString()+"<br>Institutions: "+Number(row?.institutions||0).toLocaleString());}}).addTo(academyMap);
+    if(source)source.textContent="Live profile data";
+    if(coverage)coverage.textContent=Object.keys(mapCountryStats).length+" countries represented · no IP-based location inference";
+    setTimeout(()=>academyMap.invalidateSize(),100);
+  }catch(error){console.warn("World map boundary load failed:",error);if(source)source.textContent="Map boundaries unavailable";if(coverage)coverage.textContent="Country totals remain available in the ranking above.";}
+}
+async function loadBrowserCountryFallback(){
+  const [users,institutions]=await Promise.all([getDocs(collection(db,"users")),getDocs(collection(db,"institutions"))]);
+  const stats=aggregateBrowserCountryData(users.docs,institutions.docs);
+  const rows=stats.countries;
+  renderGlobalStats({countries:rows,countriesTracked:rows.length,activeUsers:users.docs.filter(x=>x.data().active===true||x.data().status==="active").length,unknownCountry:stats.unknownUsers+stats.unknownInstitutions,roles:{},generatedAt:new Date().toISOString(),scanLimitReached:false});
+  renderAcademyWorldMap({countries:rows});
+  $("globalDataNote").textContent="Browser-only fallback: "+stats.totalUsers.toLocaleString()+" user profiles and "+stats.totalInstitutions.toLocaleString()+" institution records read under existing Founder permissions. Unknown country records: "+(stats.unknownUsers+stats.unknownInstitutions)+". Revenue and payment metrics are intentionally unavailable without trusted server-side aggregation.";
+  $("globalGrowthDataNote").textContent="Server-side growth and verified revenue metrics are unavailable until a trusted backend is deployed. The map shows profile and institution counts only.";
+}
 async function loadGlobalStats(){
   const button=$("refreshGlobalStats");if(button)button.disabled=true;
   $("globalStatsUpdated").textContent="Refreshing…";
-  try{const result=await getGlobalStats();renderGlobalStats(result.data||{});renderGrowthStats(result.data||{});}
-  catch(error){console.error("Global country analytics failed:",error);$("globalCountryRows").innerHTML='<p class="empty">Global statistics unavailable: '+String(error.message||"permission or network error")+'</p>';$("globalStatsUpdated").textContent="Refresh failed";}
+  try{const result=await getGlobalStats();renderGlobalStats(result.data||{});renderGrowthStats(result.data||{});await renderAcademyWorldMap(result.data||{});}
+  catch(error){console.warn("Server-side global stats unavailable; trying Founder-authorized browser fallback:",error);try{await loadBrowserCountryFallback();$("globalStatsUpdated").textContent="Browser-only data";}catch(fallbackError){console.error("Browser country fallback failed:",fallbackError);$("globalCountryRows").innerHTML='<p class="empty">Country analytics unavailable. Check Founder Firestore read permissions and network access.</p>';$("globalStatsUpdated").textContent="Refresh failed";$("mapDataSource").textContent="No map data";}}
   finally{if(button)button.disabled=false;}
 }
 $("refreshGlobalStats")?.addEventListener("click",loadGlobalStats);
