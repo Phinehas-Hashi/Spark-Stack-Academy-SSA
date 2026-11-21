@@ -304,7 +304,7 @@ async function loadLearningStats(
 
         const level =
             Math.floor(
-                xp / 250
+                xp / 100
             ) + 1;
 
 
