@@ -791,3 +791,62 @@
     }
 
 }
+
+/* ============================================================
+   COURSE DETAILS MODAL — COMPLETE PANEL SURFACE + MOBILE LAYOUT
+============================================================ */
+#courseDetailsModal {
+    box-sizing: border-box;
+    isolation: isolate;
+}
+
+#courseDetailsModal .course-details-modal {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 620px;
+    width: min(620px, 100%);
+    max-width: 100%;
+    max-height: min(88dvh, 780px);
+    min-height: 0;
+    margin: auto;
+    overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    background: #fff;
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 20px;
+    box-shadow: 0 28px 90px rgba(2, 8, 23, .32);
+}
+
+#courseDetailsModal .course-details-modal > * {
+    flex-shrink: 0;
+}
+
+#courseDetailsModal .course-modal-info h3,
+#courseDetailsModal .course-detail-item strong {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    #courseDetailsModal {
+        align-items: center;
+        padding: max(12px, env(safe-area-inset-top)) 12px
+                 max(12px, env(safe-area-inset-bottom));
+    }
+
+    #courseDetailsModal .course-details-modal {
+        width: 100%;
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);
+        border-radius: 17px;
+    }
+
+    #courseDetailsModal .course-modal-actions {
+        align-items: stretch;
+    }
+
+    #courseDetailsModal .course-modal-actions .admin-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
