@@ -1,6 +1,9 @@
 .premium-page{
     width: 100%;
     animation: premiumPageLoad .4s ease;
+
+    padding:28px 32px 44px;
+    box-sizing:border-box;
 }@keyframes premiumPageLoad{
     from {
         opacity: 0;
@@ -535,3 +538,4 @@
     }.premium-page .plan-price{
         font-size: 31px;
     }}
+@media(max-width:700px){.premium-page{padding:20px 16px 32px}}
