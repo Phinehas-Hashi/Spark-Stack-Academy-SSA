@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Your complete learning portfolio at Spark Stack Academy.">
+  <title>My Learning | Spark Stack Academy</title>
+  <link rel="stylesheet" href="css/student-core.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/my-learning.css?v=20261121-1">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="student-layout">
+  <aside id="sidebarContainer" class="sidebar-container" aria-label="Student navigation"></aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <main class="student-main">
+    <div id="topbarContainer" class="topbar-container"></div>
+    <section class="dashboard-content my-learning-page">
+      <header class="my-learning-hero">
+        <div class="my-learning-hero-copy">
+          <span class="my-learning-eyebrow"><i data-lucide="graduation-cap"></i> YOUR LEARNING SPACE</span>
+          <h1>My Learning</h1>
+          <p>Every course you have access to, brought together in one place. Pick up where you left off and keep moving forward.</p>
+          <a class="my-learning-explore" href="marketplace.html"><i data-lucide="compass"></i> Explore courses</a>
+        </div>
+        <div class="my-learning-hero-art" aria-hidden="true"><i data-lucide="book-open-check"></i></div>
+      </header>
+
+      <section class="my-learning-stats" aria-label="Learning overview">
+        <article class="my-learning-stat"><span>My courses</span><strong id="myLearningTotal">—</strong><i data-lucide="library"></i></article>
+        <article class="my-learning-stat"><span>In progress</span><strong id="myLearningActive">—</strong><i data-lucide="play-circle"></i></article>
+        <article class="my-learning-stat"><span>Completed</span><strong id="myLearningCompleted">—</strong><i data-lucide="badge-check"></i></article>
+        <article class="my-learning-stat"><span>Average progress</span><strong id="myLearningAverage">—</strong><i data-lucide="trending-up"></i></article>
+      </section>
+
+      <section class="my-learning-section">
+        <div class="my-learning-heading">
+          <div><span class="my-learning-kicker">YOUR PORTFOLIO</span><h2>Continue learning</h2><p>Marketplace purchases and institution learning grants appear here when access is active.</p></div>
+          <span id="myLearningCount" class="my-learning-count" aria-live="polite">Loading courses</span>
+        </div>
+        <div class="my-learning-controls">
+          <label class="my-learning-search"><i data-lucide="search"></i><input id="myLearningSearch" type="search" placeholder="Search your courses" autocomplete="off" aria-label="Search your courses"></label>
+          <div class="my-learning-filters" role="group" aria-label="Filter courses">
+            <button type="button" class="active" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" data-filter="progress" aria-pressed="false">In progress</button>
+            <button type="button" data-filter="completed" aria-pressed="false">Completed</button>
+          </div>
+        </div>
+        <div id="myLearningGrid" class="my-learning-grid" aria-live="polite">
+          <div class="my-learning-state"><i data-lucide="loader-circle"></i><h3>Preparing your learning space</h3><p>Loading your active course access.</p></div>
+        </div>
+        <div id="myLearningError" class="my-learning-state my-learning-error" hidden><i data-lucide="cloud-off"></i><h3>We couldn't load your courses</h3><p>Your learning records could not be reached. Check your connection and try again.</p><button id="myLearningRetry" type="button">Try again</button></div>
+      </section>
+      <section class="my-learning-help"><div><i data-lucide="shield-check"></i><div><strong>Access is checked before lessons open</strong><p>Only courses with an active enrolment or verified grant should unlock the classroom.</p></div></div><a href="learning-progress.html">View detailed progress <i data-lucide="arrow-up-right"></i></a></section>
+    </section>
+  </main>
+</div>
+<script type="module" src="js/student-app.js"></script>
+<script type="module" src="js/my-learning.js?v=20261121-1"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>window.lucide?.createIcons());</script>
+</body>
+</html>
