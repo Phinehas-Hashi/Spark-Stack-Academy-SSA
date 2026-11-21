@@ -8,6 +8,9 @@
 
     animation: notificationsEnter .35s ease;
 
+
+    padding:28px 32px 44px;
+    box-sizing:border-box;
 }@keyframes notificationsEnter{
 
     from {
@@ -648,3 +651,4 @@
         display: none;
 
     }}
+@media(max-width:700px){.notifications-page{padding:20px 16px 32px}}
