@@ -1,0 +1,278 @@
+.certificates-page{
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+}.certificates-page .page-header{
+    margin-bottom: 30px;
+}.certificates-page .page-eyebrow{
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #762cff;
+    margin-bottom: 8px;
+}.certificates-page .page-header h1{
+    margin: 0 0 8px;
+    font-size: 32px;
+    font-weight: 800;
+    color: #17152f;
+}.certificates-page .page-header p{
+    margin: 0;
+    color: #64748B;
+    font-size: 15px;
+}.certificates-page .certificate-stats{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 38px;
+}.certificates-page .certificate-stat-card{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    padding: 22px;
+
+    background: #ffffff;
+    border: 1px solid #E8EDF5;
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 30px rgba(8, 28, 58, 0.05);
+}.certificates-page .stat-icon{
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background: #EEF5FF;
+    color: #762cff;
+}.certificates-page .stat-icon svg{
+    width: 24px;
+    height: 24px;
+}.certificates-page .certificate-stat-card span{
+    display: block;
+    margin-bottom: 5px;
+
+    font-size: 13px;
+    color: #64748B;
+}.certificates-page .certificate-stat-card strong{
+    display: block;
+
+    font-size: 25px;
+    font-weight: 800;
+    color: #17152f;
+}.certificates-page .section-heading{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 18px;
+}.certificates-page .section-heading h2{
+    margin: 0 0 5px;
+
+    font-size: 20px;
+    font-weight: 800;
+    color: #17152f;
+}.certificates-page .section-heading p{
+    margin: 0;
+
+    font-size: 14px;
+    color: #64748B;
+}.certificates-page .certificates-grid{
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(320px, 1fr));
+
+    gap: 22px;
+}.certificates-page .certificate-card{
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #E8EDF5;
+    border-radius: 20px;
+
+    box-shadow:
+        0 10px 35px rgba(8, 28, 58, 0.06);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}.certificates-page .certificate-card:hover{
+    transform: translateY(-4px);
+
+    box-shadow:
+        0 16px 45px rgba(8, 28, 58, 0.10);
+}.certificates-page .certificate-preview{
+    position: relative;
+
+    min-height: 190px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 25px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #17152f,
+            #12396F
+        );
+}.certificates-page .certificate-preview::before{
+    content: "";
+
+    position: absolute;
+    inset: 14px;
+
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
+}.certificates-page .certificate-badge{
+    position: relative;
+
+    width: 70px;
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #20cfe8;
+    color: #17152f;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.25);
+}.certificates-page .certificate-badge svg{
+    width: 34px;
+    height: 34px;
+}.certificates-page .certificate-content{
+    padding: 20px;
+}.certificates-page .certificate-content h3{
+    margin: 0 0 7px;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    color: #17152f;
+}.certificates-page .certificate-content p{
+    margin: 0 0 14px;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    color: #64748B;
+}.certificates-page .certificate-meta{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-bottom: 18px;
+}.certificates-page .certificate-meta span{
+    padding: 6px 9px;
+
+    border-radius: 8px;
+
+    background: #F4F7FB;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    color: #475569;
+}.certificates-page .certificate-actions{
+    display: flex;
+    gap: 10px;
+}.certificates-page .certificate-btn{
+    flex: 1;
+
+    min-height: 42px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    border: none;
+    border-radius: 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}.certificates-page .certificate-btn svg{
+    width: 16px;
+    height: 16px;
+}.certificates-page .certificate-btn.primary{
+    background: #762cff;
+    color: #ffffff;
+}.certificates-page .certificate-btn.primary:hover{
+    background: #1769EF;
+}.certificates-page .certificate-btn.secondary{
+    background: #F1F5F9;
+    color: #334155;
+}.certificates-page .certificate-btn.secondary:hover{
+    background: #E2E8F0;
+}.certificates-page .certificate-loading,.certificates-page .certificate-empty{
+    grid-column: 1 / -1;
+
+    min-height: 260px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 30px;
+
+    background: #ffffff;
+
+    border: 1px dashed #CBD5E1;
+    border-radius: 20px;
+}.certificates-page .certificate-loading svg,.certificates-page .certificate-empty svg{
+    width: 38px;
+    height: 38px;
+
+    margin-bottom: 14px;
+
+    color: #762cff;
+}.certificates-page .certificate-loading h3,.certificates-page .certificate-empty h3{
+    margin: 0 0 7px;
+
+    font-size: 18px;
+    color: #17152f;
+}.certificates-page .certificate-loading p,.certificates-page .certificate-empty p{
+    margin: 0;
+
+    font-size: 14px;
+    color: #64748B;
+}@media (max-width: 768px){.certificates-page{
+        padding: 22px 16px;
+    }.certificates-page .page-header h1{
+        font-size: 27px;
+    }.certificates-page .certificate-stats{
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }.certificates-page .certificates-grid{
+        grid-template-columns: 1fr;
+    }.certificates-page .certificate-preview{
+        min-height: 175px;
+    }}@media (max-width: 480px){.certificates-page{
+        padding: 18px 12px;
+    }.certificates-page .certificate-stat-card{
+        padding: 17px;
+    }.certificates-page .certificate-actions{
+        flex-direction: column;
+    }}
