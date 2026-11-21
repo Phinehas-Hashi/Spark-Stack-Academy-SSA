@@ -718,6 +718,401 @@ exports.syncMyCourseEntitlements = onCall(async request => {
   };
 });
 
+
+// ============================================================
+// INSTITUTION ENROLMENT -> CANONICAL COURSE ENTITLEMENTS
+// Trusted Firestore triggers keep grants current as staff enrol,
+// update or revoke institution learners. Each source grant is
+// independent, so revoking one institution record cannot erase
+// a separate marketplace purchase or another institution grant.
+// ============================================================
+
+async function syncInstitutionGrant({ studentUid, sourceId, data, deleted = false }) {
+  const institutionId = safeText(data?.institutionId);
+  const courseId = safeText(data?.courseId || data?.courseID || data?.course);
+  if (!studentUid || !institutionId || !courseId) return;
+
+  const entitlementId = studentUid + "_" + courseId;
+  const grantKey = ("institution_" + institutionId + "_" + sourceId)
+    .replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 140);
+  const entitlementRef = db.doc("courseEntitlements/" + entitlementId);
+  let grant = null;
+
+  if (!deleted) {
+    const status = entitlementRecordStatus(data.status);
+    if (["active", "approved", "completed"].includes(status)) {
+      const [userSnap, institutionSnap, memberSnap, courseSnap] = await Promise.all([
+        db.doc("users/" + studentUid).get(),
+        db.doc("institutions/" + institutionId).get(),
+        db.doc("institutions/" + institutionId + "/members/" + studentUid).get(),
+        db.doc("courses/" + courseId).get()
+      ]);
+      const user = userSnap.exists ? userSnap.data() : {};
+      const institution = institutionSnap.exists ? institutionSnap.data() : {};
+      const member = memberSnap.exists ? memberSnap.data() : {};
+      const course = courseSnap.exists ? courseSnap.data() : {};
+      const studentActive = user.role === "student" && user.status === "active" && user.active === true;
+      const institutionActive = institutionSnap.exists && institution.status === "active";
+      const memberActive = memberSnap.exists
+        ? member.status === "active" && member.active !== false
+        : user.institutionId === institutionId && user.status === "active" && user.active === true;
+      const courseBelongsToInstitution = !course.institutionId || course.institutionId === institutionId;
+      if (studentActive && institutionActive && memberActive && courseSnap.exists && courseBelongsToInstitution) {
+        grant = {
+          source: "institution_enrollment",
+          sourceRecordId: sourceId,
+          institutionId,
+          institutionName: safeText(data.institutionName || data.schoolName || institution.institutionName),
+          status: "active",
+          grantedAt: Timestamp.now()
+        };
+      }
+    }
+  }
+
+  await db.runTransaction(async transaction => {
+    const snap = await transaction.get(entitlementRef);
+    const current = snap.exists ? snap.data() : {};
+    const grants = { ...(current.grants || {}) };
+    if (grant) grants[grantKey] = grant;
+    else delete grants[grantKey];
+    const activeGrants = Object.values(grants).filter(item => item?.status === "active");
+    const now = Timestamp.now();
+    const payload = {
+      studentUid, courseId, grants,
+      status: activeGrants.length ? "active" : "revoked",
+      activeGrantCount: activeGrants.length,
+      migrationVersion: 1,
+      updatedAt: now
+    };
+    if (!current.createdAt) payload.createdAt = now;
+    transaction.set(entitlementRef, payload, { merge: true });
+  });
+}
+
+exports.syncInstitutionNestedEnrollmentEntitlement = onDocumentWritten(
+  "students/{studentUid}/enrollments/{enrollmentId}",
+  async event => {
+    const after = event.data?.after;
+    const before = event.data?.before;
+    const data = after?.exists ? after.data() : (before?.data() || {});
+    await syncInstitutionGrant({
+      studentUid: event.params.studentUid,
+      sourceId: event.params.enrollmentId,
+      data,
+      deleted: !after?.exists
+    });
+  }
+);
+
+exports.syncInstitutionTopLevelEnrollmentEntitlement = onDocumentWritten(
+  "enrollments/{enrollmentId}",
+  async event => {
+    const after = event.data?.after;
+    const before = event.data?.before;
+    const data = after?.exists ? after.data() : (before?.data() || {});
+    if (!data.institutionId) return;
+    const studentUid = safeText(data.studentId || data.userId || data.studentUid);
+    if (!studentUid) return;
+    await syncInstitutionGrant({
+      studentUid,
+      sourceId: event.params.enrollmentId,
+      data,
+      deleted: !after?.exists
+    });
+  }
+);
+
+
+// ============================================================
+// MANUAL M-PESA COURSE PAYMENTS
+// Students submit a Safaricom receipt code after paying the
+// configured personal M-Pesa receiver. No entitlement is granted
+// until an authorised Finance reviewer matches the incoming
+// transaction against the actual receiving-account records.
+// ============================================================
+
+async function requirePaymentReviewer(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to review payments.");
+  const [userSnap, founderSnap] = await Promise.all([
+    db.doc("users/" + uid).get(),
+    db.doc("founder/" + uid).get()
+  ]);
+  const user = userSnap.exists ? userSnap.data() : {};
+  const founder = founderSnap.exists ? founderSnap.data() : {};
+  const isFounder = founder.role === "founder" && founder.status === "active"
+    && founder.active !== false && founder.verified !== false;
+  const labels = [user.adminRole, user.department, user.position]
+    .map(value => safeText(value).toLowerCase().replace(/\\s+/g, "_"));
+  const financeRole = ["finance", "finance_manager", "financial_manager"].includes(safeText(user.role).toLowerCase())
+    || labels.some(value => ["finance", "finance_manager", "financial_manager"].includes(value));
+  const financePermission = user.permissions?.verifyPayments === true
+    || user.permissions?.managePayments === true;
+  const activeAdmin = ["admin", "administrator", "moderator", "finance_manager", "financial_manager"]
+    .includes(safeText(user.role).toLowerCase()) && user.status === "active" && user.active === true;
+  if (!isFounder && !(activeAdmin && (financeRole || financePermission))) {
+    throw new HttpsError("permission-denied", "Only the Founder or an authorised Finance reviewer can verify M-Pesa receipts.");
+  }
+  return { uid, role: isFounder ? "founder" : "finance" };
+}
+
+function normalizeManualMpesaPhone(value) {
+  let phone = safeText(value).replace(/[\\s()+-]/g, "");
+  if (phone.startsWith("0")) phone = "254" + phone.slice(1);
+  if (phone.startsWith("7") || phone.startsWith("1")) phone = "254" + phone;
+  if (!/^254[17]\\d{8}$/.test(phone)) {
+    throw new HttpsError("invalid-argument", "Enter a valid Kenyan M-Pesa phone number.");
+  }
+  return phone;
+}
+
+exports.getManualMpesaPaymentConfig = onCall(async request => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to view payment instructions.");
+  const [userSnap, controlsSnap] = await Promise.all([
+    db.doc("users/" + uid).get(),
+    db.doc("platform_controls/global").get()
+  ]);
+  const user = userSnap.exists ? userSnap.data() : {};
+  if (user.role !== "student" || user.status !== "active" || user.active !== true) {
+    throw new HttpsError("permission-denied", "An active student account is required.");
+  }
+  const config = controlsSnap.data()?.manualMpesa || {};
+  return {
+    enabled: config.enabled === true,
+    receiverName: safeText(config.receiverName),
+    receiverPhone: safeText(config.receiverPhone),
+    instructions: safeText(config.instructions, "Send the exact amount to the personal M-Pesa number shown. Keep your Safaricom confirmation message."),
+    currency: "KES"
+  };
+});
+
+exports.submitManualCoursePayment = onCall(async request => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in before submitting a payment.");
+  const [userSnap, controlsSnap] = await Promise.all([
+    db.doc("users/" + uid).get(),
+    db.doc("platform_controls/global").get()
+  ]);
+  const user = userSnap.exists ? userSnap.data() : {};
+  if (user.role !== "student" || user.status !== "active" || user.active !== true) {
+    throw new HttpsError("permission-denied", "An active student account is required.");
+  }
+  const config = controlsSnap.data()?.manualMpesa || {};
+  if (config.enabled !== true || !safeText(config.receiverPhone) || !safeText(config.receiverName)) {
+    throw new HttpsError("failed-precondition", "M-Pesa collection is not configured yet. Please contact Academy support.");
+  }
+
+  const courseId = safeText(request.data?.courseId);
+  const mpesaCode = safeText(request.data?.mpesaCode).toUpperCase();
+  const payerPhone = normalizeManualMpesaPhone(request.data?.payerPhone);
+  if (!courseId) throw new HttpsError("invalid-argument", "Course ID is required.");
+  if (!/^[A-Z0-9]{8,12}$/.test(mpesaCode)) {
+    throw new HttpsError("invalid-argument", "Enter the M-Pesa receipt code exactly as shown in your Safaricom message.");
+  }
+
+  const courseSnap = await db.doc("courses/" + courseId).get();
+  if (!courseSnap.exists) throw new HttpsError("not-found", "This course could not be found.");
+  const course = courseSnap.data();
+  const courseStatus = safeText(course.status, "published").toLowerCase();
+  if (["draft", "archived", "deleted", "rejected", "suspended"].includes(courseStatus)) {
+    throw new HttpsError("failed-precondition", "This course is not currently available for purchase.");
+  }
+  if (course.institutionId) {
+    throw new HttpsError("failed-precondition", "Institution-issued courses are settled directly by the institution and cannot be paid through the Academy personal M-Pesa collection.");
+  }
+  const basePrice = Number(course.price || 0);
+  const discountPrice = Number(course.discountPrice || 0);
+  const amount = discountPrice > 0 && discountPrice < basePrice ? discountPrice : basePrice;
+  const currency = safeText(course.currency, "KES").toUpperCase();
+  if (!Number.isFinite(amount) || amount <= 0 || currency !== "KES") {
+    throw new HttpsError("failed-precondition", "This course does not have a valid KES price for manual M-Pesa payment.");
+  }
+
+  const entitlementRef = db.doc("courseEntitlements/" + uid + "_" + courseId);
+  const entitlementSnap = await entitlementRef.get();
+  if (entitlementSnap.exists && entitlementSnap.data().status === "active") {
+    throw new HttpsError("already-exists", "You already have access to this course.");
+  }
+
+  const receiptRef = db.doc("mpesaReceipts/" + mpesaCode);
+  const paymentRef = db.collection("payments").doc();
+  const now = Timestamp.now();
+  await db.runTransaction(async transaction => {
+    const receiptSnap = await transaction.get(receiptRef);
+    if (receiptSnap.exists) {
+      throw new HttpsError("already-exists", "This M-Pesa receipt code has already been submitted. Contact Finance if you believe this is an error.");
+    }
+    transaction.create(receiptRef, {
+      receiptCode: mpesaCode,
+      paymentId: paymentRef.id,
+      studentUid: uid,
+      status: "pending_verification",
+      createdAt: now
+    });
+    transaction.create(paymentRef, {
+      paymentId: paymentRef.id,
+      userId: uid,
+      studentId: uid,
+      studentName: safeText(user.fullName || user.name || request.auth.token.name, "Student"),
+      studentEmail: safeText(user.email || request.auth.token.email),
+      courseId,
+      courseName: safeText(course.title || course.name, "Course"),
+      instructorId: safeText(course.instructorId || course.instructorUid),
+      amount,
+      currency: "KES",
+      method: "M-Pesa",
+      provider: "manual_safaricom_receipt",
+      mpesaCode,
+      payerPhone,
+      receiverPhone: safeText(config.receiverPhone),
+      status: "pending_verification",
+      verificationStatus: "pending",
+      entitlementGranted: false,
+      createdAt: now,
+      updatedAt: now
+    });
+  });
+
+  await db.collection("audit_logs").add({
+    action: "manual_mpesa_payment_submitted",
+    actorId: uid,
+    targetId: paymentRef.id,
+    courseId,
+    receiptCode: mpesaCode,
+    amount,
+    currency: "KES",
+    createdAt: Timestamp.now()
+  });
+
+  return {
+    success: true,
+    paymentId: paymentRef.id,
+    status: "pending_verification",
+    amount,
+    currency: "KES",
+    message: "Your receipt has been submitted. Course access remains locked while Finance verifies the payment."
+  };
+});
+
+exports.verifyManualCoursePayment = onCall(async request => {
+  const reviewer = await requirePaymentReviewer(request);
+  const paymentId = safeText(request.data?.paymentId);
+  const verifiedAmount = Number(request.data?.verifiedAmount);
+  const verificationNote = safeText(request.data?.verificationNote);
+  if (!paymentId) throw new HttpsError("invalid-argument", "Payment ID is required.");
+
+  const paymentRef = db.doc("payments/" + paymentId);
+  const paymentSnap = await paymentRef.get();
+  if (!paymentSnap.exists) throw new HttpsError("not-found", "Payment submission was not found.");
+  const payment = paymentSnap.data();
+  if (payment.provider !== "manual_safaricom_receipt" || payment.method !== "M-Pesa") {
+    throw new HttpsError("failed-precondition", "This is not a manual M-Pesa course payment.");
+  }
+  if (payment.status !== "pending_verification") {
+    throw new HttpsError("failed-precondition", "This payment is no longer awaiting verification.");
+  }
+  if (!Number.isFinite(verifiedAmount) || verifiedAmount !== Number(payment.amount)) {
+    throw new HttpsError("failed-precondition", "The verified incoming amount must exactly match the course amount.");
+  }
+
+  const courseSnap = await db.doc("courses/" + payment.courseId).get();
+  if (!courseSnap.exists) throw new HttpsError("not-found", "The course linked to this payment no longer exists.");
+  const course = courseSnap.data();
+  const studentUid = safeText(payment.userId);
+  const courseId = safeText(payment.courseId);
+  const entitlementRef = db.doc("courseEntitlements/" + studentUid + "_" + courseId);
+  const receiptRef = db.doc("mpesaReceipts/" + payment.mpesaCode);
+  const ledgerRef = db.doc("paymentLedger/" + paymentId);
+  const now = Timestamp.now();
+  const gross = Number(payment.amount);
+  const instructorShare = Math.round(gross * 0.75 * 100) / 100;
+  const academyShare = Math.round((gross - instructorShare) * 100) / 100;
+  const grantKey = "manual_mpesa_" + paymentId;
+
+  await db.runTransaction(async transaction => {
+    const [freshPayment, receiptSnap, entitlementSnap] = await Promise.all([
+      transaction.get(paymentRef),
+      transaction.get(receiptRef),
+      transaction.get(entitlementRef)
+    ]);
+    if (!freshPayment.exists || freshPayment.data().status !== "pending_verification") {
+      throw new HttpsError("failed-precondition", "This payment has already been processed.");
+    }
+    if (!receiptSnap.exists || receiptSnap.data().paymentId !== paymentId) {
+      throw new HttpsError("failed-precondition", "The M-Pesa receipt lock does not match this payment.");
+    }
+    const current = entitlementSnap.exists ? entitlementSnap.data() : {};
+    const grants = { ...(current.grants || {}) };
+    grants[grantKey] = {
+      source: "verified_manual_mpesa_purchase",
+      sourceRecordId: paymentId,
+      paymentId,
+      status: "active",
+      amount: gross,
+      currency: "KES",
+      grantedAt: now
+    };
+    const activeGrantCount = Object.values(grants).filter(item => item?.status === "active").length;
+    transaction.update(paymentRef, {
+      status: "paid",
+      verificationStatus: "verified",
+      verifiedBy: reviewer.uid,
+      verifiedByRole: reviewer.role,
+      verifiedAmount,
+      verificationNote,
+      verifiedAt: now,
+      entitlementGranted: true,
+      updatedAt: now
+    });
+    transaction.update(receiptRef, {
+      status: "verified",
+      verifiedBy: reviewer.uid,
+      verifiedAt: now
+    });
+    transaction.set(entitlementRef, {
+      studentUid,
+      courseId,
+      status: "active",
+      grants,
+      activeGrantCount,
+      migrationVersion: 1,
+      updatedAt: now,
+      ...(current.createdAt ? {} : { createdAt: now })
+    }, { merge: true });
+    transaction.create(ledgerRef, {
+      paymentId,
+      studentUid,
+      courseId,
+      instructorId: safeText(payment.instructorId || course.instructorId || course.instructorUid),
+      grossAmount: gross,
+      instructorShare,
+      academyShare,
+      currency: "KES",
+      status: "posted",
+      source: "manual_mpesa",
+      verifiedBy: reviewer.uid,
+      createdAt: now
+    });
+  });
+
+  await db.collection("audit_logs").add({
+    action: "manual_mpesa_payment_verified",
+    actorId: reviewer.uid,
+    actorRole: reviewer.role,
+    targetId: paymentId,
+    studentUid,
+    courseId,
+    receiptCode: payment.mpesaCode,
+    amount: gross,
+    currency: "KES",
+    createdAt: Timestamp.now()
+  });
+
+  return { success: true, paymentId, status: "paid", entitlementGranted: true };
+});
+
 const MARKETPLACE_PRICE_TYPES = [
   { key: "course", label: "Individual courses", unit: "per course", proposed: 2500 },
   { key: "mentorship", label: "Mentorship", unit: "per session", proposed: 1500 },
