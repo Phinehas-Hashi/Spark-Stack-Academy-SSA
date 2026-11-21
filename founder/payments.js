@@ -922,7 +922,7 @@ function showToast(message, type="success") {
     console.log(`[SSA Payments:${type}] ${message}`);
 }
 
-initPayments();
+
 
 
 // ============================================================
