@@ -1501,6 +1501,25 @@ exports.saveMarketplaceCurrencyConfig = onCall(async request => {
 // Founder-only country-level aggregate. Country is taken only from explicit account/profile fields;
 // no IP geolocation or inferred location is used.
 
+
+const SSA_COUNTRY_CODES = new Set(["KE","UG","TZ","RW","BI","ET","SO","SS","SD","ZA","NG","GH","EG","MA","DZ","SN","CI","CM","ZM","ZW","MW","MZ","BW","NA","US","CA","GB","IE","FR","DE","ES","IT","NL","BE","CH","SE","NO","DK","FI","PL","PT","GR","TR","AE","SA","QA","IN","PK","BD","CN","JP","KR","SG","MY","ID","PH","TH","VN","AU","NZ","BR","MX","AR","CL","CO","RU","UA","IL","JO","LB","OM","KW","BH"]);
+exports.updateMyCountry = onCall(async request => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to update your profile.");
+  const countryCode = safeText(request.data?.countryCode).toUpperCase();
+  if (!SSA_COUNTRY_CODES.has(countryCode)) throw new HttpsError("invalid-argument", "Select a supported country.");
+  const countryNames = {"KE":"Kenya","UG":"Uganda","TZ":"Tanzania","RW":"Rwanda","BI":"Burundi","ET":"Ethiopia","SO":"Somalia","SS":"South Sudan","SD":"Sudan","ZA":"South Africa","NG":"Nigeria","GH":"Ghana","EG":"Egypt","MA":"Morocco","DZ":"Algeria","SN":"Senegal","CI":"Côte d’Ivoire","CM":"Cameroon","ZM":"Zambia","ZW":"Zimbabwe","MW":"Malawi","MZ":"Mozambique","BW":"Botswana","NA":"Namibia","US":"United States","CA":"Canada","GB":"United Kingdom","IE":"Ireland","FR":"France","DE":"Germany","ES":"Spain","IT":"Italy","NL":"Netherlands","BE":"Belgium","CH":"Switzerland","SE":"Sweden","NO":"Norway","DK":"Denmark","FI":"Finland","PL":"Poland","PT":"Portugal","GR":"Greece","TR":"Türkiye","AE":"United Arab Emirates","SA":"Saudi Arabia","QA":"Qatar","IN":"India","PK":"Pakistan","BD":"Bangladesh","CN":"China","JP":"Japan","KR":"South Korea","SG":"Singapore","MY":"Malaysia","ID":"Indonesia","PH":"Philippines","TH":"Thailand","VN":"Vietnam","AU":"Australia","NZ":"New Zealand","BR":"Brazil","MX":"Mexico","AR":"Argentina","CL":"Chile","CO":"Colombia","RU":"Russia","UA":"Ukraine","IL":"Israel","JO":"Jordan","LB":"Lebanon","OM":"Oman","KW":"Kuwait","BH":"Bahrain"};
+  const country = countryNames[countryCode];
+  const now = Timestamp.now();
+  const writes = [
+    db.doc("users/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true }),
+    db.doc("students/" + uid).set({ countryCode, country, countryUpdatedAt: now }, { merge: true })
+  ];
+  await Promise.all(writes);
+  await db.collection("audit_logs").add({ action: "profile_country_updated", actorId: uid, countryCode, createdAt: now });
+  return { success: true, countryCode, country };
+});
+
 exports.getFounderGlobalStats = onCall(async request => {
   await requireFounder(request);
   const countries = {};
