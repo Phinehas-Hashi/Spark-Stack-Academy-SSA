@@ -152,7 +152,7 @@ function renderLevel(student) {
     if ($("studentXP")) {
 
         $("studentXP").textContent =
-            xp.toLocaleString();
+            (xp - levelData.currentLevelXP).toLocaleString();
 
     }
 
@@ -162,7 +162,7 @@ function renderLevel(student) {
     if ($("nextXP")) {
 
         $("nextXP").textContent =
-            data.nextLevelXP.toLocaleString();
+            (data.nextLevelXP - data.currentLevelXP).toLocaleString();
 
     }
 
