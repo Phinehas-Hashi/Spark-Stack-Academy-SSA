@@ -19,16 +19,16 @@ body.founder-portal-page {
     --purple:#8b5cf6;
     --cyan:#06b6d4;
 
-    --bg:#071426;
-    --surface:#0f1f35;
-    --surface-light:#172a45;
+    --bg:#f5f4fb;
+    --surface:#ffffff;
+    --surface-light:#fbfaff;
 
-    --text:#ffffff;
-    --muted:#9ca3af;
-    --border:rgba(255,255,255,.08);
+    --text:#17152f;
+    --muted:#77758f;
+    --border:#e8e6f0;
 
     --radius:20px;
-    --shadow:0 20px 50px rgba(0,0,0,.25);
+    --shadow:0 12px 34px rgba(27,20,65,.10);
 
     --transition:.3s ease;
 
