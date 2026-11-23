@@ -58,7 +58,7 @@ async function loadComponent({containerId,html,css,callback}){
     container.querySelectorAll("[href], [src]").forEach(node => {
       for (const attr of ["href", "src"]) {
         const raw = node.getAttribute(attr);
-        if (!raw || /^(?:[a-z]+:|\\/\\/|#)/i.test(raw)) continue;
+        if (!raw || /^[a-z][a-z0-9+.-]*:/i.test(raw) || raw.startsWith("//") || raw.startsWith("#")) continue;
         node.setAttribute(attr, founderURL(raw));
       }
     });
