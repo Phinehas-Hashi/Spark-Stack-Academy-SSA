@@ -1,6 +1,146 @@
-/* ============================================================
-   SPARK STACK ACADEMY — ADMIN CORE
-============================================================ */
-:root{--admin-navy:#081c3a;--admin-blue:#2979ff;--admin-gold:#ffc107;--admin-bg:#f5f7fb;--admin-card:#fff;--admin-text:#172033;--admin-muted:#718096;--admin-border:#e7ebf2;--sidebar-width:260px;--topbar-height:72px;--radius-sm:8px;--radius-md:14px;--radius-lg:20px;--shadow-sm:0 4px 16px rgba(8,28,58,.06);--shadow-md:0 12px 32px rgba(8,28,58,.08)}
-*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:Poppins,sans-serif;background:var(--admin-bg);color:var(--admin-text)}body.admin-menu-open{overflow:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}a{color:inherit;text-decoration:none}.admin-app{min-height:100vh}.admin-sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-width);background:var(--admin-navy);z-index:1200;overflow-y:auto}.admin-main{min-height:100vh;margin-left:var(--sidebar-width)}.admin-topbar{position:sticky;top:0;height:var(--topbar-height);background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--admin-border);z-index:1100}.admin-page{padding:32px;max-width:1600px;margin:auto}.page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:28px}.page-eyebrow{display:block;color:var(--admin-blue);font-size:11px;font-weight:800;letter-spacing:.14em;margin-bottom:7px}.page-header h1{font-size:30px;font-weight:800;color:var(--admin-navy)}.page-header p{color:var(--admin-muted);margin-top:6px;font-size:14px}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(2,10,25,.64);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:1150}.sidebar-overlay.active{display:block}
-@media(max-width:900px){.admin-sidebar{width:min(292px,88vw);transform:translateX(-105%);transition:transform .24s cubic-bezier(.22,.8,.25,1);box-shadow:18px 0 50px rgba(0,0,0,.38)}.admin-sidebar.open{transform:translateX(0)}.admin-main{margin-left:0}.admin-page{padding:22px 16px}.page-header{align-items:flex-start;flex-direction:column}}
+/* Spark Stack Academy — Admin portal foundation.
+   Tokens are inherited only by authenticated Admin application screens. */
+.admin-app {
+  --admin-navy: var(--ssa-color-ink, #17152f);
+  --admin-blue: var(--ssa-color-brand, #762cff);
+  --admin-gold: var(--ssa-color-accent, #20cfe8);
+  --admin-bg: var(--ssa-color-canvas, #f5f4fb);
+  --admin-card: var(--ssa-color-surface, #fff);
+  --admin-text: var(--ssa-color-ink, #17152f);
+  --admin-muted: var(--ssa-color-muted, #77758f);
+  --admin-border: var(--ssa-color-line, #e8e6f0);
+  --sidebar-width: 260px;
+  --topbar-height: 72px;
+  --radius-sm: var(--ssa-radius-sm, 8px);
+  --radius-md: var(--ssa-radius-md, 14px);
+  --radius-lg: var(--ssa-radius-lg, 20px);
+  --shadow-sm: var(--ssa-shadow-sm, 0 4px 14px rgba(27,20,65,.06));
+  --shadow-md: var(--ssa-shadow-md, 0 12px 34px rgba(27,20,65,.10));
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-family: var(--ssa-font-body, "Poppins", Arial, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+.admin-app,
+.admin-app *,
+.admin-app *::before,
+.admin-app *::after { box-sizing: border-box; }
+.admin-app * { margin: 0; padding: 0; }
+body.admin-portal-page {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--ssa-color-canvas, #f5f4fb);
+  color: var(--ssa-color-ink, #17152f);
+  font-family: var(--ssa-font-body, "Poppins", Arial, sans-serif);
+}
+body.admin-menu-open,
+body.admin-modal-open { overflow: hidden; overscroll-behavior: none; }
+.admin-app button,
+.admin-app input,
+.admin-app select,
+.admin-app textarea { font: inherit; }
+.admin-app button { cursor: pointer; border: 0; }
+.admin-app a { color: inherit; text-decoration: none; }
+.admin-app :focus-visible {
+  outline: 3px solid rgba(118,44,255,.30);
+  outline-offset: 2px;
+}
+.admin-app .admin-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 1201;
+  width: var(--sidebar-width);
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #090625;
+  color: #fff;
+}
+.admin-app .admin-main {
+  min-width: 0;
+  min-height: 100vh;
+  margin-left: var(--sidebar-width);
+}
+.admin-app .admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  height: var(--topbar-height);
+  background: rgba(255,255,255,.94);
+  border-bottom: 1px solid var(--admin-border);
+  backdrop-filter: blur(16px);
+}
+.admin-app .admin-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px;
+}
+.admin-app .page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.admin-app .page-eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--admin-blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+.admin-app .page-header h1 {
+  color: var(--admin-navy);
+  font-size: 30px;
+  font-weight: 800;
+}
+.admin-app .page-header p {
+  margin-top: 6px;
+  color: var(--admin-muted);
+  font-size: 14px;
+}
+.admin-app .sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: none;
+  background: rgba(8,5,34,.58);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.admin-app .sidebar-overlay.active { display: block; }
+@media (max-width: 1200px) {
+  .admin-app { --sidebar-width: 240px; }
+  .admin-app .admin-page { padding: 28px 24px; }
+}
+@media (max-width: 900px) {
+  .admin-app { --sidebar-width: 0px; --topbar-height: 64px; }
+  .admin-app .admin-sidebar {
+    width: min(292px,calc(100vw - 44px));
+    height: 100dvh;
+    max-height: 100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateX(-105%);
+    transition: transform .24s cubic-bezier(.22,.8,.25,1);
+    box-shadow: 18px 0 50px rgba(0,0,0,.38);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-app .admin-sidebar.open { transform: translateX(0); }
+  .admin-app .admin-main { margin-left: 0; }
+  .admin-app .admin-page { padding: 24px 20px; }
+  .admin-app .page-header { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 640px) {
+  .admin-app .admin-page { padding: 20px 14px; }
+  .admin-app .page-header { margin-bottom: 22px; }
+  .admin-app .page-header h1 { font-size: 24px; letter-spacing: -.4px; }
+  .admin-app .page-header p { font-size: 12px; line-height: 1.6; }
+}
+@media (max-width: 390px) {
+  .admin-app .admin-page { padding: 17px 11px; }
+  .admin-app .page-header h1 { font-size: 22px; }
+}
