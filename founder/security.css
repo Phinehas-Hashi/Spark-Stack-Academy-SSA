@@ -2,7 +2,7 @@
    SECURITY SETTINGS
 =================================== */
 
-:root{
+body.founder-shell-ready{
 
 --bg:#07111f;
 
@@ -33,7 +33,7 @@
    GLOBAL
 =================================== */
 
-*{
+body.founder-shell-ready, body.founder-shell-ready *{
 
 margin:0;
 
@@ -44,7 +44,7 @@ box-sizing:border-box;
 }
 
 
-body{
+body.founder-shell-ready{
 
 font-family:"Inter",sans-serif;
 
@@ -61,7 +61,7 @@ overflow-x:hidden;
    BACKGROUND ORBS
 =================================== */
 
-.bg-orb{
+body.founder-shell-ready .bg-orb{
 
 position:fixed;
 
@@ -76,7 +76,7 @@ z-index:-1;
 }
 
 
-.orb-1{
+body.founder-shell-ready .orb-1{
 
 width:320px;
 
@@ -91,7 +91,7 @@ left:-120px;
 }
 
 
-.orb-2{
+body.founder-shell-ready .orb-2{
 
 width:280px;
 
@@ -106,7 +106,7 @@ top:35%;
 }
 
 
-.orb-3{
+body.founder-shell-ready .orb-3{
 
 width:300px;
 
@@ -125,7 +125,7 @@ left:40%;
    MAIN CONTENT
 =================================== */
 
-.main-content{
+body.founder-shell-ready .main-content{
 
 padding:30px;
 
@@ -143,7 +143,7 @@ gap:24px;
    GLASS CARD
 =================================== */
 
-.glass-card{
+body.founder-shell-ready .glass-card{
 
 background:var(--card);
 
@@ -163,14 +163,14 @@ box-shadow:var(--shadow);
    HEADER
 =================================== */
 
-.page-header{
+body.founder-shell-ready .page-header{
 
 padding:28px;
 
 }
 
 
-.page-header h1{
+body.founder-shell-ready .page-header h1{
 
 font-size:2rem;
 
@@ -181,7 +181,7 @@ margin-bottom:10px;
 }
 
 
-.page-header p{
+body.founder-shell-ready .page-header p{
 
 color:var(--muted);
 
@@ -195,14 +195,14 @@ line-height:1.7;
    SECTION
 =================================== */
 
-.section-card{
+body.founder-shell-ready .section-card{
 
 padding:26px;
 
 }
 
 
-.section-card h2{
+body.founder-shell-ready .section-card h2{
 
 font-size:1.2rem;
 
@@ -218,7 +218,7 @@ font-weight:700;
    FORM
 =================================== */
 
-.form-grid{
+body.founder-shell-ready .form-grid{
 
 display:grid;
 
@@ -231,7 +231,7 @@ gap:22px;
 }
 
 
-.input-group{
+body.founder-shell-ready .input-group{
 
 display:flex;
 
@@ -242,7 +242,7 @@ gap:10px;
 }
 
 
-.input-group label{
+body.founder-shell-ready .input-group label{
 
 font-weight:600;
 
@@ -253,7 +253,7 @@ color:#dbeafe;
 }
 
 
-.input-group input{
+body.founder-shell-ready .input-group input{
 
 background:rgba(255,255,255,.05);
 
@@ -274,7 +274,7 @@ transition:.3s;
 }
 
 
-.input-group input:focus{
+body.founder-shell-ready .input-group input:focus{
 
 border-color:#3b82f6;
 
@@ -287,7 +287,7 @@ box-shadow:
    TOGGLE LIST
 =================================== */
 
-.toggle-list{
+body.founder-shell-ready .toggle-list{
 
 display:flex;
 
@@ -298,7 +298,7 @@ gap:16px;
 }
 
 
-.toggle-item{
+body.founder-shell-ready .toggle-item{
 
 display:flex;
 
@@ -319,14 +319,14 @@ transition:.3s;
 }
 
 
-.toggle-item:hover{
+body.founder-shell-ready .toggle-item:hover{
 
 background:rgba(59,130,246,.08);
 
 }
 
 
-.toggle-item span{
+body.founder-shell-ready .toggle-item span{
 
 font-weight:600;
 
@@ -335,7 +335,7 @@ color:#e2e8f0;
 }
 
 
-.toggle-item input{
+body.founder-shell-ready .toggle-item input{
 
 width:20px;
 
@@ -352,7 +352,7 @@ cursor:pointer;
    SESSION CARD
 =================================== */
 
-.session-card{
+body.founder-shell-ready .session-card{
 
 display:flex;
 
@@ -373,7 +373,7 @@ border:1px solid rgba(255,255,255,.06);
 }
 
 
-.session-info h3{
+body.founder-shell-ready .session-info h3{
 
 font-size:1rem;
 
@@ -382,7 +382,7 @@ margin-bottom:6px;
 }
 
 
-.session-info p{
+body.founder-shell-ready .session-info p{
 
 color:var(--muted);
 
@@ -395,7 +395,7 @@ font-size:.9rem;
    STATUS
 =================================== */
 
-.status-online{
+body.founder-shell-ready .status-online{
 
 background:rgba(34,197,94,.15);
 
@@ -417,7 +417,7 @@ font-weight:700;
    SECURITY ACTIVITY
 =================================== */
 
-#securityActivity{
+body.founder-shell-ready #securityActivity{
 
 display:flex;
 
@@ -428,7 +428,7 @@ gap:14px;
 }
 
 
-.activity-item{
+body.founder-shell-ready .activity-item{
 
 padding:16px;
 
@@ -441,14 +441,14 @@ border-left:4px solid #3b82f6;
 }
 
 
-.activity-item h4{
+body.founder-shell-ready .activity-item h4{
 
 margin-bottom:6px;
 
 }
 
 
-.activity-item p{
+body.founder-shell-ready .activity-item p{
 
 color:var(--muted);
 
@@ -462,7 +462,7 @@ font-size:.9rem;
    EMPTY STATE
 =================================== */
 
-.empty-state{
+body.founder-shell-ready .empty-state{
 
 text-align:center;
 
@@ -478,7 +478,7 @@ color:var(--muted);
    BUTTONS
 =================================== */
 
-.action-bar{
+body.founder-shell-ready .action-bar{
 
 display:flex;
 
@@ -489,7 +489,7 @@ margin-top:10px;
 }
 
 
-.primary-btn{
+body.founder-shell-ready .primary-btn{
 
 padding:14px 28px;
 
@@ -522,7 +522,7 @@ box-shadow:
 }
 
 
-.primary-btn:hover{
+body.founder-shell-ready .primary-btn:hover{
 
 transform:translateY(-3px);
 
@@ -537,7 +537,7 @@ box-shadow:
    ANIMATION
 =================================== */
 
-.glass-card{
+body.founder-shell-ready .glass-card{
 
 animation:fadeUp .45s ease;
 
@@ -570,7 +570,7 @@ transform:translateY(0);
    RESPONSIVE
 =================================== */
 
-@media(max-width:768px){
+body.founder-shell-ready @media(max-width:768px){
 
 .main-content{
 
