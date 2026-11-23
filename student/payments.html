@@ -13,7 +13,8 @@
 <link rel="stylesheet" href="css/student-core.css?v=20261121-ui4">
 <link rel="stylesheet" href="css/components.css?v=20261121-ui4">
 <link rel="stylesheet" href="css/responsive.css?v=20261121-ui4">
-<link rel="stylesheet" href="css/pages/payments.css?v=20261121-page1">
+  <link rel="stylesheet" href="css/portal-shell.css?v=20261121-ui4">
+  <link rel="stylesheet" href="css/pages/payments.css?v=20261121-page2">
 
   
   
@@ -22,11 +23,12 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <aside id="sidebarContainer" class="sidebar-container"></aside>
-  <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
-  <div class="student-shell">
-    <div id="topbarContainer" class="topbar-container"></div>
+  <div class="student-layout">
+    <aside id="sidebarContainer" class="sidebar-container"></aside>
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
     <main class="student-main">
+      <div id="topbarContainer" class="topbar-container"></div>
+      <div class="payments-content">
       <div class="payments-page">
         <header class="payments-header">
           <div class="payments-header-copy">
@@ -135,6 +137,7 @@
           <div id="transactionList" class="transaction-list"><div class="history-empty">Your transaction history will appear here.</div></div>
         </section>
         <footer class="payment-footer"><span>SPARK STACK ACADEMY</span><span><i data-lucide="lock"></i> Secure student finance</span><span>Payments are subject to manual verification</span></footer>
+      </div>
       </div>
     </main>
   </div>
