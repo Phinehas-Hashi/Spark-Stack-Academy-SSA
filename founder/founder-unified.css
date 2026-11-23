@@ -355,3 +355,9 @@ body.founder-portal-page .menu-btn:hover {
 body.founder-portal-page .sidebar-nav {
   scrollbar-color: rgba(190,177,255,.4) transparent;
 }
+
+/* The geographic intelligence map keeps its intentionally dark data workspace. */
+body.founder-portal-page.global-intel-page {
+  background: #080522 !important;
+  color: #f7f3ff !important;
+}
