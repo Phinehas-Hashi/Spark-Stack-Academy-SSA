@@ -694,7 +694,7 @@
 .admin-modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(8, 28, 58, .55);
+    background: rgba(23, 21, 47, .55);
     backdrop-filter: blur(5px);
 }
 
