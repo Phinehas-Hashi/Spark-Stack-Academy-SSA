@@ -1,1310 +1,372 @@
-/* =========================================
-   SPARK STACK ACADEMY
-   INSTRUCTOR COMPONENTS V2
-========================================= */
-
-
-/* =========================================
-   SIDEBAR INNER
-========================================= */
-
-.instructor-sidebar-inner {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-
-/* =========================================
-   BRAND
-========================================= */
-
-.instructor-brand {
-    height: 78px;
-
-    display: flex;
-    align-items: center;
-    gap: 11px;
-
-    padding: 0 19px;
-
-    border-bottom: 1px solid rgba(255,255,255,.07);
-}
-
-.instructor-brand a {
-    width: 40px;
-    height: 40px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 12px;
-
-    background: rgba(255,255,255,.08);
-}
-
-.instructor-brand img {
-    width: 31px;
-    height: 31px;
-    object-fit: contain;
-}
-
-.instructor-brand-text {
-    min-width: 0;
-}
-
-.instructor-brand-text strong {
-    display: block;
-
-    color: #fff;
-
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .06em;
-}
-
-.instructor-brand-text span {
-    display: block;
-
-    margin-top: 2px;
-
-    color: #63a4ff;
-
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: .14em;
-}
-
-
-/* =========================================
-   NAVIGATION
-========================================= */
-
-.instructor-nav {
-    flex: 1;
-
-    padding: 20px 12px;
-}
-
-.nav-section {
-    margin-bottom: 23px;
-}
-
-.nav-label {
-    display: block;
-
-    padding: 0 11px;
-    margin-bottom: 7px;
-
-    color: rgba(255,255,255,.36);
-
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: .14em;
-}
-
-
-/* =========================================
-   NAV ITEM
-========================================= */
-
-.instructor-nav-item {
-    position: relative;
-
-    min-height: 43px;
-
-    display: flex;
-    align-items: center;
-    gap: 11px;
-
-    padding: 0 11px;
-    margin-bottom: 3px;
-
-    border-radius: 11px;
-
-    color: rgba(255,255,255,.62);
-
-    font-size: 11px;
-    font-weight: 600;
-
-    transition: .2s ease;
-}
-
-.instructor-nav-item svg {
-    width: 17px;
-    height: 17px;
-
-    flex-shrink: 0;
-
-    opacity: .8;
-}
-
-.instructor-nav-item:hover {
-    background: rgba(255,255,255,.07);
-    color: #fff;
-}
-
-.instructor-nav-item:hover svg {
-    opacity: 1;
-}
-
-
-/* ACTIVE */
-
-.instructor-nav-item.active {
-    background: linear-gradient(
-        90deg,
-        rgba(41,121,255,.25),
-        rgba(41,121,255,.08)
-    );
-
-    color: #fff;
-}
-
-.instructor-nav-item.active::before {
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    top: 9px;
-    bottom: 9px;
-
-    width: 3px;
-
-    border-radius: 0 5px 5px 0;
-
-    background: var(--blue, #2979ff);
-}
-
-.instructor-nav-item.active svg {
-    color: #63a4ff;
-    opacity: 1;
-}
-
-
-/* =========================================
-   NAV BADGE
-========================================= */
-
-.nav-badge {
-    min-width: 18px;
-    height: 18px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-left: auto;
-
-    padding: 0 5px;
-
-    border-radius: 999px;
-
-    background: #2979ff;
-    color: #fff;
-
-    font-size: 8px;
-    font-weight: 800;
-}
-
-
-/* =========================================
-   SIDEBAR PROFILE
-========================================= */
-
-.instructor-sidebar-footer {
-    padding: 13px;
-
-    border-top: 1px solid rgba(255,255,255,.07);
-}
-
-.instructor-profile-mini {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    padding: 10px;
-
-    border-radius: 13px;
-
-    transition: .2s ease;
-}
-
-.instructor-profile-mini:hover {
-    background: rgba(255,255,255,.07);
-}
-
-.profile-avatar {
-    width: 35px;
-    height: 35px;
-
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 11px;
-
-    background: linear-gradient(
-        135deg,
-        #2979ff,
-        #7357d9
-    );
-
-    color: #fff;
-
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.profile-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.profile-info strong {
-    display: block;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    color: #fff;
-
-    font-size: 10px;
-}
-
-.profile-info span {
-    display: block;
-
-    margin-top: 2px;
-
-    color: rgba(255,255,255,.4);
-
-    font-size: 8px;
-}
-
-.instructor-profile-mini > svg {
-    width: 14px;
-
-    color: rgba(255,255,255,.35);
-}
-
-
-/* =========================================
-   TOPBAR
-========================================= */
-
-.instructor-topbar-inner {
-    height: 100%;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 25px;
-}
-
-
-/* LEFT */
-
-.topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.topbar-menu {
-    display: none;
-
-    width: 38px;
-    height: 38px;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 10px;
-
-    background: #f1f4f8;
-    color: #081c3a;
-
-    cursor: pointer;
-}
-
-.topbar-menu svg {
-    width: 19px;
-}
-
-.topbar-context span {
-    display: block;
-
-    color: #2979ff;
-
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: .13em;
-}
-
-.topbar-context strong {
-    display: block;
-
-    margin-top: 2px;
-
-    color: #081c3a;
-
-    font-size: 13px;
-    font-weight: 800;
-}
-
-
-/* RIGHT */
-
-.topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.topbar-icon-btn {
-    position: relative;
-
-    width: 38px;
-    height: 38px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 11px;
-
-    background: transparent;
-    color: #667487;
-
-    cursor: pointer;
-
-    transition: .2s ease;
-}
-
-.topbar-icon-btn:hover {
-    background: #f1f4f8;
-    color: #081c3a;
-}
-
-.topbar-icon-btn svg {
-    width: 18px;
-}
-
-.notification-dot {
-    position: absolute;
-
-    top: 8px;
-    right: 8px;
-
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-
-    background: #ff4d67;
-
-    border: 1.5px solid #fff;
-}
-
-.topbar-divider {
-    width: 1px;
-    height: 28px;
-
-    margin: 0 8px;
-
-    background: #e6eaf0;
-}
-
-
-/* =========================================
-   TOPBAR PROFILE
-========================================= */
-
-.topbar-profile {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-
-    padding: 5px 7px;
-
-    border-radius: 12px;
-
-    transition: .2s ease;
-}
-
-.topbar-profile:hover {
-    background: #f5f7fa;
-}
-
-.topbar-avatar {
-    width: 34px;
-    height: 34px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 10px;
-
-    background: linear-gradient(
-        135deg,
-        #081c3a,
-        #2979ff
-    );
-
-    color: #fff;
-
-    font-size: 11px;
-    font-weight: 800;
-}
-
-.topbar-profile-info strong {
-    display: block;
-
-    max-width: 120px;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    color: #081c3a;
-
-    font-size: 10px;
-}
-
-.topbar-profile-info span {
-    display: block;
-
-    margin-top: 1px;
-
-    color: #8b96a5;
-
-    font-size: 8px;
-}
-
-.topbar-profile > svg {
-    width: 14px;
-    color: #8b96a5;
-}
-
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-
-@media (max-width: 900px) {
-
-    .topbar-menu {
-        display: flex;
-    }
-
-    .instructor-topbar-inner {
-        padding: 0 18px;
-    }
-
-}
-
-
-@media (max-width: 600px) {
-
-    .topbar-profile-info,
-    .topbar-profile > svg,
-    .topbar-divider {
-        display: none;
-    }
-
-    .topbar-right {
-        gap: 3px;
-    }
-
-    .topbar-context strong {
-        font-size: 12px;
-    }
-
-}
-
-
-@media (max-width: 420px) {
-
-    .instructor-topbar-inner {
-        padding: 0 12px;
-    }
-
-    .topbar-context span {
-        font-size: 7px;
-    }
-
-}
-
-/* ============================================================
-   INSTRUCTOR SIDEBAR
-============================================================ */
-
-.instructor-sidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-
-    width: 270px;
-
-    background: #081c3a;
-    color: #fff;
-
-    z-index: 1000;
-
-    border-right: 1px solid rgba(255,255,255,.06);
-
-    box-shadow: 10px 0 35px rgba(8,28,58,.12);
-
-    overflow: hidden;
-}
-
-.instructor-sidebar-inner {
-    height: 100%;
-
-    display: flex;
-    flex-direction: column;
-
-    padding: 22px 14px;
-}
-
-
-/* ============================================================
-   BRAND
-============================================================ */
-
-.instructor-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    padding: 4px 10px 24px;
-
-    border-bottom: 1px solid rgba(255,255,255,.08);
-}
-
-.instructor-brand a {
-    width: 42px;
-    height: 42px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 12px;
-
-    background: rgba(255,255,255,.08);
-}
-
-.instructor-brand img {
-    width: 34px;
-    height: 34px;
-
-    object-fit: contain;
-}
-
-.instructor-brand-text {
-    min-width: 0;
-}
-
-.instructor-brand-text strong {
-    display: block;
-
-    font-size: 13px;
-    font-weight: 800;
-
-    letter-spacing: .06em;
-}
-
-.instructor-brand-text span {
-    display: block;
-
-    margin-top: 2px;
-
-    color: #ffc107;
-
-    font-size: 9px;
-    font-weight: 700;
-
-    letter-spacing: .14em;
-}
-
-
-/* ============================================================
-   NAVIGATION
-============================================================ */
-
-.instructor-nav {
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 20px 2px;
-
-    scrollbar-width: none;
-}
-
-.instructor-nav::-webkit-scrollbar {
-    display: none;
-}
-
-.nav-section {
-    margin-bottom: 22px;
-}
-
-.nav-label {
-    display: block;
-
-    padding: 0 12px 8px;
-
-    color: rgba(255,255,255,.38);
-
-    font-size: 9px;
-    font-weight: 800;
-
-    letter-spacing: .13em;
-}
-
-
-/* ============================================================
-   NAV ITEM
-============================================================ */
-
-.instructor-nav-item {
-    position: relative;
-
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    min-height: 44px;
-
-    padding: 0 12px;
-    margin: 3px 0;
-
-    border-radius: 12px;
-
-    color: rgba(255,255,255,.68);
-
-    text-decoration: none;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    transition:
-        background .2s ease,
-        color .2s ease,
-        transform .2s ease;
-}
-
-.instructor-nav-item svg {
-    width: 18px;
-    height: 18px;
-
-    flex-shrink: 0;
-
-    stroke-width: 1.9;
-}
-
-.instructor-nav-item:hover {
-    color: #fff;
-
-    background: rgba(255,255,255,.07);
-
-    transform: translateX(2px);
-}
-
-
-/* ============================================================
-   ACTIVE
-============================================================ */
-
-.instructor-nav-item.active {
-    color: #fff;
-
-    background:
-        linear-gradient(
-            90deg,
-            rgba(41,121,255,.22),
-            rgba(41,121,255,.08)
-        );
-
-    box-shadow:
-        inset 0 0 0 1px rgba(41,121,255,.12);
-}
-
-.instructor-nav-item.active::before {
-    content: "";
-
-    position: absolute;
-    left: 0;
-    top: 8px;
-    bottom: 8px;
-
-    width: 3px;
-
-    border-radius: 0 4px 4px 0;
-
-    background: #2979ff;
-}
-
-.instructor-nav-item.active svg {
-    color: #4d91ff;
-}
-
-
-/* ============================================================
-   BADGE
-============================================================ */
-
-.nav-badge {
-    margin-left: auto;
-
-    min-width: 20px;
-    height: 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0 6px;
-
-    border-radius: 999px;
-
-    background: #2979ff;
-    color: #fff;
-
-    font-size: 9px;
-    font-weight: 800;
-}
-
-
-/* ============================================================
-   PROFILE FOOTER
-============================================================ */
-
-.instructor-sidebar-footer {
-    padding-top: 14px;
-
-    border-top: 1px solid rgba(255,255,255,.08);
-}
-
-.instructor-profile-mini {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    padding: 10px;
-
-    border-radius: 14px;
-
-    color: #fff;
-    text-decoration: none;
-
-    transition: .2s ease;
-}
-
-.instructor-profile-mini:hover {
-    background: rgba(255,255,255,.07);
-}
-
-.profile-avatar {
-    width: 38px;
-    height: 38px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 12px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2979ff,
-            #1455c0
-        );
-
-    color: #fff;
-
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.profile-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.profile-info strong {
-    display: block;
-
-    overflow: hidden;
-
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.profile-info span {
-    display: block;
-
-    margin-top: 2px;
-
-    color: rgba(255,255,255,.42);
-
-    font-size: 9px;
-}
-
-.instructor-profile-mini > svg {
-    width: 16px;
-
-    color: rgba(255,255,255,.4);
-}
-
-
-/* ============================================================
-   MOBILE
-============================================================ */
-
-@media (max-width: 900px) {
-
-    .instructor-sidebar {
-        transform: translateX(-100%);
-
-        transition: transform .25s ease;
-    }
-
-    .instructor-sidebar.sidebar-open {
-        transform: translateX(0);
-    }
-
-}
-
-
-/* ============================================================
-   INSTRUCTOR SIDEBAR
-============================================================ */
+/* Instructor Portal injected components.
+   Sidebar selectors are contained by #instructorSidebar.
+   Topbar selectors are contained by #instructorTopbar.
+   Page content styles do not belong in this file. */
 
 #instructorSidebar {
     position: fixed;
     inset: 0 auto 0 0;
-
+    z-index: 1000;
     width: 270px;
     height: 100vh;
-
-    z-index: 1000;
-
-    background: #081c3a;
-
-    border-right: 1px solid rgba(255,255,255,.07);
-
-    box-shadow:
-        12px 0 35px rgba(0,0,0,.12);
+    height: 100dvh;
+    overflow: hidden;
+    border-right: 1px solid rgba(255,255,255,.08);
+    background: #090625;
+    color: #fff;
+    box-shadow: 8px 0 22px rgba(8,28,58,.12);
 }
-
-
-/* ============================================================
-   SIDEBAR
-============================================================ */
-
 #instructorSidebar .sidebar {
-    width: 100%;
-    height: 100%;
-
     display: flex;
     flex-direction: column;
-
-    padding: 22px 14px;
-
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 20px 14px 12px;
+    overflow: hidden;
     box-sizing: border-box;
 }
-
-
-/* ============================================================
-   LOGO
-============================================================ */
-
-.sidebar-logo {
+#instructorSidebar .sidebar-logo {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     gap: 12px;
-
     padding: 4px 10px 22px;
-
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    border-bottom: 1px solid rgba(255,255,255,.10);
 }
-
-.sidebar-logo-icon {
+#instructorSidebar .sidebar-logo-icon {
+    display: grid;
+    flex: 0 0 42px;
+    place-items: center;
     width: 42px;
     height: 42px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 13px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2979ff,
-            #1455c0
-        );
-
-    color: #fff;
-
-    box-shadow:
-        0 8px 20px rgba(41,121,255,.25);
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    box-shadow: none;
 }
-
-.sidebar-logo-icon svg {
-    width: 21px;
-}
-
-.sidebar-brand strong {
+#instructorSidebar .sidebar-logo-icon img {
     display: block;
-
-    color: #fff;
-
-    font-size: 14px;
-    font-weight: 800;
-}
-
-.sidebar-brand span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #ffc107;
-
-    font-size: 9px;
-    font-weight: 700;
-
-    letter-spacing: .08em;
-}
-
-
-/* ============================================================
-   PROFILE
-============================================================ */
-
-.instructor-profile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    margin: 18px 4px 14px;
-    padding: 10px;
-
-    border-radius: 14px;
-
-    background: rgba(255,255,255,.055);
-
-    cursor: pointer;
-}
-
-.instructor-profile-avatar {
     width: 38px;
     height: 38px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
     border-radius: 11px;
-
-    background: #2979ff;
-
+    object-fit: contain;
+}
+#instructorSidebar .sidebar-brand { min-width: 0; }
+#instructorSidebar .sidebar-brand strong {
+    display: block;
     color: #fff;
-
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .06em;
+}
+#instructorSidebar .sidebar-brand span {
+    display: block;
+    margin-top: 3px;
+    color: #a99ad5;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .12em;
+}
+#instructorSidebar .instructor-profile {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin: 18px 4px 14px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    background: rgba(255,255,255,.055);
+}
+#instructorSidebar .instructor-profile-avatar {
+    display: grid;
+    flex: 0 0 38px;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #762cff, #5d1ed6);
+    color: #fff;
     font-size: 13px;
     font-weight: 800;
 }
-
-.instructor-profile-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.instructor-profile-info strong {
+#instructorSidebar .instructor-profile-info { flex: 1; min-width: 0; }
+#instructorSidebar .instructor-profile-info strong {
     display: block;
-
     overflow: hidden;
-
     color: #fff;
-
     font-size: 11px;
     font-weight: 700;
-
-    white-space: nowrap;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
-
-.instructor-profile-info span {
+#instructorSidebar .instructor-profile-info span {
     display: block;
-
     margin-top: 2px;
-
-    color: rgba(255,255,255,.4);
-
+    color: rgba(255,255,255,.48);
     font-size: 9px;
 }
-
-.instructor-profile > svg {
-    width: 15px;
-
-    color: rgba(255,255,255,.35);
-}
-
-
-/* ============================================================
-   NAV
-============================================================ */
-
-.sidebar-nav {
-    flex: 1;
-
-    overflow-y: auto;
-
+#instructorSidebar .instructor-profile > svg { flex: 0 0 15px; width: 15px; color: rgba(255,255,255,.45); }
+#instructorSidebar .sidebar-nav {
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 4px 2px;
-
-    scrollbar-width: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(190,177,255,.42) transparent;
 }
-
-.sidebar-nav::-webkit-scrollbar {
-    display: none;
-}
-
-.nav-section-title {
+#instructorSidebar .sidebar-nav::-webkit-scrollbar { width: 5px; }
+#instructorSidebar .sidebar-nav::-webkit-scrollbar-thumb { border-radius: 99px; background: rgba(190,177,255,.4); }
+#instructorSidebar .nav-section-title {
     display: block;
-
     margin: 18px 10px 7px;
-
-    color: rgba(255,255,255,.35);
-
+    color: #a99ad5;
     font-size: 9px;
     font-weight: 800;
-
     letter-spacing: .13em;
 }
-
-
-/* ============================================================
-   NAV LINKS
-============================================================ */
-
-.nav-link {
+#instructorSidebar .nav-link {
     position: relative;
-
     display: flex;
     align-items: center;
     gap: 12px;
-
     min-height: 43px;
-
     margin: 3px 0;
     padding: 0 12px;
-
+    border: 1px solid transparent;
     border-radius: 11px;
-
-    color: rgba(255,255,255,.63);
-
-    text-decoration: none;
-
+    color: #d5cfee;
     font-size: 12px;
     font-weight: 600;
-
-    transition:
-        .2s ease;
+    text-decoration: none;
+    transition: background .2s ease, color .2s ease, transform .2s ease;
 }
-
-.nav-link svg {
-    width: 18px;
-    height: 18px;
-
-    flex-shrink: 0;
-
-    stroke-width: 1.9;
-}
-
-.nav-link:hover {
+#instructorSidebar .nav-link > svg,
+#instructorSidebar .nav-link > i { flex: 0 0 18px; width: 18px; height: 18px; stroke-width: 1.9; }
+#instructorSidebar .nav-link:hover { background: rgba(255,255,255,.07); color: #fff; transform: translateX(2px); }
+#instructorSidebar .nav-link.active {
+    border-color: rgba(125,174,255,.18);
+    background: linear-gradient(100deg, rgba(119,44,255,.42), rgba(32,207,232,.12));
     color: #fff;
-
-    background: rgba(255,255,255,.07);
-
-    transform: translateX(2px);
+    box-shadow: inset 3px 0 #20cfe8, 0 0 18px rgba(126,48,255,.12);
 }
-
-
-/* ============================================================
-   ACTIVE
-============================================================ */
-
-.nav-link.active {
-    color: #fff;
-
-    background:
-        linear-gradient(
-            90deg,
-            rgba(41,121,255,.22),
-            rgba(41,121,255,.07)
-        );
-}
-
-.nav-link.active::before {
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    top: 8px;
-    bottom: 8px;
-
-    width: 3px;
-
-    border-radius: 0 4px 4px 0;
-
-    background: #2979ff;
-}
-
-.nav-link.active svg {
-    color: #4d91ff;
-}
-
-
-/* ============================================================
-   BADGE
-============================================================ */
-
-.nav-link small {
-    margin-left: auto;
-
-    min-width: 20px;
-    height: 20px;
-
-    display: flex;
+#instructorSidebar .nav-link small {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    padding: 0 5px;
-
-    border-radius: 20px;
-
-    background: #2979ff;
-
+    min-width: 20px;
+    height: 20px;
+    margin-left: auto;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #762cff;
     color: #fff;
-
     font-size: 9px;
     font-weight: 800;
 }
-
-
-/* ============================================================
-   LOGOUT
-============================================================ */
-
-.sidebar-bottom {
-    padding-top: 14px;
-
+#instructorSidebar .sidebar-bottom {
+    flex: 0 0 auto;
+    margin-top: 8px;
+    padding: 12px 2px max(4px, env(safe-area-inset-bottom));
     border-top: 1px solid rgba(255,255,255,.08);
+    background: linear-gradient(180deg, rgba(13,10,53,0), rgba(13,10,53,.98) 22%);
 }
-
-.logout-btn {
-    width: 100%;
-    height: 43px;
-
+#instructorSidebar .logout-btn {
     display: flex;
     align-items: center;
     gap: 12px;
-
+    width: 100%;
+    min-height: 44px;
     padding: 0 12px;
-
-    border: 0;
+    border: 1px solid rgba(255,255,255,.08);
     border-radius: 11px;
-
-    background: transparent;
-
-    color: rgba(255,255,255,.55);
-
-    font-family: inherit;
+    background: rgba(255,255,255,.055);
+    color: rgba(255,255,255,.72);
+    font: inherit;
     font-size: 12px;
     font-weight: 600;
-
     cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+}
+#instructorSidebar .logout-btn > svg,
+#instructorSidebar .logout-btn > i { width: 18px; height: 18px; }
+#instructorSidebar .logout-btn:hover { background: rgba(239,68,68,.13); color: #fecaca; }
 
-    transition: .2s ease;
+#sidebarOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(8,5,34,.52);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .22s ease, visibility .22s ease;
+}
+#sidebarOverlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
-.logout-btn svg {
-    width: 18px;
+#instructorTopbar .instructor-topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding: 0 25px;
 }
-
-.logout-btn:hover {
-    background: rgba(255,70,70,.1);
-
-    color: #ff7070;
+#instructorTopbar .topbar-left,
+#instructorTopbar .topbar-right { display: flex; align-items: center; min-width: 0; }
+#instructorTopbar .topbar-left { gap: 15px; }
+#instructorTopbar .topbar-right { gap: 8px; margin-left: auto; }
+#instructorTopbar .topbar-menu {
+    display: none;
+    flex: 0 0 38px;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    background: rgba(255,255,255,.09);
+    color: #fff;
+    cursor: pointer;
 }
-
-
-/* ============================================================
-   MOBILE
-============================================================ */
+#instructorTopbar .topbar-menu svg { width: 19px; height: 19px; }
+#instructorTopbar .topbar-context { min-width: 0; }
+#instructorTopbar .topbar-context span {
+    display: block;
+    color: #bca6f4;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .13em;
+}
+#instructorTopbar .topbar-context strong {
+    display: block;
+    margin-top: 2px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+}
+#instructorTopbar .topbar-icon-btn {
+    position: relative;
+    display: flex;
+    flex: 0 0 38px;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+}
+#instructorTopbar .topbar-icon-btn:hover { background: rgba(255,255,255,.16); color: #20cfe8; }
+#instructorTopbar .topbar-icon-btn svg { width: 18px; height: 18px; }
+#instructorTopbar .notification-dot {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 6px;
+    height: 6px;
+    border: 1.5px solid #171052;
+    border-radius: 50%;
+    background: #20cfe8;
+}
+#instructorTopbar .topbar-divider { width: 1px; height: 28px; margin: 0 8px; background: rgba(255,255,255,.22); }
+#instructorTopbar .topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    padding: 5px 7px;
+    border-radius: 12px;
+    color: #fff;
+    text-decoration: none;
+    transition: background .2s ease;
+}
+#instructorTopbar .topbar-profile:hover { background: rgba(255,255,255,.09); }
+#instructorTopbar .topbar-avatar {
+    display: flex;
+    flex: 0 0 34px;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #762cff, #5d1ed6);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+}
+#instructorTopbar .topbar-profile-info { min-width: 0; }
+#instructorTopbar .topbar-profile-info strong {
+    display: block;
+    max-width: 120px;
+    overflow: hidden;
+    color: #fff;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#instructorTopbar .topbar-profile-info span { display: block; margin-top: 1px; color: #c9c1e4; font-size: 8px; }
+#instructorTopbar .topbar-profile > svg { flex: 0 0 14px; width: 14px; height: 14px; color: #c9c1e4; }
 
 @media (max-width: 900px) {
-
     #instructorSidebar {
-        transform: translateX(-100%);
-
-        transition:
-            transform .25s ease;
+        z-index: 1201;
+        width: min(292px, calc(100vw - 44px));
+        max-height: 100dvh;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        transform: translateX(-105%);
+        transition: transform .25s ease;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
     }
-
-    #instructorSidebar.open {
-        transform: translateX(0);
-    }
-
+    #instructorSidebar.open { transform: translateX(0); }
+    #instructorTopbar .topbar-menu { display: flex; }
+    #instructorTopbar .instructor-topbar-inner { padding: 0 18px; }
 }
-/* INSTRUCTOR SIDEBAR — fixed profile/footer, independently scrollable nav */
-#instructorSidebar{height:100dvh;min-height:0;overflow:hidden}
-#instructorSidebar .sidebar{height:100%;min-height:0;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box}
-#instructorSidebar .sidebar-logo,#instructorSidebar .instructor-profile{flex:0 0 auto}
-#instructorSidebar .sidebar-nav{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(190,177,255,.42) transparent}
-#instructorSidebar .sidebar-nav::-webkit-scrollbar{width:5px}
-#instructorSidebar .sidebar-nav::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(190,177,255,.4)}
-#instructorSidebar .sidebar-bottom{flex:0 0 auto;margin-top:8px;padding-top:10px;padding-bottom:max(4px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(13,10,53,0),rgba(13,10,53,.98) 22%)}
-#instructorSidebar .logout-btn{min-height:44px}
-@media(max-height:700px){#instructorSidebar .sidebar{padding-top:12px;padding-bottom:10px}#instructorSidebar .sidebar-logo{padding-bottom:14px}#instructorSidebar .instructor-profile{margin-top:10px;margin-bottom:8px;padding:8px}#instructorSidebar .nav-section-title{margin-top:12px}#instructorSidebar .nav-link{min-height:38px}#instructorSidebar .sidebar-bottom{margin-top:5px;padding-top:7px}}
-
-#instructorSidebar .sidebar-logo-icon{background:transparent!important;box-shadow:none!important;padding:0!important}#instructorSidebar .sidebar-logo-icon img{width:38px;height:38px;display:block;border-radius:11px}
-
-/* Instructor profile chevron alignment */
-.topbar-profile{gap:7px;min-width:0;align-items:center}
-.topbar-profile>svg{display:block;flex:0 0 14px;width:14px;height:14px;margin:0 1px 0 0;align-self:center}
-.topbar-profile-info{min-width:0}
-
-
-/* Unified mobile drawer hardening — Instructor portal */
-@media(max-width:900px){
- #instructorSidebar{position:fixed;inset:0 auto 0 0;width:min(292px,calc(100vw - 44px));height:100dvh;max-height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);z-index:1201;overflow:hidden;overscroll-behavior:contain;touch-action:pan-y}
- #instructorSidebar>.sidebar{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
- #instructorSidebar .sidebar-nav{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
- #sidebarOverlay{position:fixed;inset:0;z-index:1200}
- body.sidebar-open{overflow:hidden;overscroll-behavior:none}
+@media (max-width: 600px) {
+    #instructorTopbar .topbar-profile-info,
+    #instructorTopbar .topbar-profile > svg,
+    #instructorTopbar .topbar-divider { display: none; }
+    #instructorTopbar .topbar-right { gap: 3px; }
+    #instructorTopbar .topbar-context strong { font-size: 12px; }
+}
+@media (max-width: 420px) {
+    #instructorTopbar .instructor-topbar-inner { padding: 0 12px; }
+    #instructorTopbar .topbar-context span { font-size: 7px; }
+}
+@media (max-height: 700px) {
+    #instructorSidebar .sidebar { padding-top: 12px; padding-bottom: 8px; }
+    #instructorSidebar .sidebar-logo { padding-bottom: 14px; }
+    #instructorSidebar .instructor-profile { margin-top: 10px; margin-bottom: 8px; padding: 8px; }
+    #instructorSidebar .nav-section-title { margin-top: 12px; }
+    #instructorSidebar .nav-link { min-height: 38px; }
+    #instructorSidebar .sidebar-bottom { margin-top: 5px; padding-top: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #instructorSidebar *,
+    #instructorSidebar *::before,
+    #instructorSidebar *::after,
+    #instructorTopbar *,
+    #instructorTopbar *::before,
+    #instructorTopbar *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }
