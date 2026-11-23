@@ -75,7 +75,7 @@
 
 .students-filters select:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 
@@ -303,7 +303,7 @@
 }
 
 .student-action-btn:hover {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
@@ -457,7 +457,7 @@
     border: 1px solid rgba(255,255,255,.5);
     border-radius: 20px;
     background: #fff;
-    box-shadow: 0 25px 70px rgba(8,28,58,.2);
+    box-shadow: 0 25px 70px rgba(23,21,47,.2);
 }
 
 
@@ -493,7 +493,7 @@
 }
 
 .modal-close-btn:hover {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
