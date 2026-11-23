@@ -110,7 +110,7 @@
     background: #fff;
     border: 1px solid #e8e6f0;
     border-radius: 18px;
-    box-shadow: 0 8px 25px rgba(8, 28, 58, .045);
+    box-shadow: 0 8px 25px rgba(23, 21, 47, .045);
 }
 
 .overview-icon {
@@ -183,7 +183,7 @@
     background: #fff;
     border: 1px solid #e8e6f0;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(8, 28, 58, .045);
+    box-shadow: 0 10px 30px rgba(23, 21, 47, .045);
 }
 
 .assignment-main-card {
