@@ -8,7 +8,7 @@ Premium Founder dashboard styling
 PAGE HERO
 ============================================================ */
 
-.page-hero {
+body.founder-shell-ready .page-hero{
 display: flex;
 align-items: center;
 justify-content: space-between;
@@ -23,7 +23,7 @@ position: relative;
 
 }
 
-.page-hero::before {
+body.founder-shell-ready .page-hero::before{
 content: "";
 
 position: absolute;
@@ -43,7 +43,7 @@ pointer-events: none;
 
 }
 
-.hero-content {
+body.founder-shell-ready .hero-content{
 position: relative;
 z-index: 1;
 
@@ -51,7 +51,7 @@ min-width: 0;
 
 }
 
-.hero-badge {
+body.founder-shell-ready .hero-badge{
 display: inline-flex;
 align-items: center;
 
@@ -74,7 +74,7 @@ letter-spacing: .04em;
 
 }
 
-.page-hero h1 {
+body.founder-shell-ready .page-hero h1{
 margin: 0;
 
 color: #081c3a;
@@ -88,7 +88,7 @@ letter-spacing: -.025em;
 
 }
 
-.page-hero p {
+body.founder-shell-ready .page-hero p{
 max-width: 700px;
 
 margin: 10px 0 0;
@@ -100,7 +100,7 @@ line-height: 1.65;
 
 }
 
-.hero-actions {
+body.founder-shell-ready .hero-actions{
 position: relative;
 z-index: 1;
 
@@ -108,7 +108,7 @@ flex-shrink: 0;
 
 }
 
-.primary-btn {
+body.founder-shell-ready .primary-btn{
 min-height: 44px;
 
 display: inline-flex;
@@ -148,7 +148,7 @@ transition:
 
 }
 
-.primary-btn:hover {
+body.founder-shell-ready .primary-btn:hover{
 transform: translateY(-1px);
 
 box-shadow:
@@ -156,11 +156,11 @@ box-shadow:
 
 }
 
-.primary-btn:active {
+body.founder-shell-ready .primary-btn:active{
 transform: translateY(0);
 }
 
-.primary-btn:disabled {
+body.founder-shell-ready .primary-btn:disabled{
 opacity: .65;
 
 cursor: wait;
@@ -169,7 +169,7 @@ transform: none;
 
 }
 
-.primary-btn.is-loading {
+body.founder-shell-ready .primary-btn.is-loading{
 opacity: .7;
 }
 
@@ -177,7 +177,7 @@ opacity: .7;
 STAT CARDS
 ============================================================ */
 
-.stats-grid {
+body.founder-shell-ready .stats-grid{
 display: grid;
 
 grid-template-columns:
@@ -189,7 +189,7 @@ margin-bottom: 24px;
 
 }
 
-.stat-card {
+body.founder-shell-ready .stat-card{
 position: relative;
 
 min-width: 0;
@@ -209,7 +209,7 @@ overflow: hidden;
 
 }
 
-.stat-card::after {
+body.founder-shell-ready .stat-card::after{
 content: "";
 
 position: absolute;
@@ -228,7 +228,7 @@ pointer-events: none;
 
 }
 
-.stat-top {
+body.founder-shell-ready .stat-top{
 position: relative;
 z-index: 1;
 
@@ -249,7 +249,7 @@ letter-spacing: .06em;
 
 }
 
-.stat-icon {
+body.founder-shell-ready .stat-icon{
 width: 34px;
 height: 34px;
 
@@ -265,23 +265,23 @@ font-size: 15px;
 
 }
 
-.stat-icon.gold {
+body.founder-shell-ready .stat-icon.gold{
 background: rgba(255,193,7,.12);
 }
 
-.stat-icon.green {
+body.founder-shell-ready .stat-icon.green{
 background: rgba(34,197,94,.11);
 }
 
-.stat-icon.red {
+body.founder-shell-ready .stat-icon.red{
 background: rgba(239,68,68,.10);
 }
 
-.stat-icon.blue {
+body.founder-shell-ready .stat-icon.blue{
 background: rgba(41,121,255,.10);
 }
 
-.stat-card h2 {
+body.founder-shell-ready .stat-card h2{
 position: relative;
 z-index: 1;
 
@@ -296,7 +296,7 @@ line-height: 1;
 
 }
 
-.stat-card small {
+body.founder-shell-ready .stat-card small{
 position: relative;
 z-index: 1;
 
@@ -311,11 +311,11 @@ line-height: 1.4;
 APPLICATION PANEL
 ============================================================ */
 
-.admissions-panel {
+body.founder-shell-ready .admissions-panel{
 overflow: hidden;
 }
 
-.panel-header {
+body.founder-shell-ready .panel-header{
 display: flex;
 align-items: center;
 justify-content: space-between;
@@ -329,7 +329,7 @@ border-bottom:
 
 }
 
-.panel-header h2 {
+body.founder-shell-ready .panel-header h2{
 margin: 0;
 
 color: #081c3a;
@@ -339,7 +339,7 @@ font-weight: 800;
 
 }
 
-.panel-header p {
+body.founder-shell-ready .panel-header p{
 margin: 4px 0 0;
 
 color: #94a3b8;
@@ -348,7 +348,7 @@ font-size: 11px;
 
 }
 
-.filter-group {
+body.founder-shell-ready .filter-group{
 display: flex;
 align-items: center;
 
@@ -360,7 +360,7 @@ justify-content: flex-end;
 
 }
 
-.filter-btn {
+body.founder-shell-ready .filter-btn{
 min-height: 34px;
 
 padding: 7px 12px;
@@ -386,7 +386,7 @@ transition:
 
 }
 
-.filter-btn:hover {
+body.founder-shell-ready .filter-btn:hover{
 border-color: rgba(41,121,255,.25);
 
 color: #2979ff;
@@ -395,7 +395,7 @@ background: #f1f6ff;
 
 }
 
-.filter-btn.active {
+body.founder-shell-ready .filter-btn.active{
 border-color: rgba(41,121,255,.22);
 
 background: #2979ff;
@@ -411,7 +411,7 @@ box-shadow:
 TABLE
 ============================================================ */
 
-.table-wrap {
+body.founder-shell-ready .table-wrap{
 width: 100%;
 
 overflow-x: auto;
@@ -420,7 +420,7 @@ overflow-x: auto;
 
 }
 
-.students-table {
+body.founder-shell-ready .students-table{
 width: 100%;
 
 min-width: 900px;
@@ -431,11 +431,11 @@ font-size: 12px;
 
 }
 
-.students-table thead {
+body.founder-shell-ready .students-table thead{
 background: #f8fafc;
 }
 
-.students-table th {
+body.founder-shell-ready .students-table th{
 padding: 13px 16px;
 
 border-bottom:
@@ -456,7 +456,7 @@ white-space: nowrap;
 
 }
 
-.students-table td {
+body.founder-shell-ready .students-table td{
 padding: 15px 16px;
 
 border-bottom:
@@ -468,16 +468,16 @@ vertical-align: middle;
 
 }
 
-.students-table tbody tr {
+body.founder-shell-ready .students-table tbody tr{
 transition:
 background .15s ease;
 }
 
-.students-table tbody tr:hover {
+body.founder-shell-ready .students-table tbody tr:hover{
 background: #fafcff;
 }
 
-.students-table tbody tr:last-child td {
+body.founder-shell-ready .students-table tbody tr:last-child td{
 border-bottom: 0;
 }
 
@@ -485,7 +485,7 @@ border-bottom: 0;
 INSTRUCTOR CELL
 ============================================================ */
 
-.instructor-cell {
+body.founder-shell-ready .instructor-cell{
 display: flex;
 align-items: center;
 
@@ -495,7 +495,7 @@ min-width: 190px;
 
 }
 
-.instructor-avatar {
+body.founder-shell-ready .instructor-avatar{
 width: 40px;
 height: 40px;
 
@@ -524,7 +524,7 @@ box-shadow:
 
 }
 
-.instructor-info {
+body.founder-shell-ready .instructor-info{
 min-width: 0;
 
 display: flex;
@@ -534,7 +534,7 @@ gap: 3px;
 
 }
 
-.instructor-info strong {
+body.founder-shell-ready .instructor-info strong{
 max-width: 190px;
 
 overflow: hidden;
@@ -549,7 +549,7 @@ text-overflow: ellipsis;
 
 }
 
-.instructor-info span {
+body.founder-shell-ready .instructor-info span{
 max-width: 190px;
 
 overflow: hidden;
@@ -567,7 +567,7 @@ text-overflow: ellipsis;
 EMAIL
 ============================================================ */
 
-.email-link {
+body.founder-shell-ready .email-link{
 color: #2979ff;
 
 font-size: 11px;
@@ -579,7 +579,7 @@ white-space: nowrap;
 
 }
 
-.email-link:hover {
+body.founder-shell-ready .email-link:hover{
 text-decoration: underline;
 }
 
@@ -587,7 +587,7 @@ text-decoration: underline;
 STATUS BADGES
 ============================================================ */
 
-.status {
+body.founder-shell-ready .status{
 display: inline-flex;
 align-items: center;
 
@@ -608,7 +608,7 @@ white-space: nowrap;
 
 }
 
-.status.pending_review {
+body.founder-shell-ready .status.pending_review{
 border: 1px solid rgba(245,158,11,.16);
 
 background: rgba(245,158,11,.10);
@@ -617,7 +617,7 @@ color: #b45309;
 
 }
 
-.status.active {
+body.founder-shell-ready .status.active{
 border: 1px solid rgba(34,197,94,.16);
 
 background: rgba(34,197,94,.10);
@@ -626,7 +626,7 @@ color: #15803d;
 
 }
 
-.status.rejected {
+body.founder-shell-ready .status.rejected{
 border: 1px solid rgba(239,68,68,.16);
 
 background: rgba(239,68,68,.09);
@@ -639,7 +639,7 @@ color: #b91c1c;
 ACTION BUTTONS
 ============================================================ */
 
-.action-buttons {
+body.founder-shell-ready .action-buttons{
 display: flex;
 align-items: center;
 
@@ -649,7 +649,7 @@ white-space: nowrap;
 
 }
 
-.action-btn {
+body.founder-shell-ready .action-btn{
 min-height: 32px;
 
 padding: 7px 10px;
@@ -671,15 +671,15 @@ transition:
 
 }
 
-.action-btn:hover {
+body.founder-shell-ready .action-btn:hover{
 transform: translateY(-1px);
 }
 
-.action-btn:active {
+body.founder-shell-ready .action-btn:active{
 transform: translateY(0);
 }
 
-.action-btn:disabled {
+body.founder-shell-ready .action-btn:disabled{
 opacity: .5;
 
 cursor: wait;
@@ -688,7 +688,7 @@ transform: none;
 
 }
 
-.action-btn.approve {
+body.founder-shell-ready .action-btn.approve{
 border: 1px solid rgba(34,197,94,.20);
 
 background: rgba(34,197,94,.09);
@@ -697,14 +697,14 @@ color: #15803d;
 
 }
 
-.action-btn.approve:hover {
+body.founder-shell-ready .action-btn.approve:hover{
 background: rgba(34,197,94,.16);
 
 border-color: rgba(34,197,94,.30);
 
 }
 
-.action-btn.reject {
+body.founder-shell-ready .action-btn.reject{
 border: 1px solid rgba(239,68,68,.18);
 
 background: rgba(239,68,68,.07);
@@ -713,14 +713,14 @@ color: #b91c1c;
 
 }
 
-.action-btn.reject:hover {
+body.founder-shell-ready .action-btn.reject:hover{
 background: rgba(239,68,68,.14);
 
 border-color: rgba(239,68,68,.28);
 
 }
 
-.action-complete {
+body.founder-shell-ready .action-complete{
 color: #94a3b8;
 
 font-size: 10px;
@@ -732,7 +732,7 @@ font-weight: 700;
 EMPTY / ERROR STATE
 ============================================================ */
 
-.empty-state {
+body.founder-shell-ready .empty-state{
 min-height: 180px;
 
 display: flex;
@@ -749,7 +749,7 @@ text-align: center;
 
 }
 
-.empty-state strong {
+body.founder-shell-ready .empty-state strong{
 color: #334155;
 
 font-size: 13px;
@@ -757,7 +757,7 @@ font-weight: 800;
 
 }
 
-.empty-state span {
+body.founder-shell-ready .empty-state span{
 max-width: 420px;
 
 color: #94a3b8;
@@ -767,7 +767,7 @@ line-height: 1.5;
 
 }
 
-.empty-state.error strong {
+body.founder-shell-ready .empty-state.error strong{
 color: #b91c1c;
 }
 
@@ -775,7 +775,7 @@ color: #b91c1c;
 TABLET
 ============================================================ */
 
-@media (max-width: 1000px) {
+body.founder-shell-ready @media (max-width: 1000px){
 
 .stats-grid {
     grid-template-columns:
@@ -792,7 +792,7 @@ TABLET
 MOBILE
 ============================================================ */
 
-@media (max-width: 700px) {
+body.founder-shell-ready @media (max-width: 700px){
 
 .page-hero {
     flex-direction: column;
@@ -884,7 +884,7 @@ MOBILE
 SMALL PHONES
 ============================================================ */
 
-@media (max-width: 430px) {
+body.founder-shell-ready @media (max-width: 430px){
 
 .page-hero {
     padding: 17px;
@@ -947,7 +947,7 @@ SMALL PHONES
 VERY SMALL PHONES
 ============================================================ */
 
-@media (max-width: 340px) {
+body.founder-shell-ready @media (max-width: 340px){
 
 .stats-grid {
     grid-template-columns: 1fr;
@@ -963,7 +963,7 @@ VERY SMALL PHONES
 REDUCED MOTION
 ============================================================ */
 
-@media (prefers-reduced-motion: reduce) {
+body.founder-shell-ready @media (prefers-reduced-motion: reduce){
 
 .primary-btn,
 .filter-btn,
