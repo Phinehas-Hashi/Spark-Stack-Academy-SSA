@@ -35,6 +35,7 @@ Load the page stylesheet last so scoped page rules have predictable precedence. 
 - `premium-success.html` is a standalone transactional screen. It now loads design tokens and the core document defaults, without loading unused shell components.
 - `portal-suspended.html` is a standalone system-state screen. It now uses the shared tokens while keeping its isolated page root.
 - `certificate-view.html` is a standalone printable artifact. Its styles are scoped beneath `.certificate-view-page`, use the shared palette and typography, and preserve print-specific rules.
+- `marketplace.css` has been consolidated to its current page design generation. The obsolete first-generation rules were removed only after confirming their old selectors are absent from the page markup and marketplace JavaScript; the responsive overrides for the current design remain.
 - `chat.html`, `messages.html`, `new-chat.html`, and `help-center.html` remain standalone experiences without the standard authenticated shell. Do not add `portal-shell.css` until their intended navigation experience is deliberately redesigned.
 - `progress.html` is a redirect to `learning-progress.html`, not a styled portal screen.
 - `report.html` uses the standard portal shell and its own `pages/report.css`.
