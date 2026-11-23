@@ -1,5 +1,7 @@
 <header class="topbar">
-  <button class="menu-btn" id="menuBtn" aria-label="Open sidebar">
+  <button class="menu-btn" id="menuBtn" aria-label="Open sidebar"
+    aria-controls="sidebarContainer"
+    aria-expanded="false">
     <i data-lucide="menu"></i>
   </button>
 
@@ -15,7 +17,7 @@
     <div class="notification-wrapper">
       <button class="icon-btn" id="notificationsBtn" aria-label="Notifications" type="button">
         <i data-lucide="bell"></i>
-        <span class="notification-badge" id="notificationCount" style="display:none">0</span>
+        <span class="notification-badge" id="notificationCount">0</span>
       </button>
 
       <div class="notification-dropdown" id="notificationDropdown">
