@@ -135,9 +135,13 @@ function setupTeamForm() {
 function setupNavigation() {
   const menu = document.getElementById("institutionMenuBtn");
   menu?.addEventListener("click", () => {
-    sidebar?.classList.add("open");
-    overlay?.classList.add("active");
-    document.body.classList.add("institution-menu-open");
+    if (sidebar?.classList.contains("open")) closeNavigation();
+    else {
+      sidebar?.classList.add("open");
+      overlay?.classList.add("active");
+      menu.setAttribute("aria-expanded", "true");
+      document.body.classList.add("institution-menu-open");
+    }
   });
   overlay?.addEventListener("click", closeNavigation);
   sidebar?.querySelectorAll("a").forEach(link => link.addEventListener("click", closeNavigation));
@@ -149,6 +153,7 @@ function setupNavigation() {
 function closeNavigation() {
   sidebar?.classList.remove("open");
   overlay?.classList.remove("active");
+  document.getElementById("institutionMenuBtn")?.setAttribute("aria-expanded", "false");
   document.body.classList.remove("institution-menu-open");
 }
 
