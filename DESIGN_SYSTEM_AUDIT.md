@@ -181,3 +181,31 @@ The exact canonical link order must be finalized from selector ownership and act
 ## Audit conclusion
 
 The dependency mapping and static CSS scan now cover all five portals and all 152 CSS files. The architecture is not ready for a mass stylesheet replacement: route exceptions, parallel Student CSS generations, global selector leakage, override-heavy foundations and competing Founder shell loaders must be addressed in controlled stages. **No portal CSS or HTML has been deleted or rewritten during this audit.** The next safe step is to agree the target ownership/order, then begin the first isolated migration batch.
+
+## Portal migration progress — 23 November 2026
+
+### Student Portal — first migration batch
+
+- Regular Student routes continue to use the canonical token/core/components/responsive/shell/page stylesheet sequence where a shell is intended.
+- Premium Success now loads shared tokens and core defaults without the unused shell component stylesheet.
+- Portal Suspended now uses the shared tokens with a standalone page root.
+- Certificate View now uses a dedicated `.certificate-view-page` root, token palette and typography; its print behavior is retained and its global heading/footer/reset selectors have been scoped.
+- Marketplace CSS was consolidated to the current generation after its previous classes were checked against the page HTML and JavaScript. The obsolete generation was removed from the active page stylesheet; the unused legacy duplicate file remains retained.
+- All 29 Student page-owned stylesheets passed the static brace-balance check and the bare global element-selector screen. Browser verification remains outstanding.
+- The 26 old duplicate page stylesheet copies are retained pending final regression testing and cleanup.
+
+### Instructor Portal — shared foundation migration
+
+- Instructor core variables now map to shared SSA design tokens.
+- A scoped `instructor-theme.css` replaces the global `brand-system.css` import. All 21 standard Instructor routes now load shared tokens and the scoped theme; the standalone submission-review page loads tokens without the authenticated shell.
+- The global brand-system import was removed from Instructor responsive CSS. Responsive rules are now separated from brand presentation and scoped to Instructor roots.
+- Instructor component CSS was replaced with a single scoped implementation for `#instructorSidebar`, `#sidebarOverlay` and `#instructorTopbar`, based on the currently injected component markup.
+- The desktop sidebar width is consistently 270px. The tablet offset now begins above the 900px mobile-drawer breakpoint; the redundant topbar left offset was removed.
+- The overlay now responds to the `.active` class used by the shell JavaScript, and document scroll locking uses the `body.sidebar-open` class used by the JavaScript.
+- Report styles were moved from an embedded HTML style block into `instructor/css/report.css` and scoped under `.report-page`.
+- The Instructor suspended screen and submission-review screen now use standalone page-root styles and shared tokens.
+- Proven duplicate same-context rules were consolidated in Instructor Dashboard, Create Quiz and Quizzes stylesheets.
+- Instructor shared foundations and page styles passed static brace-balance checks. The page-specific selector scan found no bare global element selectors in the sampled page stylesheets; the remaining body scroll-lock rules are intentional.
+- Browser verification and interactive shell regression testing remain outstanding.
+
+**Migration status:** Student active stylesheet foundation and standalone-page first batch committed; Instructor shared foundation and standalone-page migration committed. No production-ready claim is made until all portal routes have been tested in a browser at desktop, tablet and mobile widths.
