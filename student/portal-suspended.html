@@ -1,1 +1,27 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Portal Unavailable | Spark Stack Academy</title><link rel="stylesheet" href="css/pages/portal-suspended.css?v=20261121-page1"></head><body class="portal-suspended-page"><main class="box"><div class="icon">🛠️</div><span class="badge">SSA SYSTEM CONTROL</span><h1>Portal Temporarily Unavailable</h1><p id="message">The Student Portal is currently unavailable. Please check back shortly.</p><div class="time">If this is scheduled maintenance, access will return automatically.</div></main><script>document.getElementById('message').textContent=sessionStorage.getItem('ssaPortalMessage')||document.getElementById('message').textContent;</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Portal Unavailable | Spark Stack Academy</title>
+<link rel="stylesheet" href="../css/design-tokens.css?v=20261123-foundation1">
+<link rel="stylesheet" href="css/pages/portal-suspended.css?v=20261123-migration1">
+</head>
+<body class="portal-suspended-page">
+<main class="box">
+    <div class="icon" aria-hidden="true">⚙</div>
+    <span class="badge">SSA SYSTEM CONTROL</span>
+    <h1>Portal Temporarily Unavailable</h1>
+    <p id="message">The Student Portal is currently unavailable. Please check back shortly.</p>
+    <div class="time">If this is scheduled maintenance, access will return automatically.</div>
+</main>
+<script>
+const message = document.getElementById("message");
+try {
+    message.textContent = sessionStorage.getItem("ssaPortalMessage") || message.textContent;
+} catch (error) {
+    // Keep the safe default message when session storage is unavailable.
+}
+</script>
+</body>
+</html>
