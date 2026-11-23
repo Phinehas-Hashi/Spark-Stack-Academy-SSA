@@ -29,7 +29,7 @@
     font-size: clamp(28px, 3vw, 38px);
     font-weight: 800;
     letter-spacing: -1px;
-    color: #0f172a;
+    color: #17152f;
 }
 
 .notifications-page .page-header p {
@@ -86,7 +86,7 @@
     right: -35px;
     bottom: -40px;
     border-radius: 50%;
-    background: rgba(41, 121, 255, .035);
+    background: rgba(118, 44, 255, .035);
 }
 
 .notification-stat:hover {
@@ -113,7 +113,7 @@
 }
 
 .notification-stat-icon.blue {
-    color: #2979ff;
+    color: #762cff;
     background: #eaf2ff;
 }
 
@@ -144,7 +144,7 @@
 .notification-stat strong {
     display: block;
 
-    color: #0f172a;
+    color: #17152f;
     font-size: 24px;
     font-weight: 800;
 }
@@ -184,13 +184,13 @@
 .notifications-toolbar h2 {
     margin: 4px 0 0;
 
-    color: #0f172a;
+    color: #17152f;
     font-size: 19px;
     font-weight: 750;
 }
 
 .notifications-toolbar .card-eyebrow {
-    color: #2979ff;
+    color: #762cff;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: .14em;
@@ -246,8 +246,8 @@
 
 .notification-search:focus-within {
     background: #ffffff;
-    border-color: #2979ff;
-    box-shadow: 0 0 0 4px rgba(41, 121, 255, .09);
+    border-color: #762cff;
+    box-shadow: 0 0 0 4px rgba(118, 44, 255, .09);
 }
 
 
@@ -290,14 +290,14 @@
 }
 
 .notification-filter:hover {
-    color: #2979ff;
+    color: #762cff;
     background: #edf4ff;
 }
 
 .notification-filter.active {
     color: #ffffff;
-    background: #2979ff;
-    box-shadow: 0 5px 14px rgba(41, 121, 255, .2);
+    background: #762cff;
+    box-shadow: 0 5px 14px rgba(118, 44, 255, .2);
 }
 
 
@@ -359,7 +359,7 @@
 
     width: 3px;
 
-    background: #2979ff;
+    background: #762cff;
 }
 
 
@@ -385,7 +385,7 @@
 
 .notification-icon.enrollment,
 .notification-icon.student {
-    color: #2979ff;
+    color: #762cff;
     background: #eaf2ff;
 }
 
@@ -461,10 +461,10 @@
     margin-top: 7px;
 
     border-radius: 50%;
-    background: #2979ff;
+    background: #762cff;
 
     box-shadow:
-        0 0 0 4px rgba(41, 121, 255, .08);
+        0 0 0 4px rgba(118, 44, 255, .08);
 }
 
 
@@ -493,7 +493,7 @@
 
     border-radius: 20px;
 
-    color: #2979ff;
+    color: #762cff;
     background: #edf4ff;
 }
 
@@ -541,7 +541,7 @@
     height: 20px;
 
     border: 2px solid #e2e8f0;
-    border-top-color: #2979ff;
+    border-top-color: #762cff;
 
     border-radius: 50%;
 
