@@ -20,7 +20,12 @@ function initAdminProfileDropdown() {
 
 function closeAdminMenu() {
     document.getElementById("adminSidebar")?.classList.remove("open");
-    document.getElementById("sidebarOverlay")?.classList.remove("active");
+    const overlay = document.getElementById("sidebarOverlay");
+    overlay?.classList.remove("active");
+    overlay?.setAttribute("aria-hidden", "true");
+    const button = document.getElementById("adminMenuToggle");
+    button?.setAttribute("aria-expanded", "false");
+    button?.setAttribute("aria-label", "Open menu");
     document.body.classList.remove("admin-menu-open");
 }
 
