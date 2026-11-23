@@ -155,16 +155,16 @@ The exact canonical link order must be finalized from selector ownership and act
 ## Prioritised migration blueprint
 
 **P0 — route and shell integrity**
-- Resolve Admin `settings.html` versus `Settings.html` and confirm the intended navigation target.
+- [x] Resolve Admin `settings.html` versus `Settings.html`; the uppercase authenticated page is canonical and the lowercase path redirects to it.
 - Classify every exception listed above as shell page, standalone page or embedded component.
-- Confirm Founder bootstrap ownership and eliminate any duplicate shell initialization only after page references are known.
+- [x] Confirm Founder bootstrap ownership: `founder-app.js` is the active shell entry point; the unreferenced `component-loader.js` remains retained legacy code.
 - Record the stable shell root, component IDs and drawer state classes for each portal.
 
 **P1 — source-of-truth CSS**
 - Establish root design tokens and documented reset ownership.
 - Map imported CSS dependencies and remove imports only after inlining/replacing their responsibilities.
 - Compare the 26 duplicate Student page stylesheet pairs and select a canonical copy for each route.
-- Decompose the high-override foundations in this order: Admin responsive, Founder unified, Institution foundation, Instructor responsive, Student theme, then remaining patch layers.
+- Reduce the remaining high-override foundations after browser regression: Founder unified, Student fixes/theme, Revenue premium, Admin responsive/modal layer, Institution foundation and Instructor responsive layer. Founder selectors are now portal-scoped; override reduction is a separate visual-validation task.
 - Replace unscoped selectors with portal/page-root scopes where the HTML contract supports it.
 
 **P2 — page migration**
@@ -181,7 +181,7 @@ The exact canonical link order must be finalized from selector ownership and act
 
 ## Audit conclusion
 
-The dependency mapping and static CSS scan cover all five portals and all 152 CSS files. The architecture is not suitable for a mass stylesheet replacement: route exceptions, parallel Student CSS generations, global selector leakage, override-heavy foundations and competing Founder shell loaders must be addressed in controlled stages. Migration has begun with scoped, reversible portal batches. No wholesale CSS deletion has been performed; legacy files remain until their usage and behavior are verified. The next work is to finish Student and Instructor regression checks, then migrate Institution, Admin and Founder in sequence.
+The dependency mapping and static CSS scan cover all five portals and all 152 CSS files. The architecture is not suitable for a mass stylesheet replacement: route exceptions, parallel Student CSS generations and override-heavy foundations still require controlled regression work. Source migrations have been recorded in scoped, reversible batches across Student, Instructor, Institution, Admin and Founder. No wholesale CSS deletion has been performed; legacy files remain until their usage and behavior are verified. The remaining work is browser/Firebase regression, merge reconciliation and reduction of high-override layers.
 
 ## Portal migration progress — 23 November 2026
 
@@ -216,7 +216,7 @@ The dependency mapping and static CSS scan cover all five portals and all 152 CS
 
 
 **Instructor verification checklist:** test the drawer and overlay at mobile widths; verify keyboard Escape and body scroll lock; test course-builder and assignment modals, earnings/payment dialogs, quiz grading panels, responsive tables, messages and standalone routes. The repository changes are committed, but the Instructor portal must not be marked visually complete until these checks pass on GitHub Pages.
-**Migration status:** Student active stylesheet foundation and standalone-page first batch are committed. Instructor foundation and page-level palette migration are committed across its shell and standalone routes. The remaining work is browser verification followed by controlled migration of Founder. Static source checks do not establish visual correctness or production readiness.
+**Migration status:** Student, Instructor and Institution source migrations are recorded; Admin source migration is recorded on its portal branch; Founder source migration is recorded on `migration/founder-final`. Remaining work is cross-branch reconciliation, browser verification and live Firebase regression. Static source checks do not establish visual correctness or production readiness.
 
 **Important:** The Instructor migration is a source-code migration, not a claim that every route has been visually verified. Test the mobile drawer, topbar, course-builder modals, earnings withdrawal modal, quiz grading panels, responsive tables and standalone messaging on GitHub Pages before calling this portal complete. No production-ready claim is made until all portal routes have been tested at desktop, tablet and mobile widths.
 
