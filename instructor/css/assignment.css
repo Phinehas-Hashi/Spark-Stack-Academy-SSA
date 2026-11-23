@@ -108,7 +108,7 @@
     min-width: 0;
     padding: 19px;
     background: #fff;
-    border: 1px solid #e8edf5;
+    border: 1px solid #e8e6f0;
     border-radius: 18px;
     box-shadow: 0 8px 25px rgba(8, 28, 58, .045);
 }
@@ -128,7 +128,7 @@
 }
 
 .overview-icon.blue {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -181,7 +181,7 @@
 .assignment-side-card,
 .submissions-card {
     background: #fff;
-    border: 1px solid #e8edf5;
+    border: 1px solid #e8e6f0;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(8, 28, 58, .045);
 }
@@ -354,7 +354,7 @@
 }
 
 .submission-filter.active {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -400,7 +400,7 @@
     height: 42px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
     font-size: 13px;
     font-weight: 800;
