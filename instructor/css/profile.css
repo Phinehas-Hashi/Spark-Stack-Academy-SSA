@@ -117,7 +117,7 @@
             #f4f8ff
         );
 
-    box-shadow: 0 15px 40px rgba(8,28,58,.07);
+    box-shadow: 0 15px 40px rgba(23,21,47,.07);
 }
 
 .profile-hero::after {
@@ -192,7 +192,7 @@
 
     cursor: pointer;
 
-    box-shadow: 0 5px 15px rgba(8,28,58,.18);
+    box-shadow: 0 5px 15px rgba(23,21,47,.18);
     transition: .2s ease;
 }
 
@@ -314,7 +314,7 @@
     background: #fff;
 
     box-shadow:
-        0 8px 28px rgba(8,28,58,.045);
+        0 8px 28px rgba(23,21,47,.045);
 
     box-sizing: border-box;
 }
@@ -436,7 +436,7 @@
 .profile-stat:hover {
     transform: translateY(-2px);
     border-color: #d9e5f5;
-    box-shadow: 0 8px 20px rgba(8,28,58,.05);
+    box-shadow: 0 8px 20px rgba(23,21,47,.05);
 }
 
 .profile-stat-icon {
@@ -457,7 +457,7 @@
 }
 
 .profile-stat-icon.blue {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
