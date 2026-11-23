@@ -68,7 +68,7 @@
 .primary-btn {
     background: #17152f;
     color: #fff;
-    box-shadow: 0 8px 20px rgba(8, 28, 58, .15);
+    box-shadow: 0 8px 20px rgba(23, 21, 47, .15);
 }
 
 .primary-btn:hover {
@@ -101,7 +101,7 @@
     align-items: center;
     gap: 15px;
     min-height: 88px;
-    box-shadow: 0 5px 20px rgba(8, 28, 58, .04);
+    box-shadow: 0 5px 20px rgba(23, 21, 47, .04);
 }
 
 .stat-icon {
@@ -161,7 +161,7 @@
     border: 1px solid #e9eef5;
     border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 5px 25px rgba(8, 28, 58, .04);
+    box-shadow: 0 5px 25px rgba(23, 21, 47, .04);
 }
 
 .assignments-toolbar {
