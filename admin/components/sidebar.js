@@ -48,7 +48,12 @@ function escapeHTML(value) {
 
 function closeAdminDrawer() {
     document.getElementById("adminSidebar")?.classList.remove("open");
-    document.getElementById("sidebarOverlay")?.classList.remove("active");
+    const overlay = document.getElementById("sidebarOverlay");
+    overlay?.classList.remove("active");
+    overlay?.setAttribute("aria-hidden", "true");
+    const menu = document.getElementById("adminMenuToggle");
+    menu?.setAttribute("aria-expanded", "false");
+    menu?.setAttribute("aria-label", "Open menu");
     document.body.classList.remove("admin-menu-open");
 }
 
