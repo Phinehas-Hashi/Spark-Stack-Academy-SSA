@@ -883,3 +883,43 @@
 
 }
 .admin-brand-mark{background:transparent!important;box-shadow:none!important}.admin-brand-mark img{width:38px;height:38px;display:block;border-radius:11px}
+
+/* Unified Admin portal chrome — dark indigo shell with violet/cyan states. */
+.admin-app .admin-sidebar {
+    background:
+        radial-gradient(circle at 12% 0%,rgba(132,47,255,.30),transparent 34%),
+        linear-gradient(180deg,#090625 0%,#100b3e 58%,#080522 100%);
+    border-right:1px solid rgba(176,129,255,.22);
+    box-shadow:12px 0 36px rgba(13,5,48,.20);
+}
+.admin-app .admin-nav-label { color:#a99ad5; }
+.admin-app .admin-nav-item { color:#d5cfee; border-radius:11px; }
+.admin-app .admin-nav-item:hover,
+.admin-app .admin-nav-item.active {
+    color:#fff;
+    background:linear-gradient(100deg,rgba(119,44,255,.42),rgba(32,207,232,.12));
+    box-shadow:inset 3px 0 #20cfe8,0 0 18px rgba(126,48,255,.16);
+}
+.admin-app .admin-topbar {
+    background:linear-gradient(105deg,#0b082d 0%,#171052 100%);
+    color:#fff;
+    border-bottom:1px solid rgba(164,112,255,.36);
+    box-shadow:0 8px 24px rgba(12,5,48,.12);
+}
+.admin-app .admin-breadcrumb span,
+.admin-app .admin-breadcrumb i { color:#bca6f4; }
+.admin-app .admin-breadcrumb strong { color:#fff; }
+.admin-app .admin-menu-toggle {
+    background:rgba(255,255,255,.09);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.15);
+}
+.admin-app .topbar-icon-btn { color:#d5cfee; }
+.admin-app .topbar-icon-btn:hover,
+.admin-app .admin-topbar-profile:hover { background:rgba(255,255,255,.09); color:#fff; }
+.admin-app .admin-topbar-user strong { color:#fff; }
+.admin-app .admin-topbar-user span,
+.admin-app .profile-chevron { color:#bca6f4; }
+.admin-app .topbar-divider { background:rgba(255,255,255,.18); }
+.admin-app .admin-brand-mark { background:transparent; box-shadow:none; }
+.admin-app .admin-brand-mark img { width:38px; height:38px; display:block; border-radius:11px; }
