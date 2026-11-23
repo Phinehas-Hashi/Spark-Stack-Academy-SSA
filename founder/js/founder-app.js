@@ -145,11 +145,12 @@ function loadTopNotifications(uid){
 }
 
 function highlightActivePage(){
-  const current=window.location.pathname.split("/").pop()||"dashboard.html";
+  const currentPath=window.location.pathname.split("/").pop()||"dashboard.html";
+  const current=currentPath==="payouts.html"?"wallets.html":currentPath;
   document.querySelectorAll(".sidebar-menu a").forEach(link=>{const page=(link.getAttribute("href")||"").split("/").pop();const active=page===current;link.classList.toggle("active",active);if(active)link.setAttribute("aria-current","page");else link.removeAttribute("aria-current");});
 }
 
-document.addEventListener("click",async event=>{const logout=event.target.closest("#logoutBtn");if(!logout)return;try{await signOut(auth);sessionStorage.removeItem("founderProfile");window.location.href="../login.html";}catch(error){console.error("Logout failed:",error);}});
+document.addEventListener("click",async event=>{const logout=event.target.closest("#logoutBtn");if(!logout)return;try{await signOut(auth);sessionStorage.removeItem("founderProfile");window.location.href=founderPath("../login.html");}catch(error){console.error("Logout failed:",error);}});
 
 function initSearch(){
   const input=document.getElementById("globalSearch"),results=document.getElementById("searchResults"); if(!input||!results)return;
