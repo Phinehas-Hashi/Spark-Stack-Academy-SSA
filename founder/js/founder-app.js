@@ -4,11 +4,17 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const componentCache = new Map();
+const founderRoot = new URL("../", import.meta.url);
+const founderURL = path => new URL(path, founderRoot).href;
 const escapeHTML = value => String(value ?? "").replace(/[&<>\"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 
 function loadCSS(path){
-  if(document.querySelector(`link[href="${path}"]`)) return;
-  const link=document.createElement("link"); link.rel="stylesheet"; link.href=path; document.head.appendChild(link);
+  const url = founderURL(path);
+  if ([...document.querySelectorAll('link[rel="stylesheet"]')].some(link => link.href === url)) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = url;
+  document.head.appendChild(link);
 }
 
 function ensureFounderShell(){
@@ -34,15 +40,33 @@ function ensureFounderShell(){
 }
 
 async function fetchComponent(path){
-  if(componentCache.has(path)) return componentCache.get(path);
-  const response=await fetch(path); if(!response.ok) throw new Error(`Failed to load ${path}`);
-  const html=await response.text(); componentCache.set(path,html); return html;
+  const url = founderURL(path);
+  if(componentCache.has(url)) return componentCache.get(url);
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to load ${url} (${response.status})`);
+  const html = await response.text();
+  componentCache.set(url, html);
+  return html;
 }
 
 async function loadComponent({containerId,html,css,callback}){
-  loadCSS(css); const container=document.getElementById(containerId); if(!container) return;
-  try{ container.innerHTML=await fetchComponent(html); window.lucide?.createIcons(); callback?.(); }
-  catch(error){ console.error(`Failed to load ${html}`,error); }
+  loadCSS(css);
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  try {
+    container.innerHTML = await fetchComponent(html);
+    container.querySelectorAll("[href], [src]").forEach(node => {
+      for (const attr of ["href", "src"]) {
+        const raw = node.getAttribute(attr);
+        if (!raw || /^(?:[a-z]+:|\\/\\/|#)/i.test(raw)) continue;
+        node.setAttribute(attr, founderURL(raw));
+      }
+    });
+    window.lucide?.createIcons();
+    callback?.();
+  } catch (error) {
+    console.error(`Failed to load ${html}`, error);
+  }
 }
 
 async function loadSidebar(){ await loadComponent({containerId:"sidebarContainer",html:"components/sidebar.html",css:"components/sidebar.css",callback:highlightActivePage}); }
@@ -66,12 +90,12 @@ function setupTopbar(){
   const button=document.getElementById("notificationsBtn"), dropdown=document.getElementById("notificationDropdown"), viewAll=document.getElementById("viewAllNotifications");
   button?.addEventListener("click",e=>{e.stopPropagation();dropdown?.classList.toggle("active");});
   document.addEventListener("click",e=>{if(dropdown&&!dropdown.contains(e.target)&&!button?.contains(e.target))dropdown.classList.remove("active");});
-  viewAll?.addEventListener("click",()=>window.location.href="notifications.html");
+  viewAll?.addEventListener("click",()=>window.location.href=founderURL("notifications.html"));
 }
 
 function loadFounder(){
   onAuthStateChanged(auth,async user=>{
-    if(!user){window.location.href="../login.html";return;}
+    if(!user){window.location.href=new URL("../../login.html", import.meta.url).href;return;}
     listenToNotifications(user.uid); loadTopNotifications(user.uid);
     try{
       const cached=sessionStorage.getItem("founderProfile"); if(cached){updateFounderUI(JSON.parse(cached));return;}
@@ -107,7 +131,7 @@ function highlightActivePage(){
   document.querySelectorAll(".sidebar-menu a").forEach(link=>{const page=(link.getAttribute("href")||"").split("/").pop();const active=page===current;link.classList.toggle("active",active);if(active)link.setAttribute("aria-current","page");else link.removeAttribute("aria-current");});
 }
 
-document.addEventListener("click",async event=>{const logout=event.target.closest("#logoutBtn");if(!logout)return;try{await signOut(auth);sessionStorage.removeItem("founderProfile");window.location.href="../login.html";}catch(error){console.error("Logout failed:",error);}});
+document.addEventListener("click",async event=>{const logout=event.target.closest("#logoutBtn");if(!logout)return;try{await signOut(auth);sessionStorage.removeItem("founderProfile");window.location.href=new URL("../../login.html", import.meta.url).href;}catch(error){console.error("Logout failed:",error);}});
 
 function initSearch(){
   const input=document.getElementById("globalSearch"),results=document.getElementById("searchResults"); if(!input||!results)return;
