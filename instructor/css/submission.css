@@ -1,3 +1,7 @@
+/* Standalone page base — deliberately independent from the injected portal shell. */
+html, body { min-height: 100%; }
+*, *::before, *::after { box-sizing: border-box; }
+body.instructor-submission-page { margin: 0; min-height: 100vh; }
 /* Standalone Instructor submission review — all selectors page-scoped. */
 .instructor-submission-page {
     margin: 0;
