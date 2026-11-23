@@ -155,7 +155,7 @@
 
 .primary-btn:hover {
 
-    background: #1769ed;
+    background: #5d1ed6;
 
     transform: translateY(-1px);
 
@@ -229,7 +229,7 @@
 
     background: #ffffff;
 
-    border: 1px solid #e8edf5;
+    border: 1px solid #e8e6f0;
 
     border-radius: 16px;
 
@@ -291,7 +291,7 @@
 
 .stat-icon.blue {
 
-    background: #eaf2ff;
+    background: #f0eaff;
 
     color: #762cff;
 
@@ -372,7 +372,7 @@
 
     background: #ffffff;
 
-    border: 1px solid #e8edf5;
+    border: 1px solid #e8e6f0;
 
     border-radius: 20px;
 
@@ -583,7 +583,7 @@
 
     color: #762cff;
 
-    background: #edf4ff;
+    background: #f0eaff;
 
     border-color: #d8e7ff;
 
@@ -623,7 +623,7 @@
 
     background: #ffffff;
 
-    border: 1px solid #e7ecf3;
+    border: 1px solid #e8e6f0;
 
     border-radius: 17px;
 
@@ -1137,7 +1137,7 @@
 
     border-radius: 16px;
 
-    background: #edf4ff;
+    background: #f0eaff;
 
     color: #762cff;
 
@@ -1220,7 +1220,7 @@
 
 .empty-action:hover {
 
-    background: #edf4ff;
+    background: #f0eaff;
 
     border-color: #c8dcff;
 
