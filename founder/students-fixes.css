@@ -3,7 +3,7 @@
    Loaded after students.css and founder-unified.css.
 ========================================================== */
 
-:root {
+body.founder-portal-page {
     --students-bg: #f5f7fb;
     --students-surface: #ffffff;
     --students-surface-soft: #f8fafc;
@@ -15,7 +15,7 @@
     --students-shadow: 0 10px 30px rgba(15, 23, 42, .07);
 }
 
-body {
+body.founder-portal-page {
     background: var(--students-bg) !important;
     color: var(--students-text) !important;
 }
@@ -106,7 +106,7 @@ tbody tr:hover td { background: #f8fafc !important; }
 .page-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 /* Student modal */
-body.modal-open { overflow: hidden; }
+body.founder-portal-page.modal-open { overflow: hidden; }
 .modal {
     position: fixed; inset: 0; z-index: 5000; display: none;
     align-items: center; justify-content: center; padding: 20px;
