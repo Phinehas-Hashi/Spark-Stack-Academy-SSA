@@ -1,0 +1,18 @@
+/* Founder messaging page theme over the shared role-messaging layout. */
+body.founder-messages-page{min-height:100vh;padding:clamp(8px,2vw,24px);background:var(--ssa-color-canvas,#f5f4fb);color:var(--ssa-color-ink,#17152f);font-family:var(--ssa-font-body,"Poppins",Inter,system-ui,sans-serif)}
+body.founder-messages-page .rm-shell{border:1px solid var(--ssa-color-line,#e8e6f0);border-radius:20px;background:var(--ssa-color-surface,#fff);box-shadow:var(--ssa-shadow-md,0 12px 34px rgba(27,20,65,.10))}
+body.founder-messages-page .rm-contacts{border-color:var(--ssa-color-line,#e8e6f0);background:#fbfaff}
+body.founder-messages-page .rm-head,body.founder-messages-page .rm-chat-head,body.founder-messages-page .rm-composer{border-color:var(--ssa-color-line,#e8e6f0)}
+body.founder-messages-page .rm-head small{color:var(--ssa-color-brand,#762cff)}
+body.founder-messages-page .rm-head span{background:rgba(118,44,255,.09);color:var(--ssa-color-brand,#762cff)}
+body.founder-messages-page .rm-search,body.founder-messages-page .rm-composer input{border-color:var(--ssa-color-line,#e8e6f0);background:#fbfaff;color:var(--ssa-color-ink,#17152f)}
+body.founder-messages-page .rm-search:focus,body.founder-messages-page .rm-composer input:focus{border-color:var(--ssa-color-brand,#762cff);box-shadow:0 0 0 3px rgba(118,44,255,.12)}
+body.founder-messages-page .rm-person:hover{background:rgba(118,44,255,.07)}
+body.founder-messages-page .rm-avatar{background:linear-gradient(135deg,#762cff,#5d1ed6);color:#fff}
+body.founder-messages-page .rm-messages{background:#f7f5fc}
+body.founder-messages-page .rm-msg div{border-color:var(--ssa-color-line,#e8e6f0)}
+body.founder-messages-page .rm-msg.mine div{border-color:#5d1ed6;background:linear-gradient(120deg,#762cff,#5d1ed6);color:#fff}
+body.founder-messages-page .rm-composer button{background:linear-gradient(105deg,#762cff,#5d1ed6);color:#fff}
+body.founder-messages-page .rm-empty{color:var(--ssa-color-muted,#77758f)}
+body.founder-messages-page .rm-empty strong{color:var(--ssa-color-ink,#17152f)}
+@media(max-width:800px){body.founder-messages-page{padding:8px}body.founder-messages-page .rm-shell{height:calc(100dvh - 16px);min-height:0;border-radius:16px}}
