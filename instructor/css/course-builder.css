@@ -46,7 +46,7 @@
 }
 
 .back-link:hover {
-    color: #2979ff;
+    color: #762cff;
 }
 
 .back-link svg {
@@ -58,7 +58,7 @@
 .card-eyebrow {
     display: block;
     margin-bottom: 6px;
-    color: #2979ff;
+    color: #762cff;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .12em;
@@ -66,7 +66,7 @@
 
 .course-builder-header h1 {
     margin: 0;
-    color: #081c3a;
+    color: #17152f;
     font-size: clamp(25px, 3vw, 38px);
     font-weight: 800;
     line-height: 1.2;
@@ -146,15 +146,15 @@
 }
 
 .primary-btn {
-    border: 1px solid #2979ff;
-    background: #2979ff;
+    border: 1px solid #762cff;
+    background: #762cff;
     color: #fff;
-    box-shadow: 0 8px 20px rgba(41, 121, 255, .16);
+    box-shadow: 0 8px 20px rgba(118, 44, 255, .16);
 }
 
 .primary-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 25px rgba(41, 121, 255, .22);
+    box-shadow: 0 12px 25px rgba(118, 44, 255, .22);
 }
 
 .secondary-btn {
@@ -210,7 +210,7 @@
         #eaf2ff,
         #dbe9ff
     );
-    color: #2979ff;
+    color: #762cff;
 }
 
 .overview-course-icon svg {
@@ -233,7 +233,7 @@
 
 .overview-course-info strong {
     display: block;
-    color: #0f172a;
+    color: #17152f;
     font-size: 16px;
     font-weight: 800;
 }
@@ -266,7 +266,7 @@
 }
 
 .overview-stat strong {
-    color: #0f172a;
+    color: #17152f;
     font-size: 20px;
     font-weight: 800;
 }
@@ -306,7 +306,7 @@
 
 .builder-section-header h2 {
     margin: 0;
-    color: #0f172a;
+    color: #17152f;
     font-size: 20px;
     font-weight: 800;
 }
@@ -367,7 +367,7 @@
     place-items: center;
     border-radius: 9px;
     background: #eaf2ff;
-    color: #2979ff;
+    color: #762cff;
     font-size: 12px;
     font-weight: 800;
 }
@@ -379,7 +379,7 @@
 
 .module-info h3 {
     margin: 0;
-    color: #0f172a;
+    color: #17152f;
     font-size: 14px;
     font-weight: 800;
 }
@@ -409,7 +409,7 @@
 
 .module-action:hover {
     background: #eef4ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .module-action.danger:hover {
@@ -510,7 +510,7 @@
 
 .lesson-action:hover {
     background: #f1f5f9;
-    color: #2979ff;
+    color: #762cff;
 }
 
 
@@ -534,9 +534,9 @@
 }
 
 .add-lesson-btn:hover {
-    border-color: #2979ff;
+    border-color: #762cff;
     background: #f5f9ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 
@@ -562,7 +562,7 @@
 
 .side-card-header h3 {
     margin: 0;
-    color: #0f172a;
+    color: #17152f;
     font-size: 16px;
     font-weight: 800;
 }
@@ -619,7 +619,7 @@
 }
 
 .quick-add-btn:hover strong {
-    color: #2979ff;
+    color: #762cff;
 }
 
 .quick-add-icon {
@@ -630,7 +630,7 @@
     place-items: center;
     border-radius: 9px;
     background: #f1f5f9;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .quick-add-icon svg {
@@ -683,7 +683,7 @@
     width: 16px;
     flex: 0 0 16px;
     margin-top: 1px;
-    color: #2979ff;
+    color: #762cff;
 }
 
 
@@ -714,7 +714,7 @@
     margin: 0 auto 15px;
     border-radius: 16px;
     background: #eef4ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .builder-empty-icon svg {
@@ -723,7 +723,7 @@
 
 .builder-empty h3 {
     margin: 0;
-    color: #0f172a;
+    color: #17152f;
     font-size: 17px;
     font-weight: 800;
 }
@@ -803,7 +803,7 @@
 
 .builder-modal-header h2 {
     margin: 0;
-    color: #0f172a;
+    color: #17152f;
     font-size: 20px;
     font-weight: 800;
 }
@@ -822,7 +822,7 @@
 
 .modal-close:hover {
     background: #e2e8f0;
-    color: #0f172a;
+    color: #17152f;
 }
 
 .modal-close svg {
@@ -860,7 +860,7 @@
     border-radius: 9px;
     outline: none;
     background: #fff;
-    color: #0f172a;
+    color: #17152f;
     font-family: inherit;
     font-size: 13px;
     transition: .2s ease;
@@ -882,8 +882,8 @@
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-    border-color: #2979ff;
-    box-shadow: 0 0 0 3px rgba(41, 121, 255, .1);
+    border-color: #762cff;
+    box-shadow: 0 0 0 3px rgba(118, 44, 255, .1);
 }
 
 .form-group input::placeholder,
