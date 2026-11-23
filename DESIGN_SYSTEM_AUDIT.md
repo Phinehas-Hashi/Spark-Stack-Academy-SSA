@@ -71,11 +71,11 @@ The normal page pattern is generally:
 Exceptions:
 - `instructor/calendar.html` places Google Fonts before the portal styles and responsive CSS before its page stylesheet.
 - `instructor/dashboard.html` adds root `brand-system.css` after portal/page styles.
-- `instructor/messages.html` uses only the shared `role-messaging.css` and has a dedicated `role-messaging-page` body class.
-- `instructor/portal-suspended.html` has an embedded style block and no linked stylesheet.
-- `instructor/report.html` has an embedded style block and no page-specific stylesheet; it loads core/components/responsive only.
-- `instructor/submission.html` omits the responsive stylesheet.
-- `instructor/create-quiz.html` and several quiz/report routes omit the Google Fonts link.
+- `instructor/messages.html` uses the shared `role-messaging.css` plus Instructor-specific `instructor/css/messages.css` overrides and has a dedicated `role-messaging-page instructor-messages-page` body class.
+- `instructor/portal-suspended.html` is a standalone route and now uses `instructor/css/portal-suspended.css`.
+- `instructor/report.html` is a shell route; its embedded styles were moved to `instructor/css/report.css`.
+- `instructor/submission.html` is a standalone review workflow and now uses only tokens and `instructor/css/submission.css`, without loading the unused portal shell.
+- `instructor/create-quiz.html`, `instructor/quiz.html`, `instructor/quizzes.html` and `instructor/quiz-submission.html` are standalone workflows; they now use the shared standalone page foundation rather than loading empty shell components.
 
 The shell is injected by `instructor/js/instructor-app.js`. The script expects `#instructorSidebar`, `#instructorTopbar` and `#sidebarOverlay`, injects component HTML, then attaches mobile navigation handlers. The CSS migration must preserve these IDs and the `.open` / `.active` state contract.
 
