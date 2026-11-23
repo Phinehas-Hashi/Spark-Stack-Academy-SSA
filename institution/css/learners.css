@@ -1,27 +1,27 @@
-.learners-page{padding:26px clamp(15px,2.5vw,30px) 32px;color:#10223e;font-family:"DM Sans",sans-serif}
+.learners-page{padding:26px clamp(15px,2.5vw,30px) 32px;color:#10223e;font-family:var(--ssa-font-body, "Poppins"),sans-serif}
 .learners-hero{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:27px 30px;border:1px solid rgba(255,255,255,.12);border-radius:21px;background:radial-gradient(circle at 88% 5%,rgba(77,132,239,.3),transparent 32%),linear-gradient(115deg,#17152f,#25116a);color:#fff;box-shadow:0 16px 35px rgba(7,24,52,.14)}
 .learners-eyebrow{display:block;color:#762cff;font-size:8px;font-weight:800;letter-spacing:1.65px;text-transform:uppercase}
 .learners-hero .learners-eyebrow{color:#9bbcf0}
-.learners-hero h1{margin:8px 0 6px;color:#fff;font:800 clamp(24px,3vw,33px)/1.15 Manrope,sans-serif;letter-spacing:-.8px}
+.learners-hero h1{margin:8px 0 6px;color:#fff;font:800 clamp(24px,3vw,33px)/1.15 var(--ssa-font-display, "Montserrat"),sans-serif;letter-spacing:-.8px}
 .learners-hero p{max-width:670px;margin:0;color:#d4cdec;font-size:11px;line-height:1.6}
 .hero-shield{display:grid;justify-items:center;gap:8px;padding:15px 20px;border:1px solid rgba(159,191,245,.2);border-radius:15px;background:rgba(255,255,255,.06);color:#d8e6ff;font-size:8px;font-weight:800;letter-spacing:1.2px;white-space:nowrap}
 .hero-shield i{width:25px;height:25px;color:#20cfe8}
 .learner-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
 .learner-stats article{position:relative;min-width:0;padding:17px 18px;border:1px solid #e8e6f0;border-radius:15px;background:#fff;box-shadow:0 5px 17px rgba(16,38,72,.035)}
 .learner-stats article>span,.learner-stats article>small{display:block;color:#7d8ba0;font-size:9px}
-.learner-stats article>strong{display:block;margin:7px 0 3px;color:#17152f;font:800 22px Manrope,sans-serif;letter-spacing:-.5px}
+.learner-stats article>strong{display:block;margin:7px 0 3px;color:#17152f;font:800 22px var(--ssa-font-display, "Montserrat"),sans-serif;letter-spacing:-.5px}
 .learner-stats article>i{position:absolute;top:15px;right:15px;width:18px;height:18px;color:#762cff}
 .learner-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:14px;margin-bottom:15px}
 .learner-panel{min-width:0;padding:22px;border:1px solid #e8e6f0;border-radius:17px;background:#fff;box-shadow:0 7px 22px rgba(16,38,72,.04)}
 .learner-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
-.learner-panel-heading h2{margin:5px 0;color:#17152f;font:800 18px Manrope,sans-serif;letter-spacing:-.4px}
+.learner-panel-heading h2{margin:5px 0;color:#17152f;font:800 18px var(--ssa-font-display, "Montserrat"),sans-serif;letter-spacing:-.4px}
 .learner-panel-heading p{margin:0;color:#7a899e;font-size:10px;line-height:1.55}
 .step-chip{padding:7px 9px;border:1px solid #e2eaf7;border-radius:99px;background:#f5f4fb;color:#77758f;font-size:8px;font-weight:800;white-space:nowrap}
 #learnerEnrolForm{display:grid;gap:8px}
 #learnerEnrolForm label{margin-top:3px;color:#314765;font-size:10px;font-weight:700}
-#learnerEnrolForm input,#learnerEnrolForm select,.roster-tools select{width:100%;height:43px;padding:0 12px;border:1px solid #e8e6f0;border-radius:10px;background:#fbfcfe;color:#203753;font:500 11px "DM Sans",sans-serif;outline:none}
+#learnerEnrolForm input,#learnerEnrolForm select,.roster-tools select{width:100%;height:43px;padding:0 12px;border:1px solid #e8e6f0;border-radius:10px;background:#fbfcfe;color:#203753;font:500 11px var(--ssa-font-body, "Poppins"),sans-serif;outline:none}
 #learnerEnrolForm input:focus,#learnerEnrolForm select:focus,.roster-tools select:focus{border-color:#762cff;box-shadow:0 0 0 3px rgba(53,111,213,.09)}
-#learnerEnrolForm button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:45px;margin-top:5px;padding:11px 14px;border:0;border-radius:10px;background:linear-gradient(100deg,#762cff,#5d1ed6);color:#fff;font:800 10px Manrope,sans-serif;cursor:pointer;box-shadow:0 8px 16px rgba(43,108,219,.17)}
+#learnerEnrolForm button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:45px;margin-top:5px;padding:11px 14px;border:0;border-radius:10px;background:linear-gradient(100deg,#762cff,#5d1ed6);color:#fff;font:800 10px var(--ssa-font-display, "Montserrat"),sans-serif;cursor:pointer;box-shadow:0 8px 16px rgba(43,108,219,.17)}
 #learnerEnrolForm button:disabled{opacity:.55;cursor:not-allowed}
 #learnerEnrolForm button svg{width:15px;height:15px}
 #learnerFormMessage{min-height:15px;margin:2px 0 0;color:#687d9b;font-size:9px;line-height:1.5}
@@ -34,19 +34,19 @@
 .access-points li svg{width:15px;height:15px;flex:0 0 15px;color:#16865b}
 .roster-panel{padding:22px}
 .roster-heading{align-items:center;margin-bottom:15px}
-.refresh-learners{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid #dce7f7;border-radius:9px;background:#f5f8fe;color:#762cff;font:700 9px Manrope,sans-serif;cursor:pointer}
+.refresh-learners{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid #dce7f7;border-radius:9px;background:#f5f8fe;color:#762cff;font:700 9px var(--ssa-font-display, "Montserrat"),sans-serif;cursor:pointer}
 .refresh-learners svg{width:13px;height:13px}
 .roster-tools{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:9px;margin-bottom:13px}
 .roster-search{display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid #e8e6f0;border-radius:10px;background:#fbfcfe}
 .roster-search svg{width:15px;height:15px;color:#8a9bb4}
-.roster-search input{width:100%;height:41px;border:0;outline:0;background:transparent;color:#203753;font:500 10px "DM Sans",sans-serif}
+.roster-search input{width:100%;height:41px;border:0;outline:0;background:transparent;color:#203753;font:500 10px var(--ssa-font-body, "Poppins"),sans-serif}
 .roster-tools select{height:43px}
 .learner-roster{display:grid}
 .learner-row{display:grid;grid-template-columns:minmax(180px,.9fr) minmax(0,1.4fr) auto;align-items:center;gap:14px;padding:14px 2px;border-top:1px solid #e8e6f0}
 .learner-identity{display:flex;align-items:center;gap:10px;min-width:0}
-.learner-avatar{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#f0eaff,#f0eaff);color:#5d1ed6;font:800 11px Manrope,sans-serif}
+.learner-avatar{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#f0eaff,#f0eaff);color:#5d1ed6;font:800 11px var(--ssa-font-display, "Montserrat"),sans-serif}
 .learner-identity>div{display:grid;gap:4px;min-width:0}
-.learner-identity strong{overflow:hidden;color:#203653;font:700 10px Manrope,sans-serif;text-overflow:ellipsis;white-space:nowrap}
+.learner-identity strong{overflow:hidden;color:#203653;font:700 10px var(--ssa-font-display, "Montserrat"),sans-serif;text-overflow:ellipsis;white-space:nowrap}
 .learner-identity small{overflow:hidden;color:#8a97aa;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
 .learner-assignments{display:grid;gap:6px;min-width:0}
 .assigned-course{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
@@ -59,12 +59,12 @@
 .learner-active-pill svg{width:12px;height:12px}
 .roster-empty,.roster-loading{display:grid;justify-items:center;gap:8px;padding:35px 15px;color:#8493a8;text-align:center;font-size:10px}
 .roster-empty svg,.roster-loading svg{width:24px;height:24px;color:#7e9bc9}
-.roster-empty strong{color:#425975;font:700 11px Manrope,sans-serif}
+.roster-empty strong{color:#425975;font:700 11px var(--ssa-font-display, "Montserrat"),sans-serif}
 .roster-empty span{max-width:360px;font-size:9px;line-height:1.5}
 .roster-footer{display:flex;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid #e8e6f0;color:#8b98aa;font-size:8px}
 .learners-footnote{display:flex;gap:11px;margin-top:14px;padding:14px 16px;border:1px solid #dce8f7;border-radius:13px;background:#f5f4fb}
 .learners-footnote>svg{width:18px;height:18px;flex:0 0 18px;color:#762cff}
-.learners-footnote strong{color:#365273;font:700 10px Manrope,sans-serif}
+.learners-footnote strong{color:#365273;font:700 10px var(--ssa-font-display, "Montserrat"),sans-serif}
 .learners-footnote p{margin:4px 0 0;color:#7b8ca5;font-size:9px;line-height:1.5}
 @media(max-width:1050px){.learner-layout{grid-template-columns:1fr}.access-panel{display:none}}
 @media(max-width:760px){.learner-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.learner-row{grid-template-columns:minmax(0,1fr) auto}.learner-assignments{grid-column:1/-1;grid-row:2}.learner-active-pill{grid-column:2;grid-row:1}.learners-hero{padding:22px}.roster-tools{grid-template-columns:1fr 160px}}
