@@ -1,5 +1,4 @@
-/* Founder shell foundation is isolated to body.founder-shell-ready. Shared tokens load separately. */
-@import url("../css/brand-system.css?v=20261121-brand2")
+/* Founder shell foundation scoped to body.founder-shell-ready; legacy global brand import removed. */
 /* =========================================================
    SPARK STACK ACADEMY — FOUNDER OS
    Unified premium / readable design system
@@ -7,76 +6,57 @@
    shares the same visual language.
 ========================================================= */
 
-:root 
-/* =========================================================
-   SPARK STACK ACADEMY — FOUNDER OS
-   Unified premium / readable design system
-   Loaded after page-specific CSS so every Founder page
-   shares the same visual language.
-========================================================= */
-
-body.founder-shell-ready{
-  --f-bg: #f6f8fc;
-  --f-surface: #ffffff;
-  --f-surface-soft: #f8fafc;
-  --f-border: #e5e7eb;
-  --f-border-strong: #d8dee8;
-  --f-text: #172033;
-  --f-heading: #0f172a;
-  --f-muted: #64748b;
-  --f-subtle: #94a3b8;
-  --f-primary: #2563eb;
-  --f-primary-dark: #1d4ed8;
-  --f-primary-soft: #eff6ff;
-  --f-success: #16a34a;
-  --f-success-soft: #ecfdf3;
-  --f-warning: #d97706;
-  --f-warning-soft: #fffbeb;
-  --f-danger: #dc2626;
-  --f-danger-soft: #fef2f2;
-  --f-purple: #7c3aed;
-  --f-purple-soft: #f5f3ff;
-  --f-shadow-sm: 0 1px 2px rgba(15,23,42,.04);
-  --f-shadow: 0 12px 30px rgba(15,23,42,.07);
-  --f-radius: 18px;
+body.founder-shell-ready.founder-portal-page{
+  --f-bg: var(--ssa-color-canvas, #f5f4fb);
+  --f-surface: var(--ssa-color-surface, #fff);
+  --f-surface-soft: #fbfaff;
+  --f-border: var(--ssa-color-line, #e8e6f0);
+  --f-border-strong: #d7d1e5;
+  --f-text: var(--ssa-color-ink, #17152f);
+  --f-heading: var(--ssa-color-ink, #17152f);
+  --f-muted: var(--ssa-color-muted, #77758f);
+  --f-subtle: #9b98ad;
+  --f-primary: var(--ssa-color-brand, #762cff);
+  --f-primary-dark: var(--ssa-color-brand-strong, #5d1ed6);
+  --f-primary-soft: #f0eaff;
+  --f-success: var(--ssa-color-success, #16845b);
+  --f-success-soft: #e9f8f1;
+  --f-warning: var(--ssa-color-warning, #a96a08);
+  --f-warning-soft: #fff7df;
+  --f-danger: var(--ssa-color-danger, #c43d52);
+  --f-danger-soft: #fff0f2;
+  --f-purple: #a12bff;
+  --f-purple-soft: #f3eaff;
+  --f-shadow-sm: var(--ssa-shadow-sm, 0 4px 14px rgba(27,20,65,.06));
+  --f-shadow: var(--ssa-shadow-md, 0 12px 34px rgba(27,20,65,.10));
+  --f-radius: var(--ssa-radius-lg, 20px);
   --f-sidebar-width: 272px;
   --f-topbar-height: 74px;
 }
 
-html 
-
-body.founder-shell-ready{ min-width: 320px; }
-body 
-body.founder-shell-ready{
+body.founder-shell-ready.founder-portal-page{
   margin: 0;
   min-width: 320px;
   background: var(--f-bg) !important;
   color: var(--f-text) !important;
-  font-family: Inter, Poppins, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--ssa-font-body, "Poppins", system-ui, sans-serif);
   overflow-x: hidden;
 }
 
-*, *::before, *::after 
-
-body.founder-shell-ready, body.founder-shell-ready *, body.founder-shell-ready *, body.founder-shell-ready *::before, body.founder-shell-ready *, body.founder-shell-ready *::after{ box-sizing: border-box; }
-
-.founder-app 
+body.founder-shell-ready.founder-portal-page *, body.founder-shell-ready.founder-portal-page *::before, body.founder-shell-ready.founder-portal-page *::after{ box-sizing: border-box; }
 
 body.founder-shell-ready .founder-app{ min-height: 100vh; }
-.founder-main 
 body.founder-shell-ready .founder-main{
   margin-left: var(--f-sidebar-width) !important;
   width: calc(100% - var(--f-sidebar-width)) !important;
   min-height: 100vh;
   background: var(--f-bg) !important;
 }
-.founder-page 
 body.founder-shell-ready .founder-page{
   width: min(100%, 1480px);
   margin: 0 auto;
   padding: 24px clamp(14px, 2vw, 32px) 42px !important;
 }
-.founder-topbar 
 body.founder-shell-ready .founder-topbar{
   position: sticky;
   top: 0;
@@ -90,77 +70,55 @@ body.founder-shell-ready .founder-topbar{
 }
 
 /* Shared sidebar */
-.founder-sidebar 
-
-/* Shared sidebar */
 body.founder-shell-ready .founder-sidebar{
   width: var(--f-sidebar-width) !important;
   flex: 0 0 var(--f-sidebar-width);
 }
-.sidebar 
 body.founder-shell-ready .sidebar{
   background: var(--f-surface) !important;
   color: var(--f-text) !important;
   border-right: 1px solid var(--f-border) !important;
   box-shadow: 4px 0 18px rgba(15,23,42,.035);
 }
-.sidebar-header 
 body.founder-shell-ready .sidebar-header{ border-bottom: 1px solid var(--f-border) !important; }
-.brand-text h2, .brand-text p 
 body.founder-shell-ready .brand-text h2, body.founder-shell-ready .brand-text p{ color: var(--f-heading) !important; }
-.brand-text p 
 body.founder-shell-ready .brand-text p{ color: var(--f-muted) !important; }
-.brand-icon, .ai-avatar 
 body.founder-shell-ready .brand-icon, body.founder-shell-ready .ai-avatar{
   background: var(--f-primary-soft) !important;
   color: var(--f-primary) !important;
 }
-.nav-section-label 
 body.founder-shell-ready .nav-section-label{ color: var(--f-subtle) !important; }
-.sidebar-menu a 
 body.founder-shell-ready .sidebar-menu a{
   color: #475569 !important;
   border-radius: 12px !important;
 }
-.sidebar-menu a:hover 
 body.founder-shell-ready .sidebar-menu a:hover{
   color: var(--f-heading) !important;
   background: #f1f5f9 !important;
 }
-.sidebar-menu a.active 
 body.founder-shell-ready .sidebar-menu a.active{
   color: var(--f-primary) !important;
   background: var(--f-primary-soft) !important;
   font-weight: 700;
 }
-.sidebar-menu a i 
 body.founder-shell-ready .sidebar-menu a i{ color: currentColor !important; }
-.nav-live-dot 
 body.founder-shell-ready .nav-live-dot{ background: var(--f-success) !important; }
-.ai-status-card 
 body.founder-shell-ready .ai-status-card{
   background: linear-gradient(135deg, #f8fafc, #eef5ff) !important;
   border: 1px solid var(--f-border) !important;
   color: var(--f-text) !important;
 }
-.ai-status-card h4, .ai-status-card p 
 body.founder-shell-ready .ai-status-card h4, body.founder-shell-ready .ai-status-card p{ color: inherit !important; }
-.sidebar-ai-btn 
 body.founder-shell-ready .sidebar-ai-btn{
   background: var(--f-primary) !important;
   color: #fff !important;
 }
-.logout-btn 
 body.founder-shell-ready .logout-btn{
   color: #64748b !important;
   background: transparent !important;
   border: 1px solid var(--f-border) !important;
 }
-.logout-btn:hover 
 body.founder-shell-ready .logout-btn:hover{ color: var(--f-danger) !important; background: var(--f-danger-soft) !important; }
-
-/* Shared topbar */
-.topbar 
 
 /* Shared topbar */
 body.founder-shell-ready .topbar{
@@ -171,36 +129,26 @@ body.founder-shell-ready .topbar{
   box-shadow: var(--f-shadow-sm) !important;
   color: var(--f-text) !important;
 }
-.search-box 
 body.founder-shell-ready .search-box{
   background: #f8fafc !important;
   border: 1px solid var(--f-border) !important;
   color: var(--f-muted) !important;
 }
-.search-box input 
 body.founder-shell-ready .search-box input{ color: var(--f-heading) !important; }
-.search-box input::placeholder 
 body.founder-shell-ready .search-box input::placeholder{ color: #94a3b8 !important; }
-.icon-btn 
 body.founder-shell-ready .icon-btn{
   background: #fff !important;
   color: #475569 !important;
   border: 1px solid var(--f-border) !important;
 }
-.icon-btn:hover 
 body.founder-shell-ready .icon-btn:hover{ color: var(--f-primary) !important; background: var(--f-primary-soft) !important; }
-.profile-chip 
 body.founder-shell-ready .profile-chip{ background: #fff !important; border: 1px solid var(--f-border) !important; }
-.profile-info strong 
 body.founder-shell-ready .profile-info strong{ color: var(--f-heading) !important; }
-.profile-info span 
 body.founder-shell-ready .profile-info span{ color: var(--f-muted) !important; }
-.profile-avatar 
 body.founder-shell-ready .profile-avatar{
   background: var(--f-primary-soft) !important;
   color: var(--f-primary) !important;
 }
-.notification-dropdown 
 body.founder-shell-ready .notification-dropdown{
   background: #fff !important;
   color: var(--f-text) !important;
@@ -209,31 +157,10 @@ body.founder-shell-ready .notification-dropdown{
 }
 
 /* Typography */
-.founder-page h1, .founder-page h2, .founder-page h3,
-.founder-page h4, .founder-page strong 
-
-/* Typography */
 body.founder-shell-ready .founder-page h1, body.founder-shell-ready .founder-page h2, body.founder-shell-ready .founder-page h3,
 body.founder-shell-ready .founder-page h4, body.founder-shell-ready .founder-page strong{ color: var(--f-heading); }
-.founder-page p, .founder-page small, .founder-page .muted 
 body.founder-shell-ready .founder-page p, body.founder-shell-ready .founder-page small, body.founder-shell-ready .founder-page .muted{ color: var(--f-muted); }
-.founder-eyebrow, .eyebrow 
 body.founder-shell-ready .founder-eyebrow, body.founder-shell-ready .eyebrow{ color: var(--f-primary) !important; font-weight: 800; letter-spacing: .09em; }
-
-/* Common cards/panels */
-.founder-panel,
-.founder-stat-card,
-.control-card,
-.command-panel,
-.founder-ai-panel,
-.founder-identity-card,
-.founder-status-bar,
-.panel,
-.card,
-.table-card,
-.analytics-card,
-.settings-card,
-.section-card 
 
 /* Common cards/panels */
 body.founder-shell-ready .founder-panel,
@@ -256,25 +183,14 @@ body.founder-shell-ready .section-card{
   border-radius: var(--f-radius) !important;
 }
 
-.founder-panel:hover,
-.founder-stat-card:hover,
-.control-card:hover 
-
 body.founder-shell-ready .founder-panel:hover,
 body.founder-shell-ready .founder-stat-card:hover,
 body.founder-shell-ready .control-card:hover{ box-shadow: var(--f-shadow) !important; }
 
-.founder-stat-card span,
-.state-row span,
-.health-item span 
-
 body.founder-shell-ready .founder-stat-card span,
 body.founder-shell-ready .state-row span,
 body.founder-shell-ready .health-item span{ color: var(--f-muted) !important; }
-.founder-stat-card strong 
 body.founder-shell-ready .founder-stat-card strong{ color: var(--f-heading) !important; }
-
-input, select, textarea 
 
 body.founder-shell-ready input, body.founder-shell-ready select, body.founder-shell-ready textarea{
   color: var(--f-heading) !important;
@@ -282,47 +198,34 @@ body.founder-shell-ready input, body.founder-shell-ready select, body.founder-sh
   border: 1px solid var(--f-border-strong) !important;
   border-radius: 10px !important;
 }
-input::placeholder, textarea::placeholder 
 body.founder-shell-ready input::placeholder, body.founder-shell-ready textarea::placeholder{ color: #94a3b8 !important; }
-input:focus, select:focus, textarea:focus 
 body.founder-shell-ready input:focus, body.founder-shell-ready select:focus, body.founder-shell-ready textarea:focus{
   outline: none !important;
   border-color: #93c5fd !important;
   box-shadow: 0 0 0 3px rgba(37,99,235,.10) !important;
 }
 
-button 
-
 body.founder-shell-ready button{ font-family: inherit; }
-.primary-btn, .founder-btn.primary 
 body.founder-shell-ready .primary-btn, body.founder-shell-ready .founder-btn.primary{
   background: var(--f-primary) !important;
   color: #fff !important;
   border: 1px solid var(--f-primary) !important;
 }
-.primary-btn:hover, .founder-btn.primary:hover 
 body.founder-shell-ready .primary-btn:hover, body.founder-shell-ready .founder-btn.primary:hover{ background: var(--f-primary-dark) !important; }
-.ghost-btn 
 body.founder-shell-ready .ghost-btn{
   color: #475569 !important;
   background: #fff !important;
   border: 1px solid var(--f-border-strong) !important;
 }
-.danger-btn 
 body.founder-shell-ready .danger-btn{
   background: var(--f-danger-soft) !important;
   color: var(--f-danger) !important;
   border: 1px solid #fecaca !important;
 }
-.danger-btn:hover 
 body.founder-shell-ready .danger-btn:hover{ background: #fee2e2 !important; }
 
 /* Command Center */
-.command-page 
-
-/* Command Center */
 body.founder-shell-ready .command-page{ max-width: 1480px; }
-.command-hero 
 body.founder-shell-ready .command-hero{
   background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%) !important;
   color: var(--f-heading) !important;
@@ -330,37 +233,23 @@ body.founder-shell-ready .command-hero{
   box-shadow: var(--f-shadow) !important;
   border-radius: 22px !important;
 }
-.command-hero h1, .command-hero p 
 body.founder-shell-ready .command-hero h1, body.founder-shell-ready .command-hero p{ color: var(--f-heading) !important; }
-.command-hero p 
 body.founder-shell-ready .command-hero p{ color: var(--f-muted) !important; }
-.system-pill 
 body.founder-shell-ready .system-pill{
   background: var(--f-success-soft) !important;
   color: #15803d !important;
   border: 1px solid #bbf7d0 !important;
 }
-.system-pill span 
 body.founder-shell-ready .system-pill span{ background: var(--f-success) !important; }
-.control-card.emergency 
 body.founder-shell-ready .control-card.emergency{ border-color: #fecaca !important; }
-.icon.blue 
 body.founder-shell-ready .icon.blue{ background: var(--f-primary-soft) !important; color: var(--f-primary) !important; }
-.icon.purple 
 body.founder-shell-ready .icon.purple{ background: var(--f-purple-soft) !important; color: var(--f-purple) !important; }
-.icon.red 
 body.founder-shell-ready .icon.red{ background: var(--f-danger-soft) !important; color: var(--f-danger) !important; }
-.state-row 
 body.founder-shell-ready .state-row{ border-color: var(--f-border) !important; }
-.state-row strong 
 body.founder-shell-ready .state-row strong{ color: var(--f-heading) !important; }
-.command-entry 
 body.founder-shell-ready .command-entry{ border-color: var(--f-border) !important; }
-.command-entry strong 
 body.founder-shell-ready .command-entry strong{ color: var(--f-heading) !important; }
-.command-entry small 
 body.founder-shell-ready .command-entry small{ color: var(--f-muted) !important; }
-.schedule-info 
 body.founder-shell-ready .schedule-info{
   background: var(--f-surface-soft) !important;
   border: 1px solid var(--f-border) !important;
@@ -368,65 +257,36 @@ body.founder-shell-ready .schedule-info{
 }
 
 /* tables and data */
-table 
-
-/* tables and data */
-body.founder-shell-ready table{ color: var(--f-text) !important; }
-th 
-body.founder-shell-ready th{ background: #f8fafc !important; color: #475569 !important; }
-td 
-body.founder-shell-ready td{ border-color: var(--f-border) !important; color: var(--f-text) !important; }
-tr:hover td 
-body.founder-shell-ready tr:hover td{ background: #fafcff !important; }
-.badge, .status-badge 
+body.founder-shell-ready.founder-portal-page table{ color: var(--f-text) !important; }
+body.founder-shell-ready.founder-portal-page th{ background: #f8fafc !important; color: #475569 !important; }
+body.founder-shell-ready.founder-portal-page td{ border-color: var(--f-border) !important; color: var(--f-text) !important; }
+body.founder-shell-ready.founder-portal-page tr:hover td{ background: #fafcff !important; }
 body.founder-shell-ready .badge, body.founder-shell-ready .status-badge{ border-radius: 999px !important; }
 
 /* Mobile */
-.sidebar-overlay 
-
-/* Mobile */
-body.founder-shell-ready .sidebar-overlay{ background: rgba(15,23,42,.28) !important; }
-@media (max-width: 768px) 
+body.founder-shell-ready.founder-portal-page .sidebar-overlay{ background: rgba(15,23,42,.28) !important; }
 @media (max-width: 768px) {
-  .founder-main 
   body.founder-shell-ready .founder-main{ width: 100% !important; margin-left: 0 !important; }
-  .founder-page 
   body.founder-shell-ready .founder-page{ padding: 16px 12px 30px !important; }
-  .founder-topbar 
   body.founder-shell-ready .founder-topbar{ padding: 8px 8px 0 !important; }
-  .topbar 
   body.founder-shell-ready .topbar{ border-radius: 14px !important; }
-  .founder-stat-grid 
   body.founder-shell-ready .founder-stat-grid{ grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-  .founder-dashboard-grid 
   body.founder-shell-ready .founder-dashboard-grid{ grid-template-columns: 1fr !important; }
-  .control-grid 
   body.founder-shell-ready .control-grid{ grid-template-columns: 1fr !important; }
 }
-@media (max-width: 430px) 
 @media (max-width: 430px) {
-  .founder-stat-grid 
   body.founder-shell-ready .founder-stat-grid{ grid-template-columns: 1fr !important; }
-  .topbar-left 
   body.founder-shell-ready .topbar-left{ min-width: 0; }
-  .search-box 
   body.founder-shell-ready .search-box{ max-width: 100%; }
 }
 
-@media (prefers-reduced-motion: reduce) 
-
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after 
-  body.founder-shell-ready, body.founder-shell-ready *, body.founder-shell-ready *, body.founder-shell-ready *::before, body.founder-shell-ready *, body.founder-shell-ready *::after{
+  body.founder-shell-ready.founder-portal-page *, body.founder-shell-ready.founder-portal-page *::before, body.founder-shell-ready.founder-portal-page *::after{
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
 }
-
-
-/* Legacy Founder page wrappers */
-.dashboard-layout 
 
 
 /* Legacy Founder page wrappers */
@@ -437,27 +297,20 @@ body.founder-shell-ready .dashboard-layout{
   margin: 0 !important;
   padding: 0 !important;
 }
-body.founder-shell-ready 
 body.founder-shell-ready{
   margin: 0 !important;
   padding: 0 !important;
   overflow-x: hidden;
 }
-body.founder-shell-ready > #sidebarContainer 
 body.founder-shell-ready > #sidebarContainer{
   margin: 0 !important;
   padding: 0 !important;
 }
-.dashboard-layout > #sidebarContainer,
-.dashboard-layout > aside#sidebarContainer 
 body.founder-shell-ready .dashboard-layout > #sidebarContainer,
 body.founder-shell-ready .dashboard-layout > aside#sidebarContainer{
   margin: 0 !important;
   padding: 0 !important;
 }
-
-.dashboard-layout > #sidebarContainer,
-.dashboard-layout > aside#sidebarContainer 
 
 body.founder-shell-ready .dashboard-layout > #sidebarContainer,
 body.founder-shell-ready .dashboard-layout > aside#sidebarContainer{
@@ -467,8 +320,6 @@ body.founder-shell-ready .dashboard-layout > aside#sidebarContainer{
   width: var(--f-sidebar-width);
   height: 100dvh;
 }
-.dashboard-layout > .main-content,
-.dashboard-layout > main.main-content 
 body.founder-shell-ready .dashboard-layout > .main-content,
 body.founder-shell-ready .dashboard-layout > main.main-content{
   margin-left: var(--f-sidebar-width) !important;
@@ -478,8 +329,6 @@ body.founder-shell-ready .dashboard-layout > main.main-content{
   background: var(--f-bg) !important;
   color: var(--f-text) !important;
 }
-.dashboard-layout > .main-content > #topbarContainer,
-.dashboard-layout > main.main-content > #topbarContainer 
 body.founder-shell-ready .dashboard-layout > .main-content > #topbarContainer,
 body.founder-shell-ready .dashboard-layout > main.main-content > #topbarContainer{
   position: sticky;
@@ -490,10 +339,6 @@ body.founder-shell-ready .dashboard-layout > main.main-content > #topbarContaine
   background: rgba(246,248,252,.88);
   backdrop-filter: blur(14px);
 }
-.dashboard-layout > .main-content > .page-header,
-.dashboard-layout > main.main-content > .page-header,
-.dashboard-layout > .main-content > section:not(.page-header),
-.dashboard-layout > main.main-content > section:not(.page-header) 
 body.founder-shell-ready .dashboard-layout > .main-content > .page-header,
 body.founder-shell-ready .dashboard-layout > main.main-content > .page-header,
 body.founder-shell-ready .dashboard-layout > .main-content > section:not(.page-header),
@@ -502,12 +347,10 @@ body.founder-shell-ready .dashboard-layout > main.main-content > section:not(.pa
   margin-left: auto;
   margin-right: auto;
 }
-.dashboard-layout > .main-content > .page-header 
 body.founder-shell-ready .dashboard-layout > .main-content > .page-header{
   margin-top: 0 !important;
   margin-bottom: 22px !important;
 }
-#sidebarOverlay 
 body.founder-shell-ready #sidebarOverlay{
   position: fixed;
   inset: 0;
@@ -515,135 +358,17 @@ body.founder-shell-ready #sidebarOverlay{
   display: none;
   background: rgba(15,23,42,.28);
 }
-#sidebarOverlay.active 
 body.founder-shell-ready #sidebarOverlay.active{ display: block; }
 
-@media (max-width: 768px) 
-
 @media (max-width: 768px) {
-  .dashboard-layout > .main-content,
-  .dashboard-layout > main.main-content 
   body.founder-shell-ready .dashboard-layout > .main-content,
   body.founder-shell-ready .dashboard-layout > main.main-content{
     width: 100% !important;
     margin-left: 0 !important;
   }
-  .dashboard-layout > .main-content > #topbarContainer,
-  .dashboard-layout > main.main-content > #topbarContainer 
   body.founder-shell-ready .dashboard-layout > .main-content > #topbarContainer,
   body.founder-shell-ready .dashboard-layout > main.main-content > #topbarContainer{
     margin: 0 !important;
     padding: 0 8px !important;
   }
-}
-
-
-
-/* ===== Signature portal chrome refinement ===== */
-:root
-
-
-
-/* ===== Signature portal chrome refinement ===== */
-body.founder-shell-ready{
- --ssa-night:#080522;--ssa-navy:#0d0a35;--ssa-navy-2:#171052;
- --ssa-violet:#762cff;--ssa-violet-bright:#a12bff;--ssa-cyan:#20d8f2;
- --ssa-gold:#ffc857;--ssa-lavender:#f3f0ff;--ssa-ink:#151338;
-}
-body
-body.founder-shell-ready{font-family:"Poppins",Arial,sans-serif!important;background:#f3f0ff!important;color:#151338}
-h1,h2,h3,h4
-body.founder-shell-ready h1,body.founder-shell-ready h2,body.founder-shell-ready h3,body.founder-shell-ready h4{font-family:"Montserrat","Poppins",sans-serif}
-.sidebar,.ssa-student-sidebar,.instructor-sidebar,.admin-sidebar,.institution-sidebar,
-.founder-sidebar,.founder-sidebar .sidebar,.sidebar-container>.sidebar
-body.founder-shell-ready .sidebar,body.founder-shell-ready .ssa-student-sidebar,body.founder-shell-ready .instructor-sidebar,body.founder-shell-ready .admin-sidebar,body.founder-shell-ready .institution-sidebar,
-body.founder-shell-ready .founder-sidebar,body.founder-shell-ready .founder-sidebar .sidebar,body.founder-shell-ready .sidebar-container>.sidebar{
- background:radial-gradient(circle at 15% 0%,rgba(132,47,255,.30),transparent 34%),
- linear-gradient(180deg,#090625 0%,#100b3e 58%,#080522 100%)!important;
- color:#fff!important;border-right:1px solid rgba(176,129,255,.25)!important;
- box-shadow:12px 0 36px rgba(13,5,48,.20)!important;
-}
-.sidebar-brand,.sidebar-logo,.admin-brand,.brand,.sidebar-header
-body.founder-shell-ready .sidebar-brand,body.founder-shell-ready .sidebar-logo,body.founder-shell-ready .admin-brand,body.founder-shell-ready .brand,body.founder-shell-ready .sidebar-header{
- border-color:rgba(255,255,255,.13)!important;
-}
-.sidebar-link,.nav-link,.instructor-sidebar .nav-link,.admin-nav-item,
-.founder-sidebar .sidebar-nav>a
-body.founder-shell-ready .sidebar-link,body.founder-shell-ready .nav-link,body.founder-shell-ready .instructor-sidebar .nav-link,body.founder-shell-ready .admin-nav-item,
-body.founder-shell-ready .founder-sidebar .sidebar-nav>a{
- color:#d5cfee!important;border-radius:11px!important;
- transition:background .2s ease,color .2s ease,box-shadow .2s ease;
-}
-.sidebar-link:hover,.sidebar-link.active,.nav-link:hover,.nav-link.active,
-.instructor-sidebar .nav-link:hover,.instructor-sidebar .nav-link.active,
-.admin-nav-item:hover,.admin-nav-item.active,.founder-sidebar .sidebar-nav>a:hover,
-.founder-sidebar .sidebar-nav>a.active
-body.founder-shell-ready .sidebar-link:hover,body.founder-shell-ready .sidebar-link.active,body.founder-shell-ready .nav-link:hover,body.founder-shell-ready .nav-link.active,
-body.founder-shell-ready .instructor-sidebar .nav-link:hover,body.founder-shell-ready .instructor-sidebar .nav-link.active,
-body.founder-shell-ready .admin-nav-item:hover,body.founder-shell-ready .admin-nav-item.active,body.founder-shell-ready .founder-sidebar .sidebar-nav>a:hover,
-body.founder-shell-ready .founder-sidebar .sidebar-nav>a.active{
- color:#fff!important;
- background:linear-gradient(100deg,rgba(119,44,255,.42),rgba(32,216,242,.12))!important;
- box-shadow:inset 3px 0 #20d8f2,0 0 18px rgba(126,48,255,.16)!important;
-}
-.nav-section-title,.nav-section-label,.admin-nav-label,.nav-label
-body.founder-shell-ready .nav-section-title,body.founder-shell-ready .nav-section-label,body.founder-shell-ready .admin-nav-label,body.founder-shell-ready .nav-label{
- color:#a99ad5!important;letter-spacing:.13em;
-}
-.topbar,.topbar-container,.instructor-topbar,.admin-topbar,.institution-topbar,
-.founder-topbar
-body.founder-shell-ready .topbar,body.founder-shell-ready .topbar-container,body.founder-shell-ready .instructor-topbar,body.founder-shell-ready .admin-topbar,body.founder-shell-ready .institution-topbar,
-body.founder-shell-ready .founder-topbar{
- background:linear-gradient(105deg,#0b082d 0%,#171052 100%)!important;
- color:#fff!important;border-bottom:1px solid rgba(164,112,255,.36)!important;
- box-shadow:0 8px 24px rgba(12,5,48,.12)!important;
-}
-.topbar button,.topbar a,.topbar-container button,.topbar-container a,
-.instructor-topbar button,.instructor-topbar a,.admin-topbar button,
-.admin-topbar a,.institution-topbar button,.institution-topbar a,
-.founder-topbar button,.founder-topbar a
-body.founder-shell-ready .topbar button,body.founder-shell-ready .topbar a,body.founder-shell-ready .topbar-container button,body.founder-shell-ready .topbar-container a,
-body.founder-shell-ready .instructor-topbar button,body.founder-shell-ready .instructor-topbar a,body.founder-shell-ready .admin-topbar button,
-body.founder-shell-ready .admin-topbar a,body.founder-shell-ready .institution-topbar button,body.founder-shell-ready .institution-topbar a,
-body.founder-shell-ready .founder-topbar button,body.founder-shell-ready .founder-topbar a{color:inherit}
-.instructor-topbar-inner,.admin-topbar-inner,.topbar-inner
-body.founder-shell-ready .instructor-topbar-inner,body.founder-shell-ready .admin-topbar-inner,body.founder-shell-ready .topbar-inner{
- color:#fff!important;
-}
-.welcome-card,.dashboard-hero,.welcome-panel,.founder-command-header,
-.admin-hero,.hero-panel
-body.founder-shell-ready .welcome-card,body.founder-shell-ready .dashboard-hero,body.founder-shell-ready .welcome-panel,body.founder-shell-ready .founder-command-header,
-body.founder-shell-ready .admin-hero,body.founder-shell-ready .hero-panel{
- border:1px solid rgba(183,139,255,.58)!important;border-radius:22px!important;
- background:radial-gradient(circle at 88% 18%,rgba(32,216,242,.20),transparent 27%),
- radial-gradient(circle at 76% 100%,rgba(161,43,255,.34),transparent 38%),
- linear-gradient(120deg,#090625 0%,#171052 58%,#25116a 100%)!important;
- box-shadow:0 14px 38px rgba(24,8,76,.20),0 0 22px rgba(134,53,255,.13)!important;
- color:#fff!important;
-}
-.stat-card,.metric-card,.admin-stat,.admin-card,.institution-card,.founder-stat-card,
-.founder-panel,.card,.panel,.content-card,.chart-card,.table-card,.settings-card
-body.founder-shell-ready .stat-card,body.founder-shell-ready .metric-card,body.founder-shell-ready .admin-stat,body.founder-shell-ready .admin-card,body.founder-shell-ready .institution-card,body.founder-shell-ready .founder-stat-card,
-body.founder-shell-ready .founder-panel,body.founder-shell-ready .card,body.founder-shell-ready .panel,body.founder-shell-ready .content-card,body.founder-shell-ready .chart-card,body.founder-shell-ready .table-card,body.founder-shell-ready .settings-card{
- border:1px solid #e6e0fa!important;border-radius:17px!important;
- box-shadow:0 14px 38px rgba(31,15,83,.10)!important;
-}
-button.primary-btn,.primary-btn,.admin-btn.primary,.action-btn,.institution-btn-primary,
-.founder-btn.primary
-body.founder-shell-ready button.primary-btn,body.founder-shell-ready .primary-btn,body.founder-shell-ready .admin-btn.primary,body.founder-shell-ready .action-btn,body.founder-shell-ready .institution-btn-primary,
-body.founder-shell-ready .founder-btn.primary{
- background:linear-gradient(105deg,#7024f5 0%,#a12bff 58%,#23cbe8 150%)!important;
- color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;
- border-radius:11px!important;box-shadow:0 8px 22px rgba(117,39,239,.25)!important;
-}
-input:focus,select:focus,textarea:focus
-body.founder-shell-ready input:focus,body.founder-shell-ready select:focus,body.founder-shell-ready textarea:focus{
- border-color:#8c43ff!important;box-shadow:0 0 0 3px rgba(140,67,255,.13)!important;
-}
-@media(max-width:600px)
-@media(max-width:600px){
- .welcome-card,.dashboard-hero,.welcome-panel
- body.founder-shell-ready .welcome-card,body.founder-shell-ready .dashboard-hero,body.founder-shell-ready .welcome-panel{border-radius:17px!important}
- .stat-card,.metric-card,.admin-stat,.admin-card,.card,.panel
- body.founder-shell-ready .stat-card,body.founder-shell-ready .metric-card,body.founder-shell-ready .admin-stat,body.founder-shell-ready .admin-card,body.founder-shell-ready .card,body.founder-shell-ready .panel{border-radius:14px!important}
 }
