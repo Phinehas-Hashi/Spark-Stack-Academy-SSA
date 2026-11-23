@@ -62,7 +62,7 @@
 
     text-transform: uppercase;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -83,7 +83,7 @@
 
     letter-spacing: -1px;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -125,7 +125,7 @@
 
     border-radius: 12px;
 
-    background: #2979ff;
+    background: #762cff;
 
     color: #ffffff;
 
@@ -293,7 +293,7 @@
 
     background: #eaf2ff;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -357,7 +357,7 @@
 
     font-weight: 800;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -416,7 +416,7 @@
 
     letter-spacing: -.4px;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -482,7 +482,7 @@
 
     background: #f8fafc;
 
-    color: #0f172a;
+    color: #17152f;
 
     font-family: inherit;
 
@@ -507,7 +507,7 @@
 
     background: #ffffff;
 
-    border-color: #2979ff;
+    border-color: #762cff;
 
     box-shadow:
         0 0 0 3px rgba(
@@ -572,7 +572,7 @@
 
 .course-filter:hover {
 
-    color: #2979ff;
+    color: #762cff;
 
     background: #f4f8ff;
 
@@ -581,7 +581,7 @@
 
 .course-filter.active {
 
-    color: #2979ff;
+    color: #762cff;
 
     background: #edf4ff;
 
@@ -678,7 +678,7 @@
     background:
         linear-gradient(
             135deg,
-            #081c3a,
+            #17152f,
             #123d78
         );
 
@@ -767,7 +767,7 @@
 
     text-transform: uppercase;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -790,7 +790,7 @@
 
     font-weight: 800;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -888,7 +888,7 @@
 
     font-weight: 800;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -963,7 +963,7 @@
 
     border-color: #cfe0ff;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -1023,7 +1023,7 @@
 
     border: 3px solid #e7edf5;
 
-    border-top-color: #2979ff;
+    border-top-color: #762cff;
 
     border-radius: 50%;
 
@@ -1086,7 +1086,7 @@
 
     font-size: 15px;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -1139,7 +1139,7 @@
 
     background: #edf4ff;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -1161,7 +1161,7 @@
 
     font-weight: 800;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -1201,7 +1201,7 @@
 
     background: #f5f9ff;
 
-    color: #2979ff;
+    color: #762cff;
 
     font-family: inherit;
 
@@ -1374,7 +1374,7 @@
 
     letter-spacing: 1.4px;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -1387,7 +1387,7 @@
 
     font-weight: 800;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -1421,7 +1421,7 @@
 
     background: #edf1f6;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -1484,7 +1484,7 @@
 
     background: #ffffff;
 
-    color: #0f172a;
+    color: #17152f;
 
     font-family: inherit;
 
@@ -1524,7 +1524,7 @@
 .form-group textarea:focus,
 .form-group select:focus {
 
-    border-color: #2979ff;
+    border-color: #762cff;
 
     box-shadow:
         0 0 0 3px rgba(
@@ -1602,7 +1602,7 @@
 
     font-size: 12px;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -1699,7 +1699,7 @@
 
 .switch input:checked {
 
-    background: #2979ff;
+    background: #762cff;
 
 }
 
@@ -1758,7 +1758,7 @@
 
     background: #f8fafc;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
