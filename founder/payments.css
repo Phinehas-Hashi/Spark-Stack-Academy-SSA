@@ -7,8 +7,7 @@
 /* ===================================
    RESET
 =================================== */
-
-*{
+ body.founder-portal-page * {
     margin:0;
     padding:0;
     box-sizing:border-box;
@@ -19,7 +18,7 @@
    ROOT
 =================================== */
 
-:root{
+body.founder-portal-page {
 
     --primary:#22d3ee;
     --primary-light:#67e8f9;
@@ -60,7 +59,7 @@
    BODY
 =================================== */
 
-body{
+body.founder-portal-page {
 
     font-family:"Inter",sans-serif;
 
@@ -1558,7 +1557,7 @@ body{
 
 @media print{
 
-    body{
+    body.founder-portal-page {
 
         background:#fff;
 
