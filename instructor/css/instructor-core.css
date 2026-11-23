@@ -195,7 +195,7 @@ a:focus-visible {
    BODY LOCK
 ========================================= */
 
-body.sidebar-active {
+body.sidebar-open {
     overflow: hidden;
 }
 
