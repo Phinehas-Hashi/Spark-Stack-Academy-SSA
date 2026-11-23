@@ -49,9 +49,9 @@
 
 .calendar-card {
     background: rgba(255,255,255,.96);
-    border: 1px solid rgba(8,28,58,.08);
+    border: 1px solid rgba(23,21,47,.08);
     border-radius: 20px;
-    box-shadow: 0 12px 35px rgba(8,28,58,.07);
+    box-shadow: 0 12px 35px rgba(23,21,47,.07);
 }
 
 .calendar-main-card {
@@ -65,7 +65,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    border-bottom: 1px solid rgba(8,28,58,.07);
+    border-bottom: 1px solid rgba(23,21,47,.07);
 }
 
 .calendar-month-controls {
@@ -109,7 +109,7 @@
 .calendar-today-btn {
     padding: 9px 15px;
     border-radius: 10px;
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -217,7 +217,7 @@
     border: 0;
     border-left: 3px solid #762cff;
     border-radius: 5px;
-    background: #edf4ff;
+    background: #f0eaff;
     color: #17345f;
     text-align: left;
     font: inherit;
@@ -241,7 +241,7 @@
 
 .calendar-event-chip.course {
     border-left-color: #762cff;
-    background: #edf4ff;
+    background: #f0eaff;
 }
 
 .calendar-event-chip.announcement {
@@ -414,7 +414,7 @@
 .calendar-modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(8,28,58,.62);
+    background: rgba(23,21,47,.62);
     backdrop-filter: blur(4px);
 }
 
