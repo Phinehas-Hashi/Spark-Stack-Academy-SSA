@@ -1,0 +1,9 @@
+/* Admin withdrawal operations — dedicated page styles. */
+.admin-app .ops-page { width:100%; max-width:1400px; margin:0 auto; padding:32px; }
+.admin-app .ops-card { padding:24px; border:1px solid var(--admin-border); border-radius:18px; background:var(--admin-card); box-shadow:var(--shadow-sm); }
+.admin-app .ops-page .empty { padding:55px 20px; color:var(--admin-muted); text-align:center; }
+.admin-app .ops-page .empty svg { width:42px; height:42px; margin-bottom:12px; color:var(--admin-blue); }
+.admin-app .ops-page .empty h3 { margin:0 0 6px; color:var(--admin-navy); }
+.admin-app .ops-note { margin-top:18px; padding:15px; border:1px solid rgba(118,44,255,.12); border-radius:12px; background:#f5f0ff; color:#514b6b; font-size:12px; line-height:1.65; }
+.admin-app .secondary-btn { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:0 14px; border:1px solid var(--admin-border); border-radius:10px; background:#fff; color:var(--admin-navy); font-size:12px; font-weight:700; }
+@media(max-width:640px){.admin-app .ops-page{padding:20px 14px}.admin-app .ops-card{padding:17px}.admin-app .ops-page .empty{padding:38px 12px}}
