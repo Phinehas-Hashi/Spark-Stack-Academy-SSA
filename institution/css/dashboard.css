@@ -1,16 +1,7 @@
 /* Institution dashboard-only page styles. */
+/* Institution dashboard-only page styles. */
 /* Institution dashboard page styles, isolated from the shell. */
 .institution-app .page-wrap{max-width:1500px;margin:auto;padding:30px}
-.institution-app .welcome-panel{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:30px;border-radius:22px;background:linear-gradient(125deg,#081c3a,#164777);color:#fff;position:relative;overflow:hidden}
-.institution-app .welcome-panel:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;background:#2979ff26;right:-65px;top:-110px}
-.institution-app .welcome-panel>div{position:relative;z-index:1}
-.institution-app .eyebrow{display:block;color:#3985ff;font-size:9px;font-weight:800;letter-spacing:.14em}
-.institution-app .welcome-panel .eyebrow{color:#84b5ff}
-.institution-app .welcome-panel h1{font-size:26px;line-height:1.25;margin:9px 0}
-.institution-app .welcome-panel h1 span{color:var(--gold)}
-.institution-app .welcome-panel p{max-width:640px;margin:0;color:#c0cddd;font-size:12px;line-height:1.8}
-.institution-app .welcome-mark{width:70px;height:70px;border:1px solid #ffffff30;border-radius:20px;display:grid;place-items:center;background:#ffffff10}
-.institution-app .welcome-mark svg{width:34px;height:34px;color:#ffc107}
 .institution-app .notice-panel{display:flex;gap:13px;align-items:flex-start;margin:20px 0;padding:17px 19px;border:1px solid #dbe8fb;background:#f0f6ff;border-radius:14px;color:#28558d}
 .institution-app .notice-panel>svg{width:19px;flex-shrink:0;margin-top:2px}
 .institution-app .notice-panel strong{font-size:12px}
