@@ -69,7 +69,8 @@ function setupMobileSidebar() {
 
     menuButton?.addEventListener("click", event => {
         event.stopPropagation();
-        openSidebar();
+        if (sidebar?.classList.contains("open")) closeSidebar();
+        else openSidebar();
     });
     overlay?.addEventListener("click", closeSidebar);
     document.addEventListener("click", event => {
@@ -94,6 +95,7 @@ function toggleSidebar() {
 function openSidebar() {
     sidebar?.classList.add("open");
     overlay?.classList.add("active");
+    document.getElementById("instructorMenuBtn")?.setAttribute("aria-expanded", "true");
     document.body.classList.add("sidebar-open");
     console.log("📂 SIDEBAR OPENED");
 }
@@ -103,6 +105,7 @@ function closeSidebar() {
     const currentOverlay = document.getElementById("sidebarOverlay");
     currentSidebar?.classList.remove("open");
     currentOverlay?.classList.remove("active");
+    document.getElementById("instructorMenuBtn")?.setAttribute("aria-expanded", "false");
     document.body.classList.remove("sidebar-open");
     document.body.style.overflow = "";
 }
