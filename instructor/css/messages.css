@@ -1,6 +1,7 @@
 /* Instructor messages page: scoped overrides over the shared messaging layout. */
 body.instructor-messages-page {
     min-height: 100vh;
+    margin: 0;
     padding: clamp(10px, 2vw, 28px);
     background: var(--ssa-color-canvas, #f5f4fb);
     color: var(--ssa-color-ink, #17152f);
