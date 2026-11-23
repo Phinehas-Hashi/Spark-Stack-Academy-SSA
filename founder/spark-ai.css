@@ -7,7 +7,7 @@
    ROOT
    ============================================================ */
 
-:root {
+body.founder-shell-ready{
     --spark-navy: #081c3a;
     --spark-blue: #2979ff;
     --spark-blue-dark: #1557c0;
@@ -46,7 +46,7 @@
    APPLICATION
    ============================================================ */
 
-.spark-ai-app {
+body.founder-shell-ready .spark-ai-app{
     position: relative;
 
     width: 100%;
@@ -62,7 +62,7 @@
    HEADER
    ============================================================ */
 
-.spark-ai-header {
+body.founder-shell-ready .spark-ai-header{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -73,7 +73,7 @@
 }
 
 
-.spark-ai-identity {
+body.founder-shell-ready .spark-ai-identity{
     display: flex;
     align-items: center;
 
@@ -83,7 +83,7 @@
 }
 
 
-.spark-ai-avatar {
+body.founder-shell-ready .spark-ai-avatar{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -109,18 +109,18 @@
 }
 
 
-.spark-ai-avatar span {
+body.founder-shell-ready .spark-ai-avatar span{
     font-size: 25px;
     line-height: 1;
 }
 
 
-.spark-ai-heading {
+body.founder-shell-ready .spark-ai-heading{
     min-width: 0;
 }
 
 
-.spark-ai-title-row {
+body.founder-shell-ready .spark-ai-title-row{
     display: flex;
     align-items: center;
 
@@ -130,7 +130,7 @@
 }
 
 
-.spark-ai-title-row h1 {
+body.founder-shell-ready .spark-ai-title-row h1{
     margin: 0;
 
     color: var(--spark-navy);
@@ -142,7 +142,7 @@
 }
 
 
-.spark-ai-heading > p {
+body.founder-shell-ready .spark-ai-heading > p{
     margin: 4px 0 0;
 
     color: var(--spark-text-soft);
@@ -156,7 +156,7 @@
    AI STATUS
    ============================================================ */
 
-.spark-ai-status {
+body.founder-shell-ready .spark-ai-status{
     display: inline-flex;
     align-items: center;
 
@@ -177,7 +177,7 @@
 }
 
 
-.status-dot {
+body.founder-shell-ready .status-dot{
     width: 7px;
     height: 7px;
 
@@ -187,7 +187,7 @@
 }
 
 
-.spark-ai-status.ready .status-dot {
+body.founder-shell-ready .spark-ai-status.ready .status-dot{
     background: var(--spark-success);
 
     box-shadow:
@@ -195,21 +195,21 @@
 }
 
 
-.spark-ai-status.thinking .status-dot {
+body.founder-shell-ready .spark-ai-status.thinking .status-dot{
     background: var(--spark-blue);
 
     animation: sparkPulse 1.3s ease-in-out infinite;
 }
 
 
-.spark-ai-status.loading .status-dot {
+body.founder-shell-ready .spark-ai-status.loading .status-dot{
     background: var(--spark-gold);
 
     animation: sparkPulse 1.1s ease-in-out infinite;
 }
 
 
-.spark-ai-status.error .status-dot {
+body.founder-shell-ready .spark-ai-status.error .status-dot{
     background: var(--spark-danger);
 }
 
@@ -233,7 +233,7 @@
    HEADER ACTIONS
    ============================================================ */
 
-.spark-ai-header-actions {
+body.founder-shell-ready .spark-ai-header-actions{
     display: flex;
     align-items: center;
 
@@ -241,7 +241,7 @@
 }
 
 
-.spark-ai-action-btn {
+body.founder-shell-ready .spark-ai-action-btn{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -274,7 +274,7 @@
 }
 
 
-.spark-ai-action-btn:hover {
+body.founder-shell-ready .spark-ai-action-btn:hover{
     border-color: rgba(41, 121, 255, 0.35);
 
     background: var(--spark-surface-soft);
@@ -287,7 +287,7 @@
    WORKSPACE
    ============================================================ */
 
-.spark-ai-workspace {
+body.founder-shell-ready .spark-ai-workspace{
     display: grid;
 
     grid-template-columns:
@@ -304,7 +304,7 @@
    CONVERSATION
    ============================================================ */
 
-.spark-ai-conversation {
+body.founder-shell-ready .spark-ai-conversation{
     display: flex;
     flex-direction: column;
 
@@ -328,7 +328,7 @@
    CONVERSATION TOOLBAR
    ============================================================ */
 
-.conversation-toolbar {
+body.founder-shell-ready .conversation-toolbar{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -347,7 +347,7 @@
 }
 
 
-.conversation-info {
+body.founder-shell-ready .conversation-info{
     display: flex;
     align-items: center;
 
@@ -357,7 +357,7 @@
 }
 
 
-.conversation-title {
+body.founder-shell-ready .conversation-title{
     overflow: hidden;
 
     max-width: 300px;
@@ -372,7 +372,7 @@
 }
 
 
-.conversation-context {
+body.founder-shell-ready .conversation-context{
     padding: 4px 7px;
 
     border-radius: 6px;
@@ -386,7 +386,7 @@
 }
 
 
-.toolbar-btn {
+body.founder-shell-ready .toolbar-btn{
     border: 0;
 
     background: transparent;
@@ -402,7 +402,7 @@
 }
 
 
-.toolbar-btn:hover {
+body.founder-shell-ready .toolbar-btn:hover{
     color: var(--spark-danger);
 }
 
@@ -411,7 +411,7 @@
    MESSAGES
    ============================================================ */
 
-.spark-ai-messages {
+body.founder-shell-ready .spark-ai-messages{
     position: relative;
 
     flex: 1;
@@ -426,12 +426,12 @@
 }
 
 
-.spark-ai-messages::-webkit-scrollbar {
+body.founder-shell-ready .spark-ai-messages::-webkit-scrollbar{
     width: 6px;
 }
 
 
-.spark-ai-messages::-webkit-scrollbar-thumb {
+body.founder-shell-ready .spark-ai-messages::-webkit-scrollbar-thumb{
     border-radius: 999px;
 
     background: #d9e0eb;
@@ -442,7 +442,7 @@
    WELCOME
    ============================================================ */
 
-.spark-ai-welcome {
+body.founder-shell-ready .spark-ai-welcome{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -456,7 +456,7 @@
 }
 
 
-.welcome-icon {
+body.founder-shell-ready .welcome-icon{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -484,7 +484,7 @@
 }
 
 
-.spark-ai-welcome h2 {
+body.founder-shell-ready .spark-ai-welcome h2{
     margin: 0;
 
     color: var(--spark-navy);
@@ -496,7 +496,7 @@
 }
 
 
-.spark-ai-welcome > p {
+body.founder-shell-ready .spark-ai-welcome > p{
     max-width: 590px;
 
     margin: 10px 0 24px;
@@ -508,7 +508,7 @@
 }
 
 
-.welcome-suggestions {
+body.founder-shell-ready .welcome-suggestions{
     display: grid;
 
     grid-template-columns:
@@ -520,7 +520,7 @@
 }
 
 
-.suggestion-btn {
+body.founder-shell-ready .suggestion-btn{
     display: flex;
     align-items: center;
 
@@ -553,14 +553,14 @@
 }
 
 
-.suggestion-btn span {
+body.founder-shell-ready .suggestion-btn span{
     color: var(--spark-blue);
 
     font-size: 15px;
 }
 
 
-.suggestion-btn:hover {
+body.founder-shell-ready .suggestion-btn:hover{
     border-color:
         rgba(41, 121, 255, 0.30);
 
@@ -574,7 +574,7 @@
    MESSAGE
    ============================================================ */
 
-.spark-message {
+body.founder-shell-ready .spark-message{
     display: flex;
 
     gap: 11px;
@@ -585,12 +585,12 @@
 }
 
 
-.spark-message.user {
+body.founder-shell-ready .spark-message.user{
     flex-direction: row-reverse;
 }
 
 
-.ai-message-avatar {
+body.founder-shell-ready .ai-message-avatar{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -616,21 +616,21 @@
 }
 
 
-.spark-message.user .ai-message-avatar {
+body.founder-shell-ready .spark-message.user .ai-message-avatar{
     background: var(--spark-navy);
 
     font-size: 9px;
 }
 
 
-.spark-message-content {
+body.founder-shell-ready .spark-message-content{
     min-width: 0;
 
     max-width: min(80%, 720px);
 }
 
 
-.spark-message-body {
+body.founder-shell-ready .spark-message-body{
     padding: 13px 15px;
 
     border:
@@ -654,7 +654,7 @@
 }
 
 
-.spark-message.user .spark-message-body {
+body.founder-shell-ready .spark-message.user .spark-message-body{
     border-color: var(--spark-navy);
 
     border-radius:
@@ -669,7 +669,7 @@
 }
 
 
-.spark-message-footer {
+body.founder-shell-ready .spark-message-footer{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -682,14 +682,14 @@
 }
 
 
-.spark-message-footer time {
+body.founder-shell-ready .spark-message-footer time{
     color: var(--spark-text-muted);
 
     font-size: 9px;
 }
 
 
-.message-copy-btn {
+body.founder-shell-ready .message-copy-btn{
     padding: 0;
 
     border: 0;
@@ -706,7 +706,7 @@
 }
 
 
-.message-copy-btn:hover {
+body.founder-shell-ready .message-copy-btn:hover{
     color: var(--spark-blue);
 }
 
@@ -715,7 +715,7 @@
    THINKING
    ============================================================ */
 
-.ai-thinking {
+body.founder-shell-ready .ai-thinking{
     display: flex;
     align-items: center;
 
@@ -730,7 +730,7 @@
 }
 
 
-.thinking-content {
+body.founder-shell-ready .thinking-content{
     display: flex;
     align-items: center;
 
@@ -743,14 +743,14 @@
 }
 
 
-.thinking-dots {
+body.founder-shell-ready .thinking-dots{
     display: flex;
 
     gap: 3px;
 }
 
 
-.thinking-dots i {
+body.founder-shell-ready .thinking-dots i{
     width: 4px;
     height: 4px;
 
@@ -763,12 +763,12 @@
 }
 
 
-.thinking-dots i:nth-child(2) {
+body.founder-shell-ready .thinking-dots i:nth-child(2){
     animation-delay: 0.15s;
 }
 
 
-.thinking-dots i:nth-child(3) {
+body.founder-shell-ready .thinking-dots i:nth-child(3){
     animation-delay: 0.30s;
 }
 
@@ -793,7 +793,7 @@
    COMPOSER
    ============================================================ */
 
-.spark-ai-composer {
+body.founder-shell-ready .spark-ai-composer{
     padding: 15px 20px 17px;
 
     border-top:
@@ -803,7 +803,7 @@
 }
 
 
-.composer-box {
+body.founder-shell-ready .composer-box{
     overflow: hidden;
 
     border:
@@ -822,7 +822,7 @@
 }
 
 
-.composer-box:focus-within {
+body.founder-shell-ready .composer-box:focus-within{
     border-color:
         rgba(41, 121, 255, 0.45);
 
@@ -831,7 +831,7 @@
 }
 
 
-.composer-box textarea {
+body.founder-shell-ready .composer-box textarea{
     display: block;
 
     width: 100%;
@@ -858,12 +858,12 @@
 }
 
 
-.composer-box textarea::placeholder {
+body.founder-shell-ready .composer-box textarea::placeholder{
     color: #9aa8bb;
 }
 
 
-.composer-bottom {
+body.founder-shell-ready .composer-bottom{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -876,7 +876,7 @@
 }
 
 
-.composer-tools {
+body.founder-shell-ready .composer-tools{
     display: flex;
     align-items: center;
 
@@ -884,7 +884,7 @@
 }
 
 
-.composer-tool {
+body.founder-shell-ready .composer-tool{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -908,14 +908,14 @@
 }
 
 
-.composer-tool:hover {
+body.founder-shell-ready .composer-tool:hover{
     background: #f1f5f9;
 
     color: var(--spark-blue);
 }
 
 
-.composer-mode-label {
+body.founder-shell-ready .composer-mode-label{
     margin-left: 4px;
 
     color: var(--spark-text-muted);
@@ -925,7 +925,7 @@
 }
 
 
-.send-btn {
+body.founder-shell-ready .send-btn{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -951,21 +951,21 @@
 }
 
 
-.send-btn:hover:not(:disabled) {
+body.founder-shell-ready .send-btn:hover:not(:disabled){
     background: var(--spark-blue-dark);
 
     transform: translateY(-1px);
 }
 
 
-.send-btn:disabled {
+body.founder-shell-ready .send-btn:disabled{
     opacity: 0.45;
 
     cursor: not-allowed;
 }
 
 
-.composer-disclaimer {
+body.founder-shell-ready .composer-disclaimer{
     margin: 7px 2px 0;
 
     color: var(--spark-text-muted);
@@ -980,7 +980,7 @@
    RIGHT PANEL
    ============================================================ */
 
-.spark-ai-panel {
+body.founder-shell-ready .spark-ai-panel{
     display: flex;
     flex-direction: column;
 
@@ -990,7 +990,7 @@
 }
 
 
-.ai-panel-card {
+body.founder-shell-ready .ai-panel-card{
     padding: 16px;
 
     border:
@@ -1004,7 +1004,7 @@
 }
 
 
-.panel-card-header {
+body.founder-shell-ready .panel-card-header{
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -1015,7 +1015,7 @@
 }
 
 
-.panel-eyebrow {
+body.founder-shell-ready .panel-eyebrow{
     display: block;
 
     margin-bottom: 4px;
@@ -1029,7 +1029,7 @@
 }
 
 
-.panel-card-header h2 {
+body.founder-shell-ready .panel-card-header h2{
     margin: 0;
 
     color: var(--spark-navy);
@@ -1039,7 +1039,7 @@
 }
 
 
-.panel-link {
+body.founder-shell-ready .panel-link{
     padding: 0;
 
     border: 0;
@@ -1061,7 +1061,7 @@
    MODES
    ============================================================ */
 
-.ai-mode-list {
+body.founder-shell-ready .ai-mode-list{
     display: flex;
     flex-direction: column;
 
@@ -1069,7 +1069,7 @@
 }
 
 
-.ai-mode {
+body.founder-shell-ready .ai-mode{
     display: flex;
     align-items: center;
 
@@ -1100,12 +1100,12 @@
 }
 
 
-.ai-mode:hover {
+body.founder-shell-ready .ai-mode:hover{
     background: #f7faff;
 }
 
 
-.ai-mode.active {
+body.founder-shell-ready .ai-mode.active{
     border-color:
         rgba(41, 121, 255, 0.16);
 
@@ -1113,7 +1113,7 @@
 }
 
 
-.mode-icon {
+body.founder-shell-ready .mode-icon{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1133,7 +1133,7 @@
 }
 
 
-.mode-content {
+body.founder-shell-ready .mode-content{
     display: flex;
     flex-direction: column;
 
@@ -1143,13 +1143,13 @@
 }
 
 
-.mode-content strong {
+body.founder-shell-ready .mode-content strong{
     font-size: 11px;
     font-weight: 700;
 }
 
 
-.mode-content small {
+body.founder-shell-ready .mode-content small{
     color: var(--spark-text-muted);
 
     font-size: 9px;
@@ -1158,7 +1158,7 @@
 }
 
 
-.mode-check {
+body.founder-shell-ready .mode-check{
     margin-left: auto;
 
     color: var(--spark-blue);
@@ -1169,7 +1169,7 @@
 }
 
 
-.ai-mode.active .mode-check {
+body.founder-shell-ready .ai-mode.active .mode-check{
     opacity: 1;
 }
 
@@ -1178,7 +1178,7 @@
    TOOLS
    ============================================================ */
 
-.ai-tools-list {
+body.founder-shell-ready .ai-tools-list{
     display: flex;
     flex-direction: column;
 
@@ -1186,7 +1186,7 @@
 }
 
 
-.ai-tool {
+body.founder-shell-ready .ai-tool{
     display: flex;
     align-items: center;
 
@@ -1217,7 +1217,7 @@
 }
 
 
-.ai-tool:hover {
+body.founder-shell-ready .ai-tool:hover{
     border-color:
         rgba(41, 121, 255, 0.22);
 
@@ -1225,7 +1225,7 @@
 }
 
 
-.tool-icon {
+body.founder-shell-ready .tool-icon{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1246,7 +1246,7 @@
 }
 
 
-.ai-tool > span:last-child {
+body.founder-shell-ready .ai-tool > span:last-child{
     display: flex;
     flex-direction: column;
 
@@ -1254,13 +1254,13 @@
 }
 
 
-.ai-tool strong {
+body.founder-shell-ready .ai-tool strong{
     font-size: 10px;
     font-weight: 700;
 }
 
 
-.ai-tool small {
+body.founder-shell-ready .ai-tool small{
     color: var(--spark-text-muted);
 
     font-size: 9px;
@@ -1271,7 +1271,7 @@
    CONTEXT
    ============================================================ */
 
-.context-status {
+body.founder-shell-ready .context-status{
     padding: 4px 7px;
 
     border-radius: 6px;
@@ -1285,7 +1285,7 @@
 }
 
 
-.ai-context {
+body.founder-shell-ready .ai-context{
     display: flex;
     flex-direction: column;
 
@@ -1293,7 +1293,7 @@
 }
 
 
-.context-item {
+body.founder-shell-ready .context-item{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1307,21 +1307,21 @@
 }
 
 
-.context-item:last-child {
+body.founder-shell-ready .context-item:last-child{
     padding-bottom: 0;
 
     border-bottom: 0;
 }
 
 
-.context-item span {
+body.founder-shell-ready .context-item span{
     color: var(--spark-text-muted);
 
     font-size: 9px;
 }
 
 
-.context-item strong {
+body.founder-shell-ready .context-item strong{
     color: var(--spark-text);
 
     font-size: 10px;
@@ -1334,7 +1334,7 @@
    MEMORY
    ============================================================ */
 
-.panel-description {
+body.founder-shell-ready .panel-description{
     margin: 0 0 12px;
 
     color: var(--spark-text-soft);
@@ -1345,7 +1345,7 @@
 }
 
 
-.memory-status {
+body.founder-shell-ready .memory-status{
     display: flex;
     align-items: center;
 
@@ -1364,7 +1364,7 @@
 }
 
 
-.memory-indicator {
+body.founder-shell-ready .memory-indicator{
     width: 7px;
     height: 7px;
 
@@ -1378,7 +1378,7 @@
    ACTIONS
    ============================================================ */
 
-.ai-action-list {
+body.founder-shell-ready .ai-action-list{
     display: grid;
 
     grid-template-columns:
@@ -1388,7 +1388,7 @@
 }
 
 
-.ai-action {
+body.founder-shell-ready .ai-action{
     min-height: 36px;
 
     padding: 7px;
@@ -1416,7 +1416,7 @@
 }
 
 
-.ai-action:hover {
+body.founder-shell-ready .ai-action:hover{
     border-color:
         rgba(41, 121, 255, 0.25);
 
@@ -1430,7 +1430,7 @@
    TOOL DRAWER
    ============================================================ */
 
-.ai-tool-drawer {
+body.founder-shell-ready .ai-tool-drawer{
     position: fixed;
 
     top: 0;
@@ -1455,7 +1455,7 @@
 }
 
 
-.tool-drawer-header {
+body.founder-shell-ready .tool-drawer-header{
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -1469,7 +1469,7 @@
 }
 
 
-.tool-drawer-header h2 {
+body.founder-shell-ready .tool-drawer-header h2{
     margin: 0;
 
     color: var(--spark-navy);
@@ -1478,12 +1478,12 @@
 }
 
 
-.tool-drawer-content {
+body.founder-shell-ready .tool-drawer-content{
     padding-top: 22px;
 }
 
 
-.tool-placeholder {
+body.founder-shell-ready .tool-placeholder{
     padding: 20px;
 
     border:
@@ -1495,7 +1495,7 @@
 }
 
 
-.tool-placeholder h3 {
+body.founder-shell-ready .tool-placeholder h3{
     margin: 0 0 7px;
 
     color: var(--spark-navy);
@@ -1504,7 +1504,7 @@
 }
 
 
-.tool-placeholder p {
+body.founder-shell-ready .tool-placeholder p{
     margin: 0 0 16px;
 
     color: var(--spark-text-soft);
@@ -1515,7 +1515,7 @@
 }
 
 
-.tool-use-btn {
+body.founder-shell-ready .tool-use-btn{
     min-height: 36px;
 
     padding: 0 13px;
@@ -1537,12 +1537,12 @@
 }
 
 
-.tool-use-btn:hover {
+body.founder-shell-ready .tool-use-btn:hover{
     background: var(--spark-blue-dark);
 }
 
 
-.close-btn {
+body.founder-shell-ready .close-btn{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1566,7 +1566,7 @@
 }
 
 
-.close-btn:hover {
+body.founder-shell-ready .close-btn:hover{
     color: var(--spark-danger);
 
     border-color:
@@ -1578,7 +1578,7 @@
    ACTION MODAL
    ============================================================ */
 
-.ai-action-modal {
+body.founder-shell-ready .ai-action-modal{
     position: fixed;
 
     inset: 0;
@@ -1599,7 +1599,7 @@
 }
 
 
-.action-modal-card {
+body.founder-shell-ready .action-modal-card{
     position: relative;
 
     width: min(520px, 100%);
@@ -1621,7 +1621,7 @@
 }
 
 
-.action-modal-card > .close-btn {
+body.founder-shell-ready .action-modal-card > .close-btn{
     position: absolute;
 
     top: 14px;
@@ -1633,7 +1633,7 @@
    HIDDEN STATE
    ============================================================ */
 
-[hidden] {
+body.founder-shell-ready [hidden]{
     display: none !important;
 }
 
@@ -1642,7 +1642,7 @@
    RESPONSIVE — TABLET
    ============================================================ */
 
-@media (max-width: 1100px) {
+body.founder-shell-ready @media (max-width: 1100px){
 
     .spark-ai-workspace {
         grid-template-columns:
@@ -1661,7 +1661,7 @@
    RESPONSIVE — MOBILE
    ============================================================ */
 
-@media (max-width: 850px) {
+body.founder-shell-ready @media (max-width: 850px){
 
     .spark-ai-header {
         align-items: flex-start;
@@ -1705,24 +1705,24 @@
 
 @media (max-width: 600px) {
 
-    .spark-ai-app {
+    body.founder-shell-ready .spark-ai-app{
         padding: 12px;
     }
 
 
-    .spark-ai-title-row h1 {
+    body.founder-shell-ready .spark-ai-title-row h1{
         font-size: 22px;
     }
 
 
-    .spark-ai-heading > p {
+    body.founder-shell-ready .spark-ai-heading > p{
         max-width: 330px;
 
         font-size: 11px;
     }
 
 
-    .spark-ai-avatar {
+    body.founder-shell-ready .spark-ai-avatar{
         width: 45px;
         height: 45px;
 
@@ -1730,7 +1730,7 @@
     }
 
 
-    .spark-ai-header-actions {
+    body.founder-shell-ready .spark-ai-header-actions{
         display: grid;
 
         grid-template-columns:
@@ -1738,69 +1738,69 @@
     }
 
 
-    .spark-ai-conversation {
+    body.founder-shell-ready .spark-ai-conversation{
         min-height: 600px;
 
         border-radius: 16px;
     }
 
 
-    .conversation-toolbar {
+    body.founder-shell-ready .conversation-toolbar{
         padding: 0 13px;
     }
 
 
-    .spark-ai-messages {
+    body.founder-shell-ready .spark-ai-messages{
         padding: 18px 13px;
     }
 
 
-    .spark-ai-welcome {
+    body.founder-shell-ready .spark-ai-welcome{
         margin:
             45px auto 30px;
     }
 
 
-    .spark-ai-welcome h2 {
+    body.founder-shell-ready .spark-ai-welcome h2{
         font-size: 21px;
     }
 
 
-    .spark-ai-welcome > p {
+    body.founder-shell-ready .spark-ai-welcome > p{
         font-size: 11px;
     }
 
 
-    .welcome-suggestions {
+    body.founder-shell-ready .welcome-suggestions{
         grid-template-columns: 1fr;
     }
 
 
-    .spark-message {
+    body.founder-shell-ready .spark-message{
         gap: 7px;
 
         margin-bottom: 18px;
     }
 
 
-    .spark-message-content {
+    body.founder-shell-ready .spark-message-content{
         max-width: 86%;
     }
 
 
-    .spark-message-body {
+    body.founder-shell-ready .spark-message-body{
         padding: 11px 12px;
 
         font-size: 12px;
     }
 
 
-    .ai-thinking {
+    body.founder-shell-ready .ai-thinking{
         padding: 0 13px;
     }
 
 
-    .spark-ai-composer {
+    body.founder-shell-ready .spark-ai-composer{
         padding:
             11px
             11px
@@ -1808,23 +1808,23 @@
     }
 
 
-    .composer-mode-label {
+    body.founder-shell-ready .composer-mode-label{
         display: none;
     }
 
 
-    .spark-ai-panel {
+    body.founder-shell-ready .spark-ai-panel{
         display: flex;
     }
 
 
-    .ai-action-list {
+    body.founder-shell-ready .ai-action-list{
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
 
 
-    .ai-tool-drawer {
+    body.founder-shell-ready .ai-tool-drawer{
         width: 100%;
 
         padding: 17px;
@@ -1837,7 +1837,7 @@
    VERY SMALL SCREENS
    ============================================================ */
 
-@media (max-width: 380px) {
+body.founder-shell-ready @media (max-width: 380px){
 
     .spark-ai-action-btn {
         padding: 0 8px;
