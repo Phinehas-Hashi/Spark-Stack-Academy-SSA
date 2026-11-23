@@ -8,7 +8,7 @@
    ROOT
 =================================== */
 
-body.founder-portal-page {
+body.founder-portal-page{
 
     --primary:#762cff;
     --primary-dark:#762cff;
@@ -37,7 +37,7 @@ body.founder-portal-page {
 /* ===================================
    RESET
 =================================== */
- body.founder-portal-page * {
+ body.founder-portal-page *{
 
     margin:0;
     padding:0;
@@ -45,13 +45,13 @@ body.founder-portal-page {
 
 }
 
-body.founder-portal-page {
+body.founder-portal-page{
 
     scroll-behavior:smooth;
 
 }
 
-body.founder-portal-page {
+body.founder-portal-page{
 
     font-family:"Inter",sans-serif;
     background:var(--bg);
@@ -64,7 +64,7 @@ body.founder-portal-page {
    BACKGROUND
 =================================== */
 
-.bg-orb{
+body.founder-portal-page .bg-orb{
 
     position:fixed;
     border-radius:50%;
@@ -74,7 +74,7 @@ body.founder-portal-page {
 
 }
 
-.orb-1{
+body.founder-portal-page .orb-1{
 
     width:320px;
     height:320px;
@@ -84,7 +84,7 @@ body.founder-portal-page {
 
 }
 
-.orb-2{
+body.founder-portal-page .orb-2{
 
     width:280px;
     height:280px;
@@ -94,7 +94,7 @@ body.founder-portal-page {
 
 }
 
-.orb-3{
+body.founder-portal-page .orb-3{
 
     width:260px;
     height:260px;
@@ -108,14 +108,14 @@ body.founder-portal-page {
    LAYOUT
 =================================== */
 
-.dashboard-layout{
+body.founder-portal-page .dashboard-layout{
 
     display:flex;
     min-height:100vh;
 
 }
 
-.main-content{
+body.founder-portal-page .main-content{
 
     flex:1;
     padding:24px;
@@ -129,7 +129,7 @@ body.founder-portal-page {
    GLASS CARD
 =================================== */
 
-.glass-card{
+body.founder-portal-page .glass-card{
 
     background:rgba(15,31,53,.72);
     backdrop-filter:blur(20px);
@@ -143,8 +143,8 @@ body.founder-portal-page {
    BUTTONS
 =================================== */
 
-.primary-btn,
-.secondary-btn{
+body.founder-portal-page .primary-btn,
+body.founder-portal-page .secondary-btn{
 
     border:none;
     outline:none;
@@ -157,7 +157,7 @@ body.founder-portal-page {
 
 }
 
-.primary-btn{
+body.founder-portal-page .primary-btn{
 
     background:linear-gradient(
         135deg,
@@ -169,13 +169,13 @@ body.founder-portal-page {
 
 }
 
-.primary-btn:hover{
+body.founder-portal-page .primary-btn:hover{
 
     transform:translateY(-2px);
 
 }
 
-.secondary-btn{
+body.founder-portal-page .secondary-btn{
 
     background:transparent;
     color:var(--text);
@@ -183,7 +183,7 @@ body.founder-portal-page {
 
 }
 
-.secondary-btn:hover{
+body.founder-portal-page .secondary-btn:hover{
 
     background:rgba(255,255,255,.05);
 
@@ -193,7 +193,7 @@ body.founder-portal-page {
    PAGE HERO
 =================================== */
 
-.page-hero{
+body.founder-portal-page .page-hero{
 
     display:flex;
     flex-direction:column;
@@ -202,7 +202,7 @@ body.founder-portal-page {
 
 }
 
-.hero-content{
+body.founder-portal-page .hero-content{
 
     display:flex;
     flex-direction:column;
@@ -210,7 +210,7 @@ body.founder-portal-page {
 
 }
 
-.hero-badge{
+body.founder-portal-page .hero-badge{
 
     display:inline-flex;
     align-items:center;
@@ -228,7 +228,7 @@ body.founder-portal-page {
 
 }
 
-.hero-content h1{
+body.founder-portal-page .hero-content h1{
 
     font-size:2.2rem;
     font-weight:800;
@@ -236,7 +236,7 @@ body.founder-portal-page {
 
 }
 
-.hero-content p{
+body.founder-portal-page .hero-content p{
 
     max-width:700px;
     color:var(--muted);
@@ -244,7 +244,7 @@ body.founder-portal-page {
 
 }
 
-.hero-actions{
+body.founder-portal-page .hero-actions{
 
     display:flex;
     flex-direction:column;
@@ -252,7 +252,7 @@ body.founder-portal-page {
 
 }
 
-.hero-actions button{
+body.founder-portal-page .hero-actions button{
 
     width:100%;
 
@@ -262,7 +262,7 @@ body.founder-portal-page {
    TABLET
 =================================== */
 
-@media(min-width:768px){
+body.founder-portal-page @media(min-width:768px){
 
 .hero-actions{
 
@@ -283,7 +283,7 @@ body.founder-portal-page {
    DESKTOP
 =================================== */
 
-@media(min-width:1024px){
+body.founder-portal-page @media(min-width:1024px){
 
 .page-hero{
 
@@ -310,7 +310,7 @@ body.founder-portal-page {
    KPI GRID
 =================================== */
 
-.stats-grid{
+body.founder-portal-page .stats-grid{
 
     display:grid;
     grid-template-columns:1fr;
@@ -322,7 +322,7 @@ body.founder-portal-page {
    STAT CARD
 =================================== */
 
-.stat-card{
+body.founder-portal-page .stat-card{
 
     background:rgba(15,31,53,.72);
     backdrop-filter:blur(20px);
@@ -340,7 +340,7 @@ body.founder-portal-page {
 
 }
 
-.stat-card:hover{
+body.founder-portal-page .stat-card:hover{
 
     transform:translateY(-6px);
 
@@ -355,7 +355,7 @@ body.founder-portal-page {
    STAT TOP
 =================================== */
 
-.stat-top{
+body.founder-portal-page .stat-top{
 
     display:flex;
     align-items:center;
@@ -363,7 +363,7 @@ body.founder-portal-page {
 
 }
 
-.stat-top span{
+body.founder-portal-page .stat-top span{
 
     color:var(--muted);
 
@@ -377,7 +377,7 @@ body.founder-portal-page {
    ICON
 =================================== */
 
-.stat-icon{
+body.founder-portal-page .stat-icon{
 
     width:52px;
     height:52px;
@@ -398,42 +398,42 @@ body.founder-portal-page {
    ICON COLORS
 =================================== */
 
-.stat-icon.cyan{
+body.founder-portal-page .stat-icon.cyan{
 
     background:rgba(6,182,212,.12);
     color:#22d3ee;
 
 }
 
-.stat-icon.green{
+body.founder-portal-page .stat-icon.green{
 
     background:rgba(34,197,94,.12);
     color:#4ade80;
 
 }
 
-.stat-icon.blue{
+body.founder-portal-page .stat-icon.blue{
 
     background:rgba(59,130,246,.12);
     color:#60a5fa;
 
 }
 
-.stat-icon.purple{
+body.founder-portal-page .stat-icon.purple{
 
     background:rgba(139,92,246,.12);
     color:#a78bfa;
 
 }
 
-.stat-icon.red{
+body.founder-portal-page .stat-icon.red{
 
     background:rgba(239,68,68,.12);
     color:#f87171;
 
 }
 
-.stat-icon.gold{
+body.founder-portal-page .stat-icon.gold{
 
     background:rgba(245,158,11,.12);
     color:#fbbf24;
@@ -444,7 +444,7 @@ body.founder-portal-page {
    VALUES
 =================================== */
 
-.stat-card h2{
+body.founder-portal-page .stat-card h2{
 
     font-size:2.2rem;
 
@@ -456,7 +456,7 @@ body.founder-portal-page {
 
 }
 
-.stat-card small{
+body.founder-portal-page .stat-card small{
 
     color:var(--muted);
 
@@ -470,7 +470,7 @@ body.founder-portal-page {
    TABLET
 =================================== */
 
-@media(min-width:768px){
+body.founder-portal-page @media(min-width:768px){
 
 .stats-grid{
 
@@ -485,7 +485,7 @@ body.founder-portal-page {
    LAPTOP
 =================================== */
 
-@media(min-width:1024px){
+body.founder-portal-page @media(min-width:1024px){
 
 .stats-grid{
 
@@ -500,7 +500,7 @@ body.founder-portal-page {
    LARGE DESKTOP
 =================================== */
 
-@media(min-width:1400px){
+body.founder-portal-page @media(min-width:1400px){
 
 .stats-grid{
 
@@ -514,7 +514,7 @@ body.founder-portal-page {
    FILTER BAR
 =================================== */
 
-.filter-bar{
+body.founder-portal-page .filter-bar{
 
     display:flex;
 
@@ -530,7 +530,7 @@ body.founder-portal-page {
    FILTER LEFT
 =================================== */
 
-.filter-left{
+body.founder-portal-page .filter-left{
 
     width:100%;
 
@@ -540,7 +540,7 @@ body.founder-portal-page {
    SEARCH BOX
 =================================== */
 
-.search-box{
+body.founder-portal-page .search-box{
 
     display:flex;
 
@@ -562,7 +562,7 @@ body.founder-portal-page {
 
 }
 
-.search-box:focus-within{
+body.founder-portal-page .search-box:focus-within{
 
     border-color:var(--primary);
 
@@ -570,7 +570,7 @@ body.founder-portal-page {
 
 }
 
-.search-box i{
+body.founder-portal-page .search-box i{
 
     width:20px;
 
@@ -582,7 +582,7 @@ body.founder-portal-page {
 
 }
 
-.search-box input{
+body.founder-portal-page .search-box input{
 
     width:100%;
 
@@ -600,7 +600,7 @@ body.founder-portal-page {
 
 }
 
-.search-box input::placeholder{
+body.founder-portal-page .search-box input::placeholder{
 
     color:var(--muted);
 
@@ -610,7 +610,7 @@ body.founder-portal-page {
    FILTER RIGHT
 =================================== */
 
-.filter-right{
+body.founder-portal-page .filter-right{
 
     display:grid;
 
@@ -624,7 +624,7 @@ body.founder-portal-page {
    SELECT
 =================================== */
 
-.filter-right select{
+body.founder-portal-page .filter-right select{
 
     width:100%;
 
@@ -648,7 +648,7 @@ body.founder-portal-page {
 
 }
 
-.filter-right select:focus{
+body.founder-portal-page .filter-right select:focus{
 
     border-color:var(--primary);
 
@@ -656,7 +656,7 @@ body.founder-portal-page {
 
 }
 
-.filter-right option{
+body.founder-portal-page .filter-right option{
 
     background:var(--surface);
 
@@ -668,7 +668,7 @@ body.founder-portal-page {
    REFRESH BUTTON
 =================================== */
 
-#refreshStudents{
+body.founder-portal-page #refreshStudents{
 
     display:flex;
 
@@ -680,7 +680,7 @@ body.founder-portal-page {
 
 }
 
-#refreshStudents i{
+body.founder-portal-page #refreshStudents i{
 
     width:18px;
 
@@ -692,7 +692,7 @@ body.founder-portal-page {
    TABLET
 =================================== */
 
-@media(min-width:768px){
+body.founder-portal-page @media(min-width:768px){
 
 .filter-right{
 
@@ -707,7 +707,7 @@ body.founder-portal-page {
    DESKTOP
 =================================== */
 
-@media(min-width:1024px){
+body.founder-portal-page @media(min-width:1024px){
 
 .filter-bar{
 
@@ -743,7 +743,7 @@ body.founder-portal-page {
    STUDENTS TABLE
 =================================== */
 
-.students-table{
+body.founder-portal-page .students-table{
 
     padding:24px;
 
@@ -759,7 +759,7 @@ body.founder-portal-page {
    TABLE HEADER
 =================================== */
 
-.table-header{
+body.founder-portal-page .table-header{
 
     display:flex;
 
@@ -773,7 +773,7 @@ body.founder-portal-page {
 
 }
 
-.table-header h3{
+body.founder-portal-page .table-header h3{
 
     font-size:1.15rem;
 
@@ -783,7 +783,7 @@ body.founder-portal-page {
 
 }
 
-.table-header span{
+body.founder-portal-page .table-header span{
 
     color:var(--muted);
 
@@ -797,7 +797,7 @@ body.founder-portal-page {
    TABLE WRAPPER
 =================================== */
 
-.table-responsive{
+body.founder-portal-page .table-responsive{
 
     width:100%;
 
@@ -811,7 +811,7 @@ body.founder-portal-page {
    TABLE
 =================================== */
 
-table{
+body.founder-portal-page table{
 
     width:100%;
 
@@ -821,13 +821,13 @@ table{
 
 }
 
-thead{
+body.founder-portal-page thead{
 
     background:rgba(255,255,255,.04);
 
 }
 
-th{
+body.founder-portal-page th{
 
     text-align:left;
 
@@ -849,7 +849,7 @@ th{
 
 }
 
-td{
+body.founder-portal-page td{
 
     padding:18px;
 
@@ -863,13 +863,13 @@ td{
 
 }
 
-tbody tr{
+body.founder-portal-page tbody tr{
 
     transition:var(--transition);
 
 }
 
-tbody tr:hover{
+body.founder-portal-page tbody tr:hover{
 
     background:rgba(255,255,255,.03);
 
@@ -879,7 +879,7 @@ tbody tr:hover{
    STUDENT INFO
 =================================== */
 
-.student-info{
+body.founder-portal-page .student-info{
 
     display:flex;
 
@@ -891,7 +891,7 @@ tbody tr:hover{
 
 }
 
-.student-avatar{
+body.founder-portal-page .student-avatar{
 
     width:44px;
 
@@ -921,7 +921,7 @@ tbody tr:hover{
 
 }
 
-.student-details{
+body.founder-portal-page .student-details{
 
     display:flex;
 
@@ -931,7 +931,7 @@ tbody tr:hover{
 
 }
 
-.student-details strong{
+body.founder-portal-page .student-details strong{
 
     font-size:.95rem;
 
@@ -941,7 +941,7 @@ tbody tr:hover{
 
 }
 
-.student-details small{
+body.founder-portal-page .student-details small{
 
     font-size:.82rem;
 
@@ -953,7 +953,7 @@ tbody tr:hover{
    STATUS BADGES
 =================================== */
 
-.status-badge{
+body.founder-portal-page .status-badge{
 
     display:inline-flex;
 
@@ -977,7 +977,7 @@ tbody tr:hover{
 
 }
 
-.status-badge.active{
+body.founder-portal-page .status-badge.active{
 
     background:rgba(34,197,94,.12);
 
@@ -987,7 +987,7 @@ tbody tr:hover{
 
 }
 
-.status-badge.graduated{
+body.founder-portal-page .status-badge.graduated{
 
     background:rgba(139,92,246,.12);
 
@@ -997,7 +997,7 @@ tbody tr:hover{
 
 }
 
-.status-badge.suspended{
+body.founder-portal-page .status-badge.suspended{
 
     background:rgba(239,68,68,.12);
 
@@ -1011,13 +1011,13 @@ tbody tr:hover{
    PROGRESS BAR
 =================================== */
 
-.progress-cell{
+body.founder-portal-page .progress-cell{
 
     min-width:160px;
 
 }
 
-.progress-wrapper{
+body.founder-portal-page .progress-wrapper{
 
     display:flex;
 
@@ -1027,7 +1027,7 @@ tbody tr:hover{
 
 }
 
-.progress-bar{
+body.founder-portal-page .progress-bar{
 
     flex:1;
 
@@ -1041,7 +1041,7 @@ tbody tr:hover{
 
 }
 
-.progress-fill{
+body.founder-portal-page .progress-fill{
 
     height:100%;
 
@@ -1055,7 +1055,7 @@ tbody tr:hover{
 
 }
 
-.progress-value{
+body.founder-portal-page .progress-value{
 
     min-width:40px;
 
@@ -1073,7 +1073,7 @@ tbody tr:hover{
    ACTION BUTTONS
 =================================== */
 
-.table-actions{
+body.founder-portal-page .table-actions{
 
     display:flex;
 
@@ -1083,7 +1083,7 @@ tbody tr:hover{
 
 }
 
-.action-btn{
+body.founder-portal-page .action-btn{
 
     width:36px;
 
@@ -1109,13 +1109,13 @@ tbody tr:hover{
 
 }
 
-.action-btn:hover{
+body.founder-portal-page .action-btn:hover{
 
     transform:translateY(-2px);
 
 }
 
-.action-btn.view:hover{
+body.founder-portal-page .action-btn.view:hover{
 
     background:rgba(59,130,246,.18);
 
@@ -1123,7 +1123,7 @@ tbody tr:hover{
 
 }
 
-.action-btn.edit:hover{
+body.founder-portal-page .action-btn.edit:hover{
 
     background:rgba(245,158,11,.18);
 
@@ -1131,7 +1131,7 @@ tbody tr:hover{
 
 }
 
-.action-btn.delete:hover{
+body.founder-portal-page .action-btn.delete:hover{
 
     background:rgba(239,68,68,.18);
 
@@ -1139,7 +1139,7 @@ tbody tr:hover{
 
 }
 
-.action-btn i{
+body.founder-portal-page .action-btn i{
 
     width:16px;
 
@@ -1151,7 +1151,7 @@ tbody tr:hover{
    EMPTY STATE
 =================================== */
 
-.empty-state{
+body.founder-portal-page .empty-state{
 
     padding:60px 24px !important;
 
@@ -1159,7 +1159,7 @@ tbody tr:hover{
 
 }
 
-.empty-content{
+body.founder-portal-page .empty-content{
 
     display:flex;
 
@@ -1175,7 +1175,7 @@ tbody tr:hover{
 
 }
 
-.empty-icon{
+body.founder-portal-page .empty-icon{
 
     width:72px;
 
@@ -1197,7 +1197,7 @@ tbody tr:hover{
 
 }
 
-.empty-content h3{
+body.founder-portal-page .empty-content h3{
 
     font-size:1.1rem;
 
@@ -1207,7 +1207,7 @@ tbody tr:hover{
 
 }
 
-.empty-content p{
+body.founder-portal-page .empty-content p{
 
     color:var(--muted);
 
@@ -1219,7 +1219,7 @@ tbody tr:hover{
    MOBILE IMPROVEMENTS
 =================================== */
 
-@media(max-width:767px){
+body.founder-portal-page @media(max-width:767px){
 
 .students-table{
 
@@ -1247,7 +1247,7 @@ th{
    STUDENTS TABLE
 =================================== */
 
-.students-table{
+body.founder-portal-page .students-table{
 
     padding:24px;
 
@@ -1255,7 +1255,7 @@ th{
 
 }
 
-.table-header{
+body.founder-portal-page .table-header{
 
     display:flex;
 
@@ -1269,7 +1269,7 @@ th{
 
 }
 
-.table-header h3{
+body.founder-portal-page .table-header h3{
 
     font-size:1.2rem;
 
@@ -1279,7 +1279,7 @@ th{
 
 }
 
-.table-header span{
+body.founder-portal-page .table-header span{
 
     color:var(--muted);
 
@@ -1293,7 +1293,7 @@ th{
    RESPONSIVE TABLE
 =================================== */
 
-.table-responsive{
+body.founder-portal-page .table-responsive{
 
     width:100%;
 
@@ -1301,13 +1301,13 @@ th{
 
 }
 
-.table-responsive::-webkit-scrollbar{
+body.founder-portal-page .table-responsive::-webkit-scrollbar{
 
     height:8px;
 
 }
 
-.table-responsive::-webkit-scrollbar-thumb{
+body.founder-portal-page .table-responsive::-webkit-scrollbar-thumb{
 
     background:rgba(255,255,255,.12);
 
@@ -1315,7 +1315,7 @@ th{
 
 }
 
-table{
+body.founder-portal-page table{
 
     width:100%;
 
@@ -1325,7 +1325,7 @@ table{
 
 }
 
-thead th{
+body.founder-portal-page thead th{
 
     padding:18px 16px;
 
@@ -1345,7 +1345,7 @@ thead th{
 
 }
 
-tbody td{
+body.founder-portal-page tbody td{
 
     padding:18px 16px;
 
@@ -1357,13 +1357,13 @@ tbody td{
 
 }
 
-tbody tr{
+body.founder-portal-page tbody tr{
 
     transition:var(--transition);
 
 }
 
-tbody tr:hover{
+body.founder-portal-page tbody tr:hover{
 
     background:rgba(255,255,255,.03);
 
@@ -1373,7 +1373,7 @@ tbody tr:hover{
    STUDENT INFO
 =================================== */
 
-.student-info{
+body.founder-portal-page .student-info{
 
     display:flex;
 
@@ -1383,7 +1383,7 @@ tbody tr:hover{
 
 }
 
-.student-avatar{
+body.founder-portal-page .student-avatar{
 
     width:48px;
 
@@ -1411,7 +1411,7 @@ tbody tr:hover{
 
 }
 
-.student-details{
+body.founder-portal-page .student-details{
 
     display:flex;
 
@@ -1421,13 +1421,13 @@ tbody tr:hover{
 
 }
 
-.student-name{
+body.founder-portal-page .student-name{
 
     font-weight:700;
 
 }
 
-.student-id{
+body.founder-portal-page .student-id{
 
     font-size:.82rem;
 
@@ -1439,7 +1439,7 @@ tbody tr:hover{
    STATUS BADGES
 =================================== */
 
-.status{
+body.founder-portal-page .status{
 
     display:inline-flex;
 
@@ -1457,7 +1457,7 @@ tbody tr:hover{
 
 }
 
-.status.active{
+body.founder-portal-page .status.active{
 
     color:#4ade80;
 
@@ -1465,7 +1465,7 @@ tbody tr:hover{
 
 }
 
-.status.graduated{
+body.founder-portal-page .status.graduated{
 
     color:#60a5fa;
 
@@ -1473,7 +1473,7 @@ tbody tr:hover{
 
 }
 
-.status.suspended{
+body.founder-portal-page .status.suspended{
 
     color:#f87171;
 
@@ -1485,7 +1485,7 @@ tbody tr:hover{
    PROGRESS
 =================================== */
 
-.progress{
+body.founder-portal-page .progress{
 
     display:flex;
 
@@ -1495,7 +1495,7 @@ tbody tr:hover{
 
 }
 
-.progress-bar{
+body.founder-portal-page .progress-bar{
 
     width:140px;
 
@@ -1509,7 +1509,7 @@ tbody tr:hover{
 
 }
 
-.progress-fill{
+body.founder-portal-page .progress-fill{
 
     height:100%;
 
@@ -1523,7 +1523,7 @@ tbody tr:hover{
 
 }
 
-.progress span{
+body.founder-portal-page .progress span{
 
     font-size:.8rem;
 
@@ -1535,7 +1535,7 @@ tbody tr:hover{
    ACTION BUTTONS
 =================================== */
 
-.action-buttons{
+body.founder-portal-page .action-buttons{
 
     display:flex;
 
@@ -1545,7 +1545,7 @@ tbody tr:hover{
 
 }
 
-.action-btn{
+body.founder-portal-page .action-btn{
 
     width:38px;
 
@@ -1571,7 +1571,7 @@ tbody tr:hover{
 
 }
 
-.action-btn:hover{
+body.founder-portal-page .action-btn:hover{
 
     background:var(--primary);
 
@@ -1583,7 +1583,7 @@ tbody tr:hover{
    EMPTY STATE
 =================================== */
 
-.empty-state{
+body.founder-portal-page .empty-state{
 
     padding:70px 20px;
 
@@ -1591,7 +1591,7 @@ tbody tr:hover{
 
 }
 
-.empty-content{
+body.founder-portal-page .empty-content{
 
     display:flex;
 
@@ -1603,7 +1603,7 @@ tbody tr:hover{
 
 }
 
-.empty-icon{
+body.founder-portal-page .empty-icon{
 
     width:90px;
 
@@ -1623,7 +1623,7 @@ tbody tr:hover{
 
 }
 
-.empty-content h3{
+body.founder-portal-page .empty-content h3{
 
     font-size:1.35rem;
 
@@ -1631,7 +1631,7 @@ tbody tr:hover{
 
 }
 
-.empty-content p{
+body.founder-portal-page .empty-content p{
 
     color:var(--muted);
 
@@ -1644,7 +1644,7 @@ tbody tr:hover{
    PAGINATION
 =================================== */
 
-.pagination{
+body.founder-portal-page .pagination{
 
     display:flex;
 
@@ -1660,7 +1660,7 @@ tbody tr:hover{
 
 }
 
-.page-info{
+body.founder-portal-page .page-info{
 
     color:var(--muted);
 
@@ -1670,7 +1670,7 @@ tbody tr:hover{
 
 }
 
-.page-btn{
+body.founder-portal-page .page-btn{
 
     width:100%;
 
@@ -1698,7 +1698,7 @@ tbody tr:hover{
 
 }
 
-.page-btn:hover{
+body.founder-portal-page .page-btn:hover{
 
     background:var(--primary);
 
@@ -1708,7 +1708,7 @@ tbody tr:hover{
 
 }
 
-.page-btn:disabled{
+body.founder-portal-page .page-btn:disabled{
 
     opacity:.45;
 
@@ -1722,7 +1722,7 @@ tbody tr:hover{
    FADE ANIMATION
 =================================== */
 
-@keyframes fadeUp{
+body.founder-portal-page @keyframes fadeUp{
 
     from{
 
@@ -1742,41 +1742,41 @@ tbody tr:hover{
 
 }
 
-.page-hero,
-.stat-card,
-.filter-bar,
-.students-table,
-.pagination{
+body.founder-portal-page .page-hero,
+body.founder-portal-page .stat-card,
+body.founder-portal-page .filter-bar,
+body.founder-portal-page .students-table,
+body.founder-portal-page .pagination{
 
     animation:fadeUp .6s ease both;
 
 }
 
-.stat-card:nth-child(2){
+body.founder-portal-page .stat-card:nth-child(2){
 
     animation-delay:.08s;
 
 }
 
-.stat-card:nth-child(3){
+body.founder-portal-page .stat-card:nth-child(3){
 
     animation-delay:.16s;
 
 }
 
-.stat-card:nth-child(4){
+body.founder-portal-page .stat-card:nth-child(4){
 
     animation-delay:.24s;
 
 }
 
-.stat-card:nth-child(5){
+body.founder-portal-page .stat-card:nth-child(5){
 
     animation-delay:.32s;
 
 }
 
-.stat-card:nth-child(6){
+body.founder-portal-page .stat-card:nth-child(6){
 
     animation-delay:.40s;
 
@@ -1786,7 +1786,7 @@ tbody tr:hover{
    GLOBAL SCROLLBAR
 =================================== */
 
-::-webkit-scrollbar{
+body.founder-portal-page ::-webkit-scrollbar{
 
     width:10px;
 
@@ -1794,13 +1794,13 @@ tbody tr:hover{
 
 }
 
-::-webkit-scrollbar-track{
+body.founder-portal-page ::-webkit-scrollbar-track{
 
     background:var(--bg);
 
 }
 
-::-webkit-scrollbar-thumb{
+body.founder-portal-page ::-webkit-scrollbar-thumb{
 
     background:rgba(255,255,255,.15);
 
@@ -1808,7 +1808,7 @@ tbody tr:hover{
 
 }
 
-::-webkit-scrollbar-thumb:hover{
+body.founder-portal-page ::-webkit-scrollbar-thumb:hover{
 
     background:var(--primary);
 
@@ -1818,7 +1818,7 @@ tbody tr:hover{
    TABLET
 =================================== */
 
-@media(min-width:768px){
+body.founder-portal-page @media(min-width:768px){
 
 .pagination{
 
@@ -1842,7 +1842,7 @@ tbody tr:hover{
    MOBILE OPTIMIZATION
 =================================== */
 
-@media(max-width:767px){
+body.founder-portal-page @media(max-width:767px){
 
 .main-content{
 
@@ -1884,7 +1884,7 @@ tbody tr:hover{
    LARGE SCREENS
 =================================== */
 
-@media(min-width:1440px){
+body.founder-portal-page @media(min-width:1440px){
 
 .main-content{
 
@@ -1902,9 +1902,9 @@ tbody tr:hover{
    ACCESSIBILITY
 =================================== */
 
-button:focus-visible,
-select:focus-visible,
-input:focus-visible{
+body.founder-portal-page button:focus-visible,
+body.founder-portal-page select:focus-visible,
+body.founder-portal-page input:focus-visible{
 
     outline:2px solid var(--primary);
 
@@ -1916,7 +1916,7 @@ input:focus-visible{
    SELECTION
 =================================== */
 
-::selection{
+body.founder-portal-page ::selection{
 
     background:var(--primary);
 
@@ -1928,7 +1928,7 @@ input:focus-visible{
 =================================== */
 
 
-.modal{
+body.founder-portal-page .modal{
 
     position:fixed;
 
@@ -1951,14 +1951,14 @@ input:focus-visible{
 }
 
 
-.modal.active{
+body.founder-portal-page .modal.active{
 
     display:flex;
 
 }
 
 
-.modal-content{
+body.founder-portal-page .modal-content{
 
     width:100%;
 
@@ -1969,7 +1969,7 @@ input:focus-visible{
 }
 
 
-.modal-header{
+body.founder-portal-page .modal-header{
 
     display:flex;
 
@@ -1982,7 +1982,7 @@ input:focus-visible{
 }
 
 
-.modal-header button{
+body.founder-portal-page .modal-header button{
 
     background:none;
 
@@ -1997,7 +1997,7 @@ input:focus-visible{
 }
 
 
-#studentForm{
+body.founder-portal-page #studentForm{
 
     display:flex;
 
@@ -2008,8 +2008,8 @@ input:focus-visible{
 }
 
 
-#studentForm input,
-#studentForm select{
+body.founder-portal-page #studentForm input,
+body.founder-portal-page #studentForm select{
 
     padding:14px;
 
@@ -2031,7 +2031,7 @@ input:focus-visible{
 
 /* Desktop */
 
-.main-content{
+body.founder-portal-page .main-content{
 
 margin-left:var(--sidebar-width);
 
@@ -2045,7 +2045,7 @@ transition:.35s ease;
 
 /* Mobile */
 
-@media(max-width:768px){
+body.founder-portal-page @media(max-width:768px){
 
 
 .main-content{
