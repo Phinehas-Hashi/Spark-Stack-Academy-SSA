@@ -3,14 +3,14 @@
    One shell. Every Founder page.
 ========================================================= */
 
-:root {
+body.founder-portal-page {
   --founder-sidebar-width: 272px;
-  --founder-border: #e6eaf0;
-  --founder-text: #172033;
-  --founder-muted: #64748b;
-  --founder-primary: #2563eb;
-  --founder-primary-soft: #eff6ff;
-  --founder-surface: #ffffff;
+  --founder-border: var(--ssa-color-line, #e8e6f0);
+  --founder-text: var(--ssa-color-ink, #17152f);
+  --founder-muted: var(--ssa-color-muted, #77758f);
+  --founder-primary: var(--ssa-color-brand, #762cff);
+  --founder-primary-soft: #f0eaff;
+  --founder-surface: var(--ssa-color-surface, #ffffff);
 }
 
 .sidebar {
@@ -58,7 +58,7 @@
 .brand-text { min-width: 0; }
 .brand-text h2 {
   margin: 0;
-  color: #0f172a;
+  color: #17152f;
   font-size: 15px;
   line-height: 1.2;
   font-weight: 800;
@@ -103,7 +103,7 @@
   min-height: 42px;
   margin: 2px 0;
   padding: 9px 11px;
-  color: #526176;
+  color: #514b6b;
   text-decoration: none;
   border-radius: 11px;
   font-size: 13px;
@@ -118,8 +118,8 @@
   stroke-width: 2;
 }
 .sidebar-menu > a:hover {
-  color: #172033;
-  background: #f6f8fb;
+  color: #17152f;
+  background: #fbfaff;
   transform: translateX(1px);
 }
 .sidebar-menu > a.active,
@@ -182,7 +182,7 @@
   color: var(--founder-primary);
 }
 .ai-avatar svg { width: 17px; height: 17px; }
-.ai-status-card h4 { margin: 0; color: #172033; font-size: 12px; font-weight: 800; }
+.ai-status-card h4 { margin: 0; color: #17152f; font-size: 12px; font-weight: 800; }
 .ai-status-card p { margin: 3px 0 0; color: #718096; font-size: 10px; line-height: 1.3; }
 
 .sidebar-ai-btn {
@@ -197,7 +197,7 @@
   cursor: pointer;
   transition: background .18s ease, transform .18s ease;
 }
-.sidebar-ai-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+.sidebar-ai-btn:hover { background: #5d1ed6; transform: translateY(-1px); }
 
 .logout-btn {
   width: 100%;
