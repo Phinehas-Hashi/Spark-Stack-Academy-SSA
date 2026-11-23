@@ -1,89 +1,74 @@
-.success-page{
-
-    min-height:100vh;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    padding:25px;
-
-}.success-page .success-card{
-
-    width:100%;
-    max-width:520px;
-
-    background:#fff;
-
-    border:1px solid #e8edf5;
-
-    border-radius:28px;
-
-    padding:45px 30px;
-
-    text-align:center;
-
-    box-shadow:0 20px 60px rgba(8,28,58,.10);
-
-}.success-page .success-icon{
-
-    width:80px;
-    height:80px;
-
-    margin:0 auto 25px;
-
-    border-radius:50%;
-
-    background:#eafaf0;
-
-    color:#16a34a;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-}.success-page .success-icon svg{
-
-    width:42px;
-    height:42px;
-
-}.success-page .success-card h1{
-
-    color:#17152f;
-
-    margin-bottom:12px;
-
-}.success-page .success-card p{
-
-    color:#64748b;
-
-    line-height:1.7;
-
-}.success-page .success-btn{
-
-    display:inline-block;
-
-    margin-top:25px;
-
-    padding:14px 24px;
-
-    border-radius:14px;
-
-    background:#762cff;
-
-    color:#fff;
-
-    text-decoration:none;
-
-    font-weight:600;
-
-}.success-page #paymentStatus{
-
-    margin-top:20px;
-
-    font-size:14px;
-
+/* Premium activation — standalone transactional page.
+   Shared colors and typography come from the SSA design tokens. */
+.success-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: clamp(16px, 4vw, 32px);
+    background:
+        radial-gradient(circle at 50% 0%, rgba(118,44,255,.10), transparent 42%),
+        var(--ssa-color-canvas, #f5f4fb);
+}
+.success-card {
+    width: min(100%, 520px);
+    padding: clamp(26px, 6vw, 46px) clamp(20px, 5vw, 34px);
+    border: 1px solid var(--ssa-color-line, #e8e6f0);
+    border-radius: var(--ssa-radius-xl, 26px);
+    background: var(--ssa-color-surface, #fff);
+    color: var(--ssa-color-ink, #17152f);
+    text-align: center;
+    box-shadow: var(--ssa-shadow-md, 0 12px 34px rgba(27,20,65,.10));
+}
+.success-icon {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 22px;
+    border: 1px solid rgba(22,132,91,.16);
+    border-radius: 50%;
+    background: rgba(22,132,91,.09);
+    color: var(--ssa-color-success, #16845b);
+}
+.success-icon svg { width: 38px; height: 38px; }
+.success-card h1 {
+    margin: 0 0 12px;
+    color: var(--ssa-color-ink, #17152f);
+    font-family: var(--ssa-font-display, "Montserrat", sans-serif);
+    font-size: clamp(24px, 5vw, 30px);
+    letter-spacing: -.035em;
+}
+.success-card p {
+    margin: 0;
+    color: var(--ssa-color-muted, #77758f);
+    font-size: 14px;
+    line-height: 1.7;
+}
+#paymentStatus {
+    margin-top: 20px;
+    color: var(--ssa-color-muted, #77758f);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.success-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    margin-top: 24px;
+    padding: 12px 22px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 12px;
+    background: linear-gradient(105deg, var(--ssa-color-brand, #762cff), var(--ssa-color-brand-strong, #5d1ed6));
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 8px 22px rgba(118,44,255,.22);
+}
+.success-btn:hover { filter: brightness(1.05); }
+.success-btn:focus-visible { outline: 3px solid rgba(32,207,232,.65); outline-offset: 3px; }
+@media (max-width: 420px) {
+    .success-card { border-radius: var(--ssa-radius-lg, 20px); }
 }
