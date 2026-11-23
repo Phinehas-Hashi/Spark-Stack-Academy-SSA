@@ -29,7 +29,7 @@
     gap: 15px;
     margin-bottom: 24px;
     padding: 17px 20px;
-    border: 1px solid rgba(41,121,255,.15);
+    border: 1px solid rgba(118,44,255,.15);
     border-radius: 14px;
     background:
         linear-gradient(
@@ -257,7 +257,7 @@
 
 .reports-filters select:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 
@@ -489,7 +489,7 @@
 }
 
 .report-action-btn:hover {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
@@ -948,7 +948,7 @@
 .report-response-section textarea:focus {
     border-color: var(--admin-blue);
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(41,121,255,.08);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.08);
 }
 
 .report-notes-section .admin-btn {
