@@ -1006,3 +1006,7 @@
     }
 
 }
+/* Runtime-updated metric fills start at zero until data hydration completes. */
+#courseCompletionBar { width: 0; }
+#courseProgressBar { width: 0; }
+#courseSatisfactionBar { width: 0; }
