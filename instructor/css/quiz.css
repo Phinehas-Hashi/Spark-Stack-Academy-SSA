@@ -67,7 +67,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 12px;
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -247,7 +247,7 @@
 }
 
 .stat-icon.blue {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -368,7 +368,7 @@
     width: 27px;
     height: 27px;
     border-radius: 8px;
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
     font-size: 11px;
     font-weight: 800;
@@ -620,7 +620,7 @@
     height: 34px;
     min-width: 34px;
     border-radius: 50%;
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
     display: flex;
     align-items: center;
