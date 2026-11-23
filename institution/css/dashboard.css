@@ -1,3 +1,4 @@
+/* Institution dashboard-only page styles. */
 /* Institution dashboard page styles, isolated from the shell. */
 .institution-app .page-wrap{max-width:1500px;margin:auto;padding:30px}
 .institution-app .welcome-panel{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:30px;border-radius:22px;background:linear-gradient(125deg,#081c3a,#164777);color:#fff;position:relative;overflow:hidden}
