@@ -1,10 +1,9 @@
-
-*{
+ body.founder-portal-page * {
     box-sizing:border-box;
 }
 
 
-body{
+body.founder-portal-page {
 
     margin:0;
 
