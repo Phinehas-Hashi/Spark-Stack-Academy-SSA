@@ -1,8 +1,8 @@
 # Spark Stack Academy — Repository-Wide Design System Audit
 
-**Status:** Five-portal dependency audit completed; Student, Instructor and Institution source migrations committed; Admin and Founder migrations remain queued  
-**Branch:** main  
-**Audit commit:** pending this report update
+**Status:** Five-portal dependency audit completed; Student, Instructor, Institution and Admin source migrations committed; Founder migration remains queued. Admin browser verification is outstanding.  
+**Branch:** migration/admin-finalization  
+**Audit commit:** updated with Admin source migration checkpoint
 
 ## Scope and method
 
@@ -95,20 +95,22 @@ The shell is injected by `institution/js/institution-app.js` into `#institutionS
 
 ### Admin Portal
 
-Most authenticated Admin pages follow:
-`admin-core.css → components.css → page CSS → responsive.css`.
+The authenticated Admin pages now follow the canonical sequence:
+`design-tokens.css → font stylesheet → admin-core.css → components.css → page CSS → responsive.css`.
+The dedicated Messages route remains standalone and loads shared messaging styles plus the Admin-only `messages.css` override.
 
-Exceptions:
-- `admin/messages.html` uses only `role-messaging.css` and a dedicated `role-messaging-page` body class.
-- `admin/settings.html` has no linked stylesheets or scripts, while the case-distinct `admin/Settings.html` loads the Admin settings stylesheet and app shell. GitHub Pages is case-sensitive: this is a route/link integrity issue to resolve before styling.
-- `admin/certificates.html` and `admin/withdrawals.html` contain embedded style blocks.
-- `admin/course-profile.html` and `admin/instructor-profile.html` each retain three inline style attributes.
-- `admin/institutions.html` and `admin/pricing.html` put fonts before portal styles and use a different page/responsive ordering.
-- Dashboard additionally loads root `brand-system.css`.
+Completed source migration:
+- All 17 top-level Admin application routes load the shared design tokens and their intended portal/page styles. The uppercase `Settings.html` path is retained only as a compatibility redirect; lowercase `settings.html` is now canonical and matches sidebar/topbar navigation.
+- The dashboard no longer loads root `brand-system.css`; Admin presentation is owned by the scoped Admin stylesheets.
+- Certificates and Withdrawals use dedicated page stylesheets instead of embedded style blocks or the Dashboard stylesheet.
+- Static progress-bar defaults on Course Profile and Instructor Profile are owned by page CSS; JavaScript remains free to set runtime widths.
+- Admin shell styling preserves `#adminSidebar`, `#adminTopbar`, `#sidebarOverlay`, the `.open` drawer state, the `.active` overlay state and the `admin-menu-open` body lock.
+- The responsive stylesheet has no cross-portal imports and its portal rules are scoped beneath `.admin-app`. Modal layers retain the dedicated foreground overlay/panel rules.
+- Static inspection found no embedded style blocks or inline style attributes across the Admin application routes. All inspected Admin CSS files have balanced braces and no `@import` dependencies.
 
-The shell is injected by `admin/js/admin-app.js`, which fetches sidebar/topbar markup and then imports their behavior modules. Preserve `#adminSidebar`, `#adminTopbar` and the component initialization contract.
+The shell is injected by `admin/js/admin-app.js`, which fetches sidebar/topbar markup and then imports their behavior modules. Component IDs and the initialization contract were preserved.
 
-**Specific risk:** `admin/css/responsive.css` has 65 `!important` declarations, one import and global/root selectors. This is a high-priority cascade review target. The lower-case `settings.html` file should be checked for intended route behavior; do not silently overwrite it with the uppercase file without comparing navigation and references.
+**Remaining risk:** responsive/modal CSS still contains 30 `!important` declarations, primarily for visibility, stacking and reduced-motion behavior. These require contextual browser checks. Static checks do not verify visual output, keyboard behavior, Firebase flows or production deployment.
 
 ### Founder Portal
 
@@ -154,7 +156,7 @@ The exact canonical link order must be finalized from selector ownership and act
 ## Prioritised migration blueprint
 
 **P0 — route and shell integrity**
-- Resolve Admin `settings.html` versus `Settings.html` and confirm the intended navigation target.
+- [x] Resolve Admin `settings.html` versus `Settings.html`; lowercase is canonical and uppercase redirects.
 - Classify every exception listed above as shell page, standalone page or embedded component.
 - Confirm Founder bootstrap ownership and eliminate any duplicate shell initialization only after page references are known.
 - Record the stable shell root, component IDs and drawer state classes for each portal.
@@ -163,7 +165,7 @@ The exact canonical link order must be finalized from selector ownership and act
 - Establish root design tokens and documented reset ownership.
 - Map imported CSS dependencies and remove imports only after inlining/replacing their responsibilities.
 - Compare the 26 duplicate Student page stylesheet pairs and select a canonical copy for each route.
-- Decompose the high-override foundations in this order: Admin responsive, Founder unified, Institution foundation, Instructor responsive, Student theme, then remaining patch layers.
+- Decompose the remaining high-override foundations in this order: Founder unified, Institution foundation, Instructor responsive, Student theme, then remaining patch layers. Admin responsive source isolation is complete; browser verification remains.
 - Replace unscoped selectors with portal/page-root scopes where the HTML contract supports it.
 
 **P2 — page migration**
@@ -180,7 +182,7 @@ The exact canonical link order must be finalized from selector ownership and act
 
 ## Audit conclusion
 
-The dependency mapping and static CSS scan cover all five portals and all 152 CSS files. The architecture is not suitable for a mass stylesheet replacement: route exceptions, parallel Student CSS generations, global selector leakage, override-heavy foundations and competing Founder shell loaders must be addressed in controlled stages. Migration has begun with scoped, reversible portal batches. No wholesale CSS deletion has been performed; legacy files remain until their usage and behavior are verified. The next work is to finish Student and Instructor regression checks, then migrate Institution, Admin and Founder in sequence.
+The dependency mapping and static CSS scan cover all five portals and all 152 CSS files. The architecture is not suitable for a mass stylesheet replacement: route exceptions, parallel Student CSS generations, global selector leakage, override-heavy foundations and competing Founder shell loaders must be addressed in controlled stages. Migration has proceeded in scoped, reversible portal batches. No wholesale CSS deletion has been performed; legacy files remain until their usage and behavior are verified. Student, Instructor, Institution and Admin source migrations are recorded; the remaining major portal source migration is Founder, while browser verification remains outstanding across the migrated portals.
 
 ## Portal migration progress — 23 November 2026
 
@@ -237,3 +239,16 @@ The dependency mapping and static CSS scan cover all five portals and all 152 CS
 
 
 **Institution verification checklist:** test dashboard metrics and quota/team panels, course creation/listing, learner enrolment and roster actions, registration submission, mobile sidebar open/close and overlay, Escape handling, and all Firebase-backed states. Visual and backend verification remains outstanding; the Institution source migration must not be treated as production sign-off.
+
+
+### Admin Portal — source migration checkpoint
+
+- Standardized Admin stylesheet ownership and ordering across the authenticated routes. The dedicated Messages route retains its standalone messaging foundation.
+- Removed the last Admin dashboard reference to the root cross-portal brand stylesheet.
+- Isolated Admin responsive shell, drawer, overlay, modal and premium theme rules beneath the Admin portal ownership boundary.
+- Resolved the case-sensitive settings route mismatch without deleting the legacy uppercase URL: `settings.html` is canonical, and `Settings.html` redirects to it.
+- Replaced the Certificates and Withdrawals embedded styles with dedicated page stylesheets; removed static inline progress widths from the two profile pages.
+- Static verification: Admin route stylesheets are present in the expected order; no Admin page loads `brand-system.css`; no embedded style blocks or inline style attributes remain on the application routes; all inspected Admin CSS files have balanced braces and no imports.
+- Browser and live Firebase verification remain outstanding. No production sign-off is implied.
+
+**Admin verification checklist:** test the sidebar and overlay at mobile widths, confirm the drawer remains above the overlay with its shadow visible, test Escape and body scroll lock, inspect every modal/dropdown for clipping and foreground stacking, check responsive tables and horizontal overflow, verify the lowercase Settings route on a case-sensitive host, and exercise the existing Firebase-backed Admin workflows.
