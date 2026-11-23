@@ -1006,3 +1006,5 @@
     }
 
 }
+/* Initial empty state; profile JS updates widths as data arrives. */
+#courseCompletionBar,#courseProgressBar,#courseSatisfactionBar{width:0%}
