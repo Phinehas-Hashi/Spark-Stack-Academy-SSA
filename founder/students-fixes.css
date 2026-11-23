@@ -4,12 +4,12 @@
 ========================================================== */
 
 body.founder-portal-page {
-    --students-bg: #f5f7fb;
+    --students-bg: #f5f4fb;
     --students-surface: #ffffff;
-    --students-surface-soft: #f8fafc;
-    --students-text: #0f172a;
-    --students-muted: #64748b;
-    --students-border: #e2e8f0;
+    --students-surface-soft: #fbfaff;
+    --students-text: #17152f;
+    --students-muted: #77758f;
+    --students-border: #e8e6f0;
     --students-blue: #762cff;
     --students-blue-soft: #f0eaff;
     --students-shadow: 0 10px 30px rgba(15, 23, 42, .07);
