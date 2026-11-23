@@ -1,0 +1,11 @@
+/* Founder Premium Management — standalone page foundation. */
+body.founder-standalone-page{margin:0;min-height:100vh;background:var(--ssa-color-canvas,#f6f8fc);font-family:var(--ssa-font-body,Inter,Poppins,system-ui);color:var(--ssa-color-ink,#0f172a)}
+body.founder-standalone-page .pm-page{max-width:1200px;margin:auto;padding:32px}
+body.founder-standalone-page .pm-card{background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:24px;margin-bottom:18px;box-shadow:0 12px 35px rgba(15,23,42,.06)}
+body.founder-standalone-page .pm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+body.founder-standalone-page .pm-user{border:1px solid #e2e8f0;border-radius:16px;padding:16px}
+body.founder-standalone-page .pm-user strong,body.founder-standalone-page .pm-user span{display:block}
+body.founder-standalone-page .pm-user span{font-size:12px;color:#64748b;margin-top:4px}
+body.founder-standalone-page .pm-user button{margin-top:12px;border:0;border-radius:10px;padding:10px 12px;background:var(--ssa-color-brand,#762cff);color:#fff;font-weight:800}
+body.founder-standalone-page .pm-user button.danger{background:#dc2626}
+@media(max-width:800px){body.founder-standalone-page .pm-page{padding:16px}body.founder-standalone-page .pm-grid{grid-template-columns:1fr}}
