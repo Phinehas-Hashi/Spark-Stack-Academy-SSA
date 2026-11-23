@@ -255,7 +255,7 @@
 }
 
 .stat-icon.blue {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -683,7 +683,7 @@
     width: 24px;
     height: 24px;
 
-    border: 3px solid #e8edf4;
+    border: 3px solid #e8e6f0;
     border-top-color: #762cff;
 
     border-radius: 50%;
