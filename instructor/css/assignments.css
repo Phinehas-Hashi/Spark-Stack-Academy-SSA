@@ -28,7 +28,7 @@
     font-weight: 800;
     letter-spacing: 1.4px;
     text-transform: uppercase;
-    color: #2979ff;
+    color: #762cff;
     margin-bottom: 7px;
 }
 
@@ -36,7 +36,7 @@
     margin: 0;
     font-size: 32px;
     font-weight: 800;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .page-header p {
@@ -66,7 +66,7 @@
 }
 
 .primary-btn {
-    background: #081c3a;
+    background: #17152f;
     color: #fff;
     box-shadow: 0 8px 20px rgba(8, 28, 58, .15);
 }
@@ -120,7 +120,7 @@
 
 .stat-icon.blue {
     background: #eaf2ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .stat-icon.gold {
@@ -147,7 +147,7 @@
 }
 
 .assignment-stat strong {
-    color: #081c3a;
+    color: #17152f;
     font-size: 25px;
     font-weight: 800;
 }
@@ -175,7 +175,7 @@
 
 .assignments-toolbar h2 {
     margin: 0;
-    color: #081c3a;
+    color: #17152f;
     font-size: 19px;
     font-weight: 800;
 }
@@ -205,7 +205,7 @@
     background: transparent;
     font-family: inherit;
     font-size: 12px;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .assignment-search input::placeholder {
@@ -238,11 +238,11 @@
 
 .assignment-filter:hover {
     background: #f4f7fb;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .assignment-filter.active {
-    background: #081c3a;
+    background: #17152f;
     color: #fff;
 }
 
@@ -273,7 +273,7 @@
     display: grid;
     place-items: center;
     background: #edf4ff;
-    color: #2979ff;
+    color: #762cff;
     flex-shrink: 0;
 }
 
@@ -288,7 +288,7 @@
 
 .assignment-content h3 {
     margin: 0 0 4px;
-    color: #081c3a;
+    color: #17152f;
     font-size: 14px;
     font-weight: 700;
 }
@@ -353,7 +353,7 @@
     width: 20px;
     height: 20px;
     border: 2px solid #dfe7f1;
-    border-top-color: #2979ff;
+    border-top-color: #762cff;
     border-radius: 50%;
     animation: assignmentSpin .7s linear infinite;
 }
@@ -385,7 +385,7 @@
 
 .assignment-empty h3 {
     margin: 0 0 7px;
-    color: #081c3a;
+    color: #17152f;
     font-size: 16px;
 }
 
@@ -396,7 +396,7 @@
 }
 
 .empty-action {
-    background: #2979ff;
+    background: #762cff;
     color: #fff;
 }
 
