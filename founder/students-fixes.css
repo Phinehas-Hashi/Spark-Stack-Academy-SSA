@@ -3,7 +3,7 @@
    Loaded after students.css and founder-unified.css.
 ========================================================== */
 
-body.founder-portal-page {
+body.founder-portal-page{
     --students-bg: #f5f7fb;
     --students-surface: #ffffff;
     --students-surface-soft: #f8fafc;
@@ -15,23 +15,23 @@ body.founder-portal-page {
     --students-shadow: 0 10px 30px rgba(15, 23, 42, .07);
 }
 
-body.founder-portal-page {
+body.founder-portal-page{
     background: var(--students-bg) !important;
     color: var(--students-text) !important;
 }
 
-.bg-orb { opacity: .08 !important; filter: blur(100px) !important; }
+body.founder-portal-page .bg-orb{ opacity: .08 !important; filter: blur(100px) !important; }
 
-.main-content {
+body.founder-portal-page .main-content{
     background: transparent !important;
     color: var(--students-text) !important;
 }
 
-.page-hero,
-.filter-bar,
-.students-table,
-.stat-card,
-.glass-card {
+body.founder-portal-page .page-hero,
+body.founder-portal-page .filter-bar,
+body.founder-portal-page .students-table,
+body.founder-portal-page .stat-card,
+body.founder-portal-page .glass-card{
     background: var(--students-surface) !important;
     color: var(--students-text) !important;
     border: 1px solid var(--students-border) !important;
@@ -39,125 +39,125 @@ body.founder-portal-page {
     backdrop-filter: none !important;
 }
 
-.page-hero { padding: 30px !important; }
-.hero-badge { background: var(--students-blue-soft) !important; color: #5d1ed6 !important; }
-.hero-content h1,
-.hero-content p,
-.stat-card h2,
-.stat-card small,
-.table-header h3,
-.table-header span { color: inherit !important; }
-.hero-content p,
-.stat-top span,
-.stat-card small,
-.table-header span { color: var(--students-muted) !important; }
+body.founder-portal-page .page-hero{ padding: 30px !important; }
+body.founder-portal-page .hero-badge{ background: var(--students-blue-soft) !important; color: #5d1ed6 !important; }
+body.founder-portal-page .hero-content h1,
+body.founder-portal-page .hero-content p,
+body.founder-portal-page .stat-card h2,
+body.founder-portal-page .stat-card small,
+body.founder-portal-page .table-header h3,
+body.founder-portal-page .table-header span{ color: inherit !important; }
+body.founder-portal-page .hero-content p,
+body.founder-portal-page .stat-top span,
+body.founder-portal-page .stat-card small,
+body.founder-portal-page .table-header span{ color: var(--students-muted) !important; }
 
-.primary-btn {
+body.founder-portal-page .primary-btn{
     background: var(--students-blue) !important;
     color: #fff !important;
     box-shadow: 0 5px 14px rgba(37, 99, 235, .18);
 }
-.primary-btn:hover { background: #5d1ed6 !important; }
-.secondary-btn {
+body.founder-portal-page .primary-btn:hover{ background: #5d1ed6 !important; }
+body.founder-portal-page .secondary-btn{
     background: #fff !important;
     color: #334155 !important;
     border: 1px solid #cbd5e1 !important;
 }
-.secondary-btn:hover { background: #f8fafc !important; border-color: #94a3b8 !important; }
+body.founder-portal-page .secondary-btn:hover{ background: #f8fafc !important; border-color: #94a3b8 !important; }
 
-.search-box,
-.filter-right select {
+body.founder-portal-page .search-box,
+body.founder-portal-page .filter-right select{
     background: #fff !important;
     color: var(--students-text) !important;
     border-color: var(--students-border) !important;
 }
-.search-box input { color: var(--students-text) !important; }
-.search-box input::placeholder { color: #94a3b8 !important; }
-.filter-right option { background: #fff !important; color: var(--students-text) !important; }
+body.founder-portal-page .search-box input{ color: var(--students-text) !important; }
+body.founder-portal-page .search-box input::placeholder{ color: #94a3b8 !important; }
+body.founder-portal-page .filter-right option{ background: #fff !important; color: var(--students-text) !important; }
 
-.stat-card:hover { transform: translateY(-3px) !important; border-color: #d7c8ff !important; }
-.stat-icon { border-color: var(--students-border) !important; }
+body.founder-portal-page .stat-card:hover{ transform: translateY(-3px) !important; border-color: #d7c8ff !important; }
+body.founder-portal-page .stat-icon{ border-color: var(--students-border) !important; }
 
-.table-responsive { border: 1px solid var(--students-border); }
-thead { background: var(--students-surface-soft) !important; }
-th {
+body.founder-portal-page .table-responsive{ border: 1px solid var(--students-border); }
+body.founder-portal-page thead{ background: var(--students-surface-soft) !important; }
+body.founder-portal-page th{
     color: #64748b !important;
     background: var(--students-surface-soft) !important;
     border-color: var(--students-border) !important;
 }
-td { color: #334155 !important; border-color: #eef2f7 !important; background: #fff !important; }
-tbody tr:hover td { background: #f8fafc !important; }
-.student-details strong { color: var(--students-text) !important; }
-.student-details small { color: var(--students-muted) !important; }
-.student-avatar { background: linear-gradient(135deg, #762cff, #60a5fa) !important; }
+body.founder-portal-page td{ color: #334155 !important; border-color: #eef2f7 !important; background: #fff !important; }
+body.founder-portal-page tbody tr:hover td{ background: #f8fafc !important; }
+body.founder-portal-page .student-details strong{ color: var(--students-text) !important; }
+body.founder-portal-page .student-details small{ color: var(--students-muted) !important; }
+body.founder-portal-page .student-avatar{ background: linear-gradient(135deg, #762cff, #60a5fa) !important; }
 
-.empty-state { color: var(--students-muted) !important; }
-.empty-content h3 { color: var(--students-text) !important; }
-.empty-content p { color: var(--students-muted) !important; }
+body.founder-portal-page .empty-state{ color: var(--students-muted) !important; }
+body.founder-portal-page .empty-content h3{ color: var(--students-text) !important; }
+body.founder-portal-page .empty-content p{ color: var(--students-muted) !important; }
 
-.pagination { color: var(--students-muted) !important; }
-.page-btn {
+body.founder-portal-page .pagination{ color: var(--students-muted) !important; }
+body.founder-portal-page .page-btn{
     background: #fff !important;
     color: #334155 !important;
     border: 1px solid var(--students-border) !important;
     border-radius: 10px !important;
 }
-.page-btn:hover:not(:disabled) { border-color: #c6a8ff !important; color: var(--students-blue) !important; background: #f0eaff !important; }
-.page-btn:disabled { opacity: .45; cursor: not-allowed; }
+body.founder-portal-page .page-btn:hover:not(:disabled){ border-color: #c6a8ff !important; color: var(--students-blue) !important; background: #f0eaff !important; }
+body.founder-portal-page .page-btn:disabled{ opacity: .45; cursor: not-allowed; }
 
 /* Student modal */
-body.founder-portal-page.modal-open { overflow: hidden; }
-.modal {
+body.founder-portal-page.modal-open{ overflow: hidden; }
+body.founder-portal-page .modal{
     position: fixed; inset: 0; z-index: 5000; display: none;
     align-items: center; justify-content: center; padding: 20px;
     background: rgba(15, 23, 42, .42); backdrop-filter: blur(8px); overflow-y: auto;
 }
-.modal.active { display: flex; animation: studentsModalIn .18s ease-out; }
-.modal-content {
+body.founder-portal-page .modal.active{ display: flex; animation: studentsModalIn .18s ease-out; }
+body.founder-portal-page .modal-content{
     width: min(560px, 100%); max-height: min(760px, calc(100vh - 40px)); overflow-y: auto;
     padding: 26px; background: #fff; color: #0f172a;
     border: 1px solid #e2e8f0; border-radius: 20px;
     box-shadow: 0 28px 80px rgba(15, 23, 42, .22);
 }
-.modal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
-.modal-header h3 { margin: 0; font-size: 1.25rem; color: #0f172a; }
-.modal-header button {
+body.founder-portal-page .modal-header{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+body.founder-portal-page .modal-header h3{ margin: 0; font-size: 1.25rem; color: #0f172a; }
+body.founder-portal-page .modal-header button{
     width: 38px; height: 38px; display: grid; place-items: center;
     border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; color: #475569; cursor: pointer;
 }
-.modal-header button:hover { background: #f1f5f9; color: #0f172a; }
-#studentForm { display: grid; gap: 14px; }
-#studentForm input, #studentForm select {
+body.founder-portal-page .modal-header button:hover{ background: #f1f5f9; color: #0f172a; }
+body.founder-portal-page #studentForm{ display: grid; gap: 14px; }
+body.founder-portal-page #studentForm input, body.founder-portal-page #studentForm select{
     width: 100%; min-height: 48px; padding: 12px 14px;
     border: 1px solid #cbd5e1; border-radius: 12px; outline: none;
     background: #fff; color: #0f172a; font: inherit;
 }
-#studentForm input:focus, #studentForm select:focus { border-color: #762cff; box-shadow: 0 0 0 3px rgba(118,44,255,.12); }
-#saveStudentBtn { width: 100%; margin-top: 4px; }
+body.founder-portal-page #studentForm input:focus, body.founder-portal-page #studentForm select:focus{ border-color: #762cff; box-shadow: 0 0 0 3px rgba(118,44,255,.12); }
+body.founder-portal-page #saveStudentBtn{ width: 100%; margin-top: 4px; }
 
-.action-buttons { display: flex; align-items: center; gap: 8px; }
-.action-btn {
+body.founder-portal-page .action-buttons{ display: flex; align-items: center; gap: 8px; }
+body.founder-portal-page .action-btn{
     width: 38px; height: 38px; display: inline-grid; place-items: center; padding: 0;
     border: 1px solid #dbe3ef; border-radius: 10px; background: #fff; color: #475569; cursor: pointer;
 }
-.action-btn:hover { background: #f0eaff; color: #762cff; border-color: #d7c8ff; }
-.action-btn:disabled { opacity: .5; cursor: wait; }
-.action-btn svg { width: 17px; height: 17px; }
+body.founder-portal-page .action-btn:hover{ background: #f0eaff; color: #762cff; border-color: #d7c8ff; }
+body.founder-portal-page .action-btn:disabled{ opacity: .5; cursor: wait; }
+body.founder-portal-page .action-btn svg{ width: 17px; height: 17px; }
 
-.status { display: inline-flex; align-items: center; }
-.status.active { background: #ecfdf3; color: #15803d; border-color: #bbf7d0; }
-.status.graduated { background: #f0eaff; color: #5d1ed6; border-color: #d7c8ff; }
-.status.suspended { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
-.status.pending { background: #fffbeb; color: #a16207; border-color: #fde68a; }
+body.founder-portal-page .status{ display: inline-flex; align-items: center; }
+body.founder-portal-page .status.active{ background: #ecfdf3; color: #15803d; border-color: #bbf7d0; }
+body.founder-portal-page .status.graduated{ background: #f0eaff; color: #5d1ed6; border-color: #d7c8ff; }
+body.founder-portal-page .status.suspended{ background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+body.founder-portal-page .status.pending{ background: #fffbeb; color: #a16207; border-color: #fde68a; }
 
-.progress { min-width: 120px; display: flex; align-items: center; gap: 9px; }
-.progress-bar { flex: 1; height: 7px; overflow: hidden; border-radius: 99px; background: #e2e8f0; }
-.progress-fill { height: 100%; border-radius: inherit; background: #762cff; }
-.progress > span { min-width: 36px; font-size: .78rem; font-weight: 700; color: #475569; }
+body.founder-portal-page .progress{ min-width: 120px; display: flex; align-items: center; gap: 9px; }
+body.founder-portal-page .progress-bar{ flex: 1; height: 7px; overflow: hidden; border-radius: 99px; background: #e2e8f0; }
+body.founder-portal-page .progress-fill{ height: 100%; border-radius: inherit; background: #762cff; }
+body.founder-portal-page .progress > span{ min-width: 36px; font-size: .78rem; font-weight: 700; color: #475569; }
 
 @keyframes studentsModalIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 640px) {
-    .modal { padding: 12px; align-items: flex-end; }
-    .modal-content { max-height: calc(100vh - 24px); border-radius: 18px 18px 0 0; padding: 22px 18px; }
-    .table-header { align-items: flex-start; }
+    body.founder-portal-page .modal{ padding: 12px; align-items: flex-end; }
+    body.founder-portal-page .modal-content{ max-height: calc(100vh - 24px); border-radius: 18px 18px 0 0; padding: 22px 18px; }
+    body.founder-portal-page .table-header{ align-items: flex-start; }
 }
