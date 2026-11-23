@@ -4,7 +4,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const componentCache = new Map();
-const FOUNDER_ROOT = /\\/founder\\/wallets\\//.test(window.location.pathname) ? "../" : "";
+const FOUNDER_ROOT = /\/founder\/wallets\//.test(window.location.pathname) ? "../" : "";
 const founderPath = path => FOUNDER_ROOT + path;
 const escapeHTML = value => String(value ?? "").replace(/[&<>\"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 
@@ -49,11 +49,11 @@ async function loadComponent({containerId,html,css,callback}){
     if(FOUNDER_ROOT){
       container.querySelectorAll("a[href]").forEach(link=>{
         const href=link.getAttribute("href") || "";
-        if(href && !/^(?:[a-z]+:|\\/|#|javascript:)/i.test(href) && !href.startsWith("../")) link.setAttribute("href", founderPath(href));
+        if(href && !/^(?:[a-z]+:|\/|#|javascript:)/i.test(href) && !href.startsWith("../")) link.setAttribute("href", founderPath(href));
       });
       container.querySelectorAll("[onclick]").forEach(node=>{
         const value=node.getAttribute("onclick") || "";
-        node.setAttribute("onclick", value.replace(/window\\.location\\.href\\s*=\\s*(['"])([^'"]+)\\1/g, (match, quote, target)=>`window.location.href=${quote}${founderPath(target)}${quote}`));
+        node.setAttribute("onclick", value.replace(/window\.location\.href\s*=\s*(['"])([^'"]+)\1/g, (match, quote, target)=>`window.location.href=${quote}${founderPath(target)}${quote}`));
       });
     }
     window.lucide?.createIcons(); callback?.();
