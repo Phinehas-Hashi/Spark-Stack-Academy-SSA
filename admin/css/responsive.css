@@ -19,7 +19,7 @@
   .admin-app .admin-sidebar.open { transform: translateX(0); }
   .admin-app .sidebar-overlay { inset: 0; z-index: 1200; }
   .admin-app .sidebar-overlay.active { display: block; }
-  body.admin-menu-open { overflow: hidden; overscroll-behavior: none; }
+  body.admin-portal-page.admin-menu-open { overflow: hidden; overscroll-behavior: none; }
   .admin-app .admin-topbar { width: 100%; }
 }
 @media (max-width: 640px) {
@@ -112,7 +112,7 @@
     max-width: 100%;
 }
 
-body.admin-modal-open {
+body.admin-portal-page.admin-modal-open {
     overflow: hidden !important;
     overscroll-behavior: none;
 }
