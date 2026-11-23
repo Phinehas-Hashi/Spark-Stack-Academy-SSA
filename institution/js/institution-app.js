@@ -198,7 +198,7 @@ function denyAccess(profile, user, reason = "profile_rejected") {
     institutionId: profile?.institutionId ?? null
   };
   console.error("Institution access diagnostic:", details);
-  document.body.innerHTML = '<main style="max-width:560px;margin:8vh auto;padding:24px;font-family:Arial,sans-serif"><h1>Institution access required</h1><p>The portal rejected this account. Temporary diagnostic details are shown below; no account data has been changed.</p><pre id="institutionAccessDiagnostic" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f7;padding:16px;border-radius:8px;font-size:13px;text-align:left"></pre><p><a href="../login.html">Return to sign in</a></p></main>';
+  document.body.innerHTML = '<main class="institution-access-error"><h1>Institution access required</h1><p>The portal rejected this account. Temporary diagnostic details are shown below; no account data has been changed.</p><pre id="institutionAccessDiagnostic"></pre><p><a href="../login.html">Return to sign in</a></p></main>';
   const output = document.getElementById("institutionAccessDiagnostic");
   if (output) output.textContent = JSON.stringify(details, null, 2);
 }
@@ -250,7 +250,7 @@ async function boot() {
       window.lucide?.createIcons();
     } catch (error) {
       console.error("Institution profile verification failed:", error);
-      document.body.innerHTML = '<main style="max-width:560px;margin:12vh auto;padding:28px;font-family:Arial,sans-serif;text-align:center"><h1>Unable to verify institution access</h1><p>Please check your connection and try again. No institution data has been changed.</p><a href="../login.html">Return to sign in</a></main>';
+      document.body.innerHTML = '<main class="institution-access-error"><h1>Unable to verify institution access</h1><p>Please check your connection and try again. No institution data has been changed.</p><a href="../login.html">Return to sign in</a></main>';
     }
   });
 }
