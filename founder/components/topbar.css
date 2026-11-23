@@ -116,7 +116,7 @@
   min-width: 17px;
   height: 17px;
   padding: 0 4px;
-  display: grid;
+  display: none;
   place-items: center;
   border: 2px solid #fff;
   border-radius: 999px;
