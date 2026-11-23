@@ -354,7 +354,7 @@
 .settings-card .form-field select:focus,
 .settings-password-body input:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41, 121, 255, .09);
+    box-shadow: 0 0 0 3px rgba(118, 44, 255, .09);
 }
 
 .settings-card .form-field input:disabled {
