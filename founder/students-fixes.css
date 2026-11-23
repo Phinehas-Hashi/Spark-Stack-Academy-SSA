@@ -1,6 +1,6 @@
 /* ==========================================================
    FOUNDER STUDENTS — READABLE PREMIUM FINISHING LAYER
-   Loaded after students.css and founder-unified.css.
+   Loaded after students.css and before founder-unified.css.
 ========================================================== */
 
 body.founder-portal-page {
@@ -55,7 +55,7 @@ body.founder-portal-page {
 .primary-btn {
     background: var(--students-blue) !important;
     color: #fff !important;
-    box-shadow: 0 5px 14px rgba(37, 99, 235, .18);
+    box-shadow: 0 5px 14px rgba(118, 44, 255, .18);
 }
 .primary-btn:hover { background: #5d1ed6 !important; }
 .secondary-btn {
