@@ -209,3 +209,6 @@ body.founder-shell-ready .profile-info span{ margin-top: 2px; color: #94a3b8; fo
   body.founder-shell-ready .search-box{ width: 100%; }
   body.founder-shell-ready .topbar-actions{ margin-left: auto; }
 }
+
+/* Notification count starts hidden; Founder app toggles visibility at runtime. */
+body.founder-shell-ready #notificationCount{display:none}
