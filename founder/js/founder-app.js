@@ -10,7 +10,9 @@ const escapeHTML = value => String(value ?? "").replace(/[&<>\"']/g, c => ({"&":
 
 function loadCSS(path){
   const resolved = founderPath(path);
-  if(document.querySelector(`link[href="${resolved}"]`)) return;
+  const existing = [...document.querySelectorAll('link[rel="stylesheet"]')]
+    .some(link => (link.getAttribute("href") || "").split("?")[0] === resolved.split("?")[0]);
+  if(existing) return;
   const link=document.createElement("link"); link.rel="stylesheet"; link.href=resolved; document.head.appendChild(link);
 }
 
