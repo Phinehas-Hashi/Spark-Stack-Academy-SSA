@@ -1,90 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>
-Premium Activated | Spark Stack Academy
-</title>
-
-<link
-    rel="stylesheet"
-    href="css/student-core.css"
->
-
-<link
-    rel="stylesheet"
-    href="css/components.css"
->
-
-<link rel="stylesheet" href="css/pages/premium-success.css?v=20261121-page1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Activated | Spark Stack Academy</title>
+<link rel="stylesheet" href="../css/design-tokens.css?v=20261123-foundation1">
+<link rel="stylesheet" href="css/student-core.css?v=20261123-foundation1">
+<link rel="stylesheet" href="css/pages/premium-success.css?v=20261123-migration1">
 <script src="https://unpkg.com/lucide@latest"></script>
-
 </head>
-
-
 <body>
-
 <div class="success-page">
-
-    <div class="success-card">
-
+    <main class="success-card">
         <div class="success-icon">
-
             <i data-lucide="shield-check"></i>
-
         </div>
-
-        <h1>
-            Payment Successful 🎉
-        </h1>
-
-        <p>
-            We're confirming your Premium subscription.
-            Please wait a moment.
-        </p>
-
-        <div id="paymentStatus">
-            Verifying payment...
-        </div>
-
-        <a
-            href="premium.html"
-            class="success-btn"
-            id="continueBtn"
-            style="display:none;"
-        >
+        <h1>Payment Successful</h1>
+        <p>We're confirming your Premium subscription. Please wait a moment.</p>
+        <div id="paymentStatus" role="status" aria-live="polite">Verifying payment...</div>
+        <a href="premium.html" class="success-btn" id="continueBtn" style="display:none;">
             Continue to Premium
         </a>
-
-    </div>
-
+    </main>
 </div>
-
-
-<script type="module"
-    src="js/premium-success.js">
-</script>
-
-
+<script type="module" src="js/premium-success.js"></script>
 <script>
-
-if (window.lucide) {
-
-    lucide.createIcons();
-
+if (window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
 }
-
 </script>
-
 </body>
-
 </html>
