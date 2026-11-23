@@ -18,7 +18,7 @@ function loadCSS(path){
 
 function ensureFounderShell(){
   document.body.classList.add("founder-portal-page","founder-shell-ready");
-  const unifiedLinks=[...document.querySelectorAll('link[rel="stylesheet"]')].filter(link=>/(?:^|\\/)founder-unified\\.css(?:\\?|$)/.test(link.getAttribute("href")||""));
+  const unifiedLinks=[...document.querySelectorAll('link[rel="stylesheet"]')].filter(link=>(link.getAttribute("href")||"").split("?")[0].endsWith("founder-unified.css"));
   const unifiedHref=unifiedLinks[0]?.getAttribute("href")||founderPath("founder-unified.css");
   unifiedLinks.forEach(link=>link.remove());
   loadCSS("components/sidebar.css");
