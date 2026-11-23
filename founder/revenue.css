@@ -3,7 +3,7 @@
    FOUNDER OS
 =================================== */
 
-body.founder-portal-page {
+body.founder-portal-page{
 
 --bg:#f5f4fb;
 
@@ -38,7 +38,7 @@ body.founder-portal-page {
 /* ===================================
    RESET
 =================================== */
- body.founder-portal-page * {
+ body.founder-portal-page *{
 
 margin:0;
 
@@ -49,7 +49,7 @@ box-sizing:border-box;
 }
 
 
-body.founder-portal-page {
+body.founder-portal-page{
 
 font-family:"Inter",sans-serif;
 
@@ -66,7 +66,7 @@ overflow-x:hidden;
    BACKGROUND
 =================================== */
 
-.bg-orb{
+body.founder-portal-page .bg-orb{
 
 position:fixed;
 
@@ -83,7 +83,7 @@ z-index:-1;
 }
 
 
-.orb-1{
+body.founder-portal-page .orb-1{
 
 width:320px;
 
@@ -98,7 +98,7 @@ left:-120px;
 }
 
 
-.orb-2{
+body.founder-portal-page .orb-2{
 
 width:280px;
 
@@ -113,7 +113,7 @@ top:35%;
 }
 
 
-.orb-3{
+body.founder-portal-page .orb-3{
 
 width:300px;
 
@@ -132,7 +132,7 @@ left:40%;
    CONTENT AREA ONLY
 =================================== */
 
-.main-content{
+body.founder-portal-page .main-content{
 
 flex:1;
 
@@ -153,7 +153,7 @@ min-width:0;
    GLASS CARD
 =================================== */
 
-.glass-card{
+body.founder-portal-page .glass-card{
 
 background:var(--card);
 
@@ -174,7 +174,7 @@ animation:fadeUp .45s ease;
 }
 
 
-.glass-card:hover{
+body.founder-portal-page .glass-card:hover{
 
 border-color:
 
@@ -212,7 +212,7 @@ transform:translateY(0);
    PAGE HEADER
 =================================== */
 
-.page-header{
+body.founder-portal-page .page-header{
 
 padding:30px;
 
@@ -227,7 +227,7 @@ gap:24px;
 }
 
 
-.page-header h1{
+body.founder-portal-page .page-header h1{
 
 font-size:2rem;
 
@@ -240,7 +240,7 @@ line-height:1.2;
 }
 
 
-.page-header p{
+body.founder-portal-page .page-header p{
 
 color:var(--muted);
 
@@ -255,9 +255,9 @@ max-width:650px;
    BUTTONS
 =================================== */
 
-.primary-btn,
+body.founder-portal-page .primary-btn,
 
-.secondary-btn{
+body.founder-portal-page .secondary-btn{
 
 padding:14px 24px;
 
@@ -278,7 +278,7 @@ font-family:inherit;
 }
 
 
-.primary-btn{
+body.founder-portal-page .primary-btn{
 
 background:
 
@@ -301,7 +301,7 @@ box-shadow:
 }
 
 
-.primary-btn:hover{
+body.founder-portal-page .primary-btn:hover{
 
 transform:translateY(-3px);
 
@@ -312,7 +312,7 @@ box-shadow:
 }
 
 
-.secondary-btn{
+body.founder-portal-page .secondary-btn{
 
 background:
 
@@ -325,7 +325,7 @@ color:#fff;
 }
 
 
-.secondary-btn:hover{
+body.founder-portal-page .secondary-btn:hover{
 
 background:
 
@@ -340,7 +340,7 @@ transform:translateY(-2px);
    KPI GRID
 =================================== */
 
-.stats-grid{
+body.founder-portal-page .stats-grid{
 
 display:grid;
 
@@ -357,7 +357,7 @@ gap:22px;
    KPI CARD
 =================================== */
 
-.stat-card{
+body.founder-portal-page .stat-card{
 
 display:flex;
 
@@ -374,7 +374,7 @@ overflow:hidden;
 }
 
 
-.stat-card::before{
+body.founder-portal-page .stat-card::before{
 
 content:"";
 
@@ -403,14 +403,14 @@ linear-gradient(
 }
 
 
-.stat-card:hover{
+body.founder-portal-page .stat-card:hover{
 
 transform:translateY(-6px);
 
 }
 
 
-.stat-icon{
+body.founder-portal-page .stat-icon{
 
 width:62px;
 
@@ -431,7 +431,7 @@ flex-shrink:0;
 }
 
 
-.stat-icon.blue{
+body.founder-portal-page .stat-icon.blue{
 
 background:
 
@@ -440,7 +440,7 @@ rgba(59,130,246,.14);
 }
 
 
-.stat-icon.green{
+body.founder-portal-page .stat-icon.green{
 
 background:
 
@@ -449,7 +449,7 @@ rgba(34,197,94,.14);
 }
 
 
-.stat-icon.gold{
+body.founder-portal-page .stat-icon.gold{
 
 background:
 
@@ -458,7 +458,7 @@ rgba(245,158,11,.14);
 }
 
 
-.stat-icon.red{
+body.founder-portal-page .stat-icon.red{
 
 background:
 
@@ -467,7 +467,7 @@ rgba(239,68,68,.14);
 }
 
 
-.stat-card h4{
+body.founder-portal-page .stat-card h4{
 
 font-size:.95rem;
 
@@ -480,7 +480,7 @@ margin-bottom:8px;
 }
 
 
-.stat-card h2{
+body.founder-portal-page .stat-card h2{
 
 font-size:2rem;
 
@@ -493,7 +493,7 @@ line-height:1;
 }
 
 
-.stat-card small{
+body.founder-portal-page .stat-card small{
 
 color:var(--muted);
 
@@ -504,7 +504,7 @@ font-size:.85rem;
    ANALYTICS GRID
 =================================== */
 
-.analytics-grid{
+body.founder-portal-page .analytics-grid{
 
 display:grid;
 
@@ -521,7 +521,7 @@ align-items:start;
    CHART CARD
 =================================== */
 
-.chart-card{
+body.founder-portal-page .chart-card{
 
 padding:28px;
 
@@ -536,7 +536,7 @@ min-height:420px;
 }
 
 
-.card-header{
+body.founder-portal-page .card-header{
 
 display:flex;
 
@@ -551,7 +551,7 @@ flex-wrap:wrap;
 }
 
 
-.card-header h2{
+body.founder-portal-page .card-header h2{
 
 font-size:1.25rem;
 
@@ -560,7 +560,7 @@ font-weight:700;
 }
 
 
-.card-header select{
+body.founder-portal-page .card-header select{
 
 background:rgba(255,255,255,.05);
 
@@ -585,14 +585,14 @@ min-width:180px;
 }
 
 
-.card-header select:hover{
+body.founder-portal-page .card-header select:hover{
 
 border-color:#762cff;
 
 }
 
 
-.card-header select:focus{
+body.founder-portal-page .card-header select:focus{
 
 outline:none;
 
@@ -605,7 +605,7 @@ box-shadow:
 }
 
 
-.card-header option{
+body.founder-portal-page .card-header option{
 
 background:#07111f;
 
@@ -618,7 +618,7 @@ color:#fff;
    CHART PLACEHOLDER
 =================================== */
 
-.chart-placeholder{
+body.founder-portal-page .chart-placeholder{
 
 flex:1;
 
@@ -663,7 +663,7 @@ transition:.3s;
 }
 
 
-.chart-placeholder:hover{
+body.founder-portal-page .chart-placeholder:hover{
 
 border-color:#762cff;
 
@@ -686,7 +686,7 @@ rgba(139,92,246,.10)
    BREAKDOWN CARD
 =================================== */
 
-.breakdown-card{
+body.founder-portal-page .breakdown-card{
 
 padding:28px;
 
@@ -699,7 +699,7 @@ gap:22px;
 }
 
 
-.breakdown-card h2{
+body.founder-portal-page .breakdown-card h2{
 
 font-size:1.25rem;
 
@@ -708,7 +708,7 @@ font-weight:700;
 }
 
 
-.breakdown-list{
+body.founder-portal-page .breakdown-list{
 
 display:flex;
 
@@ -719,7 +719,7 @@ gap:16px;
 }
 
 
-.breakdown-item{
+body.founder-portal-page .breakdown-item{
 
 display:flex;
 
@@ -740,7 +740,7 @@ transition:.3s;
 }
 
 
-.breakdown-item:hover{
+body.founder-portal-page .breakdown-item:hover{
 
 background:rgba(59,130,246,.08);
 
@@ -749,7 +749,7 @@ transform:translateX(4px);
 }
 
 
-.breakdown-item span{
+body.founder-portal-page .breakdown-item span{
 
 font-weight:600;
 
@@ -758,7 +758,7 @@ color:#cbd5e1;
 }
 
 
-.breakdown-item strong{
+body.founder-portal-page .breakdown-item strong{
 
 font-size:1rem;
 
@@ -769,7 +769,7 @@ color:#fff;
 }
 
 
-.breakdown-item.total{
+body.founder-portal-page .breakdown-item.total{
 
 background:
 
@@ -792,7 +792,7 @@ padding:18px;
 }
 
 
-.breakdown-item.total span{
+body.founder-portal-page .breakdown-item.total span{
 
 font-size:1rem;
 
@@ -803,7 +803,7 @@ color:#fff;
 }
 
 
-.breakdown-item.total strong{
+body.founder-portal-page .breakdown-item.total strong{
 
 font-size:1.2rem;
 
@@ -816,7 +816,7 @@ color:#4ade80;
    PAYMENT GRID
 =================================== */
 
-.payment-grid{
+body.founder-portal-page .payment-grid{
 
 display:grid;
 
@@ -833,7 +833,7 @@ align-items:start;
    PAYMENT CARD
 =================================== */
 
-.payment-card{
+body.founder-portal-page .payment-card{
 
 padding:28px;
 
@@ -846,7 +846,7 @@ gap:18px;
 }
 
 
-.payment-card h2{
+body.founder-portal-page .payment-card h2{
 
 font-size:1.25rem;
 
@@ -857,7 +857,7 @@ margin-bottom:4px;
 }
 
 
-.payment-method{
+body.founder-portal-page .payment-method{
 
 display:flex;
 
@@ -878,7 +878,7 @@ transition:.3s;
 }
 
 
-.payment-method:hover{
+body.founder-portal-page .payment-method:hover{
 
 background:rgba(59,130,246,.08);
 
@@ -887,7 +887,7 @@ transform:translateY(-3px);
 }
 
 
-.payment-method span{
+body.founder-portal-page .payment-method span{
 
 font-weight:600;
 
@@ -896,7 +896,7 @@ color:#cbd5e1;
 }
 
 
-.payment-method strong{
+body.founder-portal-page .payment-method strong{
 
 font-size:1rem;
 
@@ -911,7 +911,7 @@ color:#4ade80;
    GROWTH CARD
 =================================== */
 
-.growth-card{
+body.founder-portal-page .growth-card{
 
 padding:28px;
 
@@ -924,7 +924,7 @@ gap:18px;
 }
 
 
-.growth-card h2{
+body.founder-portal-page .growth-card h2{
 
 font-size:1.25rem;
 
@@ -935,7 +935,7 @@ margin-bottom:4px;
 }
 
 
-.growth-item{
+body.founder-portal-page .growth-item{
 
 display:flex;
 
@@ -956,7 +956,7 @@ transition:.3s;
 }
 
 
-.growth-item:hover{
+body.founder-portal-page .growth-item:hover{
 
 background:rgba(34,197,94,.08);
 
@@ -965,7 +965,7 @@ transform:translateY(-3px);
 }
 
 
-.growth-item span{
+body.founder-portal-page .growth-item span{
 
 font-weight:600;
 
@@ -974,7 +974,7 @@ color:#cbd5e1;
 }
 
 
-.growth-item strong{
+body.founder-portal-page .growth-item strong{
 
 font-size:1rem;
 
@@ -987,7 +987,7 @@ color:#22c55e;
    TRANSACTIONS SECTION
 =================================== */
 
-.transactions-section{
+body.founder-portal-page .transactions-section{
 
 padding:28px;
 
@@ -1004,7 +1004,7 @@ gap:24px;
    SECTION HEADER
 =================================== */
 
-.section-header{
+body.founder-portal-page .section-header{
 
 display:flex;
 
@@ -1019,7 +1019,7 @@ flex-wrap:wrap;
 }
 
 
-.section-header h2{
+body.founder-portal-page .section-header h2{
 
 font-size:1.25rem;
 
@@ -1032,7 +1032,7 @@ font-weight:700;
    HEADER ACTIONS
 =================================== */
 
-.header-actions{
+body.founder-portal-page .header-actions{
 
 display:flex;
 
@@ -1045,9 +1045,9 @@ flex-wrap:wrap;
 }
 
 
-.header-actions input,
+body.founder-portal-page .header-actions input,
 
-.header-actions select{
+body.founder-portal-page .header-actions select{
 
 height:46px;
 
@@ -1070,23 +1070,23 @@ transition:.3s;
 }
 
 
-.header-actions input{
+body.founder-portal-page .header-actions input{
 
 width:260px;
 
 }
 
 
-.header-actions input::placeholder{
+body.founder-portal-page .header-actions input::placeholder{
 
 color:#94a3b8;
 
 }
 
 
-.header-actions input:focus,
+body.founder-portal-page .header-actions input:focus,
 
-.header-actions select:focus{
+body.founder-portal-page .header-actions select:focus{
 
 outline:none;
 
@@ -1099,7 +1099,7 @@ box-shadow:
 }
 
 
-.header-actions option{
+body.founder-portal-page .header-actions option{
 
 background:#07111f;
 
@@ -1112,7 +1112,7 @@ color:#fff;
    TABLE
 =================================== */
 
-.table-responsive{
+body.founder-portal-page .table-responsive{
 
 width:100%;
 
@@ -1123,7 +1123,7 @@ border-radius:18px;
 }
 
 
-table{
+body.founder-portal-page table{
 
 width:100%;
 
@@ -1134,14 +1134,14 @@ min-width:1100px;
 }
 
 
-thead{
+body.founder-portal-page thead{
 
 background:rgba(255,255,255,.05);
 
 }
 
 
-th{
+body.founder-portal-page th{
 
 padding:18px;
 
@@ -1160,7 +1160,7 @@ white-space:nowrap;
 }
 
 
-td{
+body.founder-portal-page td{
 
 padding:18px;
 
@@ -1175,14 +1175,14 @@ white-space:nowrap;
 }
 
 
-tbody tr{
+body.founder-portal-page tbody tr{
 
 transition:.3s;
 
 }
 
 
-tbody tr:hover{
+body.founder-portal-page tbody tr:hover{
 
 background:rgba(59,130,246,.06);
 
@@ -1193,7 +1193,7 @@ background:rgba(59,130,246,.06);
    EMPTY TABLE
 =================================== */
 
-.empty-table{
+body.founder-portal-page .empty-table{
 
 text-align:center;
 
@@ -1210,7 +1210,7 @@ color:#94a3b8;
    STATUS BADGES
 =================================== */
 
-.status{
+body.founder-portal-page .status{
 
 display:inline-flex;
 
@@ -1229,7 +1229,7 @@ font-weight:700;
 }
 
 
-.status.completed{
+body.founder-portal-page .status.completed{
 
 background:rgba(34,197,94,.15);
 
@@ -1238,7 +1238,7 @@ color:#4ade80;
 }
 
 
-.status.pending{
+body.founder-portal-page .status.pending{
 
 background:rgba(245,158,11,.15);
 
@@ -1247,7 +1247,7 @@ color:#fbbf24;
 }
 
 
-.status.failed{
+body.founder-portal-page .status.failed{
 
 background:rgba(239,68,68,.15);
 
@@ -1260,7 +1260,7 @@ color:#f87171;
    ACTION BUTTONS
 =================================== */
 
-.table-action{
+body.founder-portal-page .table-action{
 
 padding:8px 14px;
 
@@ -1281,7 +1281,7 @@ transition:.3s;
 }
 
 
-.table-action:hover{
+body.founder-portal-page .table-action:hover{
 
 background:#762cff;
 
@@ -1294,7 +1294,7 @@ color:#fff;
    SUMMARY GRID
 =================================== */
 
-.summary-grid{
+body.founder-portal-page .summary-grid{
 
 display:grid;
 
@@ -1307,7 +1307,7 @@ gap:22px;
 }
 
 
-.summary-card{
+body.founder-portal-page .summary-card{
 
 padding:24px;
 
@@ -1316,7 +1316,7 @@ text-align:center;
 }
 
 
-.summary-card h3{
+body.founder-portal-page .summary-card h3{
 
 font-size:1rem;
 
@@ -1327,7 +1327,7 @@ margin-bottom:14px;
 }
 
 
-.summary-card h2{
+body.founder-portal-page .summary-card h2{
 
 font-size:2rem;
 
@@ -1338,7 +1338,7 @@ margin-bottom:10px;
 }
 
 
-.summary-card p{
+body.founder-portal-page .summary-card p{
 
 font-size:.9rem;
 
@@ -1351,7 +1351,7 @@ color:#94a3b8;
    WITHDRAWALS
 =================================== */
 
-.withdrawals-section{
+body.founder-portal-page .withdrawals-section{
 
 padding:28px;
 
@@ -1368,7 +1368,7 @@ gap:24px;
    WITHDRAWAL BUTTONS
 =================================== */
 
-.withdraw-action{
+body.founder-portal-page .withdraw-action{
 
 padding:8px 16px;
 
@@ -1385,7 +1385,7 @@ transition:.3s;
 }
 
 
-.withdraw-action.approve{
+body.founder-portal-page .withdraw-action.approve{
 
 background:rgba(34,197,94,.15);
 
@@ -1394,7 +1394,7 @@ color:#4ade80;
 }
 
 
-.withdraw-action.approve:hover{
+body.founder-portal-page .withdraw-action.approve:hover{
 
 background:#22c55e;
 
@@ -1403,7 +1403,7 @@ color:#fff;
 }
 
 
-.withdraw-action.reject{
+body.founder-portal-page .withdraw-action.reject{
 
 background:rgba(239,68,68,.15);
 
@@ -1412,7 +1412,7 @@ color:#f87171;
 }
 
 
-.withdraw-action.reject:hover{
+body.founder-portal-page .withdraw-action.reject:hover{
 
 background:#ef4444;
 
@@ -1423,7 +1423,7 @@ color:#fff;
    FINANCIAL REPORTS
 =================================== */
 
-.reports-section{
+body.founder-portal-page .reports-section{
 
 padding:28px;
 
@@ -1440,7 +1440,7 @@ gap:24px;
    REPORT CARDS
 =================================== */
 
-.report-grid{
+body.founder-portal-page .report-grid{
 
 display:grid;
 
@@ -1453,7 +1453,7 @@ gap:22px;
 }
 
 
-.report-card{
+body.founder-portal-page .report-card{
 
 padding:26px;
 
@@ -1464,7 +1464,7 @@ overflow:hidden;
 }
 
 
-.report-card::before{
+body.founder-portal-page .report-card::before{
 
 content:"";
 
@@ -1485,7 +1485,7 @@ border-radius:50%;
 }
 
 
-.report-card h3{
+body.founder-portal-page .report-card h3{
 
 font-size:.95rem;
 
@@ -1496,7 +1496,7 @@ margin-bottom:14px;
 }
 
 
-.report-card h2{
+body.founder-portal-page .report-card h2{
 
 font-size:2.1rem;
 
@@ -1507,7 +1507,7 @@ margin-bottom:10px;
 }
 
 
-.report-card span{
+body.founder-portal-page .report-card span{
 
 font-size:.85rem;
 
@@ -1516,7 +1516,7 @@ color:#94a3b8;
 }
 
 
-.report-growth{
+body.founder-portal-page .report-growth{
 
 display:flex;
 
@@ -1533,14 +1533,14 @@ font-weight:700;
 }
 
 
-.report-growth.up{
+body.founder-portal-page .report-growth.up{
 
 color:#4ade80;
 
 }
 
 
-.report-growth.down{
+body.founder-portal-page .report-growth.down{
 
 color:#f87171;
 
@@ -1552,7 +1552,7 @@ color:#f87171;
    ACTION BAR
 =================================== */
 
-.action-bar{
+body.founder-portal-page .action-bar{
 
 display:flex;
 
@@ -1569,7 +1569,7 @@ flex-wrap:wrap;
 }
 
 
-.action-buttons{
+body.founder-portal-page .action-buttons{
 
 display:flex;
 
@@ -1580,7 +1580,7 @@ flex-wrap:wrap;
 }
 
 
-.action-btn{
+body.founder-portal-page .action-btn{
 
 height:44px;
 
@@ -1605,7 +1605,7 @@ transition:.3s;
 }
 
 
-.action-btn.primary{
+body.founder-portal-page .action-btn.primary{
 
 background:#762cff;
 
@@ -1614,7 +1614,7 @@ color:#fff;
 }
 
 
-.action-btn.primary:hover{
+body.founder-portal-page .action-btn.primary:hover{
 
 background:#5d1ed6;
 
@@ -1623,7 +1623,7 @@ transform:translateY(-2px);
 }
 
 
-.action-btn.secondary{
+body.founder-portal-page .action-btn.secondary{
 
 background:rgba(255,255,255,.06);
 
@@ -1634,7 +1634,7 @@ border:1px solid rgba(255,255,255,.08);
 }
 
 
-.action-btn.secondary:hover{
+body.founder-portal-page .action-btn.secondary:hover{
 
 background:rgba(255,255,255,.12);
 
@@ -1646,7 +1646,7 @@ background:rgba(255,255,255,.12);
    CUSTOM SCROLLBAR
 =================================== */
 
-::-webkit-scrollbar{
+body.founder-portal-page ::-webkit-scrollbar{
 
 width:8px;
 
@@ -1655,14 +1655,14 @@ height:8px;
 }
 
 
-::-webkit-scrollbar-track{
+body.founder-portal-page ::-webkit-scrollbar-track{
 
 background:#07111f;
 
 }
 
 
-::-webkit-scrollbar-thumb{
+body.founder-portal-page ::-webkit-scrollbar-thumb{
 
 background:#334155;
 
@@ -1671,7 +1671,7 @@ border-radius:20px;
 }
 
 
-::-webkit-scrollbar-thumb:hover{
+body.founder-portal-page ::-webkit-scrollbar-thumb:hover{
 
 background:#762cff;
 
@@ -1686,7 +1686,7 @@ background:#762cff;
 
 /* TABLET */
 
-@media(max-width:900px){
+body.founder-portal-page @media(max-width:900px){
 
 
 .transactions-section,
@@ -1749,7 +1749,7 @@ repeat(2,1fr);
 
 /* MOBILE */
 
-@media(max-width:600px){
+body.founder-portal-page @media(max-width:600px){
 
 
 .section-header h2{
@@ -1827,9 +1827,9 @@ min-width:900px;
    FINAL CARD POLISH
 =================================== */
 
-.summary-card,
-.report-card,
-.action-bar{
+body.founder-portal-page .summary-card,
+body.founder-portal-page .report-card,
+body.founder-portal-page .action-bar{
 
 background:
 
@@ -1859,10 +1859,10 @@ backdrop-filter:blur(18px);
    PREMIUM ANIMATIONS
 =================================== */
 
-.summary-card,
-.report-card,
-.action-bar,
-.table-responsive{
+body.founder-portal-page .summary-card,
+body.founder-portal-page .report-card,
+body.founder-portal-page .action-bar,
+body.founder-portal-page .table-responsive{
 
 animation:
 
@@ -1893,10 +1893,10 @@ transform:translateY(0);
 
 
 
-.status,
-.table-action,
-.withdraw-action,
-.action-btn{
+body.founder-portal-page .status,
+body.founder-portal-page .table-action,
+body.founder-portal-page .withdraw-action,
+body.founder-portal-page .action-btn{
 
 transition:
 
@@ -1907,10 +1907,10 @@ background .25s ease;
 }
 
 
-.status:hover,
-.table-action:hover,
-.withdraw-action:hover,
-.action-btn:hover{
+body.founder-portal-page .status:hover,
+body.founder-portal-page .table-action:hover,
+body.founder-portal-page .withdraw-action:hover,
+body.founder-portal-page .action-btn:hover{
 
 transform:translateY(-2px);
 
@@ -1919,7 +1919,7 @@ transform:translateY(-2px);
    LOADING SCREEN
 =================================== */
 
-.loading-overlay{
+body.founder-portal-page .loading-overlay{
 
 position:fixed;
 
@@ -1942,7 +1942,7 @@ gap:15px;
 }
 
 
-.loader{
+body.founder-portal-page .loader{
 
 width:45px;
 
@@ -1970,7 +1970,7 @@ transform:rotate(360deg);
 }
 
 
-.loading-overlay p{
+body.founder-portal-page .loading-overlay p{
 
 color:#cbd5e1;
 
@@ -1980,7 +1980,7 @@ font-weight:600;
 @media(max-width:600px){
 
 
-.page-header{
+body.founder-portal-page .page-header{
 
 flex-direction:column;
 
@@ -1989,36 +1989,36 @@ align-items:flex-start;
 }
 
 
-.page-header button{
+body.founder-portal-page .page-header button{
 
 width:100%;
 
 }
 
 
-.analytics-grid,
-.payment-grid{
+body.founder-portal-page .analytics-grid,
+body.founder-portal-page .payment-grid{
 
 grid-template-columns:1fr;
 
 }
 
 
-.transactions-section{
+body.founder-portal-page .transactions-section{
 
 overflow:hidden;
 
 }
 
 
-.table-responsive{
+body.founder-portal-page .table-responsive{
 
 overflow-x:auto;
 
 }
 
 
-.stat-card{
+body.founder-portal-page .stat-card{
 
 padding:18px;
 
