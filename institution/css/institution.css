@@ -22,8 +22,7 @@
 .institution-app *,
 .institution-app *::before,
 .institution-app *::after { box-sizing: border-box; }
-html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
-body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-family: "Poppins", Arial, sans-serif; }
+body.institution-portal-page { margin: 0; min-height: 100vh; width: 100%; max-width: 100%; overflow-x: clip; background: var(--ssa-color-canvas, #f5f4fb); color: var(--ssa-color-ink, #17152f); font-family: var(--ssa-font-body, "Poppins", Arial, sans-serif); }
 .institution-app a { color: inherit; text-decoration: none; }
 .institution-app button,
 .institution-app input,
@@ -32,7 +31,7 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
 .institution-app button { cursor: pointer; }
 
 /* Authenticated portal shell */
-#institutionSidebar {
+.institution-app #institutionSidebar {
     position: fixed;
     inset: 0 auto 0 0;
     z-index: 1000;
@@ -47,7 +46,7 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     color: #fff;
     box-shadow: 8px 0 22px rgba(8,5,34,.13);
 }
-#institutionSidebar .sidebar-inner {
+.institution-app #institutionSidebar .sidebar-inner {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -56,7 +55,7 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     padding: 20px 14px 12px;
     overflow: hidden;
 }
-#institutionSidebar .brand {
+.institution-app #institutionSidebar .brand {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -64,7 +63,7 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     padding: 4px 8px 22px;
     border-bottom: 1px solid rgba(255,255,255,.12);
 }
-#institutionSidebar .brand-mark {
+.institution-app #institutionSidebar .brand-mark {
     display: grid;
     flex: 0 0 42px;
     place-items: center;
@@ -73,20 +72,20 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     border-radius: 12px;
     background: transparent;
 }
-#institutionSidebar .brand-mark img {
+.institution-app #institutionSidebar .brand-mark img {
     display: block;
     width: 38px;
     height: 38px;
     border-radius: 10px;
     object-fit: contain;
 }
-#institutionSidebar .brand strong,
-#institutionSidebar .brand small,
-#institutionSidebar .profile-mini strong,
-#institutionSidebar .profile-mini small { display: block; }
-#institutionSidebar .brand strong { color: #fff; font-size: 14px; font-weight: 800; }
-#institutionSidebar .brand small { margin-top: 3px; color: #b5a8dc; font-size: 9px; letter-spacing: .08em; }
-#institutionSidebar .profile-mini {
+.institution-app #institutionSidebar .brand strong,
+.institution-app #institutionSidebar .brand small,
+.institution-app #institutionSidebar .profile-mini strong,
+.institution-app #institutionSidebar .profile-mini small { display: block; }
+.institution-app #institutionSidebar .brand strong { color: #fff; font-size: 14px; font-weight: 800; }
+.institution-app #institutionSidebar .brand small { margin-top: 3px; color: #b5a8dc; font-size: 9px; letter-spacing: .08em; }
+.institution-app #institutionSidebar .profile-mini {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -98,7 +97,7 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     border-radius: 14px;
     background: rgba(255,255,255,.055);
 }
-#institutionSidebar .avatar {
+.institution-app #institutionSidebar .avatar {
     display: grid;
     flex: 0 0 38px;
     place-items: center;
@@ -109,9 +108,9 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     color: #fff;
     font-weight: 800;
 }
-#institutionSidebar .profile-mini strong { overflow: hidden; color: #fff; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-#institutionSidebar .profile-mini small { margin-top: 3px; color: #b7acd8; font-size: 9px; }
-#institutionSidebar .navigation {
+.institution-app #institutionSidebar .profile-mini strong { overflow: hidden; color: #fff; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.institution-app #institutionSidebar .profile-mini small { margin-top: 3px; color: #b7acd8; font-size: 9px; }
+.institution-app #institutionSidebar .navigation {
     flex: 1 1 auto;
     min-height: 0;
     display: grid;
@@ -125,16 +124,16 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     scrollbar-width: thin;
     scrollbar-color: rgba(190,177,255,.4) transparent;
 }
-#institutionSidebar .navigation::-webkit-scrollbar { width: 5px; }
-#institutionSidebar .navigation::-webkit-scrollbar-thumb { border-radius: 99px; background: rgba(190,177,255,.4); }
-#institutionSidebar .nav-label {
+.institution-app #institutionSidebar .navigation::-webkit-scrollbar { width: 5px; }
+.institution-app #institutionSidebar .navigation::-webkit-scrollbar-thumb { border-radius: 99px; background: rgba(190,177,255,.4); }
+.institution-app #institutionSidebar .nav-label {
     padding: 16px 10px 5px;
     color: #a99ad5;
     font-size: 9px;
     font-weight: 800;
     letter-spacing: .13em;
 }
-#institutionSidebar .nav-link {
+.institution-app #institutionSidebar .nav-link {
     display: flex;
     align-items: center;
     gap: 11px;
@@ -147,14 +146,14 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     font-weight: 600;
     transition: background .2s ease, color .2s ease, box-shadow .2s ease;
 }
-#institutionSidebar .nav-link svg { flex: 0 0 17px; width: 17px; height: 17px; }
-#institutionSidebar .nav-link:hover,
-#institutionSidebar .nav-link.active {
+.institution-app #institutionSidebar .nav-link svg { flex: 0 0 17px; width: 17px; height: 17px; }
+.institution-app #institutionSidebar .nav-link:hover,
+.institution-app #institutionSidebar .nav-link.active {
     background: linear-gradient(100deg, rgba(119,44,255,.42), rgba(32,207,232,.12));
     color: #fff;
 }
-#institutionSidebar .nav-link.active { box-shadow: inset 3px 0 #20cfe8, 0 0 18px rgba(126,48,255,.12); }
-#institutionSidebar .logout-button {
+.institution-app #institutionSidebar .nav-link.active { box-shadow: inset 3px 0 #20cfe8, 0 0 18px rgba(126,48,255,.12); }
+.institution-app #institutionSidebar .logout-button {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -171,10 +170,10 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     font-size: 11px;
     font-weight: 600;
 }
-#institutionSidebar .logout-button svg { width: 16px; height: 16px; }
-#institutionSidebar .logout-button:hover { background: rgba(239,68,68,.13); color: #fecaca; }
+.institution-app #institutionSidebar .logout-button svg { width: 16px; height: 16px; }
+.institution-app #institutionSidebar .logout-button:hover { background: rgba(239,68,68,.13); color: #fecaca; }
 
-#sidebarOverlay {
+.institution-app #sidebarOverlay {
     position: fixed;
     inset: 0;
     z-index: 1200;
@@ -184,16 +183,16 @@ body { margin: 0; min-height: 100vh; background: #f5f4fb; color: #17152f; font-f
     pointer-events: none;
     transition: opacity .22s ease, visibility .22s ease;
 }
-#sidebarOverlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+.institution-app #sidebarOverlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
 
-.institution-main {
+.institution-app .institution-main {
     min-width: 0;
     min-height: 100vh;
     margin-left: 270px;
     background: var(--ssa-color-canvas, #f5f4fb);
 }
-.institution-topbar {
+.institution-app .institution-topbar {
     position: sticky;
     top: 0;
     z-index: 900;
@@ -203,7 +202,7 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
     color: #fff;
     box-shadow: 0 8px 24px rgba(12,5,48,.12);
 }
-#institutionTopbar .topbar-inner {
+.institution-app #institutionTopbar .topbar-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -212,20 +211,20 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
     height: 100%;
     padding: 0 26px;
 }
-#institutionTopbar .topbar-left,
-#institutionTopbar .topbar-right { display: flex; align-items: center; gap: 13px; min-width: 0; }
-#institutionTopbar .topbar-left > div > span {
+.institution-app #institutionTopbar .topbar-left,
+.institution-app #institutionTopbar .topbar-right { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.institution-app #institutionTopbar .topbar-left > div > span {
     display: block;
     color: #bca6f4;
     font-size: 8px;
     font-weight: 800;
     letter-spacing: .13em;
 }
-#institutionTopbar .topbar-left strong { display: block; margin-top: 3px; color: #fff; font-size: 13px; font-weight: 800; }
-#institutionTopbar .topbar-right { font-size: 10px; font-weight: 600; }
-#institutionTopbar .secure-label { display: flex; align-items: center; gap: 6px; color: #d1c9e8; }
-#institutionTopbar .secure-label svg { width: 15px; color: #20cfe8; }
-#institutionTopbar .topbar-avatar {
+.institution-app #institutionTopbar .topbar-left strong { display: block; margin-top: 3px; color: #fff; font-size: 13px; font-weight: 800; }
+.institution-app #institutionTopbar .topbar-right { font-size: 10px; font-weight: 600; }
+.institution-app #institutionTopbar .secure-label { display: flex; align-items: center; gap: 6px; color: #d1c9e8; }
+.institution-app #institutionTopbar .secure-label svg { width: 15px; color: #20cfe8; }
+.institution-app #institutionTopbar .topbar-avatar {
     display: grid;
     flex: 0 0 34px;
     place-items: center;
@@ -236,8 +235,8 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
     color: #fff;
     font-weight: 800;
 }
-#institutionTopbar .topbar-user { max-width: 170px; overflow: hidden; color: #fff; text-overflow: ellipsis; white-space: nowrap; }
-#institutionTopbar .menu-button {
+.institution-app #institutionTopbar .topbar-user { max-width: 170px; overflow: hidden; color: #fff; text-overflow: ellipsis; white-space: nowrap; }
+.institution-app #institutionTopbar .menu-button {
     display: none;
     place-items: center;
     width: 38px;
@@ -247,7 +246,7 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
     background: rgba(255,255,255,.09);
     color: #fff;
 }
-#institutionTopbar .menu-button svg { width: 19px; height: 19px; }
+.institution-app #institutionTopbar .menu-button svg { width: 19px; height: 19px; }
 
 .institution-app .page-wrap { width: 100%; max-width: 1500px; margin: 0 auto; padding: 28px 30px 36px; }
 
@@ -431,7 +430,7 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
     .institution-dashboard-page .services-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media (max-width: 900px) {
-    #institutionSidebar {
+    .institution-app #institutionSidebar {
         z-index: 1201;
         width: min(292px, calc(100vw - 44px));
         max-width: 100vw;
@@ -442,16 +441,16 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
         overscroll-behavior: contain;
         touch-action: pan-y;
     }
-    #institutionSidebar.open { transform: translateX(0); }
-    .institution-main { margin-left: 0; }
-    #institutionTopbar .menu-button { display: grid; }
-    #institutionTopbar .topbar-inner { padding: 0 18px; }
+    .institution-app #institutionSidebar.open { transform: translateX(0); }
+    .institution-app .institution-main { margin-left: 0; }
+    .institution-app #institutionTopbar .menu-button { display: grid; }
+    .institution-app #institutionTopbar .topbar-inner { padding: 0 18px; }
     .institution-app .page-wrap { padding: 20px 18px 30px; }
     .institution-dashboard-page .team-management { grid-template-columns: 1fr; }
-    #sidebarOverlay { display: block; }
+    .institution-app #sidebarOverlay { display: block; }
 }
 @media (max-width: 650px) {
-    #institutionTopbar .secure-label { display: none; }
+    .institution-app #institutionTopbar .secure-label { display: none; }
     .institution-dashboard-page .welcome-panel { padding: 22px; }
     .institution-dashboard-page .welcome-panel h1 { font-size: 22px; }
     .institution-dashboard-page .welcome-mark { width: 54px; height: 54px; flex-basis: 54px; }
@@ -465,7 +464,7 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
     .institution-dashboard-page .module-panel { align-items: flex-start; flex-direction: column; }
 }
 @media (max-width: 430px) {
-    #institutionTopbar .topbar-user { max-width: 105px; }
+    .institution-app #institutionTopbar .topbar-user { max-width: 105px; }
     .institution-dashboard-page .welcome-mark { display: none; }
     .institution-dashboard-page .metrics-grid,
     .institution-dashboard-page .services-grid,
@@ -473,19 +472,19 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
     .institution-app .page-wrap { padding: 17px 12px 26px; }
 }
 @media (max-height: 700px) {
-    #institutionSidebar .sidebar-inner { padding-top: 12px; padding-bottom: 8px; }
-    #institutionSidebar .brand { padding-bottom: 14px; }
-    #institutionSidebar .profile-mini { margin-top: 10px; margin-bottom: 8px; padding: 8px; }
-    #institutionSidebar .nav-label { padding-top: 11px; }
-    #institutionSidebar .nav-link { min-height: 38px; }
+    .institution-app #institutionSidebar .sidebar-inner { padding-top: 12px; padding-bottom: 8px; }
+    .institution-app #institutionSidebar .brand { padding-bottom: 14px; }
+    .institution-app #institutionSidebar .profile-mini { margin-top: 10px; margin-bottom: 8px; padding: 8px; }
+    .institution-app #institutionSidebar .nav-label { padding-top: 11px; }
+    .institution-app #institutionSidebar .nav-link { min-height: 38px; }
 }
 @media (prefers-reduced-motion: reduce) {
-    #institutionSidebar *,
-    #institutionSidebar *::before,
-    #institutionSidebar *::after,
-    #institutionTopbar *,
-    #institutionTopbar *::before,
-    #institutionTopbar *::after,
+    .institution-app #institutionSidebar *,
+    .institution-app #institutionSidebar *::before,
+    .institution-app #institutionSidebar *::after,
+    .institution-app #institutionTopbar *,
+    .institution-app #institutionTopbar *::before,
+    .institution-app #institutionTopbar *::after,
     .institution-dashboard-page * {
         transition-duration: .01ms !important;
         animation-duration: .01ms !important;
@@ -524,4 +523,18 @@ body.institution-menu-open { overflow: hidden; overscroll-behavior: none; }
 .institution-access-error a { color: var(--ssa-color-brand, #762cff); font-weight: 700; }
 @media (max-width: 600px) {
     .institution-access-error { margin: 5vh 14px; padding: 20px; }
+}
+
+/* Shared interaction states. Keep focus and disabled styling inside this portal. */
+.institution-app :focus-visible {
+  outline: 3px solid rgba(118,44,255,.32);
+  outline-offset: 2px;
+}
+.institution-app button:disabled,
+.institution-app [aria-disabled="true"] {
+  cursor: not-allowed;
+}
+.institution-app .institution-sidebar,
+.institution-app .institution-topbar {
+  isolation: isolate;
 }
