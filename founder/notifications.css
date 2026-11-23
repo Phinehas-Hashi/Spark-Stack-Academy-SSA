@@ -1,9 +1,9 @@
- body.founder-portal-page * {
+ body.founder-portal-page *{
     box-sizing:border-box;
 }
 
 
-body.founder-portal-page {
+body.founder-portal-page{
 
     margin:0;
 
@@ -26,7 +26,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.bg-orb{
+body.founder-portal-page .bg-orb{
 
     position:fixed;
 
@@ -42,7 +42,7 @@ body.founder-portal-page {
 
 
 
-.orb-1{
+body.founder-portal-page .orb-1{
 
     width:350px;
 
@@ -58,7 +58,7 @@ body.founder-portal-page {
 
 
 
-.orb-2{
+body.founder-portal-page .orb-2{
 
     width:300px;
 
@@ -74,7 +74,7 @@ body.founder-portal-page {
 
 
 
-.orb-3{
+body.founder-portal-page .orb-3{
 
     width:280px;
 
@@ -97,7 +97,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.dashboard-layout{
+body.founder-portal-page .dashboard-layout{
 
     display:flex;
 
@@ -107,7 +107,7 @@ body.founder-portal-page {
 
 
 
-.main-content{
+body.founder-portal-page .main-content{
 
     flex:1;
 
@@ -126,7 +126,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.glass-card{
+body.founder-portal-page .glass-card{
 
     background:
 
@@ -159,7 +159,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.notification-header{
+body.founder-portal-page .notification-header{
 
     display:flex;
 
@@ -173,7 +173,7 @@ body.founder-portal-page {
 
 
 
-.notification-header h1{
+body.founder-portal-page .notification-header h1{
 
     font-size:32px;
 
@@ -183,7 +183,7 @@ body.founder-portal-page {
 
 
 
-.notification-header p{
+body.founder-portal-page .notification-header p{
 
     color:#b8c4d9;
 
@@ -200,8 +200,8 @@ body.founder-portal-page {
 =================================== */
 
 
-.primary-btn,
-.secondary-btn{
+body.founder-portal-page .primary-btn,
+body.founder-portal-page .secondary-btn{
 
     border:none;
 
@@ -219,7 +219,7 @@ body.founder-portal-page {
 
 
 
-.primary-btn{
+body.founder-portal-page .primary-btn{
 
     background:
 
@@ -235,7 +235,7 @@ body.founder-portal-page {
 
 
 
-.secondary-btn{
+body.founder-portal-page .secondary-btn{
 
     background:
 
@@ -247,8 +247,8 @@ body.founder-portal-page {
 
 
 
-.primary-btn:hover,
-.secondary-btn:hover{
+body.founder-portal-page .primary-btn:hover,
+body.founder-portal-page .secondary-btn:hover{
 
     transform:translateY(-2px);
 
@@ -259,7 +259,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.notification-stats{
+body.founder-portal-page .notification-stats{
 
     display:grid;
 
@@ -274,7 +274,7 @@ body.founder-portal-page {
 
 
 
-.notification-stat{
+body.founder-portal-page .notification-stat{
 
     display:flex;
 
@@ -286,7 +286,7 @@ body.founder-portal-page {
 
 
 
-.stat-icon{
+body.founder-portal-page .stat-icon{
 
     width:60px;
 
@@ -310,7 +310,7 @@ body.founder-portal-page {
 
 
 
-.stat-icon.unread{
+body.founder-portal-page .stat-icon.unread{
 
     background:
     rgba(118,44,255,.25);
@@ -319,7 +319,7 @@ body.founder-portal-page {
 
 
 
-.stat-icon.payment{
+body.founder-portal-page .stat-icon.payment{
 
     background:
     rgba(0,200,83,.25);
@@ -328,7 +328,7 @@ body.founder-portal-page {
 
 
 
-.stat-icon.security{
+body.founder-portal-page .stat-icon.security{
 
     background:
     rgba(255,193,7,.25);
@@ -337,7 +337,7 @@ body.founder-portal-page {
 
 
 
-.notification-stat h3{
+body.founder-portal-page .notification-stat h3{
 
     margin:0;
 
@@ -349,7 +349,7 @@ body.founder-portal-page {
 
 
 
-.notification-stat h2{
+body.founder-portal-page .notification-stat h2{
 
     margin:5px 0;
 
@@ -359,7 +359,7 @@ body.founder-portal-page {
 
 
 
-.notification-stat p{
+body.founder-portal-page .notification-stat p{
 
     margin:0;
 
@@ -378,7 +378,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.notification-filter{
+body.founder-portal-page .notification-filter{
 
     margin-bottom:25px;
 
@@ -386,7 +386,7 @@ body.founder-portal-page {
 
 
 
-.filter-group{
+body.founder-portal-page .filter-group{
 
     display:flex;
 
@@ -398,7 +398,7 @@ body.founder-portal-page {
 
 
 
-.filter-btn{
+body.founder-portal-page .filter-btn{
 
     border:none;
 
@@ -420,7 +420,7 @@ body.founder-portal-page {
 
 
 
-.filter-btn:hover{
+body.founder-portal-page .filter-btn:hover{
 
     background:
 
@@ -430,7 +430,7 @@ body.founder-portal-page {
 
 
 
-.filter-btn.active{
+body.founder-portal-page .filter-btn.active{
 
     background:
 
@@ -450,7 +450,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.notification-panel{
+body.founder-portal-page .notification-panel{
 
     margin-bottom:25px;
 
@@ -458,7 +458,7 @@ body.founder-portal-page {
 
 
 
-.section-header{
+body.founder-portal-page .section-header{
 
     display:flex;
 
@@ -472,7 +472,7 @@ body.founder-portal-page {
 
 
 
-.section-header h2{
+body.founder-portal-page .section-header h2{
 
     margin:0;
 
@@ -482,7 +482,7 @@ body.founder-portal-page {
 
 
 
-.section-header p{
+body.founder-portal-page .section-header p{
 
     color:#9aa8c1;
 
@@ -492,7 +492,7 @@ body.founder-portal-page {
 
 
 
-.notification-tools{
+body.founder-portal-page .notification-tools{
 
     display:flex;
 
@@ -504,8 +504,8 @@ body.founder-portal-page {
 
 
 
-.notification-tools input,
-.notification-tools select{
+body.founder-portal-page .notification-tools input,
+body.founder-portal-page .notification-tools select{
 
     background:
 
@@ -534,7 +534,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.notification-list{
+body.founder-portal-page .notification-list{
 
     display:flex;
 
@@ -548,7 +548,7 @@ body.founder-portal-page {
 
 
 
-.notification-card{
+body.founder-portal-page .notification-card{
 
     display:flex;
 
@@ -572,7 +572,7 @@ body.founder-portal-page {
 
 
 
-.notification-card:hover{
+body.founder-portal-page .notification-card:hover{
 
     transform:translateY(-3px);
 
@@ -586,7 +586,7 @@ body.founder-portal-page {
 
 
 
-.notification-icon{
+body.founder-portal-page .notification-icon{
 
     width:50px;
 
@@ -612,7 +612,7 @@ body.founder-portal-page {
 
 
 
-.notification-content{
+body.founder-portal-page .notification-content{
 
     flex:1;
 
@@ -622,7 +622,7 @@ body.founder-portal-page {
 
 
 
-.notification-top{
+body.founder-portal-page .notification-top{
 
     display:flex;
 
@@ -632,7 +632,7 @@ body.founder-portal-page {
 
 
 
-.notification-title{
+body.founder-portal-page .notification-title{
 
     margin:0;
 
@@ -642,7 +642,7 @@ body.founder-portal-page {
 
 
 
-.notification-time{
+body.founder-portal-page .notification-time{
 
     color:#8f9bb3;
 
@@ -654,7 +654,7 @@ body.founder-portal-page {
 
 
 
-.notification-message{
+body.founder-portal-page .notification-message{
 
     color:#c7d2e6;
 
@@ -666,7 +666,7 @@ body.founder-portal-page {
 
 
 
-.notification-footer{
+body.founder-portal-page .notification-footer{
 
     display:flex;
 
@@ -680,7 +680,7 @@ body.founder-portal-page {
 
 
 
-.notification-type{
+body.founder-portal-page .notification-type{
 
     padding:5px 12px;
 
@@ -696,7 +696,7 @@ body.founder-portal-page {
 
 
 
-.notification-actions{
+body.founder-portal-page .notification-actions{
 
     display:flex;
 
@@ -708,8 +708,8 @@ body.founder-portal-page {
 
 
 
-.read-btn,
-.view-btn{
+body.founder-portal-page .read-btn,
+body.founder-portal-page .view-btn{
 
     border:none;
 
@@ -732,7 +732,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.settings-grid{
+body.founder-portal-page .settings-grid{
 
     display:grid;
 
@@ -749,7 +749,7 @@ body.founder-portal-page {
 
 
 
-.settings-card{
+body.founder-portal-page .settings-card{
 
     min-height:100%;
 
@@ -759,7 +759,7 @@ body.founder-portal-page {
 
 
 
-.settings-list{
+body.founder-portal-page .settings-list{
 
     display:flex;
 
@@ -780,7 +780,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.setting-item{
+body.founder-portal-page .setting-item{
 
     display:flex;
 
@@ -800,7 +800,7 @@ body.founder-portal-page {
 
 
 
-.setting-item strong{
+body.founder-portal-page .setting-item strong{
 
     display:block;
 
@@ -810,7 +810,7 @@ body.founder-portal-page {
 
 
 
-.setting-item p{
+body.founder-portal-page .setting-item p{
 
     margin:0;
 
@@ -831,7 +831,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.switch{
+body.founder-portal-page .switch{
 
     position:relative;
 
@@ -845,7 +845,7 @@ body.founder-portal-page {
 
 
 
-.switch input{
+body.founder-portal-page .switch input{
 
     opacity:0;
 
@@ -857,7 +857,7 @@ body.founder-portal-page {
 
 
 
-.slider{
+body.founder-portal-page .slider{
 
     position:absolute;
 
@@ -877,7 +877,7 @@ body.founder-portal-page {
 
 
 
-.slider:before{
+body.founder-portal-page .slider:before{
 
     content:"";
 
@@ -901,7 +901,7 @@ body.founder-portal-page {
 
 
 
-.switch input:checked + .slider{
+body.founder-portal-page .switch input:checked + .slider{
 
     background:#762cff;
 
@@ -909,7 +909,7 @@ body.founder-portal-page {
 
 
 
-.switch input:checked + .slider:before{
+body.founder-portal-page .switch input:checked + .slider:before{
 
     transform:translateX(24px);
 
@@ -926,7 +926,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.delivery-card{
+body.founder-portal-page .delivery-card{
 
     border-left:
 
@@ -946,7 +946,7 @@ body.founder-portal-page {
 =================================== */
 
 
-.broadcast-center{
+body.founder-portal-page .broadcast-center{
 
     margin-top:25px;
 
@@ -956,7 +956,7 @@ body.founder-portal-page {
 
 
 
-.broadcast-form{
+body.founder-portal-page .broadcast-form{
 
     display:grid;
 
@@ -972,7 +972,7 @@ body.founder-portal-page {
 
 
 
-.form-group{
+body.founder-portal-page .form-group{
 
     display:flex;
 
@@ -984,7 +984,7 @@ body.founder-portal-page {
 
 
 
-.form-group.full-width{
+body.founder-portal-page .form-group.full-width{
 
     grid-column:
 
@@ -996,7 +996,7 @@ body.founder-portal-page {
 
 
 
-.form-group label{
+body.founder-portal-page .form-group label{
 
     font-size:14px;
 
@@ -1008,9 +1008,9 @@ body.founder-portal-page {
 
 
 
-.form-group input,
-.form-group select,
-.form-group textarea{
+body.founder-portal-page .form-group input,
+body.founder-portal-page .form-group select,
+body.founder-portal-page .form-group textarea{
 
 
     background:
@@ -1043,7 +1043,7 @@ body.founder-portal-page {
 
 
 
-.form-group textarea{
+body.founder-portal-page .form-group textarea{
 
     resize:none;
 
@@ -1053,9 +1053,9 @@ body.founder-portal-page {
 
 
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus{
+body.founder-portal-page .form-group input:focus,
+body.founder-portal-page .form-group select:focus,
+body.founder-portal-page .form-group textarea:focus{
 
 
     border-color:#762cff;
@@ -1074,8 +1074,8 @@ body.founder-portal-page {
 =================================== */
 
 
-.settings-card .primary-btn,
-.broadcast-center .primary-btn{
+body.founder-portal-page .settings-card .primary-btn,
+body.founder-portal-page .broadcast-center .primary-btn{
 
     margin-top:20px;
 
@@ -1088,7 +1088,7 @@ body.founder-portal-page {
 =================================== */
 
 
-critical-section{
+body.founder-portal-page critical-section{
 
     margin-top:25px;
 
@@ -1096,7 +1096,7 @@ critical-section{
 
 
 
-.critical-section{
+body.founder-portal-page .critical-section{
 
     border-left:
 
@@ -1108,7 +1108,7 @@ critical-section{
 
 
 
-.alert-count{
+body.founder-portal-page .alert-count{
 
     padding:8px 15px;
 
@@ -1128,7 +1128,7 @@ critical-section{
 
 
 
-.critical-list{
+body.founder-portal-page .critical-list{
 
     display:flex;
 
@@ -1142,7 +1142,7 @@ critical-section{
 
 
 
-.critical-item{
+body.founder-portal-page .critical-item{
 
     display:flex;
 
@@ -1164,7 +1164,7 @@ critical-section{
 
 
 
-.critical-icon{
+body.founder-portal-page .critical-icon{
 
     width:45px;
 
@@ -1195,8 +1195,8 @@ critical-section{
 =================================== */
 
 
-.empty-state,
-.critical-empty{
+body.founder-portal-page .empty-state,
+body.founder-portal-page .critical-empty{
 
     text-align:center;
 
@@ -1208,7 +1208,7 @@ critical-section{
 
 
 
-.empty-icon{
+body.founder-portal-page .empty-icon{
 
     font-size:50px;
 
@@ -1218,7 +1218,7 @@ critical-section{
 
 
 
-.empty-state h3{
+body.founder-portal-page .empty-state h3{
 
     color:white;
 
@@ -1228,7 +1228,7 @@ critical-section{
 
 
 
-.critical-empty{
+body.founder-portal-page .critical-empty{
 
     border-radius:15px;
 
@@ -1252,7 +1252,7 @@ critical-section{
 =================================== */
 
 
-.notification-history{
+body.founder-portal-page .notification-history{
 
     margin-top:25px;
 
@@ -1262,7 +1262,7 @@ critical-section{
 
 
 
-.table-responsive{
+body.founder-portal-page .table-responsive{
 
     overflow-x:auto;
 
@@ -1272,7 +1272,7 @@ critical-section{
 
 
 
-table{
+body.founder-portal-page table{
 
     width:100%;
 
@@ -1284,7 +1284,7 @@ table{
 
 
 
-thead{
+body.founder-portal-page thead{
 
     background:
 
@@ -1296,7 +1296,7 @@ thead{
 
 
 
-th{
+body.founder-portal-page th{
 
     text-align:left;
 
@@ -1312,7 +1312,7 @@ th{
 
 
 
-td{
+body.founder-portal-page td{
 
     padding:15px;
 
@@ -1328,7 +1328,7 @@ td{
 
 
 
-tbody tr{
+body.founder-portal-page tbody tr{
 
     transition:.3s;
 
@@ -1338,7 +1338,7 @@ tbody tr{
 
 
 
-tbody tr:hover{
+body.founder-portal-page tbody tr:hover{
 
     background:
 
@@ -1350,7 +1350,7 @@ tbody tr:hover{
 
 
 
-.empty-table{
+body.founder-portal-page .empty-table{
 
     text-align:center;
 
@@ -1372,7 +1372,7 @@ tbody tr:hover{
 =================================== */
 
 
-.priority{
+body.founder-portal-page .priority{
 
     padding:6px 12px;
 
@@ -1386,7 +1386,7 @@ tbody tr:hover{
 
 
 
-.priority.normal{
+body.founder-portal-page .priority.normal{
 
     background:
 
@@ -1398,7 +1398,7 @@ tbody tr:hover{
 
 
 
-.priority.high{
+body.founder-portal-page .priority.high{
 
     background:
 
@@ -1410,7 +1410,7 @@ tbody tr:hover{
 
 
 
-.priority.critical{
+body.founder-portal-page .priority.critical{
 
     background:
 
@@ -1432,7 +1432,7 @@ tbody tr:hover{
 =================================== */
 
 
-.load-more-area{
+body.founder-portal-page .load-more-area{
 
     display:flex;
 
@@ -1448,7 +1448,7 @@ tbody tr:hover{
 =================================== */
 
 
-.security-grid{
+body.founder-portal-page .security-grid{
 
     display:grid;
 
@@ -1472,8 +1472,8 @@ tbody tr:hover{
 =================================== */
 
 
-.security-card,
-.rules-card{
+body.founder-portal-page .security-card,
+body.founder-portal-page .rules-card{
 
     padding:25px;
 
@@ -1483,7 +1483,7 @@ tbody tr:hover{
 
 
 
-.security-list{
+body.founder-portal-page .security-list{
 
     display:flex;
 
@@ -1497,7 +1497,7 @@ tbody tr:hover{
 
 
 
-.security-item{
+body.founder-portal-page .security-item{
 
     display:flex;
 
@@ -1519,7 +1519,7 @@ tbody tr:hover{
 
 
 
-.security-item span:first-child{
+body.founder-portal-page .security-item span:first-child{
 
     color:#c7d2e6;
 
@@ -1529,7 +1529,7 @@ tbody tr:hover{
 
 
 
-.status{
+body.founder-portal-page .status{
 
     padding:6px 14px;
 
@@ -1545,7 +1545,7 @@ tbody tr:hover{
 
 
 
-.status.connected{
+body.founder-portal-page .status.connected{
 
     background:
 
@@ -1559,7 +1559,7 @@ tbody tr:hover{
 
 
 
-.status.warning{
+body.founder-portal-page .status.warning{
 
     background:
 
@@ -1573,7 +1573,7 @@ tbody tr:hover{
 
 
 
-.status.error{
+body.founder-portal-page .status.error{
 
     background:
 
@@ -1595,7 +1595,7 @@ tbody tr:hover{
 =================================== */
 
 
-.rules-list{
+body.founder-portal-page .rules-list{
 
     display:flex;
 
@@ -1609,7 +1609,7 @@ tbody tr:hover{
 
 
 
-.rule-item{
+body.founder-portal-page .rule-item{
 
     display:flex;
 
@@ -1633,7 +1633,7 @@ tbody tr:hover{
 
 
 
-.rule-item h3{
+body.founder-portal-page .rule-item h3{
 
     margin:0 0 5px;
 
@@ -1645,7 +1645,7 @@ tbody tr:hover{
 
 
 
-.rule-item p{
+body.founder-portal-page .rule-item p{
 
     margin:0;
 
@@ -1667,7 +1667,7 @@ tbody tr:hover{
 =================================== */
 
 
-.sound-panel{
+body.founder-portal-page .sound-panel{
 
     margin-top:25px;
 
@@ -1681,7 +1681,7 @@ tbody tr:hover{
 
 
 
-.sound-control{
+body.founder-portal-page .sound-control{
 
     display:flex;
 
@@ -1703,7 +1703,7 @@ tbody tr:hover{
 
 
 
-.sound-info{
+body.founder-portal-page .sound-info{
 
     display:flex;
 
@@ -1717,7 +1717,7 @@ tbody tr:hover{
 
 
 
-.sound-icon{
+body.founder-portal-page .sound-icon{
 
     width:50px;
 
@@ -1745,7 +1745,7 @@ tbody tr:hover{
 
 
 
-.sound-select{
+body.founder-portal-page .sound-select{
 
     background:
 
@@ -1775,7 +1775,7 @@ tbody tr:hover{
 =================================== */
 
 
-.audio-status{
+body.founder-portal-page .audio-status{
 
     margin-top:15px;
 
@@ -1798,7 +1798,7 @@ tbody tr:hover{
 =================================== */
 
 
-.action-bar{
+body.founder-portal-page .action-bar{
 
     display:flex;
 
@@ -1823,7 +1823,7 @@ tbody tr:hover{
 =================================== */
 
 
-.finance-toast{
+body.founder-portal-page .finance-toast{
 
     position:fixed;
 
@@ -1867,7 +1867,7 @@ tbody tr:hover{
 
 
 
-.finance-toast.visible{
+body.founder-portal-page .finance-toast.visible{
 
     transform:
 
@@ -1881,7 +1881,7 @@ tbody tr:hover{
 
 
 
-.finance-toast.success{
+body.founder-portal-page .finance-toast.success{
 
     border-left:
 
@@ -1893,7 +1893,7 @@ tbody tr:hover{
 
 
 
-.finance-toast.error{
+body.founder-portal-page .finance-toast.error{
 
     border-left:
 
@@ -1905,7 +1905,7 @@ tbody tr:hover{
 
 
 
-.finance-toast.warning{
+body.founder-portal-page .finance-toast.warning{
 
     border-left:
 
@@ -1925,7 +1925,7 @@ tbody tr:hover{
 =================================== */
 
 
-.sound-playing .sound-icon{
+body.founder-portal-page .sound-playing .sound-icon{
 
     animation:
 
@@ -1978,7 +1978,7 @@ tbody tr:hover{
 =================================== */
 
 
-::-webkit-scrollbar{
+body.founder-portal-page ::-webkit-scrollbar{
 
     width:8px;
 
@@ -1986,7 +1986,7 @@ tbody tr:hover{
 
 
 
-::-webkit-scrollbar-track{
+body.founder-portal-page ::-webkit-scrollbar-track{
 
     background:#050b18;
 
@@ -1994,7 +1994,7 @@ tbody tr:hover{
 
 
 
-::-webkit-scrollbar-thumb{
+body.founder-portal-page ::-webkit-scrollbar-thumb{
 
     background:#762cff;
 
@@ -2014,7 +2014,7 @@ tbody tr:hover{
 =================================== */
 
 
-@media(max-width:1200px){
+body.founder-portal-page @media(max-width:1200px){
 
 
 .notification-stats{
@@ -2048,7 +2048,7 @@ tbody tr:hover{
 @media(max-width:768px){
 
 
-.main-content{
+body.founder-portal-page .main-content{
 
     margin-left:0;
 
@@ -2058,8 +2058,8 @@ tbody tr:hover{
 
 
 
-.notification-header,
-.section-header{
+body.founder-portal-page .notification-header,
+body.founder-portal-page .section-header{
 
     flex-direction:column;
 
@@ -2073,7 +2073,7 @@ tbody tr:hover{
 
 
 
-.notification-stats{
+body.founder-portal-page .notification-stats{
 
     grid-template-columns:
 
@@ -2085,7 +2085,7 @@ tbody tr:hover{
 
 
 
-.broadcast-form{
+body.founder-portal-page .broadcast-form{
 
     grid-template-columns:
 
@@ -2097,7 +2097,7 @@ tbody tr:hover{
 
 
 
-.form-group.full-width{
+body.founder-portal-page .form-group.full-width{
 
     grid-column:
 
@@ -2109,7 +2109,7 @@ tbody tr:hover{
 
 
 
-.notification-tools{
+body.founder-portal-page .notification-tools{
 
     width:100%;
 
@@ -2121,8 +2121,8 @@ tbody tr:hover{
 
 
 
-.notification-top,
-.notification-footer{
+body.founder-portal-page .notification-top,
+body.founder-portal-page .notification-footer{
 
     flex-direction:column;
 
@@ -2134,9 +2134,9 @@ tbody tr:hover{
 
 
 
-.security-item,
-.rule-item,
-.setting-item{
+body.founder-portal-page .security-item,
+body.founder-portal-page .rule-item,
+body.founder-portal-page .setting-item{
 
     flex-direction:column;
 
@@ -2148,7 +2148,7 @@ tbody tr:hover{
 
 
 
-.action-bar{
+body.founder-portal-page .action-bar{
 
     justify-content:center;
 
@@ -2160,7 +2160,7 @@ tbody tr:hover{
 
 }
 /* Founder feedback for broadcast and notification actions. */
-.founder-toast {
+body.founder-portal-page .founder-toast{
     position: fixed;
     right: 24px;
     bottom: 24px;
@@ -2175,6 +2175,6 @@ tbody tr:hover{
     font-weight: 600;
 }
 
-.founder-toast.error {
+body.founder-portal-page .founder-toast.error{
     border-color: rgba(248, 113, 113, .45);
 }
