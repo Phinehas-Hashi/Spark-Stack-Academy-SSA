@@ -40,7 +40,7 @@
 }
 
 .back-link:hover {
-    color: var(--primary, #2979ff);
+    color: var(--primary, #762cff);
 }
 
 .back-link svg {
@@ -51,7 +51,7 @@
 .page-eyebrow {
     display: block;
     margin-bottom: 7px;
-    color: var(--primary, #2979ff);
+    color: var(--primary, #762cff);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .14em;
@@ -59,7 +59,7 @@
 
 .assignment-header h1 {
     margin: 0;
-    color: var(--heading, #081c3a);
+    color: var(--heading, #17152f);
     font-size: clamp(25px, 3vw, 38px);
     line-height: 1.15;
     font-weight: 800;
@@ -84,7 +84,7 @@
     padding: 8px 14px;
     border-radius: 999px;
     background: #e8f0ff;
-    color: #2563eb;
+    color: #762cff;
     font-size: 12px;
     font-weight: 700;
 }
@@ -129,7 +129,7 @@
 
 .overview-icon.blue {
     background: #eaf2ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .overview-icon.gold {
@@ -206,7 +206,7 @@
 }
 
 .card-eyebrow {
-    color: #2979ff;
+    color: #762cff;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: .13em;
@@ -318,9 +318,9 @@
 }
 
 .submission-search input:focus {
-    border-color: #2979ff;
+    border-color: #762cff;
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(41, 121, 255, .09);
+    box-shadow: 0 0 0 3px rgba(118, 44, 255, .09);
 }
 
 
@@ -355,7 +355,7 @@
 
 .submission-filter.active {
     background: #eaf2ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 
@@ -401,7 +401,7 @@
     flex-shrink: 0;
     border-radius: 50%;
     background: #eaf2ff;
-    color: #2979ff;
+    color: #762cff;
     font-size: 13px;
     font-weight: 800;
 }
