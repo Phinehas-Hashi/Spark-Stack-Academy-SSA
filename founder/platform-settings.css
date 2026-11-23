@@ -8,7 +8,7 @@
    ROOT VARIABLES
 =================================== */
 
-:root{
+body.founder-portal-page {
 
 --bg:#07111f;
 
@@ -52,8 +52,7 @@
 /* ===================================
    RESET
 =================================== */
-
-*{
+ body.founder-portal-page * {
 
 margin:0;
 
@@ -63,13 +62,13 @@ box-sizing:border-box;
 
 }
 
-html{
+body.founder-portal-page {
 
 scroll-behavior:smooth;
 
 }
 
-body{
+body.founder-portal-page {
 
 font-family:"Inter",sans-serif;
 
