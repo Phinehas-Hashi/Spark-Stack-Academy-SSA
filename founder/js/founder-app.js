@@ -17,7 +17,7 @@ function loadCSS(path){
 }
 
 function ensureFounderShell(){
-  document.body.classList.add("founder-shell-ready");
+  document.body.classList.add("founder-portal-page","founder-shell-ready");
   loadCSS("founder-unified.css");
   if(!document.getElementById("sidebarOverlay")){
     const overlay=document.createElement("div"); overlay.id="sidebarOverlay"; overlay.className="sidebar-overlay"; document.body.appendChild(overlay);
