@@ -18,7 +18,7 @@ function loadCSS(path){
 }
 
 function ensureFounderShell(){
-  document.body.classList.add("founder-shell-ready");
+  document.body.classList.add("founder-shell-ready", "founder-portal-page");
   loadCSS("founder-unified.css");
   loadCSS("founder-complete.css");
   if(!document.getElementById("sidebarOverlay")){
@@ -81,9 +81,13 @@ window.addEventListener("DOMContentLoaded",async()=>{
 function setupSidebar(){
   const menuBtn=document.getElementById("menuBtn"), sidebar=document.querySelector("#sidebarContainer .sidebar"), overlay=document.getElementById("sidebarOverlay");
   if(!menuBtn||!sidebar) return;
-  const close=()=>{sidebar.classList.remove("open","active");document.body.classList.remove("sidebar-open","menu-open");overlay?.classList.remove("active");};
-  menuBtn.onclick=()=>{const open=!sidebar.classList.contains("open");sidebar.classList.toggle("open",open);document.body.classList.toggle("sidebar-open",open);overlay?.classList.toggle("active",open);};
-  overlay?.addEventListener("click",close); document.querySelectorAll(".sidebar-menu a").forEach(link=>link.addEventListener("click",close));
+  menuBtn.setAttribute("aria-controls", "sidebarContainer");
+  const close=()=>{sidebar.classList.remove("open","active");document.body.classList.remove("sidebar-open","menu-open");overlay?.classList.remove("active");menuBtn.setAttribute("aria-expanded","false");};
+  menuBtn.setAttribute("aria-expanded", String(sidebar.classList.contains("open")));
+  menuBtn.onclick=()=>{const open=!sidebar.classList.contains("open");sidebar.classList.toggle("open",open);document.body.classList.toggle("sidebar-open",open);overlay?.classList.toggle("active",open);menuBtn.setAttribute("aria-expanded",String(open));};
+  overlay?.addEventListener("click",close);
+  document.addEventListener("keydown",event=>{if(event.key==="Escape")close();});
+  document.querySelectorAll(".sidebar-menu a").forEach(link=>link.addEventListener("click",close));
 }
 
 function setupTopbar(){
