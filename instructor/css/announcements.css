@@ -96,7 +96,7 @@
 
 .announcement-stat {
     background: #fff;
-    border: 1px solid rgba(8,28,58,.08);
+    border: 1px solid rgba(23,21,47,.08);
     border-radius: 18px;
     padding: 20px;
 
@@ -104,7 +104,7 @@
     align-items: center;
     gap: 15px;
 
-    box-shadow: 0 8px 25px rgba(8,28,58,.05);
+    box-shadow: 0 8px 25px rgba(23,21,47,.05);
 }
 
 .announcement-stat > div:last-child {
@@ -170,11 +170,11 @@
 
 .announcements-card {
     background: #fff;
-    border: 1px solid rgba(8,28,58,.08);
+    border: 1px solid rgba(23,21,47,.08);
     border-radius: 22px;
     padding: 25px;
 
-    box-shadow: 0 10px 30px rgba(8,28,58,.05);
+    box-shadow: 0 10px 30px rgba(23,21,47,.05);
 }
 
 
@@ -300,7 +300,7 @@
 
 .announcement-item:hover {
     border-color: #cbd5e1;
-    box-shadow: 0 8px 22px rgba(8,28,58,.06);
+    box-shadow: 0 8px 22px rgba(23,21,47,.06);
     transform: translateY(-1px);
 }
 
@@ -747,7 +747,7 @@
     border: 0;
     border-radius: 12px;
 
-    background: #f4f7fb;
+    background: #f5f4fb;
 
     color: #64748b;
 
