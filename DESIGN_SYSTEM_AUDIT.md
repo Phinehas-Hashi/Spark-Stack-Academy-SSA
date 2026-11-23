@@ -1,6 +1,6 @@
 # Spark Stack Academy — Repository-Wide Design System Audit
 
-**Status:** Portal inventory, HTML dependency scan, stylesheet static scan and shell-ownership review completed; migration blueprint ready for approval  
+**Status:** Five-portal dependency audit completed; Student and Instructor migration batches committed; Admin, Institution and Founder migrations remain queued  
 **Branch:** main  
 **Audit commit:** pending this report update
 
@@ -180,7 +180,7 @@ The exact canonical link order must be finalized from selector ownership and act
 
 ## Audit conclusion
 
-The dependency mapping and static CSS scan now cover all five portals and all 152 CSS files. The architecture is not ready for a mass stylesheet replacement: route exceptions, parallel Student CSS generations, global selector leakage, override-heavy foundations and competing Founder shell loaders must be addressed in controlled stages. **No portal CSS or HTML has been deleted or rewritten during this audit.** The next safe step is to agree the target ownership/order, then begin the first isolated migration batch.
+The dependency mapping and static CSS scan cover all five portals and all 152 CSS files. The architecture is not suitable for a mass stylesheet replacement: route exceptions, parallel Student CSS generations, global selector leakage, override-heavy foundations and competing Founder shell loaders must be addressed in controlled stages. Migration has begun with scoped, reversible portal batches. No wholesale CSS deletion has been performed; legacy files remain until their usage and behavior are verified. The next work is to finish Student and Instructor regression checks, then migrate Institution, Admin and Founder in sequence.
 
 ## Portal migration progress — 23 November 2026
 
@@ -208,4 +208,6 @@ The dependency mapping and static CSS scan now cover all five portals and all 15
 - Instructor shared foundations and page styles passed static brace-balance checks. The page-specific selector scan found no bare global element selectors in the sampled page stylesheets; the remaining body scroll-lock rules are intentional.
 - Browser verification and interactive shell regression testing remain outstanding.
 
-**Migration status:** Student active stylesheet foundation and standalone-page first batch committed; Instructor shared foundation and standalone-page migration committed. No production-ready claim is made until all portal routes have been tested in a browser at desktop, tablet and mobile widths.
+**Migration status:** Student active stylesheet foundation and standalone-page first batch committed. Instructor migration has now been extended to all 21 shell-based routes plus the standalone messaging, submission-review and suspended routes. Standard Instructor pages now use a consistent order: shared design tokens → Montserrat/Poppins fonts → Instructor core → injected shell components → page stylesheet → responsive primitives → scoped Instructor theme. The issue-report page has its styles extracted into `instructor/css/report.css`; the suspended page uses `instructor/css/portal-suspended.css`; and the submission-review page uses only tokens, typography and its page stylesheet rather than loading an unused authenticated shell. The Instructor component stylesheet now targets the actual injected sidebar/topbar IDs and their `.open` / `.active` states. Instructor page palette accents were aligned with the shared purple/cyan system, and the earnings reduced-motion rule was scoped to its page root. Static link and brace checks are in progress; browser verification remains outstanding.
+
+**Important:** The Instructor migration is a source-code migration, not a claim that every route has been visually verified. Test the mobile drawer, topbar, course-builder modals, earnings withdrawal modal, quiz grading panels, responsive tables and standalone messaging on GitHub Pages before calling this portal complete. No production-ready claim is made until all portal routes have been tested at desktop, tablet and mobile widths.
