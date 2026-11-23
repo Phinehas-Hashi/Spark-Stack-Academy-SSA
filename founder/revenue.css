@@ -3,7 +3,7 @@
    FOUNDER OS
 =================================== */
 
-:root{
+body.founder-portal-page {
 
 --bg:#07111f;
 
@@ -38,8 +38,7 @@
 /* ===================================
    RESET
 =================================== */
-
-*{
+ body.founder-portal-page * {
 
 margin:0;
 
@@ -50,7 +49,7 @@ box-sizing:border-box;
 }
 
 
-body{
+body.founder-portal-page {
 
 font-family:"Inter",sans-serif;
 
