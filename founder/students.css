@@ -8,7 +8,7 @@
    ROOT
 =================================== */
 
-:root{
+body.founder-shell-ready{
 
     --primary:#3b82f6;
     --primary-dark:#2563eb;
@@ -38,7 +38,7 @@
    RESET
 =================================== */
 
-*{
+body.founder-shell-ready, body.founder-shell-ready *{
 
     margin:0;
     padding:0;
@@ -46,13 +46,13 @@
 
 }
 
-html{
+body.founder-shell-ready{
 
     scroll-behavior:smooth;
 
 }
 
-body{
+body.founder-shell-ready{
 
     font-family:"Inter",sans-serif;
     background:var(--bg);
@@ -65,7 +65,7 @@ body{
    BACKGROUND
 =================================== */
 
-.bg-orb{
+body.founder-shell-ready .bg-orb{
 
     position:fixed;
     border-radius:50%;
@@ -75,7 +75,7 @@ body{
 
 }
 
-.orb-1{
+body.founder-shell-ready .orb-1{
 
     width:320px;
     height:320px;
@@ -85,7 +85,7 @@ body{
 
 }
 
-.orb-2{
+body.founder-shell-ready .orb-2{
 
     width:280px;
     height:280px;
@@ -95,7 +95,7 @@ body{
 
 }
 
-.orb-3{
+body.founder-shell-ready .orb-3{
 
     width:260px;
     height:260px;
@@ -109,14 +109,14 @@ body{
    LAYOUT
 =================================== */
 
-.dashboard-layout{
+body.founder-shell-ready .dashboard-layout{
 
     display:flex;
     min-height:100vh;
 
 }
 
-.main-content{
+body.founder-shell-ready .main-content{
 
     flex:1;
     padding:24px;
@@ -130,7 +130,7 @@ body{
    GLASS CARD
 =================================== */
 
-.glass-card{
+body.founder-shell-ready .glass-card{
 
     background:rgba(15,31,53,.72);
     backdrop-filter:blur(20px);
@@ -144,8 +144,8 @@ body{
    BUTTONS
 =================================== */
 
-.primary-btn,
-.secondary-btn{
+body.founder-shell-ready .primary-btn,
+body.founder-shell-ready .secondary-btn{
 
     border:none;
     outline:none;
@@ -158,7 +158,7 @@ body{
 
 }
 
-.primary-btn{
+body.founder-shell-ready .primary-btn{
 
     background:linear-gradient(
         135deg,
@@ -170,13 +170,13 @@ body{
 
 }
 
-.primary-btn:hover{
+body.founder-shell-ready .primary-btn:hover{
 
     transform:translateY(-2px);
 
 }
 
-.secondary-btn{
+body.founder-shell-ready .secondary-btn{
 
     background:transparent;
     color:var(--text);
@@ -184,7 +184,7 @@ body{
 
 }
 
-.secondary-btn:hover{
+body.founder-shell-ready .secondary-btn:hover{
 
     background:rgba(255,255,255,.05);
 
@@ -194,7 +194,7 @@ body{
    PAGE HERO
 =================================== */
 
-.page-hero{
+body.founder-shell-ready .page-hero{
 
     display:flex;
     flex-direction:column;
@@ -203,7 +203,7 @@ body{
 
 }
 
-.hero-content{
+body.founder-shell-ready .hero-content{
 
     display:flex;
     flex-direction:column;
@@ -211,7 +211,7 @@ body{
 
 }
 
-.hero-badge{
+body.founder-shell-ready .hero-badge{
 
     display:inline-flex;
     align-items:center;
@@ -229,7 +229,7 @@ body{
 
 }
 
-.hero-content h1{
+body.founder-shell-ready .hero-content h1{
 
     font-size:2.2rem;
     font-weight:800;
@@ -237,7 +237,7 @@ body{
 
 }
 
-.hero-content p{
+body.founder-shell-ready .hero-content p{
 
     max-width:700px;
     color:var(--muted);
@@ -245,7 +245,7 @@ body{
 
 }
 
-.hero-actions{
+body.founder-shell-ready .hero-actions{
 
     display:flex;
     flex-direction:column;
@@ -253,7 +253,7 @@ body{
 
 }
 
-.hero-actions button{
+body.founder-shell-ready .hero-actions button{
 
     width:100%;
 
@@ -263,7 +263,7 @@ body{
    TABLET
 =================================== */
 
-@media(min-width:768px){
+body.founder-shell-ready @media(min-width:768px){
 
 .hero-actions{
 
@@ -284,7 +284,7 @@ body{
    DESKTOP
 =================================== */
 
-@media(min-width:1024px){
+body.founder-shell-ready @media(min-width:1024px){
 
 .page-hero{
 
@@ -311,7 +311,7 @@ body{
    KPI GRID
 =================================== */
 
-.stats-grid{
+body.founder-shell-ready .stats-grid{
 
     display:grid;
     grid-template-columns:1fr;
@@ -323,7 +323,7 @@ body{
    STAT CARD
 =================================== */
 
-.stat-card{
+body.founder-shell-ready .stat-card{
 
     background:rgba(15,31,53,.72);
     backdrop-filter:blur(20px);
@@ -341,7 +341,7 @@ body{
 
 }
 
-.stat-card:hover{
+body.founder-shell-ready .stat-card:hover{
 
     transform:translateY(-6px);
 
@@ -356,7 +356,7 @@ body{
    STAT TOP
 =================================== */
 
-.stat-top{
+body.founder-shell-ready .stat-top{
 
     display:flex;
     align-items:center;
@@ -364,7 +364,7 @@ body{
 
 }
 
-.stat-top span{
+body.founder-shell-ready .stat-top span{
 
     color:var(--muted);
 
@@ -378,7 +378,7 @@ body{
    ICON
 =================================== */
 
-.stat-icon{
+body.founder-shell-ready .stat-icon{
 
     width:52px;
     height:52px;
@@ -399,42 +399,42 @@ body{
    ICON COLORS
 =================================== */
 
-.stat-icon.cyan{
+body.founder-shell-ready .stat-icon.cyan{
 
     background:rgba(6,182,212,.12);
     color:#22d3ee;
 
 }
 
-.stat-icon.green{
+body.founder-shell-ready .stat-icon.green{
 
     background:rgba(34,197,94,.12);
     color:#4ade80;
 
 }
 
-.stat-icon.blue{
+body.founder-shell-ready .stat-icon.blue{
 
     background:rgba(59,130,246,.12);
     color:#60a5fa;
 
 }
 
-.stat-icon.purple{
+body.founder-shell-ready .stat-icon.purple{
 
     background:rgba(139,92,246,.12);
     color:#a78bfa;
 
 }
 
-.stat-icon.red{
+body.founder-shell-ready .stat-icon.red{
 
     background:rgba(239,68,68,.12);
     color:#f87171;
 
 }
 
-.stat-icon.gold{
+body.founder-shell-ready .stat-icon.gold{
 
     background:rgba(245,158,11,.12);
     color:#fbbf24;
@@ -445,7 +445,7 @@ body{
    VALUES
 =================================== */
 
-.stat-card h2{
+body.founder-shell-ready .stat-card h2{
 
     font-size:2.2rem;
 
@@ -457,7 +457,7 @@ body{
 
 }
 
-.stat-card small{
+body.founder-shell-ready .stat-card small{
 
     color:var(--muted);
 
@@ -471,7 +471,7 @@ body{
    TABLET
 =================================== */
 
-@media(min-width:768px){
+body.founder-shell-ready @media(min-width:768px){
 
 .stats-grid{
 
@@ -486,7 +486,7 @@ body{
    LAPTOP
 =================================== */
 
-@media(min-width:1024px){
+body.founder-shell-ready @media(min-width:1024px){
 
 .stats-grid{
 
@@ -501,7 +501,7 @@ body{
    LARGE DESKTOP
 =================================== */
 
-@media(min-width:1400px){
+body.founder-shell-ready @media(min-width:1400px){
 
 .stats-grid{
 
@@ -515,7 +515,7 @@ body{
    FILTER BAR
 =================================== */
 
-.filter-bar{
+body.founder-shell-ready .filter-bar{
 
     display:flex;
 
@@ -531,7 +531,7 @@ body{
    FILTER LEFT
 =================================== */
 
-.filter-left{
+body.founder-shell-ready .filter-left{
 
     width:100%;
 
@@ -541,7 +541,7 @@ body{
    SEARCH BOX
 =================================== */
 
-.search-box{
+body.founder-shell-ready .search-box{
 
     display:flex;
 
@@ -563,7 +563,7 @@ body{
 
 }
 
-.search-box:focus-within{
+body.founder-shell-ready .search-box:focus-within{
 
     border-color:var(--primary);
 
@@ -571,7 +571,7 @@ body{
 
 }
 
-.search-box i{
+body.founder-shell-ready .search-box i{
 
     width:20px;
 
@@ -583,7 +583,7 @@ body{
 
 }
 
-.search-box input{
+body.founder-shell-ready .search-box input{
 
     width:100%;
 
@@ -601,7 +601,7 @@ body{
 
 }
 
-.search-box input::placeholder{
+body.founder-shell-ready .search-box input::placeholder{
 
     color:var(--muted);
 
@@ -611,7 +611,7 @@ body{
    FILTER RIGHT
 =================================== */
 
-.filter-right{
+body.founder-shell-ready .filter-right{
 
     display:grid;
 
@@ -625,7 +625,7 @@ body{
    SELECT
 =================================== */
 
-.filter-right select{
+body.founder-shell-ready .filter-right select{
 
     width:100%;
 
@@ -649,7 +649,7 @@ body{
 
 }
 
-.filter-right select:focus{
+body.founder-shell-ready .filter-right select:focus{
 
     border-color:var(--primary);
 
@@ -657,7 +657,7 @@ body{
 
 }
 
-.filter-right option{
+body.founder-shell-ready .filter-right option{
 
     background:var(--surface);
 
@@ -669,7 +669,7 @@ body{
    REFRESH BUTTON
 =================================== */
 
-#refreshStudents{
+body.founder-shell-ready #refreshStudents{
 
     display:flex;
 
@@ -681,7 +681,7 @@ body{
 
 }
 
-#refreshStudents i{
+body.founder-shell-ready #refreshStudents i{
 
     width:18px;
 
@@ -693,7 +693,7 @@ body{
    TABLET
 =================================== */
 
-@media(min-width:768px){
+body.founder-shell-ready @media(min-width:768px){
 
 .filter-right{
 
@@ -708,7 +708,7 @@ body{
    DESKTOP
 =================================== */
 
-@media(min-width:1024px){
+body.founder-shell-ready @media(min-width:1024px){
 
 .filter-bar{
 
@@ -744,7 +744,7 @@ body{
    STUDENTS TABLE
 =================================== */
 
-.students-table{
+body.founder-shell-ready .students-table{
 
     padding:24px;
 
@@ -760,7 +760,7 @@ body{
    TABLE HEADER
 =================================== */
 
-.table-header{
+body.founder-shell-ready .table-header{
 
     display:flex;
 
@@ -774,7 +774,7 @@ body{
 
 }
 
-.table-header h3{
+body.founder-shell-ready .table-header h3{
 
     font-size:1.15rem;
 
@@ -784,7 +784,7 @@ body{
 
 }
 
-.table-header span{
+body.founder-shell-ready .table-header span{
 
     color:var(--muted);
 
@@ -798,7 +798,7 @@ body{
    TABLE WRAPPER
 =================================== */
 
-.table-responsive{
+body.founder-shell-ready .table-responsive{
 
     width:100%;
 
@@ -812,7 +812,7 @@ body{
    TABLE
 =================================== */
 
-table{
+body.founder-shell-ready table{
 
     width:100%;
 
@@ -822,13 +822,13 @@ table{
 
 }
 
-thead{
+body.founder-shell-ready thead{
 
     background:rgba(255,255,255,.04);
 
 }
 
-th{
+body.founder-shell-ready th{
 
     text-align:left;
 
@@ -850,7 +850,7 @@ th{
 
 }
 
-td{
+body.founder-shell-ready td{
 
     padding:18px;
 
@@ -864,13 +864,13 @@ td{
 
 }
 
-tbody tr{
+body.founder-shell-ready tbody tr{
 
     transition:var(--transition);
 
 }
 
-tbody tr:hover{
+body.founder-shell-ready tbody tr:hover{
 
     background:rgba(255,255,255,.03);
 
@@ -880,7 +880,7 @@ tbody tr:hover{
    STUDENT INFO
 =================================== */
 
-.student-info{
+body.founder-shell-ready .student-info{
 
     display:flex;
 
@@ -892,7 +892,7 @@ tbody tr:hover{
 
 }
 
-.student-avatar{
+body.founder-shell-ready .student-avatar{
 
     width:44px;
 
@@ -922,7 +922,7 @@ tbody tr:hover{
 
 }
 
-.student-details{
+body.founder-shell-ready .student-details{
 
     display:flex;
 
@@ -932,7 +932,7 @@ tbody tr:hover{
 
 }
 
-.student-details strong{
+body.founder-shell-ready .student-details strong{
 
     font-size:.95rem;
 
@@ -942,7 +942,7 @@ tbody tr:hover{
 
 }
 
-.student-details small{
+body.founder-shell-ready .student-details small{
 
     font-size:.82rem;
 
@@ -954,7 +954,7 @@ tbody tr:hover{
    STATUS BADGES
 =================================== */
 
-.status-badge{
+body.founder-shell-ready .status-badge{
 
     display:inline-flex;
 
@@ -978,7 +978,7 @@ tbody tr:hover{
 
 }
 
-.status-badge.active{
+body.founder-shell-ready .status-badge.active{
 
     background:rgba(34,197,94,.12);
 
@@ -988,7 +988,7 @@ tbody tr:hover{
 
 }
 
-.status-badge.graduated{
+body.founder-shell-ready .status-badge.graduated{
 
     background:rgba(139,92,246,.12);
 
@@ -998,7 +998,7 @@ tbody tr:hover{
 
 }
 
-.status-badge.suspended{
+body.founder-shell-ready .status-badge.suspended{
 
     background:rgba(239,68,68,.12);
 
@@ -1012,13 +1012,13 @@ tbody tr:hover{
    PROGRESS BAR
 =================================== */
 
-.progress-cell{
+body.founder-shell-ready .progress-cell{
 
     min-width:160px;
 
 }
 
-.progress-wrapper{
+body.founder-shell-ready .progress-wrapper{
 
     display:flex;
 
@@ -1028,7 +1028,7 @@ tbody tr:hover{
 
 }
 
-.progress-bar{
+body.founder-shell-ready .progress-bar{
 
     flex:1;
 
@@ -1042,7 +1042,7 @@ tbody tr:hover{
 
 }
 
-.progress-fill{
+body.founder-shell-ready .progress-fill{
 
     height:100%;
 
@@ -1056,7 +1056,7 @@ tbody tr:hover{
 
 }
 
-.progress-value{
+body.founder-shell-ready .progress-value{
 
     min-width:40px;
 
@@ -1074,7 +1074,7 @@ tbody tr:hover{
    ACTION BUTTONS
 =================================== */
 
-.table-actions{
+body.founder-shell-ready .table-actions{
 
     display:flex;
 
@@ -1084,7 +1084,7 @@ tbody tr:hover{
 
 }
 
-.action-btn{
+body.founder-shell-ready .action-btn{
 
     width:36px;
 
@@ -1110,13 +1110,13 @@ tbody tr:hover{
 
 }
 
-.action-btn:hover{
+body.founder-shell-ready .action-btn:hover{
 
     transform:translateY(-2px);
 
 }
 
-.action-btn.view:hover{
+body.founder-shell-ready .action-btn.view:hover{
 
     background:rgba(59,130,246,.18);
 
@@ -1124,7 +1124,7 @@ tbody tr:hover{
 
 }
 
-.action-btn.edit:hover{
+body.founder-shell-ready .action-btn.edit:hover{
 
     background:rgba(245,158,11,.18);
 
@@ -1132,7 +1132,7 @@ tbody tr:hover{
 
 }
 
-.action-btn.delete:hover{
+body.founder-shell-ready .action-btn.delete:hover{
 
     background:rgba(239,68,68,.18);
 
@@ -1140,7 +1140,7 @@ tbody tr:hover{
 
 }
 
-.action-btn i{
+body.founder-shell-ready .action-btn i{
 
     width:16px;
 
@@ -1152,7 +1152,7 @@ tbody tr:hover{
    EMPTY STATE
 =================================== */
 
-.empty-state{
+body.founder-shell-ready .empty-state{
 
     padding:60px 24px !important;
 
@@ -1160,7 +1160,7 @@ tbody tr:hover{
 
 }
 
-.empty-content{
+body.founder-shell-ready .empty-content{
 
     display:flex;
 
@@ -1176,7 +1176,7 @@ tbody tr:hover{
 
 }
 
-.empty-icon{
+body.founder-shell-ready .empty-icon{
 
     width:72px;
 
@@ -1198,7 +1198,7 @@ tbody tr:hover{
 
 }
 
-.empty-content h3{
+body.founder-shell-ready .empty-content h3{
 
     font-size:1.1rem;
 
@@ -1208,7 +1208,7 @@ tbody tr:hover{
 
 }
 
-.empty-content p{
+body.founder-shell-ready .empty-content p{
 
     color:var(--muted);
 
@@ -1220,7 +1220,7 @@ tbody tr:hover{
    MOBILE IMPROVEMENTS
 =================================== */
 
-@media(max-width:767px){
+body.founder-shell-ready @media(max-width:767px){
 
 .students-table{
 
@@ -1248,7 +1248,7 @@ th{
    STUDENTS TABLE
 =================================== */
 
-.students-table{
+body.founder-shell-ready .students-table{
 
     padding:24px;
 
@@ -1256,7 +1256,7 @@ th{
 
 }
 
-.table-header{
+body.founder-shell-ready .table-header{
 
     display:flex;
 
@@ -1270,7 +1270,7 @@ th{
 
 }
 
-.table-header h3{
+body.founder-shell-ready .table-header h3{
 
     font-size:1.2rem;
 
@@ -1280,7 +1280,7 @@ th{
 
 }
 
-.table-header span{
+body.founder-shell-ready .table-header span{
 
     color:var(--muted);
 
@@ -1294,7 +1294,7 @@ th{
    RESPONSIVE TABLE
 =================================== */
 
-.table-responsive{
+body.founder-shell-ready .table-responsive{
 
     width:100%;
 
@@ -1302,13 +1302,13 @@ th{
 
 }
 
-.table-responsive::-webkit-scrollbar{
+body.founder-shell-ready .table-responsive::-webkit-scrollbar{
 
     height:8px;
 
 }
 
-.table-responsive::-webkit-scrollbar-thumb{
+body.founder-shell-ready .table-responsive::-webkit-scrollbar-thumb{
 
     background:rgba(255,255,255,.12);
 
@@ -1316,7 +1316,7 @@ th{
 
 }
 
-table{
+body.founder-shell-ready table{
 
     width:100%;
 
@@ -1326,7 +1326,7 @@ table{
 
 }
 
-thead th{
+body.founder-shell-ready thead th{
 
     padding:18px 16px;
 
@@ -1346,7 +1346,7 @@ thead th{
 
 }
 
-tbody td{
+body.founder-shell-ready tbody td{
 
     padding:18px 16px;
 
@@ -1358,13 +1358,13 @@ tbody td{
 
 }
 
-tbody tr{
+body.founder-shell-ready tbody tr{
 
     transition:var(--transition);
 
 }
 
-tbody tr:hover{
+body.founder-shell-ready tbody tr:hover{
 
     background:rgba(255,255,255,.03);
 
@@ -1374,7 +1374,7 @@ tbody tr:hover{
    STUDENT INFO
 =================================== */
 
-.student-info{
+body.founder-shell-ready .student-info{
 
     display:flex;
 
@@ -1384,7 +1384,7 @@ tbody tr:hover{
 
 }
 
-.student-avatar{
+body.founder-shell-ready .student-avatar{
 
     width:48px;
 
@@ -1412,7 +1412,7 @@ tbody tr:hover{
 
 }
 
-.student-details{
+body.founder-shell-ready .student-details{
 
     display:flex;
 
@@ -1422,13 +1422,13 @@ tbody tr:hover{
 
 }
 
-.student-name{
+body.founder-shell-ready .student-name{
 
     font-weight:700;
 
 }
 
-.student-id{
+body.founder-shell-ready .student-id{
 
     font-size:.82rem;
 
@@ -1440,7 +1440,7 @@ tbody tr:hover{
    STATUS BADGES
 =================================== */
 
-.status{
+body.founder-shell-ready .status{
 
     display:inline-flex;
 
@@ -1458,7 +1458,7 @@ tbody tr:hover{
 
 }
 
-.status.active{
+body.founder-shell-ready .status.active{
 
     color:#4ade80;
 
@@ -1466,7 +1466,7 @@ tbody tr:hover{
 
 }
 
-.status.graduated{
+body.founder-shell-ready .status.graduated{
 
     color:#60a5fa;
 
@@ -1474,7 +1474,7 @@ tbody tr:hover{
 
 }
 
-.status.suspended{
+body.founder-shell-ready .status.suspended{
 
     color:#f87171;
 
@@ -1486,7 +1486,7 @@ tbody tr:hover{
    PROGRESS
 =================================== */
 
-.progress{
+body.founder-shell-ready .progress{
 
     display:flex;
 
@@ -1496,7 +1496,7 @@ tbody tr:hover{
 
 }
 
-.progress-bar{
+body.founder-shell-ready .progress-bar{
 
     width:140px;
 
@@ -1510,7 +1510,7 @@ tbody tr:hover{
 
 }
 
-.progress-fill{
+body.founder-shell-ready .progress-fill{
 
     height:100%;
 
@@ -1524,7 +1524,7 @@ tbody tr:hover{
 
 }
 
-.progress span{
+body.founder-shell-ready .progress span{
 
     font-size:.8rem;
 
@@ -1536,7 +1536,7 @@ tbody tr:hover{
    ACTION BUTTONS
 =================================== */
 
-.action-buttons{
+body.founder-shell-ready .action-buttons{
 
     display:flex;
 
@@ -1546,7 +1546,7 @@ tbody tr:hover{
 
 }
 
-.action-btn{
+body.founder-shell-ready .action-btn{
 
     width:38px;
 
@@ -1572,7 +1572,7 @@ tbody tr:hover{
 
 }
 
-.action-btn:hover{
+body.founder-shell-ready .action-btn:hover{
 
     background:var(--primary);
 
@@ -1584,7 +1584,7 @@ tbody tr:hover{
    EMPTY STATE
 =================================== */
 
-.empty-state{
+body.founder-shell-ready .empty-state{
 
     padding:70px 20px;
 
@@ -1592,7 +1592,7 @@ tbody tr:hover{
 
 }
 
-.empty-content{
+body.founder-shell-ready .empty-content{
 
     display:flex;
 
@@ -1604,7 +1604,7 @@ tbody tr:hover{
 
 }
 
-.empty-icon{
+body.founder-shell-ready .empty-icon{
 
     width:90px;
 
@@ -1624,7 +1624,7 @@ tbody tr:hover{
 
 }
 
-.empty-content h3{
+body.founder-shell-ready .empty-content h3{
 
     font-size:1.35rem;
 
@@ -1632,7 +1632,7 @@ tbody tr:hover{
 
 }
 
-.empty-content p{
+body.founder-shell-ready .empty-content p{
 
     color:var(--muted);
 
@@ -1645,7 +1645,7 @@ tbody tr:hover{
    PAGINATION
 =================================== */
 
-.pagination{
+body.founder-shell-ready .pagination{
 
     display:flex;
 
@@ -1661,7 +1661,7 @@ tbody tr:hover{
 
 }
 
-.page-info{
+body.founder-shell-ready .page-info{
 
     color:var(--muted);
 
@@ -1671,7 +1671,7 @@ tbody tr:hover{
 
 }
 
-.page-btn{
+body.founder-shell-ready .page-btn{
 
     width:100%;
 
@@ -1699,7 +1699,7 @@ tbody tr:hover{
 
 }
 
-.page-btn:hover{
+body.founder-shell-ready .page-btn:hover{
 
     background:var(--primary);
 
@@ -1709,7 +1709,7 @@ tbody tr:hover{
 
 }
 
-.page-btn:disabled{
+body.founder-shell-ready .page-btn:disabled{
 
     opacity:.45;
 
@@ -1723,7 +1723,7 @@ tbody tr:hover{
    FADE ANIMATION
 =================================== */
 
-@keyframes fadeUp{
+body.founder-shell-ready @keyframes fadeUp{
 
     from{
 
@@ -1743,41 +1743,41 @@ tbody tr:hover{
 
 }
 
-.page-hero,
-.stat-card,
-.filter-bar,
-.students-table,
-.pagination{
+body.founder-shell-ready .page-hero,
+body.founder-shell-ready .stat-card,
+body.founder-shell-ready .filter-bar,
+body.founder-shell-ready .students-table,
+body.founder-shell-ready .pagination{
 
     animation:fadeUp .6s ease both;
 
 }
 
-.stat-card:nth-child(2){
+body.founder-shell-ready .stat-card:nth-child(2){
 
     animation-delay:.08s;
 
 }
 
-.stat-card:nth-child(3){
+body.founder-shell-ready .stat-card:nth-child(3){
 
     animation-delay:.16s;
 
 }
 
-.stat-card:nth-child(4){
+body.founder-shell-ready .stat-card:nth-child(4){
 
     animation-delay:.24s;
 
 }
 
-.stat-card:nth-child(5){
+body.founder-shell-ready .stat-card:nth-child(5){
 
     animation-delay:.32s;
 
 }
 
-.stat-card:nth-child(6){
+body.founder-shell-ready .stat-card:nth-child(6){
 
     animation-delay:.40s;
 
@@ -1787,7 +1787,7 @@ tbody tr:hover{
    GLOBAL SCROLLBAR
 =================================== */
 
-::-webkit-scrollbar{
+body.founder-shell-ready ::-webkit-scrollbar{
 
     width:10px;
 
@@ -1795,13 +1795,13 @@ tbody tr:hover{
 
 }
 
-::-webkit-scrollbar-track{
+body.founder-shell-ready ::-webkit-scrollbar-track{
 
     background:var(--bg);
 
 }
 
-::-webkit-scrollbar-thumb{
+body.founder-shell-ready ::-webkit-scrollbar-thumb{
 
     background:rgba(255,255,255,.15);
 
@@ -1809,7 +1809,7 @@ tbody tr:hover{
 
 }
 
-::-webkit-scrollbar-thumb:hover{
+body.founder-shell-ready ::-webkit-scrollbar-thumb:hover{
 
     background:var(--primary);
 
@@ -1819,7 +1819,7 @@ tbody tr:hover{
    TABLET
 =================================== */
 
-@media(min-width:768px){
+body.founder-shell-ready @media(min-width:768px){
 
 .pagination{
 
@@ -1843,7 +1843,7 @@ tbody tr:hover{
    MOBILE OPTIMIZATION
 =================================== */
 
-@media(max-width:767px){
+body.founder-shell-ready @media(max-width:767px){
 
 .main-content{
 
@@ -1885,7 +1885,7 @@ tbody tr:hover{
    LARGE SCREENS
 =================================== */
 
-@media(min-width:1440px){
+body.founder-shell-ready @media(min-width:1440px){
 
 .main-content{
 
@@ -1903,9 +1903,9 @@ tbody tr:hover{
    ACCESSIBILITY
 =================================== */
 
-button:focus-visible,
-select:focus-visible,
-input:focus-visible{
+body.founder-shell-ready button:focus-visible,
+body.founder-shell-ready select:focus-visible,
+body.founder-shell-ready input:focus-visible{
 
     outline:2px solid var(--primary);
 
@@ -1917,7 +1917,7 @@ input:focus-visible{
    SELECTION
 =================================== */
 
-::selection{
+body.founder-shell-ready ::selection{
 
     background:var(--primary);
 
@@ -1929,7 +1929,7 @@ input:focus-visible{
 =================================== */
 
 
-.modal{
+body.founder-shell-ready .modal{
 
     position:fixed;
 
@@ -1952,14 +1952,14 @@ input:focus-visible{
 }
 
 
-.modal.active{
+body.founder-shell-ready .modal.active{
 
     display:flex;
 
 }
 
 
-.modal-content{
+body.founder-shell-ready .modal-content{
 
     width:100%;
 
@@ -1970,7 +1970,7 @@ input:focus-visible{
 }
 
 
-.modal-header{
+body.founder-shell-ready .modal-header{
 
     display:flex;
 
@@ -1983,7 +1983,7 @@ input:focus-visible{
 }
 
 
-.modal-header button{
+body.founder-shell-ready .modal-header button{
 
     background:none;
 
@@ -1998,7 +1998,7 @@ input:focus-visible{
 }
 
 
-#studentForm{
+body.founder-shell-ready #studentForm{
 
     display:flex;
 
@@ -2009,8 +2009,8 @@ input:focus-visible{
 }
 
 
-#studentForm input,
-#studentForm select{
+body.founder-shell-ready #studentForm input,
+body.founder-shell-ready #studentForm select{
 
     padding:14px;
 
@@ -2032,7 +2032,7 @@ input:focus-visible{
 
 /* Desktop */
 
-.main-content{
+body.founder-shell-ready .main-content{
 
 margin-left:var(--sidebar-width);
 
@@ -2046,7 +2046,7 @@ transition:.35s ease;
 
 /* Mobile */
 
-@media(max-width:768px){
+body.founder-shell-ready @media(max-width:768px){
 
 
 .main-content{
