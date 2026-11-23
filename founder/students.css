@@ -10,8 +10,8 @@
 
 body.founder-portal-page {
 
-    --primary:#3b82f6;
-    --primary-dark:#2563eb;
+    --primary:#762cff;
+    --primary-dark:#762cff;
 
     --success:#22c55e;
     --danger:#ef4444;
@@ -78,7 +78,7 @@ body.founder-portal-page {
 
     width:320px;
     height:320px;
-    background:#2563eb;
+    background:#762cff;
     top:-100px;
     left:-80px;
 
@@ -1119,7 +1119,7 @@ tbody tr:hover{
 
     background:rgba(59,130,246,.18);
 
-    color:#93c5fd;
+    color:#c6a8ff;
 
 }
 
@@ -1193,7 +1193,7 @@ tbody tr:hover{
 
     background:rgba(59,130,246,.12);
 
-    color:#93c5fd;
+    color:#c6a8ff;
 
 }
 
@@ -1518,7 +1518,7 @@ tbody tr:hover{
     background:linear-gradient(
         90deg,
         #22c55e,
-        #3b82f6
+        #762cff
     );
 
 }
