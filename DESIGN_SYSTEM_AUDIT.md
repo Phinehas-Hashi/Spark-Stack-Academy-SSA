@@ -196,17 +196,20 @@ The dependency mapping and static CSS scan cover all five portals and all 152 CS
 
 ### Instructor Portal — foundation and page migration
 
-- Standardized the 17 shell-based Instructor routes on a shared stylesheet order: design tokens → Instructor core/reset → injected shell components → responsive primitives → scoped Instructor theme → page stylesheet → Google Fonts.
-- Kept the seven non-shell routes independent of the injected navigation shell: Create Quiz, Quiz Submission, Quiz, Quizzes, Messages, Portal Suspended and Submission Review. Messages retains the shared messaging layout and now has an Instructor-only theme override.
+- Classified all 24 Instructor HTML routes: 17 authenticated shell routes and 7 standalone routes.
+- The 17 shell routes use shared design tokens, Instructor core/reset, injected shell components, a page stylesheet, responsive primitives and the scoped Instructor theme. The current link order is: tokens → font preconnect/font stylesheet → core → shell components → page stylesheet → responsive primitives → theme.
+- Four standalone quiz routes (Create Quiz, Quiz Submission, Quiz and Quizzes) use the shared standalone foundation, their own page stylesheet, responsive primitives and the scoped theme; they do not load the injected sidebar/topbar components.
+- Messages remains a standalone shared messaging layout. It now loads shared tokens and a dedicated Instructor-only `messages.css` override.
+- Portal Suspended and Submission Review each use dedicated standalone page-root styles and do not depend on the authenticated shell.
 - Replaced the Instructor component stylesheet with selectors scoped to the actual injected IDs: `#instructorSidebar`, `#sidebarOverlay` and `#instructorTopbar`. The sidebar open state and overlay state match the shell JavaScript classes `.open` and `.active`.
-- Removed duplicate outer sidebar and overlay geometry from Instructor core CSS. The injected component stylesheet owns those elements; core CSS owns the page reset, main-column offset and topbar sizing.
+- Removed duplicate outer sidebar and overlay geometry from Instructor core CSS. The injected component stylesheet owns those elements; core CSS owns the reset, main-column offset and topbar sizing.
 - Scoped Instructor token aliases to `.instructor-app` and `.instructor-page` instead of defining portal-specific aliases globally on `:root`.
 - Updated the mobile menu control with `aria-controls` and `aria-expanded`, and made its click handler toggle the drawer state.
 - Migrated legacy Instructor blue/navy brand values in page stylesheets toward the shared purple/cyan palette while retaining semantic status colors.
-- Extracted Report an Issue styles into `instructor/css/report.css`. The suspended page and submission-review page use dedicated standalone stylesheets and do not depend on the authenticated shell.
-- Added an Instructor-scoped message theme over the shared messaging layout, preventing the old global messaging palette from diverging on this portal.
-- Static checks on the inspected Instructor stylesheets show balanced braces and no `@import` dependencies. Remaining `!important` declarations are primarily state/visibility rules and reduced-motion overrides; they still require contextual browser review.
-- Browser verification and interactive shell regression testing remain outstanding.
+- Extracted Report an Issue styles into `instructor/css/report.css`. The suspended page and submission-review page use dedicated standalone stylesheets.
+- Static inspection of all 24 Instructor HTML routes found no embedded `<style>` blocks or inline style attributes. Inspected Instructor CSS files have balanced braces and no `@import` dependencies.
+- Remaining `!important` declarations are primarily state/visibility rules and reduced-motion overrides; they still require contextual browser review.
+
 
 **Instructor verification checklist:** test the drawer and overlay at mobile widths; verify keyboard Escape and body scroll lock; test course-builder and assignment modals, earnings/payment dialogs, quiz grading panels, responsive tables, messages and standalone routes. The repository changes are committed, but the Instructor portal must not be marked visually complete until these checks pass on GitHub Pages.
 **Migration status:** Student active stylesheet foundation and standalone-page first batch are committed. Instructor foundation and page-level palette migration are committed across its shell and standalone routes. The remaining work is browser verification followed by controlled migration of Institution, Admin and Founder. Static source checks do not establish visual correctness or production readiness.
