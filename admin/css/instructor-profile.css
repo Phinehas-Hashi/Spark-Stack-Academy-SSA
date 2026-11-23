@@ -42,7 +42,7 @@
 }
 
 .profile-back-link:hover {
-    color: var(--primary, #2979ff);
+    color: var(--primary, #762cff);
     transform: translateX(-3px);
 }
 
@@ -67,7 +67,7 @@
     background:
         linear-gradient(
             135deg,
-            rgba(41,121,255,.07),
+            rgba(118,44,255,.07),
             rgba(255,193,7,.035)
         );
 
@@ -108,8 +108,8 @@
     background:
         linear-gradient(
             135deg,
-            #2979ff,
-            #081c3a
+            #762cff,
+            #17152f
         );
 
     color: #fff;
@@ -118,7 +118,7 @@
     font-weight: 800;
 
     box-shadow:
-        0 12px 25px rgba(41,121,255,.25);
+        0 12px 25px rgba(118,44,255,.25);
 }
 
 
@@ -307,7 +307,7 @@
 }
 
 .profile-course-item:hover {
-    border-color: rgba(41,121,255,.25);
+    border-color: rgba(118,44,255,.25);
     transform: translateY(-1px);
 }
 
@@ -323,8 +323,8 @@
 
     border-radius: 11px;
 
-    background: rgba(41,121,255,.1);
-    color: #2979ff;
+    background: rgba(118,44,255,.1);
+    color: #762cff;
 }
 
 .profile-course-icon svg {
@@ -411,7 +411,7 @@
     background:
         linear-gradient(
             90deg,
-            #2979ff,
+            #762cff,
             #60a5fa
         );
 
@@ -459,8 +459,8 @@
 
     border-radius: 10px;
 
-    background: rgba(41,121,255,.09);
-    color: #2979ff;
+    background: rgba(118,44,255,.09);
+    color: #762cff;
 }
 
 .profile-activity-icon svg {
@@ -612,7 +612,7 @@
     height: 18px;
 
     border: 2px solid #e5e7eb;
-    border-top-color: #2979ff;
+    border-top-color: #762cff;
 
     border-radius: 50%;
 
