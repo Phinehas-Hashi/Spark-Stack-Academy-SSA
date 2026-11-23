@@ -54,7 +54,7 @@
 .search-box:focus-within {
   background: #fff;
   border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.08);
+  box-shadow: 0 0 0 3px rgba(118,44,255,.08);
 }
 .search-box > svg { width: 17px; height: 17px; flex: 0 0 17px; }
 .search-box input {
