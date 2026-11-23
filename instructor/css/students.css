@@ -24,7 +24,7 @@
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 1.5px;
-    color: #2979ff;
+    color: #762cff;
     margin-bottom: 7px;
 }
 
@@ -32,7 +32,7 @@
     margin: 0;
     font-size: 32px;
     font-weight: 800;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .page-header p {
@@ -78,7 +78,7 @@
 
 .student-stat strong {
     font-size: 24px;
-    color: #081c3a;
+    color: #17152f;
     font-weight: 800;
 }
 
@@ -104,7 +104,7 @@
 
 .stat-icon.blue {
     background: #eaf2ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .stat-icon.green {
@@ -151,7 +151,7 @@
 
 .students-toolbar h2 {
     margin: 0;
-    color: #081c3a;
+    color: #17152f;
     font-size: 20px;
     font-weight: 750;
 }
@@ -178,7 +178,7 @@
     border: 0;
     outline: 0;
     background: transparent;
-    color: #081c3a;
+    color: #17152f;
     font-family: inherit;
     font-size: 13px;
 }
@@ -215,11 +215,11 @@
 
 .filter-btn:hover {
     background: #f4f7fb;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .filter-btn.active {
-    background: #081c3a;
+    background: #17152f;
     color: #fff;
 }
 
@@ -261,7 +261,7 @@
     align-items: center;
     justify-content: center;
     background: #eaf2ff;
-    color: #2979ff;
+    color: #762cff;
     font-size: 14px;
     font-weight: 800;
 }
@@ -274,7 +274,7 @@
 
 .student-name strong {
     font-size: 13px;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .student-name span {
@@ -312,7 +312,7 @@
     height: 100%;
     width: 0;
     border-radius: inherit;
-    background: #2979ff;
+    background: #762cff;
 }
 
 .student-status {
@@ -353,7 +353,7 @@
     width: 27px;
     height: 27px;
     border: 3px solid #e7edf5;
-    border-top-color: #2979ff;
+    border-top-color: #762cff;
     border-radius: 50%;
     animation: studentSpin 0.8s linear infinite;
 }
@@ -391,7 +391,7 @@
     justify-content: center;
     border-radius: 16px;
     background: #edf4ff;
-    color: #2979ff;
+    color: #762cff;
     margin-bottom: 15px;
 }
 
@@ -401,7 +401,7 @@
 
 .students-empty h3 {
     margin: 0 0 6px;
-    color: #081c3a;
+    color: #17152f;
     font-size: 16px;
 }
 
