@@ -71,8 +71,8 @@
 
 .primary-btn {
     color: #fff;
-    background: #081c3a;
-    border-color: #081c3a;
+    background: #17152f;
+    border-color: #17152f;
 }
 
 .primary-btn:hover {
@@ -87,7 +87,7 @@
 }
 
 .secondary-btn {
-    color: #081c3a;
+    color: #17152f;
     background: #fff;
     border-color: #e5e7eb;
 }
@@ -180,8 +180,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
     background: #fff;
-    border-color: #2979ff;
-    box-shadow: 0 0 0 3px rgba(41, 121, 255, .1);
+    border-color: #762cff;
+    box-shadow: 0 0 0 3px rgba(118, 44, 255, .1);
 }
 
 .form-group input::placeholder,
