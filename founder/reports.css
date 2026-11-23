@@ -1,5 +1,23 @@
-body.founder-portal-page {--bg:#f5f7fb;--surface:#fff;--surface-soft:#f8fafc;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--danger:#dc2626;--shadow:0 10px 30px rgba(15,23,42,.07)}
-body.founder-portal-page {margin:0;background:var(--bg);color:var(--text);font-family:Inter,Poppins,system-ui,sans-serif}.page{max-width:1200px;margin:auto;padding:32px}.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:26px;box-shadow:var(--shadow)}.eyebrow{font-size:.75rem;font-weight:800;letter-spacing:.08em;color:var(--primary)}h1{margin:8px 0;font-size:clamp(1.5rem,3vw,2.1rem)}.intro{color:var(--muted);line-height:1.6;margin-bottom:22px}.reports-list{display:grid;gap:12px}.report{padding:18px;background:var(--surface-soft);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:14px}.report.critical{border-left-color:var(--danger)}.report strong{font-size:.9rem}.report span{display:block;margin-top:6px;color:var(--muted);font-size:.78rem;text-transform:capitalize}.report p{line-height:1.6;margin:9px 0 0}.report p:last-child{color:#475569}.empty{padding:32px;text-align:center;border:1px dashed #cbd5e1;border-radius:14px;color:var(--muted)}@media(max-width:600px){.page{padding:16px}.card{padding:18px}}
-
-/* Extracted standalone Reports page styles. */
-body.founder-portal-page {background:#f6f8fc;color:#0f172a;font-family:Inter,Poppins,system-ui}body.founder-portal-page .page {max-width:1200px;margin:auto;padding:32px}body.founder-portal-page .card {background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:24px;box-shadow:0 12px 35px rgba(15,23,42,.06)}body.founder-portal-page .report {padding:16px;border:1px solid #e2e8f0;border-radius:16px;margin-top:12px}body.founder-portal-page .report.critical {border-left:4px solid #dc2626}body.founder-portal-page .report.system {border-left:4px solid #2563eb}body.founder-portal-page .report strong,body.founder-portal-page body.founder-portal-page .report span {display:block}.report span{margin-top:5px;color:#64748b;font-size:12px}body.founder-portal-page .report p {line-height:1.6}
+/* Founder Reports — standalone, token-driven page. */
+body.founder-portal-page {
+  --report-surface:var(--ssa-color-surface,#fff);
+  --report-border:var(--ssa-color-line,#e8e6f0);
+  --report-text:var(--ssa-color-ink,#17152f);
+  --report-muted:var(--ssa-color-muted,#77758f);
+  --report-brand:var(--ssa-color-brand,#762cff);
+  --report-danger:var(--ssa-color-danger,#c43d52);
+}
+body.founder-portal-page .page{max-width:1200px;margin:auto;padding:32px;color:var(--report-text)}
+body.founder-portal-page .card{background:var(--report-surface);border:1px solid var(--report-border);border-radius:20px;padding:26px;box-shadow:var(--ssa-shadow-md,0 12px 34px rgba(27,20,65,.10))}
+body.founder-portal-page .eyebrow{font-size:.75rem;font-weight:800;letter-spacing:.08em;color:var(--report-brand)}
+body.founder-portal-page h1{margin:8px 0;font-size:clamp(1.5rem,3vw,2.1rem);color:var(--report-text)}
+body.founder-portal-page .intro{color:var(--report-muted);line-height:1.6;margin-bottom:22px}
+body.founder-portal-page .reports-list{display:grid;gap:12px}
+body.founder-portal-page .report{padding:18px;background:#fbfaff;border:1px solid var(--report-border);border-left:4px solid var(--report-brand);border-radius:14px}
+body.founder-portal-page .report.critical{border-left-color:var(--report-danger)}
+body.founder-portal-page .report.system{border-left-color:var(--ssa-color-accent,#20cfe8)}
+body.founder-portal-page .report strong{font-size:.9rem;color:var(--report-text)}
+body.founder-portal-page .report span{display:block;margin-top:6px;color:var(--report-muted);font-size:.78rem;text-transform:capitalize}
+body.founder-portal-page .report p{line-height:1.6;margin:9px 0 0;color:var(--report-muted)}
+body.founder-portal-page .empty{padding:32px;text-align:center;border:1px dashed var(--report-border);border-radius:14px;color:var(--report-muted)}
+@media(max-width:600px){body.founder-portal-page .page{padding:16px}body.founder-portal-page .card{padding:18px}}
