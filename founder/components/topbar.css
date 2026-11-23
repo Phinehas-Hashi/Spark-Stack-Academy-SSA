@@ -2,10 +2,6 @@
    FOUNDER OS — SHARED TOPBAR
 ========================================================= */
 
-.topbar /* =========================================================
-   FOUNDER OS — SHARED TOPBAR
-========================================================= */
-
 body.founder-shell-ready .topbar{
   position: relative;
   z-index: 1000;
@@ -21,8 +17,6 @@ body.founder-shell-ready .topbar{
   box-shadow: 0 2px 10px rgba(15,23,42,.045);
 }
 
-.menu-btn 
-
 body.founder-shell-ready .menu-btn{
   display: none;
   width: 40px;
@@ -35,19 +29,13 @@ body.founder-shell-ready .menu-btn{
   color: #475569;
   cursor: pointer;
 }
-.menu-btn:hover 
 body.founder-shell-ready .menu-btn:hover{ color: #2563eb; background: #eff6ff; }
-.menu-btn svg 
 body.founder-shell-ready .menu-btn svg{ width: 19px; height: 19px; }
-
-.topbar-left 
 
 body.founder-shell-ready .topbar-left{
   min-width: 0;
   flex: 1 1 auto;
 }
-
-.search-box 
 
 body.founder-shell-ready .search-box{
   position: relative;
@@ -63,15 +51,12 @@ body.founder-shell-ready .search-box{
   color: #94a3b8;
   transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
-.search-box:focus-within 
 body.founder-shell-ready .search-box:focus-within{
   background: #fff;
   border-color: #93c5fd;
   box-shadow: 0 0 0 3px rgba(37,99,235,.08);
 }
-.search-box > svg 
 body.founder-shell-ready .search-box > svg{ width: 17px; height: 17px; flex: 0 0 17px; }
-.search-box input 
 body.founder-shell-ready .search-box input{
   width: 100%;
   min-width: 0;
@@ -82,10 +67,7 @@ body.founder-shell-ready .search-box input{
   color: #172033 !important;
   font: 500 12px/1.2 Inter, Poppins, system-ui, sans-serif;
 }
-.search-box input::placeholder 
 body.founder-shell-ready .search-box input::placeholder{ color: #94a3b8; }
-
-#searchResults 
 
 body.founder-shell-ready #searchResults{
   position: absolute;
@@ -101,10 +83,7 @@ body.founder-shell-ready #searchResults{
   border-radius: 13px;
   box-shadow: 0 18px 45px rgba(15,23,42,.12);
 }
-#searchResults:not(:empty) 
 body.founder-shell-ready #searchResults:not(:empty){ display: block; }
-
-.topbar-actions 
 
 body.founder-shell-ready .topbar-actions{
   flex: 0 0 auto;
@@ -112,8 +91,6 @@ body.founder-shell-ready .topbar-actions{
   align-items: center;
   gap: 8px;
 }
-
-.icon-btn 
 
 body.founder-shell-ready .icon-btn{
   position: relative;
@@ -128,15 +105,10 @@ body.founder-shell-ready .icon-btn{
   cursor: pointer;
   transition: color .18s ease, background .18s ease, border-color .18s ease;
 }
-.icon-btn:hover 
 body.founder-shell-ready .icon-btn:hover{ color: #2563eb; background: #eff6ff; border-color: #bfdbfe; }
-.icon-btn svg 
 body.founder-shell-ready .icon-btn svg{ width: 18px; height: 18px; }
 
-.notification-wrapper 
-
 body.founder-shell-ready .notification-wrapper{ position: relative; }
-.notification-badge 
 body.founder-shell-ready .notification-badge{
   position: absolute;
   top: -4px;
@@ -153,8 +125,6 @@ body.founder-shell-ready .notification-badge{
   font: 800 9px/1 system-ui, sans-serif;
 }
 
-.notification-dropdown 
-
 body.founder-shell-ready .notification-dropdown{
   position: absolute;
   top: calc(100% + 10px);
@@ -169,11 +139,8 @@ body.founder-shell-ready .notification-dropdown{
   border-radius: 16px;
   box-shadow: 0 22px 55px rgba(15,23,42,.14);
 }
-.notification-dropdown.show,
-.notification-dropdown.active 
 body.founder-shell-ready .notification-dropdown.show,
 body.founder-shell-ready .notification-dropdown.active{ display: block; }
-.dropdown-header 
 body.founder-shell-ready .dropdown-header{
   display: flex;
   align-items: center;
@@ -181,15 +148,10 @@ body.founder-shell-ready .dropdown-header{
   padding: 15px 16px;
   border-bottom: 1px solid #edf0f4;
 }
-.dropdown-header h3 
 body.founder-shell-ready .dropdown-header h3{ margin: 0; color: #0f172a; font-size: 13px; font-weight: 800; }
-.dropdown-header span 
 body.founder-shell-ready .dropdown-header span{ color: #2563eb; font-size: 11px; font-weight: 800; }
-#topNotificationsList 
 body.founder-shell-ready #topNotificationsList{ max-height: 355px; overflow: auto; }
-.empty-notifications 
 body.founder-shell-ready .empty-notifications{ margin: 0; padding: 28px 16px; text-align: center; color: #94a3b8; font-size: 12px; }
-#viewAllNotifications 
 body.founder-shell-ready #viewAllNotifications{
   width: 100%;
   min-height: 42px;
@@ -201,10 +163,7 @@ body.founder-shell-ready #viewAllNotifications{
   font-weight: 800;
   cursor: pointer;
 }
-#viewAllNotifications:hover 
 body.founder-shell-ready #viewAllNotifications:hover{ background: #f8fafc; }
-
-.profile-chip 
 
 body.founder-shell-ready .profile-chip{
   min-width: 0;
@@ -216,7 +175,6 @@ body.founder-shell-ready .profile-chip{
   border-radius: 12px;
   background: #fff;
 }
-.profile-avatar 
 body.founder-shell-ready .profile-avatar{
   width: 34px;
   height: 34px;
@@ -230,43 +188,24 @@ body.founder-shell-ready .profile-avatar{
   font-size: 12px;
   font-weight: 800;
 }
-.profile-avatar img 
 body.founder-shell-ready .profile-avatar img{ width: 100%; height: 100%; object-fit: cover; }
-.profile-info 
 body.founder-shell-ready .profile-info{ min-width: 0; max-width: 150px; }
-.profile-info strong,
-.profile-info span 
 body.founder-shell-ready .profile-info strong,
 body.founder-shell-ready .profile-info span{ display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.profile-info strong 
 body.founder-shell-ready .profile-info strong{ color: #172033; font-size: 11px; font-weight: 800; }
-.profile-info span 
 body.founder-shell-ready .profile-info span{ margin-top: 2px; color: #94a3b8; font-size: 9px; font-weight: 650; }
 
-@media (max-width: 900px) 
-
 @media (max-width: 900px) {
-  .menu-btn 
   body.founder-shell-ready .menu-btn{ display: grid; }
-  .topbar 
   body.founder-shell-ready .topbar{ min-height: 60px; padding: 9px; gap: 9px; border-radius: 13px; }
-  .search-box 
   body.founder-shell-ready .search-box{ height: 40px; }
-  .profile-info 
   body.founder-shell-ready .profile-info{ display: none; }
-  .profile-chip 
   body.founder-shell-ready .profile-chip{ padding: 3px; border: 0; background: transparent; }
 }
 
-@media (max-width: 560px) 
-
 @media (max-width: 560px) {
-  .topbar-left 
   body.founder-shell-ready .topbar-left{ order: 3; flex: 1 1 100%; width: 100%; }
-  .topbar 
   body.founder-shell-ready .topbar{ flex-wrap: wrap; }
-  .search-box 
   body.founder-shell-ready .search-box{ width: 100%; }
-  .topbar-actions 
   body.founder-shell-ready .topbar-actions{ margin-left: auto; }
 }
