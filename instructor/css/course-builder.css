@@ -207,7 +207,7 @@
     border-radius: 14px;
     background: linear-gradient(
         135deg,
-        #eaf2ff,
+        #f0eaff,
         #dbe9ff
     );
     color: #762cff;
@@ -366,7 +366,7 @@
     display: grid;
     place-items: center;
     border-radius: 9px;
-    background: #eaf2ff;
+    background: #f0eaff;
     color: #762cff;
     font-size: 12px;
     font-weight: 800;
