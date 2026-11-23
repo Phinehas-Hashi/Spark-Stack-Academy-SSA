@@ -107,11 +107,11 @@
     overflow: hidden;
 
     background: #fff;
-    border: 1px solid #e8edf4;
+    border: 1px solid #e8e6f0;
     border-radius: 17px;
 
     box-shadow:
-        0 8px 30px rgba(8,28,58,.055);
+        0 8px 30px rgba(23,21,47,.055);
 
     transition:
         transform .2s ease,
@@ -126,13 +126,13 @@
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    background: #f4f7fb;
+    background: #f5f4fb;
 }
 
 .analytics-stat:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 14px 35px rgba(8,28,58,.09);
+        0 14px 35px rgba(23,21,47,.09);
 }
 
 .analytics-stat .stat-icon {
@@ -161,7 +161,7 @@
 
 .stat-icon.blue {
     color: #762cff;
-    background: #eaf2ff;
+    background: #f0eaff;
 }
 
 .stat-icon.green {
@@ -217,11 +217,11 @@
     overflow: hidden;
 
     background: #fff;
-    border: 1px solid #e7ecf3;
+    border: 1px solid #e8e6f0;
     border-radius: 18px;
 
     box-shadow:
-        0 8px 30px rgba(8,28,58,.045);
+        0 8px 30px rgba(23,21,47,.045);
 }
 
 .analytics-card .card-header {
@@ -294,7 +294,7 @@
 
     border-radius: 12px;
     color: #762cff;
-    background: #edf4ff;
+    background: #f0eaff;
 }
 
 .course-performance-info {
@@ -354,7 +354,7 @@
             transparent 58%
         );
 
-    border: 10px solid #eaf2ff;
+    border: 10px solid #f0eaff;
 }
 
 .engagement-circle::before {
@@ -576,7 +576,7 @@
     width: 25px;
     height: 25px;
 
-    border: 3px solid #e8edf4;
+    border: 3px solid #e8e6f0;
     border-top-color: #762cff;
 
     border-radius: 50%;
