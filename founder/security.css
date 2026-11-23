@@ -2,7 +2,7 @@
    SECURITY SETTINGS
 =================================== */
 
-:root{
+body.founder-portal-page {
 
 --bg:#07111f;
 
@@ -32,8 +32,7 @@
 /* ===================================
    GLOBAL
 =================================== */
-
-*{
+ body.founder-portal-page * {
 
 margin:0;
 
@@ -44,7 +43,7 @@ box-sizing:border-box;
 }
 
 
-body{
+body.founder-portal-page {
 
 font-family:"Inter",sans-serif;
 
