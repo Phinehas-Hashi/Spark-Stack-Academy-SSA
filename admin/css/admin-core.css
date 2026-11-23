@@ -34,8 +34,8 @@ body.admin-portal-page {
   color: var(--ssa-color-ink, #17152f);
   font-family: var(--ssa-font-body, "Poppins", Arial, sans-serif);
 }
-body.admin-menu-open,
-body.admin-modal-open { overflow: hidden; overscroll-behavior: none; }
+body.admin-portal-page.admin-menu-open,
+body.admin-portal-page.admin-modal-open { overflow: hidden; overscroll-behavior: none; }
 .admin-app button,
 .admin-app input,
 .admin-app select,
