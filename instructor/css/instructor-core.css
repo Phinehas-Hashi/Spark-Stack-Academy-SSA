@@ -4,23 +4,19 @@
 ========================================= */
 
 :root {
-    --navy: #081c3a;
-    --navy-2: #102d52;
-    --blue: #2979ff;
-    --blue-dark: #1769ed;
-    --gold: #ffc107;
-
-    --bg: #f5f7fb;
-    --white: #ffffff;
-
-    --text: #081c3a;
-    --muted: #7b8797;
-    --border: rgba(8, 28, 58, .08);
-
+    --navy: var(--ssa-color-ink, #17152f);
+    --navy-2: var(--ssa-color-brand-strong, #5d1ed6);
+    --blue: var(--ssa-color-brand, #762cff);
+    --blue-dark: var(--ssa-color-brand-strong, #5d1ed6);
+    --gold: var(--ssa-color-accent, #20cfe8);
+    --bg: var(--ssa-color-canvas, #f5f4fb);
+    --white: var(--ssa-color-surface, #ffffff);
+    --text: var(--ssa-color-ink, #17152f);
+    --muted: var(--ssa-color-muted, #77758f);
+    --border: var(--ssa-color-line, #e8e6f0);
     --sidebar-width: 255px;
     --topbar-height: 72px;
-
-    --shadow: 0 8px 28px rgba(8, 28, 58, .055);
+    --shadow: var(--ssa-shadow-sm, 0 4px 14px rgba(27,20,65,.06));
 }
 
 
@@ -36,6 +32,12 @@
 
 html {
     scroll-behavior: smooth;
+}
+
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body {
