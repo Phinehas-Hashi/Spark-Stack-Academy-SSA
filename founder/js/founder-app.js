@@ -53,6 +53,10 @@ async function loadComponent({containerId,html,css,callback}){
         const href=link.getAttribute("href") || "";
         if(href && !/^(?:[a-z]+:|\/|#|javascript:)/i.test(href) && !href.startsWith("../")) link.setAttribute("href", founderPath(href));
       });
+      container.querySelectorAll("[src]").forEach(node=>{
+        const src=node.getAttribute("src") || "";
+        if(src.startsWith("../")) node.setAttribute("src", founderPath(src));
+      });
       container.querySelectorAll("[onclick]").forEach(node=>{
         const value=node.getAttribute("onclick") || "";
         node.setAttribute("onclick", value.replace(/window\.location\.href\s*=\s*(['"])([^'"]+)\1/g, (match, quote, target)=>`window.location.href=${quote}${founderPath(target)}${quote}`));
