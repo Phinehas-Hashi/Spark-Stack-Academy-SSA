@@ -20,12 +20,12 @@
 
 body.founder-portal-page {
 
-    --primary:#22d3ee;
-    --primary-light:#67e8f9;
+    --primary:#762cff;
+    --primary-light:#20cfe8;
 
-    --secondary:#8b5cf6;
+    --secondary:#a12bff;
 
-    --accent:#ec4899;
+    --accent:#20cfe8;
 
     --success:#22c55e;
 
@@ -33,20 +33,20 @@ body.founder-portal-page {
 
     --danger:#ef4444;
 
-    --background:#050816;
+    --background:#f5f4fb;
 
-    --surface:rgba(15,23,42,.78);
+    --surface:#ffffff;
 
-    --border:rgba(148,163,184,.12);
+    --border:#e8e6f0;
 
-    --text:#f8fafc;
+    --text:#17152f;
 
-    --muted:#94a3b8;
+    --muted:#77758f;
 
     --radius:24px;
 
     --shadow:
-    0 18px 45px rgba(0,0,0,.35);
+    0 12px 34px rgba(27,20,65,.10);
 
     --transition:.3s ease;
 
