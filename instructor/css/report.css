@@ -1,0 +1,92 @@
+/* Instructor issue reporting page — scoped page-owned styles. */
+.report-page {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px;
+    color: var(--ssa-color-ink, #17152f);
+}
+.report-page .report-card {
+    margin: 0 0 20px;
+    padding: 26px;
+    border: 1px solid var(--ssa-color-line, #e8e6f0);
+    border-radius: 20px;
+    background: var(--ssa-color-surface, #fff);
+    box-shadow: var(--ssa-shadow-sm, 0 4px 14px rgba(27,20,65,.06));
+}
+.report-page h1,
+.report-page h2 {
+    color: var(--ssa-color-ink, #17152f);
+    font-family: var(--ssa-font-display, "Montserrat", sans-serif);
+}
+.report-page h1 { margin: 8px 0; font-size: clamp(25px, 3vw, 32px); }
+.report-page h2 { margin: 0 0 10px; font-size: 19px; }
+.report-page p { color: var(--ssa-color-muted, #77758f); line-height: 1.7; }
+.report-page .report-form { display: grid; gap: 15px; margin-top: 18px; }
+.report-page .report-form label {
+    display: grid;
+    gap: 7px;
+    color: var(--ssa-color-ink, #17152f);
+    font-size: 12px;
+    font-weight: 700;
+}
+.report-page .report-form input,
+.report-page .report-form select,
+.report-page .report-form textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid var(--ssa-color-line, #e8e6f0);
+    border-radius: 12px;
+    outline: 0;
+    background: #fbfaff;
+    color: var(--ssa-color-ink, #17152f);
+    font: inherit;
+    font-size: 13px;
+}
+.report-page .report-form textarea { min-height: 150px; resize: vertical; }
+.report-page .report-form input:focus,
+.report-page .report-form select:focus,
+.report-page .report-form textarea:focus {
+    border-color: var(--ssa-color-brand, #762cff);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.12);
+}
+.report-page .report-form button {
+    min-height: 46px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(105deg, var(--ssa-color-brand, #762cff), var(--ssa-color-brand-strong, #5d1ed6));
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+.report-page .report-result {
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid rgba(118,44,255,.12);
+    border-radius: 12px;
+    background: rgba(118,44,255,.07);
+    color: var(--ssa-color-ink, #17152f);
+}
+.report-page .report-history-item {
+    margin-top: 10px;
+    padding: 16px;
+    border: 1px solid var(--ssa-color-line, #e8e6f0);
+    border-radius: 14px;
+    background: #fff;
+}
+.report-page .report-history-item > div { display: flex; justify-content: space-between; gap: 15px; }
+.report-page .report-history-item span { display: block; margin-top: 4px; color: var(--ssa-color-muted, #77758f); }
+.report-page .report-status { font-size: 12px; text-transform: capitalize; }
+.report-page .report-status.resolved { color: var(--ssa-color-success, #16845b); }
+.report-page .report-status.pending { color: var(--ssa-color-warning, #a96a08); }
+.report-page .report-status.reviewing { color: var(--ssa-color-brand, #762cff); }
+.report-page .report-empty { padding: 25px; color: var(--ssa-color-muted, #77758f); text-align: center; }
+@media (max-width: 600px) {
+    .report-page { padding: 20px 14px 30px; }
+    .report-page .report-card { padding: 19px; border-radius: 16px; }
+    .report-page .report-history-item > div { flex-direction: column; gap: 7px; }
+}
