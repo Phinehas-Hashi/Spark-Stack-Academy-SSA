@@ -173,7 +173,7 @@
 
     border-radius: 11px;
 
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -293,7 +293,7 @@
 }
 
 .stat-icon.blue {
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -402,7 +402,7 @@
 
 .quiz-filter.active {
     color: #762cff;
-    background: #edf4ff;
+    background: #f0eaff;
 }
 
 .quiz-search {
@@ -683,7 +683,7 @@
 
     border-radius: 14px;
 
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
