@@ -1,1 +1,43 @@
-body{margin:0;background:#f5f7fb;color:#0b1730;font-family:Inter,system-ui,sans-serif}.submission-shell{max-width:1100px;margin:auto;padding:28px 18px 60px}.submission-header{display:flex;gap:24px;align-items:flex-start;margin-bottom:22px}.back-link{color:#2979ff;text-decoration:none;font-weight:800;font-size:13px}.submission-header span{font-size:11px;font-weight:900;letter-spacing:.14em;color:#2979ff}.submission-header h1{margin:7px 0 5px;font:800 30px/1.15 Poppins,system-ui}.submission-header p{margin:0;color:#64748b}.submission-card{background:#fff;border:1px solid #e4e9f1;border-radius:24px;padding:24px;box-shadow:0 18px 55px rgba(8,28,58,.08)}.review-grid{display:grid;grid-template-columns:1.5fr .8fr;gap:20px}.panel{border:1px solid #e8edf4;border-radius:18px;padding:18px}.panel h2{font:800 17px Poppins;margin:0 0 14px}.student-row{display:flex;gap:12px;align-items:center;margin-bottom:18px}.avatar{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:#eaf2ff;color:#2979ff;font-weight:900}.muted{color:#64748b;font-size:13px}.work-content{white-space:pre-wrap;overflow-wrap:anywhere;background:#f8fafc;border:1px solid #edf1f6;border-radius:14px;padding:16px;line-height:1.7;min-height:180px}.score-box{display:grid;gap:10px}.score-box label,.feedback label{font-weight:800;font-size:12px;color:#334155}.score-input{display:flex;align-items:center;gap:8px}.score-input input{width:100%;box-sizing:border-box;border:1px solid #dbe3ef;border-radius:12px;padding:12px;font-size:18px;font-weight:800;outline:0}.score-input input:focus,.feedback textarea:focus{border-color:#2979ff;box-shadow:0 0 0 3px rgba(41,121,255,.12)}.feedback{display:grid;gap:8px;margin-top:18px}.feedback textarea{width:100%;box-sizing:border-box;min-height:180px;resize:vertical;border:1px solid #dbe3ef;border-radius:13px;padding:12px;outline:0;font:500 14px/1.6 Inter}.save-btn{width:100%;margin-top:18px;border:0;border-radius:13px;padding:13px;background:#2979ff;color:#fff;font-weight:900;cursor:pointer}.save-btn:disabled{opacity:.55}.status{display:inline-flex;padding:6px 9px;border-radius:999px;background:#fff7ed;color:#c2410c;font-size:11px;font-weight:900}.status.graded{background:#ecfdf5;color:#047857}.notice{padding:12px 14px;border-radius:12px;background:#eff6ff;color:#1d4ed8;font-size:12px;line-height:1.5;margin-bottom:16px}.submission-loading{text-align:center;padding:60px;color:#64748b}@media(max-width:800px){.submission-shell{padding:18px 12px 40px}.submission-header{display:grid}.review-grid{grid-template-columns:1fr}.submission-card{padding:15px;border-radius:18px}}
+/* Standalone Instructor submission review — all selectors page-scoped. */
+.instructor-submission-page {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ssa-color-canvas, #f5f4fb);
+    color: var(--ssa-color-ink, #17152f);
+    font-family: var(--ssa-font-body, "Poppins", Arial, sans-serif);
+}
+.instructor-submission-page .submission-shell { max-width: 1100px; margin: 0 auto; padding: 28px 18px 60px; }
+.instructor-submission-page .submission-header { display: flex; align-items: flex-start; gap: 24px; margin-bottom: 22px; }
+.instructor-submission-page .back-link { color: var(--ssa-color-brand, #762cff); text-decoration: none; font-size: 13px; font-weight: 800; }
+.instructor-submission-page .submission-header span { color: var(--ssa-color-brand, #762cff); font-size: 11px; font-weight: 900; letter-spacing: .14em; }
+.instructor-submission-page .submission-header h1 { margin: 7px 0 5px; color: var(--ssa-color-ink, #17152f); font: 800 30px/1.15 var(--ssa-font-display, "Montserrat", sans-serif); }
+.instructor-submission-page .submission-header p { margin: 0; color: var(--ssa-color-muted, #77758f); }
+.instructor-submission-page .submission-card { padding: 24px; border: 1px solid var(--ssa-color-line, #e8e6f0); border-radius: 22px; background: #fff; box-shadow: var(--ssa-shadow-md, 0 12px 34px rgba(27,20,65,.10)); }
+.instructor-submission-page .review-grid { display: grid; grid-template-columns: 1.5fr .8fr; gap: 20px; }
+.instructor-submission-page .panel { padding: 18px; border: 1px solid var(--ssa-color-line, #e8e6f0); border-radius: 16px; background: #fff; }
+.instructor-submission-page .panel h2 { margin: 0 0 14px; color: var(--ssa-color-ink, #17152f); font: 800 17px var(--ssa-font-display, "Montserrat", sans-serif); }
+.instructor-submission-page .student-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.instructor-submission-page .avatar { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 15px; background: rgba(118,44,255,.09); color: var(--ssa-color-brand, #762cff); font-weight: 900; }
+.instructor-submission-page .muted { color: var(--ssa-color-muted, #77758f); font-size: 13px; }
+.instructor-submission-page .work-content { min-height: 180px; padding: 16px; border: 1px solid var(--ssa-color-line, #e8e6f0); border-radius: 14px; background: #fbfaff; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.instructor-submission-page .score-box { display: grid; gap: 10px; }
+.instructor-submission-page .score-box label,
+.instructor-submission-page .feedback label { color: var(--ssa-color-ink, #17152f); font-size: 12px; font-weight: 800; }
+.instructor-submission-page .score-input { display: flex; align-items: center; gap: 8px; }
+.instructor-submission-page .score-input input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--ssa-color-line, #e8e6f0); border-radius: 12px; outline: 0; font-size: 18px; font-weight: 800; }
+.instructor-submission-page .score-input input:focus,
+.instructor-submission-page .feedback textarea:focus { border-color: var(--ssa-color-brand, #762cff); box-shadow: 0 0 0 3px rgba(118,44,255,.12); }
+.instructor-submission-page .feedback { display: grid; gap: 8px; margin-top: 18px; }
+.instructor-submission-page .feedback textarea { width: 100%; min-height: 180px; box-sizing: border-box; resize: vertical; padding: 12px; border: 1px solid var(--ssa-color-line, #e8e6f0); border-radius: 13px; outline: 0; font: 500 14px/1.6 var(--ssa-font-body, "Poppins", sans-serif); }
+.instructor-submission-page .save-btn { width: 100%; margin-top: 18px; padding: 13px; border: 0; border-radius: 13px; background: linear-gradient(105deg, var(--ssa-color-brand, #762cff), var(--ssa-color-brand-strong, #5d1ed6)); color: #fff; font-weight: 900; cursor: pointer; }
+.instructor-submission-page .save-btn:disabled { opacity: .55; cursor: not-allowed; }
+.instructor-submission-page .status { display: inline-flex; padding: 6px 9px; border-radius: 999px; background: #fff6e5; color: #a96a08; font-size: 11px; font-weight: 900; }
+.instructor-submission-page .status.graded { background: #e7f6ed; color: #16845b; }
+.instructor-submission-page .notice { margin-bottom: 16px; padding: 12px 14px; border-radius: 12px; background: rgba(118,44,255,.07); color: var(--ssa-color-ink, #17152f); font-size: 12px; line-height: 1.5; }
+.instructor-submission-page .submission-loading { padding: 60px; color: var(--ssa-color-muted, #77758f); text-align: center; }
+@media (max-width: 800px) {
+    .instructor-submission-page .submission-shell { padding: 18px 12px 40px; }
+    .instructor-submission-page .submission-header { display: grid; }
+    .instructor-submission-page .review-grid { grid-template-columns: 1fr; }
+    .instructor-submission-page .submission-card { padding: 15px; border-radius: 18px; }
+}
