@@ -60,12 +60,12 @@ width: fit-content;
 margin-bottom: 10px;
 padding: 7px 12px;
 
-border: 1px solid rgba(41,121,255,.18);
+border: 1px solid rgba(118,44,255,.18);
 border-radius: 999px;
 
-background: rgba(41,121,255,.08);
+background: rgba(118,44,255,.08);
 
-color: #2979ff;
+color: #762cff;
 
 font-size: 11px;
 font-weight: 800;
@@ -119,13 +119,13 @@ gap: 8px;
 
 padding: 10px 17px;
 
-border: 1px solid rgba(41,121,255,.25);
+border: 1px solid rgba(118,44,255,.25);
 border-radius: 12px;
 
 background:
     linear-gradient(
         135deg,
-        #2979ff,
+        #762cff,
         #145bd1
     );
 
@@ -139,7 +139,7 @@ font-weight: 800;
 cursor: pointer;
 
 box-shadow:
-    0 8px 20px rgba(41,121,255,.20);
+    0 8px 20px rgba(118,44,255,.20);
 
 transition:
     transform .18s ease,
@@ -152,7 +152,7 @@ transition:
 transform: translateY(-1px);
 
 box-shadow:
-    0 12px 26px rgba(41,121,255,.28);
+    0 12px 26px rgba(118,44,255,.28);
 
 }
 
@@ -222,7 +222,7 @@ height: 110px;
 
 border-radius: 50%;
 
-background: rgba(41,121,255,.035);
+background: rgba(118,44,255,.035);
 
 pointer-events: none;
 
@@ -278,7 +278,7 @@ background: rgba(239,68,68,.10);
 }
 
 .stat-icon.blue {
-background: rgba(41,121,255,.10);
+background: rgba(118,44,255,.10);
 }
 
 .stat-card h2 {
@@ -387,23 +387,23 @@ transition:
 }
 
 .filter-btn:hover {
-border-color: rgba(41,121,255,.25);
+border-color: rgba(118,44,255,.25);
 
-color: #2979ff;
+color: #762cff;
 
 background: #f1f6ff;
 
 }
 
 .filter-btn.active {
-border-color: rgba(41,121,255,.22);
+border-color: rgba(118,44,255,.22);
 
-background: #2979ff;
+background: #762cff;
 
 color: #fff;
 
 box-shadow:
-    0 5px 14px rgba(41,121,255,.16);
+    0 5px 14px rgba(118,44,255,.16);
 
 }
 
@@ -510,7 +510,7 @@ border-radius: 12px;
 background:
     linear-gradient(
         135deg,
-        #2979ff,
+        #762cff,
         #145bd1
     );
 
@@ -520,7 +520,7 @@ font-size: 11px;
 font-weight: 800;
 
 box-shadow:
-    0 5px 14px rgba(41,121,255,.18);
+    0 5px 14px rgba(118,44,255,.18);
 
 }
 
@@ -568,7 +568,7 @@ EMAIL
 ============================================================ */
 
 .email-link {
-color: #2979ff;
+color: #762cff;
 
 font-size: 11px;
 font-weight: 600;
