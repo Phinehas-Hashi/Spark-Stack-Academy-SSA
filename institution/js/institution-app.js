@@ -134,14 +134,19 @@ function setupTeamForm() {
 
 function setupNavigation() {
   const menu = document.getElementById("institutionMenuBtn");
+  overlay?.setAttribute("aria-hidden", "true");
+  menu?.setAttribute("aria-expanded", "false");
   menu?.addEventListener("click", () => {
-    if (sidebar?.classList.contains("open")) closeNavigation();
-    else {
-      sidebar?.classList.add("open");
-      overlay?.classList.add("active");
-      menu.setAttribute("aria-expanded", "true");
-      document.body.classList.add("institution-menu-open");
+    if (sidebar?.classList.contains("open")) {
+      closeNavigation();
+      return;
     }
+    sidebar?.classList.add("open");
+    overlay?.classList.add("active");
+    overlay?.setAttribute("aria-hidden", "false");
+    menu?.setAttribute("aria-expanded", "true");
+    menu?.setAttribute("aria-label", "Close navigation");
+    document.body.classList.add("institution-menu-open");
   });
   overlay?.addEventListener("click", closeNavigation);
   sidebar?.querySelectorAll("a").forEach(link => link.addEventListener("click", closeNavigation));
@@ -153,7 +158,9 @@ function setupNavigation() {
 function closeNavigation() {
   sidebar?.classList.remove("open");
   overlay?.classList.remove("active");
+  overlay?.setAttribute("aria-hidden", "true");
   document.getElementById("institutionMenuBtn")?.setAttribute("aria-expanded", "false");
+  document.getElementById("institutionMenuBtn")?.setAttribute("aria-label", "Open navigation");
   document.body.classList.remove("institution-menu-open");
 }
 
