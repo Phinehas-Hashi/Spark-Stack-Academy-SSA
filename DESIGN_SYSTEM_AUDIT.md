@@ -1,6 +1,6 @@
 # Spark Stack Academy — Repository-Wide Design System Audit
 
-**Status:** Five-portal dependency audit completed; Student and Instructor migration batches committed; Admin, Institution and Founder migrations remain queued  
+**Status:** Five-portal dependency audit completed; Student, Instructor and Institution source migrations committed; Admin and Founder migrations remain queued  
 **Branch:** main  
 **Audit commit:** pending this report update
 
@@ -215,6 +215,23 @@ The dependency mapping and static CSS scan cover all five portals and all 152 CS
 
 
 **Instructor verification checklist:** test the drawer and overlay at mobile widths; verify keyboard Escape and body scroll lock; test course-builder and assignment modals, earnings/payment dialogs, quiz grading panels, responsive tables, messages and standalone routes. The repository changes are committed, but the Instructor portal must not be marked visually complete until these checks pass on GitHub Pages.
-**Migration status:** Student active stylesheet foundation and standalone-page first batch are committed. Instructor foundation and page-level palette migration are committed across its shell and standalone routes. The remaining work is browser verification followed by controlled migration of Institution, Admin and Founder. Static source checks do not establish visual correctness or production readiness.
+**Migration status:** Student active stylesheet foundation and standalone-page first batch are committed. Instructor foundation and page-level palette migration are committed across its shell and standalone routes. The remaining work is browser verification followed by controlled migration of Admin and Founder. Static source checks do not establish visual correctness or production readiness.
 
 **Important:** The Instructor migration is a source-code migration, not a claim that every route has been visually verified. Test the mobile drawer, topbar, course-builder modals, earnings withdrawal modal, quiz grading panels, responsive tables and standalone messaging on GitHub Pages before calling this portal complete. No production-ready claim is made until all portal routes have been tested at desktop, tablet and mobile widths.
+
+
+### Institution Portal — foundation and page migration
+
+- Replaced the former import-heavy `institution.css` with a token-based foundation for the authenticated shell and dashboard. The portal no longer imports or links the cross-portal `brand-system.css`.
+- Dashboard, Courses and Learners now load shared design tokens and a consistent Montserrat/Poppins font pair before the Institution foundation and their page styles.
+- Institution Registration is treated as a standalone onboarding route. It now loads shared tokens, typography and `register.css` only; it no longer loads authenticated portal shell CSS.
+- Added explicit page roots for Dashboard and Courses. The Learners and Registration routes retain their existing page roots.
+- Rebuilt sidebar, topbar and overlay styles around the injected `#institutionSidebar`, `#institutionTopbar` and `#sidebarOverlay` elements. The mobile drawer uses the JavaScript `.open` and `.active` states and a 270px desktop shell offset.
+- Normalised mobile drawer toggling and accessibility state (`aria-controls`, `aria-expanded`, `aria-hidden`, Escape, overlay click and body scroll lock).
+- Aligned Institution Dashboard, Courses, Learners and Registration colours with the shared purple/cyan design tokens while preserving semantic success, warning and error states.
+- Moved the dynamic access-verification fallback presentation from inline HTML styles in `institution-app.js` into `.institution-access-error` rules in the portal foundation. The progress-bar width assignment remains runtime-driven and is intentionally retained.
+- Static inspection of all four Institution application routes found no embedded style blocks or inline style attributes. Every local CSS and JavaScript reference resolved against the current repository tree.
+- All four Institution CSS files have balanced brace counts and no `@import` directives. The old navy/blue/gold brand palette literals were removed from these four stylesheets.
+- Cloud Functions and Firebase business logic were not changed during this styling migration.
+
+**Institution verification checklist:** test dashboard metrics and quota/team panels, course creation/listing, learner enrolment and roster actions, registration submission, mobile sidebar open/close and overlay, Escape handling, and all Firebase-backed states. Visual and backend verification remains outstanding; the Institution source migration must not be treated as production sign-off.
