@@ -1,4 +1,4 @@
-/* Shared cross-portal brand-system import removed; Admin owns this theme. */
+/* Shared cross-portal brand-system import removed. */
 
 /* ============================================================
    SPARK STACK ACADEMY
@@ -192,80 +192,20 @@
 }
 
 
-/* ===== Signature portal chrome refinement ===== */
-:root{
- --ssa-night:#080522;--ssa-navy:#0d0a35;--ssa-navy-2:#171052;
- --ssa-violet:#762cff;--ssa-violet-bright:#a12bff;--ssa-cyan:#20d8f2;
- --ssa-gold:#ffc857;--ssa-lavender:#f3f0ff;--ssa-ink:#151338;
-}
-body{font-family:"Poppins",Arial,sans-serif!important;background:#f3f0ff!important;color:#151338}
-h1,h2,h3,h4{font-family:"Montserrat","Poppins",sans-serif}
-.sidebar,.ssa-student-sidebar,.instructor-sidebar,.admin-sidebar,.institution-sidebar,
-.founder-sidebar,.founder-sidebar .sidebar,.sidebar-container>.sidebar{
- background:radial-gradient(circle at 15% 0%,rgba(132,47,255,.30),transparent 34%),
- linear-gradient(180deg,#090625 0%,#100b3e 58%,#080522 100%)!important;
- color:#fff!important;border-right:1px solid rgba(176,129,255,.25)!important;
- box-shadow:12px 0 36px rgba(13,5,48,.20)!important;
-}
-.sidebar-brand,.sidebar-logo,.admin-brand,.brand,.sidebar-header{
- border-color:rgba(255,255,255,.13)!important;
-}
-.sidebar-link,.nav-link,.instructor-sidebar .nav-link,.admin-nav-item,
-.founder-sidebar .sidebar-nav>a{
- color:#d5cfee!important;border-radius:11px!important;
- transition:background .2s ease,color .2s ease,box-shadow .2s ease;
-}
-.sidebar-link:hover,.sidebar-link.active,.nav-link:hover,.nav-link.active,
-.instructor-sidebar .nav-link:hover,.instructor-sidebar .nav-link.active,
-.admin-nav-item:hover,.admin-nav-item.active,.founder-sidebar .sidebar-nav>a:hover,
-.founder-sidebar .sidebar-nav>a.active{
- color:#fff!important;
- background:linear-gradient(100deg,rgba(119,44,255,.42),rgba(32,216,242,.12))!important;
- box-shadow:inset 3px 0 #20d8f2,0 0 18px rgba(126,48,255,.16)!important;
-}
-.nav-section-title,.nav-section-label,.admin-nav-label,.nav-label{
- color:#a99ad5!important;letter-spacing:.13em;
-}
-.topbar,.topbar-container,.instructor-topbar,.admin-topbar,.institution-topbar,
-.founder-topbar{
- background:linear-gradient(105deg,#0b082d 0%,#171052 100%)!important;
- color:#fff!important;border-bottom:1px solid rgba(164,112,255,.36)!important;
- box-shadow:0 8px 24px rgba(12,5,48,.12)!important;
-}
-.topbar button,.topbar a,.topbar-container button,.topbar-container a,
-.instructor-topbar button,.instructor-topbar a,.admin-topbar button,
-.admin-topbar a,.institution-topbar button,.institution-topbar a,
-.founder-topbar button,.founder-topbar a{color:inherit}
-.instructor-topbar-inner,.admin-topbar-inner,.topbar-inner{
- color:#fff!important;
-}
-.welcome-card,.dashboard-hero,.welcome-panel,.founder-command-header,
-.admin-hero,.hero-panel{
- border:1px solid rgba(183,139,255,.58)!important;border-radius:22px!important;
- background:radial-gradient(circle at 88% 18%,rgba(32,216,242,.20),transparent 27%),
- radial-gradient(circle at 76% 100%,rgba(161,43,255,.34),transparent 38%),
- linear-gradient(120deg,#090625 0%,#171052 58%,#25116a 100%)!important;
- box-shadow:0 14px 38px rgba(24,8,76,.20),0 0 22px rgba(134,53,255,.13)!important;
- color:#fff!important;
-}
-.stat-card,.metric-card,.admin-stat,.admin-card,.institution-card,.founder-stat-card,
-.founder-panel,.card,.panel,.content-card,.chart-card,.table-card,.settings-card{
- border:1px solid #e6e0fa!important;border-radius:17px!important;
- box-shadow:0 14px 38px rgba(31,15,83,.10)!important;
-}
-button.primary-btn,.primary-btn,.admin-btn.primary,.action-btn,.institution-btn-primary,
-.founder-btn.primary{
- background:linear-gradient(105deg,#7024f5 0%,#a12bff 58%,#23cbe8 150%)!important;
- color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;
- border-radius:11px!important;box-shadow:0 8px 22px rgba(117,39,239,.25)!important;
-}
-input:focus,select:focus,textarea:focus{
- border-color:#8c43ff!important;box-shadow:0 0 0 3px rgba(140,67,255,.13)!important;
-}
-@media(max-width:600px){
- .welcome-card,.dashboard-hero,.welcome-panel{border-radius:17px!important}
- .stat-card,.metric-card,.admin-stat,.admin-card,.card,.panel{border-radius:14px!important}
-}
+/* Admin-only premium theme layer. */
+.admin-app{--admin-navy:#17152f;--admin-blue:#762cff;--admin-gold:#ffc857;--admin-bg:#f5f4fb;--admin-card:#fff;--admin-text:#17152f;--admin-muted:#77758f;--admin-border:#e8e6f0;background:var(--admin-bg);color:var(--admin-text);font-family:"Poppins",Arial,sans-serif}
+.admin-app :is(h1,h2,h3,h4){font-family:"Montserrat","Poppins",sans-serif}
+.admin-app .admin-sidebar{background:radial-gradient(circle at 15% 0%,rgba(132,47,255,.30),transparent 34%),linear-gradient(180deg,#090625 0%,#100b3e 58%,#080522 100%);color:#fff;border-right:1px solid rgba(176,129,255,.25);box-shadow:12px 0 36px rgba(13,5,48,.20)}
+.admin-app .admin-nav-item{color:#d5cfee;border-radius:11px}
+.admin-app .admin-nav-item:hover,.admin-app .admin-nav-item.active{color:#fff;background:linear-gradient(100deg,rgba(119,44,255,.42),rgba(32,216,242,.12));box-shadow:inset 3px 0 #20d8f2,0 0 18px rgba(126,48,255,.16)}
+.admin-app .admin-nav-label{color:#a99ad5}
+.admin-app .admin-topbar{background:linear-gradient(105deg,#0b082d 0%,#171052 100%);color:#fff;border-bottom:1px solid rgba(164,112,255,.36);box-shadow:0 8px 24px rgba(12,5,48,.12)}
+.admin-app .admin-topbar :is(button,a){color:inherit}
+.admin-app :is(.admin-card,.admin-stat,.dashboard-card,.stat-card,.content-card,.chart-card,.table-card,.settings-card){border-color:#e6e0fa;border-radius:17px;box-shadow:0 14px 38px rgba(31,15,83,.10)}
+.admin-app :is(.dashboard-hero,.admin-hero,.hero-panel,.welcome-card,.welcome-panel){border:1px solid rgba(183,139,255,.58);border-radius:22px;background:radial-gradient(circle at 88% 18%,rgba(32,216,242,.20),transparent 27%),radial-gradient(circle at 76% 100%,rgba(161,43,255,.34),transparent 38%),linear-gradient(120deg,#090625 0%,#171052 58%,#25116a 100%);box-shadow:0 14px 38px rgba(24,8,76,.20),0 0 22px rgba(134,53,255,.13);color:#fff}
+.admin-app :is(.primary-btn,.admin-btn.primary,.action-btn){background:linear-gradient(105deg,#7024f5 0%,#a12bff 58%,#23cbe8 150%);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:11px;box-shadow:0 8px 22px rgba(117,39,239,.25)}
+.admin-app :is(input,select,textarea):focus{border-color:#8c43ff;box-shadow:0 0 0 3px rgba(140,67,255,.13)}
+@media(max-width:600px){.admin-app :is(.dashboard-hero,.admin-hero,.hero-panel,.welcome-card,.welcome-panel){border-radius:17px}.admin-app :is(.admin-stat,.admin-card,.dashboard-card,.stat-card,.content-card,.chart-card,.table-card,.settings-card){border-radius:14px}}
 
 
 /* Unified mobile drawer hardening — Admin portal */
@@ -420,25 +360,3 @@ body.admin-modal-open {
         border-radius: 17px !important;
     }
 }
-
-
-/* Admin-only theme overrides. The shared import above is intentionally absent. */
-.admin-app {
-  --admin-navy:#17152f;--admin-blue:#762cff;--admin-gold:#ffc857;
-  --admin-bg:#f5f4fb;--admin-card:#fff;--admin-text:#17152f;
-  --admin-muted:#77758f;--admin-border:#e8e6f0;
-  background:var(--admin-bg);color:var(--admin-text);
-  font-family:"Poppins",Arial,sans-serif;
-}
-.admin-app :is(h1,h2,h3,h4){font-family:"Montserrat","Poppins",sans-serif}
-.admin-app .admin-sidebar{background:radial-gradient(circle at 15% 0%,rgba(132,47,255,.30),transparent 34%),linear-gradient(180deg,#090625 0%,#100b3e 58%,#080522 100%);color:#fff;border-right:1px solid rgba(176,129,255,.25);box-shadow:12px 0 36px rgba(13,5,48,.20)}
-.admin-app .admin-nav-item{color:#d5cfee;border-radius:11px}
-.admin-app .admin-nav-item:hover,.admin-app .admin-nav-item.active{color:#fff;background:linear-gradient(100deg,rgba(119,44,255,.42),rgba(32,216,242,.12));box-shadow:inset 3px 0 #20d8f2,0 0 18px rgba(126,48,255,.16)}
-.admin-app .admin-nav-label{color:#a99ad5}
-.admin-app .admin-topbar{background:linear-gradient(105deg,#0b082d 0%,#171052 100%);color:#fff;border-bottom:1px solid rgba(164,112,255,.36);box-shadow:0 8px 24px rgba(12,5,48,.12)}
-.admin-app .admin-topbar :is(button,a){color:inherit}
-.admin-app :is(.admin-card,.admin-stat,.dashboard-card,.stat-card,.content-card,.chart-card,.table-card,.settings-card){border-color:#e6e0fa;border-radius:17px;box-shadow:0 14px 38px rgba(31,15,83,.10)}
-.admin-app :is(.dashboard-hero,.admin-hero,.hero-panel,.welcome-card,.welcome-panel){border:1px solid rgba(183,139,255,.58);border-radius:22px;background:radial-gradient(circle at 88% 18%,rgba(32,216,242,.20),transparent 27%),radial-gradient(circle at 76% 100%,rgba(161,43,255,.34),transparent 38%),linear-gradient(120deg,#090625 0%,#171052 58%,#25116a 100%);box-shadow:0 14px 38px rgba(24,8,76,.20),0 0 22px rgba(134,53,255,.13);color:#fff}
-.admin-app :is(.primary-btn,.admin-btn.primary,.action-btn){background:linear-gradient(105deg,#7024f5 0%,#a12bff 58%,#23cbe8 150%);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:11px;box-shadow:0 8px 22px rgba(117,39,239,.25)}
-.admin-app :is(input,select,textarea):focus{border-color:#8c43ff;box-shadow:0 0 0 3px rgba(140,67,255,.13)}
-@media(max-width:600px){.admin-app :is(.dashboard-hero,.admin-hero,.hero-panel,.welcome-card,.welcome-panel){border-radius:17px}.admin-app :is(.admin-stat,.admin-card,.dashboard-card,.stat-card,.content-card,.chart-card,.table-card,.settings-card){border-radius:14px}}
