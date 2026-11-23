@@ -8,7 +8,7 @@
    ROOT
 =================================== */
 
-:root{
+body.founder-portal-page {
 
     --primary:#3b82f6;
     --primary-dark:#2563eb;
@@ -37,8 +37,7 @@
 /* ===================================
    RESET
 =================================== */
-
-*{
+ body.founder-portal-page * {
 
     margin:0;
     padding:0;
@@ -46,13 +45,13 @@
 
 }
 
-html{
+body.founder-portal-page {
 
     scroll-behavior:smooth;
 
 }
 
-body{
+body.founder-portal-page {
 
     font-family:"Inter",sans-serif;
     background:var(--bg);
