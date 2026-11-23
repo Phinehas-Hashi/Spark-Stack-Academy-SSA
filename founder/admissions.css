@@ -1,5 +1,5 @@
 /* SSA FOUNDER OS — ADMISSIONS PAGE */
-:root {
+body.founder-portal-page {
     --ad-primary: #2563eb;
     --ad-primary-soft: #eff6ff;
     --ad-success: #15803d;
@@ -15,10 +15,8 @@
     --ad-page: #f7f8fc;
     --ad-radius: 18px;
     --ad-shadow: 0 12px 32px rgba(16, 24, 40, .07);
-}
-
-* { box-sizing: border-box; }
-body {
+} body.founder-portal-page * { box-sizing: border-box; }
+body.founder-portal-page {
     margin: 0;
     min-height: 100vh;
     background: var(--ad-page);
