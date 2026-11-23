@@ -68,7 +68,7 @@ body.founder-portal-page {
     font: inherit;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 5px 14px rgba(37, 99, 235, .18);
+    box-shadow: 0 5px 14px rgba(118, 44, 255, .18);
     transition: .2s ease;
 }
 .primary-btn:hover { transform: translateY(-1px); background: #5d1ed6; }
