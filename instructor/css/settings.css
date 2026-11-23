@@ -116,7 +116,7 @@
 
 .settings-nav-item.active {
     color: #762cff;
-    background: #edf4ff;
+    background: #f0eaff;
     box-shadow: inset 3px 0 0 #762cff;
 }
 
@@ -220,7 +220,7 @@
 
 .settings-icon.blue {
     color: #762cff;
-    background: #edf4ff;
+    background: #f0eaff;
 }
 
 .settings-icon.purple {
@@ -336,7 +336,7 @@
     display: block;
     margin-bottom: 5px;
 
-    color: #1e293b;
+    color: #17152f;
     font-size: 13px;
     font-weight: 700;
 }
@@ -645,7 +645,7 @@
 
 .secondary-btn {
     color: #762cff;
-    background: #edf4ff;
+    background: #f0eaff;
     border: 1px solid #d8e7ff;
 }
 
