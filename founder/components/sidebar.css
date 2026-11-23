@@ -8,8 +8,8 @@ body.founder-shell-ready{
   --founder-border: #e6eaf0;
   --founder-text: #172033;
   --founder-muted: #64748b;
-  --founder-primary: #2563eb;
-  --founder-primary-soft: #eff6ff;
+  --founder-primary: var(--ssa-color-brand,#762cff);
+  --founder-primary-soft: #f0eaff;
   --founder-surface: #ffffff;
 }
 
@@ -161,9 +161,9 @@ body.founder-shell-ready .sidebar-footer{
 body.founder-shell-ready .ai-status-card{
   padding: 12px;
   margin-bottom: 9px;
-  border: 1px solid #dbe7f8;
+  border: 1px solid #e8dcff;
   border-radius: 14px;
-  background: linear-gradient(135deg, #f8fbff, #f2f6ff);
+  background: linear-gradient(135deg, #faf7ff, #f0eaff);
 }
 body.founder-shell-ready .ai-status-top{
   display: flex;
@@ -178,7 +178,7 @@ body.founder-shell-ready .ai-avatar{
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: #eaf2ff;
+  background: #f0eaff;
   color: var(--founder-primary);
 }
 body.founder-shell-ready .ai-avatar svg{ width: 17px; height: 17px; }
@@ -197,7 +197,7 @@ body.founder-shell-ready .sidebar-ai-btn{
   cursor: pointer;
   transition: background .18s ease, transform .18s ease;
 }
-body.founder-shell-ready .sidebar-ai-btn:hover{ background: #1d4ed8; transform: translateY(-1px); }
+body.founder-shell-ready .sidebar-ai-btn:hover{ background: #5d1ed6; transform: translateY(-1px); }
 
 body.founder-shell-ready .logout-btn{
   width: 100%;
