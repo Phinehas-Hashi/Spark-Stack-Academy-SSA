@@ -47,7 +47,7 @@
 
     border-radius: 999px;
 
-    background: rgba(255, 193, 7, 0.12);
+    background: rgba(32, 207, 232, 0.12);
 
     color: #b77900;
 
@@ -79,7 +79,7 @@
 
     font-weight: 800;
 
-    color: #081c3a;
+    color: #17152f;
 
 }
 
@@ -88,7 +88,7 @@
 
     display: inline-block;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -162,9 +162,9 @@
 
     border-radius: 14px;
 
-    background: rgba(41, 121, 255, 0.1);
+    background: rgba(118, 44, 255, 0.1);
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -202,7 +202,7 @@
 
 .plan-status strong {
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 15px;
 
@@ -262,7 +262,7 @@
 
     background: #ffffff;
 
-    border: 1px solid rgba(41, 121, 255, 0.2);
+    border: 1px solid rgba(118, 44, 255, 0.2);
 
     box-shadow:
         0 25px 70px rgba(8, 28, 58, 0.12);
@@ -289,9 +289,9 @@
     background:
         linear-gradient(
             90deg,
-            #2979ff,
+            #762cff,
             #7c3aed,
-            #ffc107
+            #20cfe8
         );
 
 }
@@ -316,7 +316,7 @@
 
     letter-spacing: 1.5px;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -333,7 +333,7 @@
 
     border-radius: 14px;
 
-    background: rgba(255, 193, 7, 0.13);
+    background: rgba(32, 207, 232, 0.13);
 
     color: #d99100;
 
@@ -381,7 +381,7 @@
 
     line-height: 1;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-weight: 800;
 
@@ -484,7 +484,7 @@
     background:
         linear-gradient(
             135deg,
-            #2979ff,
+            #762cff,
             #1557c7
         );
 
@@ -499,7 +499,7 @@
     cursor: pointer;
 
     box-shadow:
-        0 12px 25px rgba(41, 121, 255, 0.25);
+        0 12px 25px rgba(118, 44, 255, 0.25);
 
     transition:
         transform 0.2s ease,
@@ -513,7 +513,7 @@
     transform: translateY(-2px);
 
     box-shadow:
-        0 16px 30px rgba(41, 121, 255, 0.32);
+        0 16px 30px rgba(118, 44, 255, 0.32);
 
 }
 
@@ -598,7 +598,7 @@
 
     letter-spacing: 1.5px;
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -607,7 +607,7 @@
 
     margin: 8px 0 0;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 28px;
 
@@ -669,9 +669,9 @@
 
     border-radius: 13px;
 
-    background: rgba(41, 121, 255, 0.1);
+    background: rgba(118, 44, 255, 0.1);
 
-    color: #2979ff;
+    color: #762cff;
 
 }
 
@@ -687,7 +687,7 @@
 
     margin: 0 0 8px;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 15px;
 
