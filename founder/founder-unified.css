@@ -338,3 +338,20 @@ body.founder-shell-ready > #sidebarContainer {
     padding: 0 8px !important;
   }
 }
+
+body.founder-portal-page .sidebar-footer {
+  background: #080522 !important;
+  border-top: 1px solid rgba(255,255,255,.13) !important;
+}
+body.founder-portal-page .menu-btn {
+  background: rgba(255,255,255,.09) !important;
+  border-color: rgba(255,255,255,.16) !important;
+  color: #fff !important;
+}
+body.founder-portal-page .menu-btn:hover {
+  background: rgba(118,44,255,.24) !important;
+  color: #20cfe8 !important;
+}
+body.founder-portal-page .sidebar-nav {
+  scrollbar-color: rgba(190,177,255,.4) transparent;
+}
