@@ -1,28 +1,28 @@
 /* Founder Revenue — premium readable light layer */
-body.founder-portal-page {--rev-bg:#f6f8fc;--rev-surface:#fff;--rev-border:#e4e9f2;--rev-text:#172033;--rev-muted:#667085;--rev-primary:#762cff;--rev-success:#16a34a;--rev-warning:#d97706;--rev-danger:#dc2626}
-body.founder-portal-page {background:var(--rev-bg)!important;color:var(--rev-text)!important;font-family:Inter,system-ui,sans-serif}
-.bg-orb{opacity:.06!important;filter:blur(90px)!important}
-.main-content{background:transparent!important}
-.glass-card{background:var(--rev-surface)!important;border:1px solid var(--rev-border)!important;box-shadow:0 8px 28px rgba(16,24,40,.06)!important;backdrop-filter:none!important;color:var(--rev-text)!important}
-.glass-card:hover{box-shadow:0 12px 32px rgba(16,24,40,.09)!important;border-color:#d5ddea!important}
-.page-header h1,.card-header h2,.breakdown-card h2,.payment-card h2,.growth-card h2,.section-header h2,.report-card h3,.summary-card h3{color:var(--rev-text)!important}
-.page-header p,.stat-card h4,.stat-card small,.growth-item span,.payment-method span,.breakdown-item span,.report-card p,.summary-card p{color:var(--rev-muted)!important}
-.primary-btn{background:var(--rev-primary)!important;box-shadow:0 8px 18px rgba(118,44,255,.2)!important}
-.secondary-btn{background:#fff!important;color:#344054!important;border:1px solid #d9e0eb!important}
-.secondary-btn:hover{background:#f8fafc!important;color:var(--rev-primary)!important}
-.card-header select,.header-actions input,.header-actions select{background:#fff!important;color:#344054!important;border:1px solid #d9e0eb!important}
-.card-header option,.header-actions option{background:#fff!important;color:#344054!important}
-.stat-card,.breakdown-item,.payment-method,.growth-item{background:#fff!important;border-color:var(--rev-border)!important}
-.stat-card::before{background:var(--rev-primary)!important}
-.stat-icon.blue{background:#f0eaff!important}.stat-icon.green{background:#ecfdf3!important}.stat-icon.gold{background:#fffbeb!important}.stat-icon.red{background:#fef2f2!important}
-.breakdown-item.total{background:#f0f6ff!important;border-color:#d7c8ff!important}.breakdown-item.total span{color:var(--rev-text)!important}.breakdown-item.total strong{color:var(--rev-primary)!important}
-.payment-method strong,.growth-item strong{color:var(--rev-success)!important}
-.table-responsive{border:1px solid var(--rev-border);background:#fff}
-table{min-width:1050px}thead{background:#f8fafc!important}th{color:#475467!important;border-bottom:1px solid var(--rev-border)!important}td{color:#344054!important;border-bottom:1px solid #edf0f5!important}
-.status{display:inline-flex;padding:5px 10px;border-radius:999px;font-size:.78rem;font-weight:700;text-transform:capitalize}.status.completed{background:#ecfdf3;color:#15803d}.status.pending{background:#fffbeb;color:#b45309}.status.failed{background:#fef2f2;color:#b91c1c}
-.table-action,.withdraw-action{border:1px solid #d9e0eb;background:#fff;color:#344054;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}.withdraw-action.approve{color:#15803d;border-color:#bbf7d0}.withdraw-action.reject{color:#b91c1c;border-color:#fecaca}.table-action:hover,.withdraw-action:hover{background:#f8fafc}
-.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}.summary-card{padding:24px}.summary-card h2{color:var(--rev-text)!important;font-size:1.8rem}.report-card{padding:24px}.reports-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.action-bar{display:flex;gap:12px;flex-wrap:wrap}
-canvas{max-height:340px}
-.empty-table{padding:40px!important;text-align:center;color:var(--rev-muted)!important}
-@media(max-width:1000px){.analytics-grid,.payment-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.reports-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.main-content{padding:16px!important}.page-header{align-items:flex-start;flex-direction:column;padding:22px!important}.page-header h1{font-size:1.55rem}.stats-grid{grid-template-columns:1fr}.summary-grid,.reports-grid{grid-template-columns:1fr}.header-actions{width:100%}.header-actions input{width:100%}.header-actions select{width:100%}.action-bar>*{width:100%}}
+body.founder-portal-page{--rev-bg:#f6f8fc;--rev-surface:#fff;--rev-border:#e4e9f2;--rev-text:#172033;--rev-muted:#667085;--rev-primary:#762cff;--rev-success:#16a34a;--rev-warning:#d97706;--rev-danger:#dc2626}
+body.founder-portal-page{background:var(--rev-bg)!important;color:var(--rev-text)!important;font-family:Inter,system-ui,sans-serif}
+body.founder-portal-page .bg-orb{opacity:.06!important;filter:blur(90px)!important}
+body.founder-portal-page .main-content{background:transparent!important}
+body.founder-portal-page .glass-card{background:var(--rev-surface)!important;border:1px solid var(--rev-border)!important;box-shadow:0 8px 28px rgba(16,24,40,.06)!important;backdrop-filter:none!important;color:var(--rev-text)!important}
+body.founder-portal-page .glass-card:hover{box-shadow:0 12px 32px rgba(16,24,40,.09)!important;border-color:#d5ddea!important}
+body.founder-portal-page .page-header h1,body.founder-portal-page .card-header h2,body.founder-portal-page .breakdown-card h2,body.founder-portal-page .payment-card h2,body.founder-portal-page .growth-card h2,body.founder-portal-page .section-header h2,body.founder-portal-page .report-card h3,body.founder-portal-page .summary-card h3{color:var(--rev-text)!important}
+body.founder-portal-page .page-header p,body.founder-portal-page .stat-card h4,body.founder-portal-page .stat-card small,body.founder-portal-page .growth-item span,body.founder-portal-page .payment-method span,body.founder-portal-page .breakdown-item span,body.founder-portal-page .report-card p,body.founder-portal-page .summary-card p{color:var(--rev-muted)!important}
+body.founder-portal-page .primary-btn{background:var(--rev-primary)!important;box-shadow:0 8px 18px rgba(118,44,255,.2)!important}
+body.founder-portal-page .secondary-btn{background:#fff!important;color:#344054!important;border:1px solid #d9e0eb!important}
+body.founder-portal-page .secondary-btn:hover{background:#f8fafc!important;color:var(--rev-primary)!important}
+body.founder-portal-page .card-header select,body.founder-portal-page .header-actions input,body.founder-portal-page .header-actions select{background:#fff!important;color:#344054!important;border:1px solid #d9e0eb!important}
+body.founder-portal-page .card-header option,body.founder-portal-page .header-actions option{background:#fff!important;color:#344054!important}
+body.founder-portal-page .stat-card,body.founder-portal-page .breakdown-item,body.founder-portal-page .payment-method,body.founder-portal-page .growth-item{background:#fff!important;border-color:var(--rev-border)!important}
+body.founder-portal-page .stat-card::before{background:var(--rev-primary)!important}
+body.founder-portal-page .stat-icon.blue{background:#f0eaff!important}body.founder-portal-page .stat-icon.green{background:#ecfdf3!important}body.founder-portal-page .stat-icon.gold{background:#fffbeb!important}body.founder-portal-page .stat-icon.red{background:#fef2f2!important}
+body.founder-portal-page .breakdown-item.total{background:#f0f6ff!important;border-color:#d7c8ff!important}body.founder-portal-page .breakdown-item.total span{color:var(--rev-text)!important}body.founder-portal-page .breakdown-item.total strong{color:var(--rev-primary)!important}
+body.founder-portal-page .payment-method strong,body.founder-portal-page .growth-item strong{color:var(--rev-success)!important}
+body.founder-portal-page .table-responsive{border:1px solid var(--rev-border);background:#fff}
+body.founder-portal-page table{min-width:1050px}body.founder-portal-page thead{background:#f8fafc!important}body.founder-portal-page th{color:#475467!important;border-bottom:1px solid var(--rev-border)!important}body.founder-portal-page td{color:#344054!important;border-bottom:1px solid #edf0f5!important}
+body.founder-portal-page .status{display:inline-flex;padding:5px 10px;border-radius:999px;font-size:.78rem;font-weight:700;text-transform:capitalize}body.founder-portal-page .status.completed{background:#ecfdf3;color:#15803d}body.founder-portal-page .status.pending{background:#fffbeb;color:#b45309}body.founder-portal-page .status.failed{background:#fef2f2;color:#b91c1c}
+body.founder-portal-page .table-action,body.founder-portal-page .withdraw-action{border:1px solid #d9e0eb;background:#fff;color:#344054;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}body.founder-portal-page .withdraw-action.approve{color:#15803d;border-color:#bbf7d0}body.founder-portal-page .withdraw-action.reject{color:#b91c1c;border-color:#fecaca}body.founder-portal-page .table-action:hover,body.founder-portal-page .withdraw-action:hover{background:#f8fafc}
+body.founder-portal-page .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}body.founder-portal-page .summary-card{padding:24px}body.founder-portal-page .summary-card h2{color:var(--rev-text)!important;font-size:1.8rem}body.founder-portal-page .report-card{padding:24px}body.founder-portal-page .reports-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}body.founder-portal-page .action-bar{display:flex;gap:12px;flex-wrap:wrap}
+body.founder-portal-page canvas{max-height:340px}
+body.founder-portal-page .empty-table{padding:40px!important;text-align:center;color:var(--rev-muted)!important}
+@media(max-width:1000px){body.founder-portal-page .analytics-grid,body.founder-portal-page .payment-grid{grid-template-columns:1fr}body.founder-portal-page .summary-grid{grid-template-columns:repeat(2,1fr)}body.founder-portal-page .reports-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){body.founder-portal-page .main-content{padding:16px!important}body.founder-portal-page .page-header{align-items:flex-start;flex-direction:column;padding:22px!important}body.founder-portal-page .page-header h1{font-size:1.55rem}body.founder-portal-page .stats-grid{grid-template-columns:1fr}body.founder-portal-page .summary-grid,body.founder-portal-page .reports-grid{grid-template-columns:1fr}body.founder-portal-page .header-actions{width:100%}body.founder-portal-page .header-actions input{width:100%}body.founder-portal-page .header-actions select{width:100%}body.founder-portal-page .action-bar>*{width:100%}}
