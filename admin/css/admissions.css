@@ -81,8 +81,8 @@
 .admission-table-avatar {
     width: 40px;
     height: 40px;
-    background: rgba(41,121,255,.14);
-    color: #2979ff;
+    background: rgba(118,44,255,.14);
+    color: #762cff;
     flex: 0 0 auto;
 }
 
@@ -135,8 +135,8 @@
 .admission-avatar {
     width: 58px;
     height: 58px;
-    background: rgba(41,121,255,.14);
-    color: #2979ff;
+    background: rgba(118,44,255,.14);
+    color: #762cff;
     font-size: 20px;
 }
 
