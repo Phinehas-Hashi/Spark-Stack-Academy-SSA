@@ -7,7 +7,7 @@
    ROOT
    ============================================================ */
 
-:root {
+body.founder-portal-page {
     --spark-navy: #081c3a;
     --spark-blue: #2979ff;
     --spark-blue-dark: #1557c0;
@@ -630,7 +630,7 @@
 }
 
 
-.spark-message-body {
+.spark-message-body.founder-portal-page {
     padding: 13px 15px;
 
     border:
@@ -654,7 +654,7 @@
 }
 
 
-.spark-message.user .spark-message-body {
+.spark-message.user .spark-message-body.founder-portal-page {
     border-color: var(--spark-navy);
 
     border-radius:
@@ -1788,7 +1788,7 @@
     }
 
 
-    .spark-message-body {
+    .spark-message-body.founder-portal-page {
         padding: 11px 12px;
 
         font-size: 12px;
