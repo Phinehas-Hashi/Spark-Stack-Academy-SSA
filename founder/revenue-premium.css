@@ -1,6 +1,6 @@
 /* Founder Revenue — premium readable light layer */
-:root{--rev-bg:#f6f8fc;--rev-surface:#fff;--rev-border:#e4e9f2;--rev-text:#172033;--rev-muted:#667085;--rev-primary:#2563eb;--rev-success:#16a34a;--rev-warning:#d97706;--rev-danger:#dc2626}
-body{background:var(--rev-bg)!important;color:var(--rev-text)!important;font-family:Inter,system-ui,sans-serif}
+body.founder-portal-page {--rev-bg:#f6f8fc;--rev-surface:#fff;--rev-border:#e4e9f2;--rev-text:#172033;--rev-muted:#667085;--rev-primary:#2563eb;--rev-success:#16a34a;--rev-warning:#d97706;--rev-danger:#dc2626}
+body.founder-portal-page {background:var(--rev-bg)!important;color:var(--rev-text)!important;font-family:Inter,system-ui,sans-serif}
 .bg-orb{opacity:.06!important;filter:blur(90px)!important}
 .main-content{background:transparent!important}
 .glass-card{background:var(--rev-surface)!important;border:1px solid var(--rev-border)!important;box-shadow:0 8px 28px rgba(16,24,40,.06)!important;backdrop-filter:none!important;color:var(--rev-text)!important}
