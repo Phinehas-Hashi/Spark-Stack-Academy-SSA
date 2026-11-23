@@ -3,7 +3,12 @@
    One shell. Every Founder page.
 ========================================================= */
 
-:root {
+:root /* =========================================================
+   FOUNDER OS — SHARED SIDEBAR
+   One shell. Every Founder page.
+========================================================= */
+
+body.founder-shell-ready{
   --founder-sidebar-width: 272px;
   --founder-border: #e6eaf0;
   --founder-text: #172033;
@@ -13,7 +18,9 @@
   --founder-surface: #ffffff;
 }
 
-.sidebar {
+.sidebar 
+
+body.founder-shell-ready .sidebar{
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 1200;
@@ -28,13 +35,17 @@
   box-shadow: 8px 0 28px rgba(15,23,42,.045);
 }
 
-.sidebar-header {
+.sidebar-header 
+
+body.founder-shell-ready .sidebar-header{
   flex: 0 0 auto;
   padding: 18px 18px 16px;
   border-bottom: 1px solid var(--founder-border);
 }
 
-.brand {
+.brand 
+
+body.founder-shell-ready .brand{
   display: flex;
   align-items: center;
   gap: 12px;
@@ -43,7 +54,9 @@
   text-decoration: none;
 }
 
-.brand-icon {
+.brand-icon 
+
+body.founder-shell-ready .brand-icon{
   width: 42px;
   height: 42px;
   flex: 0 0 42px;
@@ -54,9 +67,13 @@
   color: var(--founder-primary);
 }
 
-.brand-icon svg { width: 21px; height: 21px; stroke-width: 2.4; }
-.brand-text { min-width: 0; }
-.brand-text h2 {
+.brand-icon svg 
+
+body.founder-shell-ready .brand-icon svg{ width: 21px; height: 21px; stroke-width: 2.4; }
+.brand-text 
+body.founder-shell-ready .brand-text{ min-width: 0; }
+.brand-text h2 
+body.founder-shell-ready .brand-text h2{
   margin: 0;
   color: #0f172a;
   font-size: 15px;
@@ -64,7 +81,8 @@
   font-weight: 800;
   letter-spacing: -.02em;
 }
-.brand-text p {
+.brand-text p 
+body.founder-shell-ready .brand-text p{
   margin: 4px 0 0;
   color: #94a3b8;
   font-size: 11px;
@@ -74,7 +92,9 @@
   text-transform: uppercase;
 }
 
-.sidebar-nav {
+.sidebar-nav 
+
+body.founder-shell-ready .sidebar-nav{
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -83,10 +103,14 @@
   scrollbar-width: thin;
   scrollbar-color: #d7dee8 transparent;
 }
-.sidebar-nav::-webkit-scrollbar { width: 5px; }
-.sidebar-nav::-webkit-scrollbar-thumb { background: #d7dee8; border-radius: 99px; }
+.sidebar-nav::-webkit-scrollbar 
+body.founder-shell-ready .sidebar-nav::-webkit-scrollbar{ width: 5px; }
+.sidebar-nav::-webkit-scrollbar-thumb 
+body.founder-shell-ready .sidebar-nav::-webkit-scrollbar-thumb{ background: #d7dee8; border-radius: 99px; }
 
-.nav-section-label {
+.nav-section-label 
+
+body.founder-shell-ready .nav-section-label{
   margin: 16px 10px 7px;
   color: #9aa6b5;
   font-size: 10px;
@@ -95,7 +119,9 @@
   letter-spacing: .11em;
 }
 
-.sidebar-menu > a {
+.sidebar-menu > a 
+
+body.founder-shell-ready .sidebar-menu > a{
   position: relative;
   display: flex;
   align-items: center;
@@ -110,26 +136,32 @@
   font-weight: 600;
   transition: background .18s ease, color .18s ease, transform .18s ease;
 }
-.sidebar-menu > a svg {
+.sidebar-menu > a svg 
+body.founder-shell-ready .sidebar-menu > a svg{
   width: 18px;
   height: 18px;
   flex: 0 0 18px;
   color: currentColor;
   stroke-width: 2;
 }
-.sidebar-menu > a:hover {
+.sidebar-menu > a:hover 
+body.founder-shell-ready .sidebar-menu > a:hover{
   color: #172033;
   background: #f6f8fb;
   transform: translateX(1px);
 }
 .sidebar-menu > a.active,
-.sidebar-menu > a[aria-current="page"] {
+.sidebar-menu > a[aria-current="page"] 
+body.founder-shell-ready .sidebar-menu > a.active,
+body.founder-shell-ready .sidebar-menu > a[aria-current="page"]{
   color: var(--founder-primary);
   background: var(--founder-primary-soft);
   font-weight: 750;
 }
 .sidebar-menu > a.active::before,
-.sidebar-menu > a[aria-current="page"]::before {
+.sidebar-menu > a[aria-current="page"]::before 
+body.founder-shell-ready .sidebar-menu > a.active::before,
+body.founder-shell-ready .sidebar-menu > a[aria-current="page"]::before{
   content: "";
   position: absolute;
   left: 0;
@@ -140,8 +172,11 @@
   background: var(--founder-primary);
 }
 
-.command-nav-item { background: #f8fafc; }
-.nav-live-dot {
+.command-nav-item 
+
+body.founder-shell-ready .command-nav-item{ background: #f8fafc; }
+.nav-live-dot 
+body.founder-shell-ready .nav-live-dot{
   width: 7px;
   height: 7px;
   margin-left: auto;
@@ -151,27 +186,33 @@
   box-shadow: 0 0 0 3px #dcfce7;
 }
 
-.sidebar-footer {
+.sidebar-footer 
+
+body.founder-shell-ready .sidebar-footer{
   flex: 0 0 auto;
   padding: 12px;
   background: #fff;
   border-top: 1px solid var(--founder-border);
 }
 
-.ai-status-card {
+.ai-status-card 
+
+body.founder-shell-ready .ai-status-card{
   padding: 12px;
   margin-bottom: 9px;
   border: 1px solid #dbe7f8;
   border-radius: 14px;
   background: linear-gradient(135deg, #f8fbff, #f2f6ff);
 }
-.ai-status-top {
+.ai-status-top 
+body.founder-shell-ready .ai-status-top{
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
 }
-.ai-avatar {
+.ai-avatar 
+body.founder-shell-ready .ai-avatar{
   width: 34px;
   height: 34px;
   flex: 0 0 34px;
@@ -181,11 +222,16 @@
   background: #eaf2ff;
   color: var(--founder-primary);
 }
-.ai-avatar svg { width: 17px; height: 17px; }
-.ai-status-card h4 { margin: 0; color: #172033; font-size: 12px; font-weight: 800; }
-.ai-status-card p { margin: 3px 0 0; color: #718096; font-size: 10px; line-height: 1.3; }
+.ai-avatar svg 
+body.founder-shell-ready .ai-avatar svg{ width: 17px; height: 17px; }
+.ai-status-card h4 
+body.founder-shell-ready .ai-status-card h4{ margin: 0; color: #172033; font-size: 12px; font-weight: 800; }
+.ai-status-card p 
+body.founder-shell-ready .ai-status-card p{ margin: 3px 0 0; color: #718096; font-size: 10px; line-height: 1.3; }
 
-.sidebar-ai-btn {
+.sidebar-ai-btn 
+
+body.founder-shell-ready .sidebar-ai-btn{
   width: 100%;
   min-height: 34px;
   border: 0;
@@ -197,9 +243,12 @@
   cursor: pointer;
   transition: background .18s ease, transform .18s ease;
 }
-.sidebar-ai-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+.sidebar-ai-btn:hover 
+body.founder-shell-ready .sidebar-ai-btn:hover{ background: #1d4ed8; transform: translateY(-1px); }
 
-.logout-btn {
+.logout-btn 
+
+body.founder-shell-ready .logout-btn{
   width: 100%;
   min-height: 40px;
   display: flex;
@@ -214,27 +263,42 @@
   font-weight: 700;
   cursor: pointer;
 }
-.logout-btn:hover { color: #dc2626; background: #fef2f2; border-color: #fecaca; }
-.logout-btn svg { width: 16px; height: 16px; }
+.logout-btn:hover 
+body.founder-shell-ready .logout-btn:hover{ color: #dc2626; background: #fef2f2; border-color: #fecaca; }
+.logout-btn svg 
+body.founder-shell-ready .logout-btn svg{ width: 16px; height: 16px; }
+
+@media (max-width: 900px) 
 
 @media (max-width: 900px) {
-  .sidebar {
+  .sidebar 
+  body.founder-shell-ready .sidebar{
     transform: translateX(-105%);
     transition: transform .25s ease;
     box-shadow: 14px 0 35px rgba(15,23,42,.14);
   }
   body.sidebar-open .sidebar,
-  .sidebar.open { transform: translateX(0); }
+  .sidebar.open 
+  body.founder-shell-ready.sidebar-open .sidebar,
+  body.founder-shell-ready .sidebar.open{ transform: translateX(0); }
 }
+
+@media (prefers-reduced-motion: reduce) 
 
 @media (prefers-reduced-motion: reduce) {
-  .sidebar, .sidebar-menu > a, .sidebar-ai-btn { transition: none; }
+  .sidebar, .sidebar-menu > a, .sidebar-ai-btn 
+  body.founder-shell-ready .sidebar, body.founder-shell-ready .sidebar-menu > a, body.founder-shell-ready .sidebar-ai-btn{ transition: none; }
 }
 
-.founder-sidebar .brand-icon{background:transparent!important;box-shadow:none!important}.founder-sidebar .brand-icon img{width:38px;height:38px;display:block;border-radius:11px}
+.founder-sidebar .brand-icon
+
+body.founder-shell-ready .founder-sidebar .brand-icon{background:transparent!important;box-shadow:none!important}.founder-sidebar .brand-icon imgbody.founder-shell-ready .founder-sidebar .brand-icon img{width:38px;height:38px;display:block;border-radius:11px}
 
 /* Unified mobile drawer hardening — Founder portal */
-@media(max-width:900px){
+@media(max-width:900px)
+
+/* Unified mobile drawer hardening — Founder portal */
+body.founder-shell-ready @media(max-width:900px){
  #sidebarContainer .sidebar{inset:0 auto 0 0;width:min(292px,calc(100vw - 44px));height:100dvh;max-height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);z-index:1201;overflow:hidden;overscroll-behavior:contain}
  #sidebarContainer .sidebar-nav{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
  #sidebarOverlay{position:fixed;inset:0;z-index:1200}
