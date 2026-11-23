@@ -14,7 +14,7 @@
     --text: var(--ssa-color-ink, #17152f);
     --muted: var(--ssa-color-muted, #77758f);
     --border: var(--ssa-color-line, #e8e6f0);
-    --sidebar-width: 255px;
+    --sidebar-width: 270px;
     --topbar-height: 72px;
     --shadow: var(--ssa-shadow-sm, 0 4px 14px rgba(27,20,65,.06));
 }
@@ -171,7 +171,8 @@ svg {
     transition: .25s ease;
 }
 
-.sidebar-overlay.overlay-visible {
+.sidebar-overlay.overlay-visible,
+.sidebar-overlay.active {
     opacity: 1;
     visibility: visible;
 
@@ -206,7 +207,7 @@ body.sidebar-active {
 @media (max-width: 900px) {
 
     :root {
-        --sidebar-width: 255px;
+        --sidebar-width: 270px;
     }
 
     .instructor-sidebar {
