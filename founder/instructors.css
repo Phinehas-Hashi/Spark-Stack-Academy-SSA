@@ -3,8 +3,8 @@
    Premium, readable, responsive management UI
    ============================================================ */
 body.founder-portal-page {
-    --ins-bg:#f5f7fb; --ins-surface:#fff; --ins-surface-soft:#f8fafc;
-    --ins-text:#172033; --ins-muted:#667085; --ins-border:#e6eaf0;
+    --ins-bg:#f5f4fb; --ins-surface:#fff; --ins-surface-soft:#fbfaff;
+    --ins-text:#17152f; --ins-muted:#77758f; --ins-border:#e8e6f0;
     --ins-primary:#762cff; --ins-primary-soft:#f0eaff;
     --ins-success:#15803d; --ins-success-soft:#ecfdf3;
     --ins-danger:#dc2626; --ins-danger-soft:#fef2f2;
