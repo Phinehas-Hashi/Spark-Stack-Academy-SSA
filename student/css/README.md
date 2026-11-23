@@ -27,6 +27,18 @@ Load the page stylesheet last so scoped page rules have predictable precedence. 
 - Keep standalone experiences (certificate print view, maintenance page, and other intentionally independent screens) independent when they do not use the standard portal shell.
 - Preserve existing HTML IDs, data attributes, event hooks, and JavaScript behavior during visual migrations.
 
+## Student migration status
+
+- Standard learning pages use the shared token/core/component/responsive/shell foundation and a page-owned stylesheet from `pages/`.
+- The 26 legacy page stylesheet copies in `student/css/` are not the canonical files referenced by the current Student HTML routes. They are retained for rollback and must not be reintroduced into page load lists.
+- The page-specific files in `student/css/pages/` are the canonical content stylesheets for those routes. The paired legacy files are not byte-identical; do not copy older rules over the page-scoped versions.
+- `premium-success.html` is a standalone transactional screen. It now loads design tokens and the core document defaults, without loading unused shell components.
+- `portal-suspended.html` is a standalone system-state screen. It now uses the shared tokens while keeping its isolated page root.
+- `certificate-view.html` is a standalone printable artifact. Its styles are scoped beneath `.certificate-view-page`, use the shared palette and typography, and preserve print-specific rules.
+- `chat.html`, `messages.html`, `new-chat.html`, and `help-center.html` remain standalone experiences without the standard authenticated shell. Do not add `portal-shell.css` until their intended navigation experience is deliberately redesigned.
+- `progress.html` is a redirect to `learning-progress.html`, not a styled portal screen.
+- `report.html` uses the standard portal shell and its own `pages/report.css`.
+
 ## Legacy stylesheet policy
 
 Old page stylesheets and `student-theme.css` are retained until all HTML, JavaScript-created links, imports, and component dependencies have been checked. Delete a legacy file only after its references are proven absent and the replacement has been checked at desktop and mobile widths.
