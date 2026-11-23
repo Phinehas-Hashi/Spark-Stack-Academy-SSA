@@ -75,7 +75,7 @@
 
 .instructors-filters select:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 
@@ -298,7 +298,7 @@
 }
 
 .instructor-action-btn:hover {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
@@ -439,7 +439,7 @@
     border: 1px solid var(--admin-border);
     border-radius: 20px;
     background: #fff;
-    box-shadow: 0 25px 70px rgba(8,28,58,.18);
+    box-shadow: 0 25px 70px rgba(23,21,47,.18);
 }
 
 
