@@ -2,16 +2,15 @@
    SSA FOUNDER OS — INSTRUCTORS
    Premium, readable, responsive management UI
    ============================================================ */
-:root {
+body.founder-portal-page {
     --ins-bg:#f5f7fb; --ins-surface:#fff; --ins-surface-soft:#f8fafc;
     --ins-text:#172033; --ins-muted:#667085; --ins-border:#e6eaf0;
     --ins-primary:#2563eb; --ins-primary-soft:#eff6ff;
     --ins-success:#15803d; --ins-success-soft:#ecfdf3;
     --ins-danger:#dc2626; --ins-danger-soft:#fef2f2;
     --ins-shadow:0 10px 30px rgba(15,23,42,.06);
-}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ins-text);background:var(--ins-bg)}
+} body.founder-portal-page * {box-sizing:border-box}
+body.founder-portal-page {margin:0;min-height:100vh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ins-text);background:var(--ins-bg)}
 .bg-orb{display:none!important}
 .dashboard-layout{min-height:100vh}
 .main-content{min-width:0;padding:28px;background:var(--ins-bg)}
