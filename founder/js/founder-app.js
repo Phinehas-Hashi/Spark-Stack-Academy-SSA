@@ -4,17 +4,19 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const componentCache = new Map();
+const FOUNDER_ROOT = /\\/founder\\/wallets\\//.test(window.location.pathname) ? "../" : "";
+const founderPath = path => FOUNDER_ROOT + path;
 const escapeHTML = value => String(value ?? "").replace(/[&<>\"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 
 function loadCSS(path){
-  if(document.querySelector(`link[href="${path}"]`)) return;
-  const link=document.createElement("link"); link.rel="stylesheet"; link.href=path; document.head.appendChild(link);
+  const resolved = founderPath(path);
+  if(document.querySelector(`link[href="${resolved}"]`)) return;
+  const link=document.createElement("link"); link.rel="stylesheet"; link.href=resolved; document.head.appendChild(link);
 }
 
 function ensureFounderShell(){
   document.body.classList.add("founder-shell-ready");
   loadCSS("founder-unified.css");
-  loadCSS("founder-complete.css");
   if(!document.getElementById("sidebarOverlay")){
     const overlay=document.createElement("div"); overlay.id="sidebarOverlay"; overlay.className="sidebar-overlay"; document.body.appendChild(overlay);
   }
@@ -34,14 +36,28 @@ function ensureFounderShell(){
 }
 
 async function fetchComponent(path){
-  if(componentCache.has(path)) return componentCache.get(path);
-  const response=await fetch(path); if(!response.ok) throw new Error(`Failed to load ${path}`);
-  const html=await response.text(); componentCache.set(path,html); return html;
+  const resolved = founderPath(path);
+  if(componentCache.has(resolved)) return componentCache.get(resolved);
+  const response=await fetch(resolved); if(!response.ok) throw new Error(`Failed to load ${resolved}`);
+  const html=await response.text(); componentCache.set(resolved,html); return html;
 }
 
 async function loadComponent({containerId,html,css,callback}){
   loadCSS(css); const container=document.getElementById(containerId); if(!container) return;
-  try{ container.innerHTML=await fetchComponent(html); window.lucide?.createIcons(); callback?.(); }
+  try{
+    container.innerHTML=await fetchComponent(html);
+    if(FOUNDER_ROOT){
+      container.querySelectorAll("a[href]").forEach(link=>{
+        const href=link.getAttribute("href") || "";
+        if(href && !/^(?:[a-z]+:|\\/|#|javascript:)/i.test(href) && !href.startsWith("../")) link.setAttribute("href", founderPath(href));
+      });
+      container.querySelectorAll("[onclick]").forEach(node=>{
+        const value=node.getAttribute("onclick") || "";
+        node.setAttribute("onclick", value.replace(/window\\.location\\.href\\s*=\\s*(['"])([^'"]+)\\1/g, (match, quote, target)=>`window.location.href=${quote}${founderPath(target)}${quote}`));
+      });
+    }
+    window.lucide?.createIcons(); callback?.();
+  }
   catch(error){ console.error(`Failed to load ${html}`,error); }
 }
 
@@ -57,21 +73,41 @@ window.addEventListener("DOMContentLoaded",async()=>{
 function setupSidebar(){
   const menuBtn=document.getElementById("menuBtn"), sidebar=document.querySelector("#sidebarContainer .sidebar"), overlay=document.getElementById("sidebarOverlay");
   if(!menuBtn||!sidebar) return;
-  const close=()=>{sidebar.classList.remove("open","active");document.body.classList.remove("sidebar-open","menu-open");overlay?.classList.remove("active");};
-  menuBtn.onclick=()=>{const open=!sidebar.classList.contains("open");sidebar.classList.toggle("open",open);document.body.classList.toggle("sidebar-open",open);overlay?.classList.toggle("active",open);};
-  overlay?.addEventListener("click",close); document.querySelectorAll(".sidebar-menu a").forEach(link=>link.addEventListener("click",close));
+  const close=()=>{
+    sidebar.classList.remove("open","active");
+    document.body.classList.remove("sidebar-open","menu-open");
+    overlay?.classList.remove("active");
+    overlay?.setAttribute("aria-hidden","true");
+    menuBtn.setAttribute("aria-expanded","false");
+    menuBtn.setAttribute("aria-label","Open sidebar");
+  };
+  overlay?.setAttribute("aria-hidden","true");
+  menuBtn.setAttribute("aria-controls","sidebarContainer");
+  menuBtn.setAttribute("aria-expanded","false");
+  menuBtn.onclick=()=>{
+    const open=!sidebar.classList.contains("open")&&!sidebar.classList.contains("active");
+    sidebar.classList.toggle("open",open);
+    document.body.classList.toggle("sidebar-open",open);
+    overlay?.classList.toggle("active",open);
+    overlay?.setAttribute("aria-hidden",String(!open));
+    menuBtn.setAttribute("aria-expanded",String(open));
+    menuBtn.setAttribute("aria-label",open?"Close sidebar":"Open sidebar");
+  };
+  overlay?.addEventListener("click",close);
+  document.addEventListener("keydown",event=>{if(event.key==="Escape")close();});
+  document.querySelectorAll(".sidebar-menu a").forEach(link=>link.addEventListener("click",close));
 }
 
 function setupTopbar(){
   const button=document.getElementById("notificationsBtn"), dropdown=document.getElementById("notificationDropdown"), viewAll=document.getElementById("viewAllNotifications");
   button?.addEventListener("click",e=>{e.stopPropagation();dropdown?.classList.toggle("active");});
   document.addEventListener("click",e=>{if(dropdown&&!dropdown.contains(e.target)&&!button?.contains(e.target))dropdown.classList.remove("active");});
-  viewAll?.addEventListener("click",()=>window.location.href="notifications.html");
+  viewAll?.addEventListener("click",()=>window.location.href=founderPath("notifications.html"));
 }
 
 function loadFounder(){
   onAuthStateChanged(auth,async user=>{
-    if(!user){window.location.href="../login.html";return;}
+    if(!user){window.location.href=founderPath("../login.html");return;}
     listenToNotifications(user.uid); loadTopNotifications(user.uid);
     try{
       const cached=sessionStorage.getItem("founderProfile"); if(cached){updateFounderUI(JSON.parse(cached));return;}
