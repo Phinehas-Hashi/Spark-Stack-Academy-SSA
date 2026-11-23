@@ -236,7 +236,7 @@ body.founder-portal-page {
 /* Unified mobile drawer hardening — Founder portal */
 @media(max-width:900px){
  body.founder-portal-page #sidebarContainer .sidebar{inset:0 auto 0 0;width:min(292px,calc(100vw - 44px));height:100dvh;max-height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);z-index:1201;overflow:hidden;overscroll-behavior:contain}
- body.founder-portal-page body.founder-portal-page #sidebarContainer .sidebar-nav{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ body.founder-portal-page #sidebarContainer .sidebar-nav{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
  body.founder-portal-page #sidebarOverlay{position:fixed;inset:0;z-index:1200}
  body.founder-portal-page.sidebar-open{overflow:hidden;overscroll-behavior:none}
 }
