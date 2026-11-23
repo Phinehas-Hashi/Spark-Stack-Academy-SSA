@@ -77,7 +77,7 @@
 
 .courses-filters select:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 
@@ -159,7 +159,7 @@
     background:
         linear-gradient(
             135deg,
-            rgba(41,121,255,.12),
+            rgba(118,44,255,.12),
             rgba(109,93,252,.12)
         );
 
@@ -363,7 +363,7 @@
 }
 
 .course-action-btn:hover {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
@@ -574,7 +574,7 @@
     background:
         linear-gradient(
             135deg,
-            rgba(41,121,255,.12),
+            rgba(118,44,255,.12),
             rgba(109,93,252,.14)
         );
 
