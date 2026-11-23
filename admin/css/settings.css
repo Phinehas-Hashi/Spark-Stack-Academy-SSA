@@ -153,7 +153,7 @@
 }
 
 .settings-nav-item.active {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
     font-weight: 700;
 }
@@ -290,7 +290,7 @@
     margin-top: 6px;
     padding: 3px 7px;
     border-radius: 999px;
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
     font-size: 9px;
     font-weight: 700;
@@ -391,7 +391,7 @@
 }
 
 .settings-option-icon.blue {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
