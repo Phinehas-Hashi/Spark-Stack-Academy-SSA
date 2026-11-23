@@ -215,7 +215,7 @@ The dependency mapping and static CSS scan cover all five portals and all 152 CS
 
 
 **Instructor verification checklist:** test the drawer and overlay at mobile widths; verify keyboard Escape and body scroll lock; test course-builder and assignment modals, earnings/payment dialogs, quiz grading panels, responsive tables, messages and standalone routes. The repository changes are committed, but the Instructor portal must not be marked visually complete until these checks pass on GitHub Pages.
-**Migration status:** Student active stylesheet foundation and standalone-page first batch are committed. Instructor foundation and page-level palette migration are committed across its shell and standalone routes. The remaining work is browser verification followed by controlled migration of Admin and Founder. Static source checks do not establish visual correctness or production readiness.
+**Migration status:** Student active stylesheet foundation and standalone-page first batch are committed. Instructor foundation and page-level palette migration are committed across its shell and standalone routes. The remaining work is browser verification followed by controlled migration of Founder. Static source checks do not establish visual correctness or production readiness.
 
 **Important:** The Instructor migration is a source-code migration, not a claim that every route has been visually verified. Test the mobile drawer, topbar, course-builder modals, earnings withdrawal modal, quiz grading panels, responsive tables and standalone messaging on GitHub Pages before calling this portal complete. No production-ready claim is made until all portal routes have been tested at desktop, tablet and mobile widths.
 
@@ -237,3 +237,23 @@ The dependency mapping and static CSS scan cover all five portals and all 152 CS
 
 
 **Institution verification checklist:** test dashboard metrics and quota/team panels, course creation/listing, learner enrolment and roster actions, registration submission, mobile sidebar open/close and overlay, Escape handling, and all Firebase-backed states. Visual and backend verification remains outstanding; the Institution source migration must not be treated as production sign-off.
+
+
+### Admin Portal — foundation and page migration
+
+- Rebuilt `admin/css/admin-core.css` around shared design tokens. Admin palette aliases now inherit the Academy ink, violet, cyan, canvas, surface and border tokens instead of defining a separate blue/navy root palette.
+- Scoped the Admin reset, typography, page header, content offset, sidebar, topbar and overlay under `.admin-app`; body-level state selectors are restricted to `body.admin-portal-page`.
+- Removed the cross-portal `brand-system.css` import from `admin/css/responsive.css` and removed the dashboard's direct brand-system link. The Admin responsive layer now contains Admin-only breakpoints and the existing tested modal positioning rules.
+- Standardized all 17 authenticated Admin routes on this order: shared tokens → Montserrat/Poppins fonts → Admin core → shared Admin components → one page stylesheet → Admin responsive/modal layer.
+- Removed the conflicting global brand-system override layer and aligned Admin component/page brand colors with the shared violet/cyan palette. Semantic status colors remain intact.
+- Unified the Admin sidebar and topbar chrome with the dark indigo shell. Mobile navigation uses the JavaScript `.open` state, overlay `.active` state, body scroll lock and the actual shell IDs.
+- Added `aria-controls`, `aria-expanded` and `aria-hidden` state synchronization to the menu control, including Escape and overlay-close behavior.
+- Extracted Certificates and Withdrawals inline style blocks into dedicated `certificates.css` and `withdrawals.css`. Those pages no longer load the unrelated Dashboard stylesheet.
+- Removed six static inline progress-bar width attributes from Course Profile and Instructor Profile and placed their zero-state defaults in the page stylesheets; runtime JavaScript width updates remain unchanged.
+- Admin Messages remains a standalone shared messaging screen with an Admin-only theme override. It does not load the authenticated Admin shell.
+- Resolved the case-sensitive Settings route: `Settings.html` remains the canonical authenticated page and the lowercase `settings.html` path redirects to it. Sidebar and profile menu links use the canonical path.
+- Static inspection of all 19 Admin HTML routes found no embedded style blocks or inline style attributes. All 21 Admin CSS files have balanced brace counts and no `@import` directives.
+- The remaining `!important` declarations are concentrated in the existing modal surface/stacking normalization, reduced-motion rules and a few component states. The previously tested modal behavior was preserved rather than rewritten.
+- No Firebase, authorization, Firestore or Cloud Functions logic was changed during this styling migration.
+
+**Admin verification checklist:** test all 17 shell routes, the standalone Messages screen and lowercase Settings redirect; test the mobile drawer, Escape/overlay close, profile dropdown, all modal types, responsive tables, certificate/withdrawal screens and dynamic progress bars. Browser and Firebase verification remain outstanding; source migration is not production sign-off.
