@@ -28,7 +28,7 @@
     border-radius: 24px;
 
     background:
-        linear-gradient(135deg, #17152f, #123d70);
+        linear-gradient(135deg, #17152f, #25116a);
 
     color: #fff;
 
@@ -69,7 +69,7 @@
     display: block;
     margin-bottom: 8px;
 
-    color: #63a4ff;
+    color: #c6a8ff;
 
     font-size: 10px;
     font-weight: 800;
@@ -137,7 +137,7 @@
 }
 
 .dashboard-btn.primary:hover {
-    background: #1769ed;
+    background: #5d1ed6;
     transform: translateY(-2px);
 }
 
@@ -177,17 +177,17 @@
 
     background: #fff;
 
-    border: 1px solid rgba(8,28,58,.07);
+    border: 1px solid rgba(23,21,47,.07);
     border-radius: 18px;
 
-    box-shadow: 0 8px 25px rgba(8,28,58,.045);
+    box-shadow: 0 8px 25px rgba(23,21,47,.045);
 
     transition: .2s ease;
 }
 
 .dashboard-stat:hover {
     transform: translateY(-3px);
-    box-shadow: 0 14px 32px rgba(8,28,58,.08);
+    box-shadow: 0 14px 32px rgba(23,21,47,.08);
 }
 
 .stat-icon {
@@ -208,7 +208,7 @@
 }
 
 .stat-icon.blue {
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -285,10 +285,10 @@
 
     background: #fff;
 
-    border: 1px solid rgba(8,28,58,.07);
+    border: 1px solid rgba(23,21,47,.07);
     border-radius: 20px;
 
-    box-shadow: 0 8px 25px rgba(8,28,58,.045);
+    box-shadow: 0 8px 25px rgba(23,21,47,.045);
 }
 
 .card-header {
@@ -339,7 +339,7 @@
 }
 
 .card-link:hover {
-    color: #1769ed;
+    color: #5d1ed6;
 }
 
 
@@ -359,7 +359,7 @@
 
     padding: 13px;
 
-    border: 1px solid rgba(8,28,58,.06);
+    border: 1px solid rgba(23,21,47,.06);
     border-radius: 14px;
 
     transition: .2s ease;
@@ -382,7 +382,7 @@
 
     border-radius: 12px;
 
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -446,7 +446,7 @@
 
     padding: 11px;
 
-    border: 1px solid rgba(8,28,58,.06);
+    border: 1px solid rgba(23,21,47,.06);
     border-radius: 14px;
 
     background: #fff;
@@ -483,7 +483,7 @@
 }
 
 .quick-icon.blue {
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -550,7 +550,7 @@
 
     padding: 25px;
 
-    border: 1px dashed rgba(8,28,58,.11);
+    border: 1px dashed rgba(23,21,47,.11);
     border-radius: 16px;
 
     text-align: center;
@@ -572,7 +572,7 @@
 
     border-radius: 14px;
 
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -659,7 +659,7 @@
 
     border-radius: 11px;
 
-    background: #edf4ff;
+    background: #f0eaff;
     color: #762cff;
 }
 
@@ -738,7 +738,7 @@
 
     border-radius: 999px;
 
-    background: #e8edf4;
+    background: #e8e6f0;
 }
 
 .progress-fill {
