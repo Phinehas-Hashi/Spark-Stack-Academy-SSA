@@ -209,6 +209,9 @@ The dependency mapping and static CSS scan cover all five portals and all 152 CS
 - Extracted Report an Issue styles into `instructor/css/report.css`. The suspended page and submission-review page use dedicated standalone stylesheets.
 - Static inspection of all 24 Instructor HTML routes found no embedded `<style>` blocks or inline style attributes. Inspected Instructor CSS files have balanced braces and no `@import` dependencies.
 - Remaining `!important` declarations are primarily state/visibility rules and reduced-motion overrides; they still require contextual browser review.
+- Follow-up static validation resolved every local CSS and JavaScript reference across the 24 Instructor application routes against the current repository tree; no missing local asset paths were found. The 24 route files also contain no embedded style blocks or inline style attributes.
+- All 29 Instructor CSS files have balanced brace counts and no `@import` directives. This is a static structural check only; it does not replace parsing or browser rendering.
+
 
 
 **Instructor verification checklist:** test the drawer and overlay at mobile widths; verify keyboard Escape and body scroll lock; test course-builder and assignment modals, earnings/payment dialogs, quiz grading panels, responsive tables, messages and standalone routes. The repository changes are committed, but the Instructor portal must not be marked visually complete until these checks pass on GitHub Pages.
