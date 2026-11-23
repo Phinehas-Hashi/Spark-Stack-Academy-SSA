@@ -60,7 +60,7 @@
 }
 
 .create-quiz-page .breadcrumb a:hover {
-    color: #2979ff;
+    color: #762cff;
 }
 
 .create-quiz-page .breadcrumb i {
@@ -100,8 +100,8 @@
 
     border-radius: 12px;
 
-    background: rgba(41, 121, 255, .10);
-    color: #2979ff;
+    background: rgba(118, 44, 255, .10);
+    color: #762cff;
 }
 
 .course-context-icon svg {
@@ -125,7 +125,7 @@
 }
 
 .course-context-info strong {
-    color: #0f172a;
+    color: #17152f;
     font-size: 14px;
 
     overflow: hidden;
@@ -185,7 +185,7 @@
 .card-heading h2 {
     margin: 0 0 5px;
 
-    color: #0f172a;
+    color: #17152f;
 
     font-size: 17px;
     font-weight: 750;
@@ -250,7 +250,7 @@
 
     background: #f8fafc;
 
-    color: #0f172a;
+    color: #17152f;
 
     font-family: inherit;
     font-size: 13px;
@@ -287,10 +287,10 @@
 .form-group select:focus {
     background: #ffffff;
 
-    border-color: #2979ff;
+    border-color: #762cff;
 
     box-shadow:
-        0 0 0 3px rgba(41, 121, 255, .10);
+        0 0 0 3px rgba(118, 44, 255, .10);
 }
 
 .form-group select {
@@ -357,7 +357,7 @@
 }
 
 .question-counter strong {
-    color: #0f172a;
+    color: #17152f;
     font-size: 14px;
 }
 
@@ -422,7 +422,7 @@
 
     border-radius: 8px;
 
-    background: #081c3a;
+    background: #17152f;
     color: #ffffff;
 
     font-size: 12px;
@@ -434,8 +434,8 @@
 
     border-radius: 6px;
 
-    background: rgba(41, 121, 255, .09);
-    color: #2979ff;
+    background: rgba(118, 44, 255, .09);
+    color: #762cff;
 
     font-size: 10px;
     font-weight: 800;
@@ -480,7 +480,7 @@
 
 .question-action:hover {
     background: #e2e8f0;
-    color: #0f172a;
+    color: #17152f;
 }
 
 .question-action.danger:hover {
@@ -501,7 +501,7 @@
 .question-text {
     margin: 0 0 14px;
 
-    color: #0f172a;
+    color: #17152f;
 
     font-size: 14px;
     font-weight: 650;
@@ -611,7 +611,7 @@
 .questions-empty h3 {
     margin: 0 0 6px;
 
-    color: #0f172a;
+    color: #17152f;
 
     font-size: 14px;
 }
@@ -693,9 +693,9 @@
 }
 
 .create-quiz-page .btn-primary {
-    border: 1px solid #081c3a;
+    border: 1px solid #17152f;
 
-    background: #081c3a;
+    background: #17152f;
     color: #ffffff;
 }
 
@@ -722,11 +722,11 @@
     border: 1px dashed #94a3b8;
 
     background: #ffffff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .create-quiz-page .btn-outline:hover {
-    border-color: #2979ff;
+    border-color: #762cff;
     background: #eff6ff;
 }
 
@@ -899,13 +899,13 @@
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.12em;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .question-editor-header h2 {
     margin: 0;
     font-size: 21px;
-    color: #081c3a;
+    color: #17152f;
 }
 
 
@@ -924,7 +924,7 @@
     margin-bottom: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #0f172a;
+    color: #17152f;
 }
 
 .editor-group textarea,
@@ -937,7 +937,7 @@
     border-radius: 10px;
     padding: 12px 13px;
     font: inherit;
-    color: #0f172a;
+    color: #17152f;
     background: #fff;
     outline: none;
 }
@@ -951,8 +951,8 @@
 .editor-group input:focus,
 .editor-group select:focus,
 #shortAnswer:focus {
-    border-color: #2979ff;
-    box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.1);
+    border-color: #762cff;
+    box-shadow: 0 0 0 3px rgba(118, 44, 255, 0.1);
 }
 
 
@@ -975,7 +975,7 @@
     margin-bottom: 12px;
     font-size: 13px;
     font-weight: 700;
-    color: #0f172a;
+    color: #17152f;
 }
 
 .answer-row {
@@ -988,7 +988,7 @@
 .answer-row input[type="radio"] {
     width: 17px;
     height: 17px;
-    accent-color: #2979ff;
+    accent-color: #762cff;
 }
 
 .answer-input {
@@ -1019,7 +1019,7 @@
 }
 
 .true-false-options input {
-    accent-color: #2979ff;
+    accent-color: #762cff;
 }
 
 
@@ -1053,7 +1053,7 @@
 
 .question-editor-header .question-action:hover {
     background: #e2e8f0;
-    color: #0f172a;
+    color: #17152f;
 }
 
 
