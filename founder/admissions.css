@@ -1,7 +1,7 @@
 /* SSA FOUNDER OS — ADMISSIONS PAGE */
 body.founder-portal-page {
-    --ad-primary: #2563eb;
-    --ad-primary-soft: #eff6ff;
+    --ad-primary: #762cff;
+    --ad-primary-soft: #f0eaff;
     --ad-success: #15803d;
     --ad-success-soft: #ecfdf3;
     --ad-danger: #b91c1c;
@@ -71,7 +71,7 @@ body.founder-portal-page {
     box-shadow: 0 5px 14px rgba(37, 99, 235, .18);
     transition: .2s ease;
 }
-.primary-btn:hover { transform: translateY(-1px); background: #1d4ed8; }
+.primary-btn:hover { transform: translateY(-1px); background: #5d1ed6; }
 .primary-btn:disabled { opacity: .65; cursor: wait; transform: none; }
 .primary-btn.is-loading { position: relative; }
 
