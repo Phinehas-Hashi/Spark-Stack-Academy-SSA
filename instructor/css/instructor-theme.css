@@ -1,0 +1,187 @@
+/* Instructor Portal theme layer.
+   Scoped to the Instructor shell and standalone Instructor page roots.
+   This replaces the cross-portal brand-system import previously bundled
+   into responsive.css. */
+
+.instructor-app,
+.instructor-page {
+    color: var(--ssa-color-ink, #17152f);
+}
+
+.instructor-app {
+    background: var(--ssa-color-canvas, #f5f4fb);
+}
+
+.instructor-app .instructor-main,
+.instructor-page {
+    background:
+        radial-gradient(ellipse at 88% 0%, rgba(157,91,255,.10), transparent 34%),
+        var(--ssa-color-canvas, #f5f4fb);
+}
+
+.instructor-app .instructor-sidebar,
+.instructor-app #instructorSidebar {
+    background:
+        radial-gradient(circle at 10% 0%, rgba(132,47,255,.30), transparent 34%),
+        linear-gradient(180deg, #090625 0%, #100b3e 58%, #080522 100%);
+    color: #fff;
+    border-right: 1px solid rgba(176,129,255,.25);
+    box-shadow: 8px 0 22px rgba(8,28,58,.12);
+}
+
+.instructor-app .instructor-topbar,
+.instructor-app #instructorTopbar {
+    background: linear-gradient(105deg, #0b082d 0%, #171052 100%);
+    color: #fff;
+    border-bottom: 1px solid rgba(164,112,255,.36);
+    box-shadow: 0 8px 24px rgba(12,5,48,.12);
+}
+
+.instructor-app .instructor-topbar-inner,
+.instructor-app .topbar-context strong,
+.instructor-app .topbar-profile-info strong {
+    color: #fff;
+}
+
+.instructor-app #instructorSidebar .instructor-brand,
+.instructor-app #instructorSidebar .sidebar-logo {
+    border-color: rgba(255,255,255,.13);
+}
+
+.instructor-app #instructorSidebar .instructor-nav-item,
+.instructor-app #instructorSidebar .nav-link {
+    color: #d5cfee;
+    border-radius: 11px;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.instructor-app #instructorSidebar .instructor-nav-item:hover,
+.instructor-app #instructorSidebar .instructor-nav-item.active,
+.instructor-app #instructorSidebar .nav-link:hover,
+.instructor-app #instructorSidebar .nav-link.active {
+    color: #fff;
+    background: linear-gradient(100deg, rgba(119,44,255,.42), rgba(32,207,232,.12));
+    box-shadow: inset 3px 0 var(--ssa-color-accent, #20cfe8), 0 0 18px rgba(126,48,255,.16);
+}
+
+.instructor-app #instructorSidebar .instructor-nav-item.active::before,
+.instructor-app #instructorSidebar .nav-link.active::before {
+    background: var(--ssa-color-accent, #20cfe8);
+}
+
+.instructor-app #instructorSidebar .nav-label,
+.instructor-app #instructorSidebar .nav-section-title {
+    color: #a99ad5;
+}
+
+.instructor-app .page-header h1,
+.instructor-page .page-header h1,
+.instructor-app .dashboard-page > h1,
+.instructor-page > h1 {
+    color: var(--ssa-color-ink, #17152f);
+    font-family: var(--ssa-font-display, "Montserrat", sans-serif);
+    letter-spacing: -.035em;
+}
+
+.instructor-app .page-eyebrow,
+.instructor-page .page-eyebrow,
+.instructor-app .dashboard-eyebrow,
+.instructor-page .dashboard-eyebrow {
+    color: var(--ssa-color-brand, #762cff);
+}
+
+.instructor-app .dashboard-hero,
+.instructor-page .dashboard-hero,
+.instructor-app .welcome-card,
+.instructor-page .welcome-card,
+.instructor-app .welcome-panel,
+.instructor-page .welcome-panel {
+    border: 1px solid rgba(183,139,255,.48);
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at 88% 18%, rgba(32,216,242,.20), transparent 27%),
+        radial-gradient(circle at 76% 100%, rgba(161,43,255,.34), transparent 38%),
+        linear-gradient(120deg, #090625 0%, #171052 58%, #25116a 100%);
+    box-shadow: 0 14px 38px rgba(24,8,76,.20), 0 0 22px rgba(134,53,255,.13);
+    color: #fff;
+}
+
+.instructor-app .dashboard-hero h1,
+.instructor-page .dashboard-hero h1,
+.instructor-app .dashboard-hero h2,
+.instructor-page .dashboard-hero h2,
+.instructor-app .dashboard-hero p,
+.instructor-page .dashboard-hero p {
+    color: #fff;
+}
+
+.instructor-app .dashboard-hero h1 span,
+.instructor-page .dashboard-hero h1 span {
+    color: var(--ssa-color-accent, #20cfe8);
+}
+
+.instructor-app .dashboard-stat,
+.instructor-page .dashboard-stat,
+.instructor-app .course-stat,
+.instructor-page .course-stat,
+.instructor-app .stat-card,
+.instructor-page .stat-card,
+.instructor-app .metric-card,
+.instructor-page .metric-card,
+.instructor-app .content-card,
+.instructor-page .content-card,
+.instructor-app .panel,
+.instructor-page .panel,
+.instructor-app .settings-card,
+.instructor-page .settings-card {
+    border: 1px solid var(--ssa-color-line, #e8e6f0);
+    border-radius: 17px;
+    background: linear-gradient(145deg, #fff, #faf8ff);
+    box-shadow: var(--ssa-shadow-md, 0 12px 34px rgba(27,20,65,.10));
+}
+
+.instructor-app .dashboard-btn.primary,
+.instructor-page .dashboard-btn.primary,
+.instructor-app .primary-btn,
+.instructor-page .primary-btn,
+.instructor-app .btn-primary,
+.instructor-page .btn-primary,
+.instructor-app button[type="submit"],
+.instructor-page button[type="submit"] {
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 11px;
+    background: linear-gradient(105deg, var(--ssa-color-brand, #762cff), var(--ssa-color-brand-strong, #5d1ed6) 58%, var(--ssa-color-accent, #20cfe8) 150%);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(117,39,239,.25);
+}
+
+.instructor-app input:focus,
+.instructor-app select:focus,
+.instructor-app textarea:focus,
+.instructor-page input:focus,
+.instructor-page select:focus,
+.instructor-page textarea:focus {
+    border-color: var(--ssa-color-brand, #762cff);
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(118,44,255,.13);
+}
+
+@media (max-width: 600px) {
+    .instructor-app .dashboard-hero,
+    .instructor-page .dashboard-hero,
+    .instructor-app .welcome-card,
+    .instructor-page .welcome-card {
+        border-radius: 17px;
+    }
+
+    .instructor-app .dashboard-stat,
+    .instructor-page .dashboard-stat,
+    .instructor-app .course-stat,
+    .instructor-page .course-stat,
+    .instructor-app .stat-card,
+    .instructor-page .stat-card,
+    .instructor-app .metric-card,
+    .instructor-page .metric-card {
+        border-radius: 14px;
+    }
+}
