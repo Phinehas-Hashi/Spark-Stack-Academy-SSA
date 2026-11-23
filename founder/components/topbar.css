@@ -29,7 +29,7 @@
   color: #475569;
   cursor: pointer;
 }
-.menu-btn:hover { color: #2563eb; background: #eff6ff; }
+.menu-btn:hover { color: #762cff; background: #f0eaff; }
 .menu-btn svg { width: 19px; height: 19px; }
 
 .topbar-left {
@@ -64,8 +64,8 @@
   outline: 0 !important;
   box-shadow: none !important;
   background: transparent !important;
-  color: #172033 !important;
-  font: 500 12px/1.2 Inter, Poppins, system-ui, sans-serif;
+  color: #17152f !important;
+  font: 500 12px/1.2 var(--ssa-font-body, Poppins), system-ui, sans-serif;
 }
 .search-box input::placeholder { color: #94a3b8; }
 
@@ -105,7 +105,7 @@
   cursor: pointer;
   transition: color .18s ease, background .18s ease, border-color .18s ease;
 }
-.icon-btn:hover { color: #2563eb; background: #eff6ff; border-color: #bfdbfe; }
+.icon-btn:hover { color: #762cff; background: #f0eaff; border-color: #d7c8ff; }
 .icon-btn svg { width: 18px; height: 18px; }
 
 .notification-wrapper { position: relative; }
@@ -148,8 +148,8 @@
   padding: 15px 16px;
   border-bottom: 1px solid #edf0f4;
 }
-.dropdown-header h3 { margin: 0; color: #0f172a; font-size: 13px; font-weight: 800; }
-.dropdown-header span { color: #2563eb; font-size: 11px; font-weight: 800; }
+.dropdown-header h3 { margin: 0; color: #17152f; font-size: 13px; font-weight: 800; }
+.dropdown-header span { color: #762cff; font-size: 11px; font-weight: 800; }
 #topNotificationsList { max-height: 355px; overflow: auto; }
 .empty-notifications { margin: 0; padding: 28px 16px; text-align: center; color: #94a3b8; font-size: 12px; }
 #viewAllNotifications {
@@ -158,7 +158,7 @@
   border: 0;
   border-top: 1px solid #edf0f4;
   background: #fff;
-  color: #2563eb;
+  color: #762cff;
   font-size: 11px;
   font-weight: 800;
   cursor: pointer;
@@ -183,8 +183,8 @@
   place-items: center;
   overflow: hidden;
   border-radius: 10px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #f0eaff;
+  color: #762cff;
   font-size: 12px;
   font-weight: 800;
 }
@@ -192,7 +192,7 @@
 .profile-info { min-width: 0; max-width: 150px; }
 .profile-info strong,
 .profile-info span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.profile-info strong { color: #172033; font-size: 11px; font-weight: 800; }
+.profile-info strong { color: #17152f; font-size: 11px; font-weight: 800; }
 .profile-info span { margin-top: 2px; color: #94a3b8; font-size: 9px; font-weight: 650; }
 
 @media (max-width: 900px) {
