@@ -27,10 +27,21 @@ function closeAdminMenu() {
 function initAdminMenuToggle() {
     const button = document.getElementById("adminMenuToggle"), sidebar = document.getElementById("adminSidebar"), overlay = document.getElementById("sidebarOverlay");
     if (!button) return;
+    overlay?.setAttribute("aria-hidden", "true");
+    button.setAttribute("aria-expanded", "false");
     button.addEventListener("click", () => {
-        sidebar?.classList.toggle("open"); overlay?.classList.toggle("active"); document.body.classList.toggle("admin-menu-open");
+        const isOpen = !sidebar?.classList.contains("open");
+        sidebar?.classList.toggle("open", isOpen);
+        overlay?.classList.toggle("active", isOpen);
+        overlay?.setAttribute("aria-hidden", String(!isOpen));
+        button.setAttribute("aria-expanded", String(isOpen));
+        button.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+        document.body.classList.toggle("admin-menu-open", isOpen);
     });
     overlay?.addEventListener("click", closeAdminMenu);
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeAdminMenu();
+    });
 }
 
 function updateAdminTopbarProfile(data = {}) {
