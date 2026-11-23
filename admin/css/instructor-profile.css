@@ -793,3 +793,7 @@
     }
 
 }
+/* Runtime-updated metric fills start at zero until data hydration completes. */
+#satisfactionBar { width: 0; }
+#completionBar { width: 0; }
+#retentionBar { width: 0; }
