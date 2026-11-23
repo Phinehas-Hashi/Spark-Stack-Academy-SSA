@@ -26,7 +26,7 @@
     margin: 6px 0;
     font-size: 32px;
     font-weight: 800;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .earnings-page .page-header p {
@@ -49,7 +49,7 @@
     padding: 0 18px;
     border: 0;
     border-radius: 12px;
-    background: #081c3a;
+    background: #17152f;
     color: #fff;
     font-family: inherit;
     font-size: 13px;
@@ -91,12 +91,12 @@
     background:
         radial-gradient(
             circle at 85% 20%,
-            rgba(41, 121, 255, .22),
+            rgba(118, 44, 255, .22),
             transparent 32%
         ),
         linear-gradient(
             135deg,
-            #081c3a,
+            #17152f,
             #102e5c
         );
 
@@ -222,7 +222,7 @@
 .earnings-stat strong {
     display: block;
 
-    color: #081c3a;
+    color: #17152f;
     font-size: 20px;
     font-weight: 800;
 }
@@ -256,7 +256,7 @@
 
 .stat-icon.blue {
     background: #eaf2ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .stat-icon.purple {
@@ -308,7 +308,7 @@
 }
 
 .card-eyebrow {
-    color: #2979ff;
+    color: #762cff;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 1.2px;
@@ -317,7 +317,7 @@
 .card-header h2 {
     margin: 5px 0 0;
 
-    color: #081c3a;
+    color: #17152f;
     font-size: 18px;
     font-weight: 800;
 }
@@ -357,12 +357,12 @@
 }
 
 .revenue-row.total {
-    color: #081c3a;
+    color: #17152f;
     font-weight: 700;
 }
 
 .revenue-row.total strong {
-    color: #081c3a;
+    color: #17152f;
     font-size: 18px;
 }
 
@@ -464,7 +464,7 @@
     background:
         radial-gradient(
             circle at 90% 10%,
-            rgba(41,121,255,.12),
+            rgba(118,44,255,.12),
             transparent 35%
         ),
         linear-gradient(
@@ -487,7 +487,7 @@
     border-radius: 20px;
 
     background: #e6f0ff;
-    color: #2979ff;
+    color: #762cff;
 
     font-size: 9px;
     font-weight: 800;
@@ -497,7 +497,7 @@
 .premium-content h2 {
     margin: 10px 0 7px;
 
-    color: #081c3a;
+    color: #17152f;
     font-size: 23px;
     font-weight: 800;
 }
@@ -531,7 +531,7 @@
 .premium-features svg {
     width: 15px;
     height: 15px;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .premium-btn {
@@ -544,7 +544,7 @@
     border: 0;
     border-radius: 11px;
 
-    background: #2979ff;
+    background: #762cff;
     color: #fff;
 
     font-family: inherit;
@@ -557,7 +557,7 @@
 
 .premium-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 10px 22px rgba(41,121,255,.22);
+    box-shadow: 0 10px 22px rgba(118,44,255,.22);
 }
 
 .premium-price {
@@ -578,7 +578,7 @@
     display: inline-block;
     margin: 4px 0;
 
-    color: #081c3a;
+    color: #17152f;
     font-size: 30px;
     font-weight: 800;
 }
@@ -630,7 +630,7 @@
     border-radius: 11px;
 
     background: #eef5ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .transaction-info strong {
@@ -684,7 +684,7 @@
     height: 24px;
 
     border: 3px solid #e8edf4;
-    border-top-color: #2979ff;
+    border-top-color: #762cff;
 
     border-radius: 50%;
 
@@ -772,7 +772,7 @@
 .modal-header h2 {
     margin: 5px 0;
 
-    color: #081c3a;
+    color: #17152f;
     font-size: 23px;
     font-weight: 800;
 }
@@ -826,8 +826,8 @@
 
 .withdrawal-field input:focus,
 .withdrawal-field select:focus {
-    border-color: #2979ff;
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    border-color: #762cff;
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 .amount-input {
@@ -843,8 +843,8 @@
 }
 
 .amount-input:focus-within {
-    border-color: #2979ff;
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    border-color: #762cff;
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 .amount-input span {
@@ -907,7 +907,7 @@
 
     border-top: 1px solid #e2e7ee;
 
-    color: #081c3a !important;
+    color: #17152f !important;
     font-weight: 700;
 }
 
@@ -1025,10 +1025,9 @@
 
 
 @media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
+    .earnings-page *,
+    .earnings-page *::before,
+    .earnings-page *::after {
         animation-duration: .01ms !important;
         transition-duration: .01ms !important;
     }
