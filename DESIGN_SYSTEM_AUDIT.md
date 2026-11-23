@@ -1,8 +1,8 @@
 # Spark Stack Academy — Repository-Wide Design System Audit
 
-**Status:** Five-portal dependency audit completed; Student, Instructor and Institution source migrations committed; Admin and Founder migrations remain queued  
-**Branch:** main  
-**Audit commit:** pending this report update
+**Status:** Student, Instructor, Institution and Admin source migrations are recorded; Founder source migration is now isolated on `migration/founder-final`. Browser and live Firebase verification remain outstanding.  
+**Branch:** migration/founder-final  
+**Audit commit:** updated with Founder source migration checkpoint
 
 ## Scope and method
 
@@ -112,20 +112,21 @@ The shell is injected by `admin/js/admin-app.js`, which fetches sidebar/topbar m
 
 ### Founder Portal
 
-Founder has the most varied stylesheet arrangement:
-- Page styles and `founder-unified.css` appear in both orders across pages.
-- `founder/dashboard.html` also loads root `brand-system.css`.
-- `founder/global-intelligence.html` includes Leaflet CSS and then its page stylesheet after `founder-unified.css`.
-- `founder/revenue.html` loads `revenue-premium.css` after the unified and page styles.
-- `founder/instructor-admissions.html`, `founder/marketplace.html`, `founder/marketplace-products.html`, and `founder/spark-ai.html` load the unified stylesheet before page-specific CSS.
-- `founder/messages.html` uses only `role-messaging.css`.
-- `founder/premium-management.html` and `founder/reports.html` have embedded style blocks and load only `founder-unified.css` as linked CSS.
-- `founder/security.html` retains one inline style attribute.
-- Wallets pages use a different combination of component theme/sidebar/topbar styles and unified styles.
+The Founder source migration now uses `body.founder-portal-page` as the portal ownership boundary. All 26 top-level Founder routes load shared design tokens, and the active page/shell stylesheets are ordered consistently: tokens and typography, shell components, page stylesheet, then the unified Founder theme. The standalone Messages route keeps its role-messaging base and Founder-only override.
 
-The Founder shell has overlapping implementation paths. `founder/js/founder-app.js` dynamically ensures shell containers and loads `founder-unified.css` and `founder-complete.css`, then injects sidebar/topbar components. A separate `founder/js/component-loader.js` also loads shell components and wires mobile navigation. Determine which pages load which bootstrap path before consolidating; do not let both initialize the same shell.
+Completed source migration:
+- Removed the cross-portal `brand-system.css` import from the Founder unified theme and removed direct brand-system links from Founder pages.
+- Scoped the active Founder unified theme, shell components, page stylesheets, Wallets stylesheets, and shared role-messaging styles to their owning body roots.
+- The Founder shell now preloads sidebar/topbar styles before the unified theme. Its active bootstrap is `founder/js/founder-app.js`; the separate `founder/js/component-loader.js` has no page/script references and remains as inactive legacy code pending removal review.
+- Preserved the route-aware Wallets base path. The nested Wallets page no longer references nonexistent `./js/founder-app.js` or `./js/founder-auth.js`; `wallets.js` imports the shared app module and owns the page's existing wallet initialization.
+- Premium Management and Reports now load dedicated page stylesheets. Courses styling was moved out of its embedded style block. Security spacing and the topbar notification badge's initial visibility are owned by CSS rather than static inline styles.
+- All 26 Founder HTML routes were statically checked: no embedded style blocks or inline style attributes remain, all load shared design tokens, and none loads the cross-portal brand stylesheet.
+- All inspected active Founder CSS files have balanced braces and no `@import` dependencies. The Students font now uses the shared typography link.
+- No Firebase, Firestore, authorization, wallet, payment or Cloud Functions logic was intentionally changed.
 
-**Specific risk:** `founder/founder-unified.css` has 192 `!important` declarations and global selectors. `founder/students-fixes.css` adds another 56 override declarations. These should not be treated as a clean design-system foundation without selector-by-selector ownership work.
+Inactive legacy files `founder-complete.css`, `founder/components/founder-shell.css` and `founder/components/founder-theme.css` are retained because no active route/bootstrap references them; they were not deleted as part of this migration.
+
+**Remaining risk:** `founder-unified.css` still contains 170 `!important` declarations; `students-fixes.css` has 56, `revenue-premium.css` has 48 and Dashboard has 27. These rules are now portal-scoped, but their visual precedence and responsive behavior need browser review. Static checks do not validate the live Firebase flows, modal stacking, mobile drawer animation, or production rendering.
 
 ## Shared shell and JavaScript ownership
 
@@ -135,7 +136,7 @@ The Founder shell has overlapping implementation paths. `founder/js/founder-app.
 | Instructor | `instructor/js/instructor-app.js` | Fetches sidebar/topbar; `.open` sidebar, `.active` overlay |
 | Institution | `institution/js/institution-app.js` | Fetches sidebar/topbar; `.open` sidebar, `.active` overlay |
 | Admin | `admin/js/admin-app.js` | Fetches markup, imports sidebar/topbar modules and initializes them |
-| Founder | `founder/js/founder-app.js` and `founder/js/component-loader.js` | Two component-loader/bootstrap paths need route-by-route ownership confirmation |
+| Founder | `founder/js/founder-app.js` | Active shell bootstrap; `component-loader.js` is unreferenced legacy code retained pending removal review |
 
 Do not rename component IDs, shell root classes, drawer state classes or injected component selectors during a CSS-only migration.
 
