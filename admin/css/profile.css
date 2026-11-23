@@ -36,8 +36,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(41,121,255,.045),
-            rgba(8,28,58,.02)
+            rgba(118,44,255,.045),
+            rgba(23,21,47,.02)
         );
 }
 
@@ -73,7 +73,7 @@
     font-weight: 800;
 
     box-shadow:
-        0 10px 25px rgba(41,121,255,.18);
+        0 10px 25px rgba(118,44,255,.18);
 }
 
 .profile-avatar-edit {
@@ -173,7 +173,7 @@
 }
 
 .profile-role-badge {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
@@ -333,7 +333,7 @@
     border-color: var(--admin-blue);
 
     box-shadow:
-        0 0 0 3px rgba(41,121,255,.09);
+        0 0 0 3px rgba(118,44,255,.09);
 }
 
 .profile-section-card input:disabled {
