@@ -222,16 +222,18 @@ The dependency mapping and static CSS scan cover all five portals and all 152 CS
 
 ### Institution Portal — foundation and page migration
 
-- Replaced the former import-heavy `institution.css` with a token-based foundation for the authenticated shell and dashboard. The portal no longer imports or links the cross-portal `brand-system.css`.
-- Dashboard, Courses and Learners now load shared design tokens and a consistent Montserrat/Poppins font pair before the Institution foundation and their page styles.
-- Institution Registration is treated as a standalone onboarding route. It now loads shared tokens, typography and `register.css` only; it no longer loads authenticated portal shell CSS.
-- Added explicit page roots for Dashboard and Courses. The Learners and Registration routes retain their existing page roots.
-- Rebuilt sidebar, topbar and overlay styles around the injected `#institutionSidebar`, `#institutionTopbar` and `#sidebarOverlay` elements. The mobile drawer uses the JavaScript `.open` and `.active` states and a 270px desktop shell offset.
-- Normalised mobile drawer toggling and accessibility state (`aria-controls`, `aria-expanded`, `aria-hidden`, Escape, overlay click and body scroll lock).
-- Aligned Institution Dashboard, Courses, Learners and Registration colours with the shared purple/cyan design tokens while preserving semantic success, warning and error states.
-- Moved the dynamic access-verification fallback presentation from inline HTML styles in `institution-app.js` into `.institution-access-error` rules in the portal foundation. The progress-bar width assignment remains runtime-driven and is intentionally retained.
-- Static inspection of all four Institution application routes found no embedded style blocks or inline style attributes. Every local CSS and JavaScript reference resolved against the current repository tree.
-- All four Institution CSS files have balanced brace counts and no `@import` directives. The old navy/blue/gold brand palette literals were removed from these four stylesheets.
-- Cloud Functions and Firebase business logic were not changed during this styling migration.
+- Re-scoped the authenticated shell foundation so the portal's reset, body styling, sidebar, topbar and overlay no longer rely on unqualified global element selectors. Shell IDs are scoped under `.institution-app`.
+- Separated dashboard-only presentation into `institution/css/dashboard.css`; the authenticated shell foundation retains shared layout, shell, responsive drawer and access-fallback rules.
+- Dashboard, Courses and Learners load shared design tokens, the shared Montserrat/Poppins font pair, the Institution shell foundation and their route-specific stylesheet. Dashboard now has its own page stylesheet.
+- Institution Registration remains a standalone onboarding route. It loads shared tokens, typography and `register.css` only, without authenticated portal shell CSS.
+- Dashboard, Courses and Learners use the authenticated shell wrapper and page roots. Registration has its own standalone `.registration-page` root.
+- Sidebar, topbar and overlay rules are scoped to the injected `#institutionSidebar`, `#institutionTopbar` and `#sidebarOverlay` within `.institution-app`. The mobile drawer uses the actual JavaScript `.open` and `.active` states, with a 270px desktop content offset and a 292px maximum mobile drawer.
+- Navigation accessibility remains aligned with the existing JavaScript: `aria-controls`, `aria-expanded`, `aria-hidden`, Escape handling, overlay click and body scroll lock. No Firebase or Cloud Functions behavior was changed.
+- Aligned Dashboard, Courses, Learners and Registration colours with the shared purple/cyan design language while preserving semantic success, warning and error states.
+- Moved the dynamic access-verification fallback presentation into scoped `.institution-access-error` CSS rules. Runtime-driven progress-bar widths remain in JavaScript.
+- Static inspection of all four Institution application routes found no embedded style blocks or inline style attributes. All local CSS and JavaScript references resolved against the repository tree.
+- All five active Institution CSS files have balanced brace counts and no `@import` directives. The only remaining `!important` declarations are reduced-motion overrides in the shell and registration styles.
+- Browser rendering, mobile drawer interaction, and Firebase-backed workflows have not been verified in this migration pass.
+
 
 **Institution verification checklist:** test dashboard metrics and quota/team panels, course creation/listing, learner enrolment and roster actions, registration submission, mobile sidebar open/close and overlay, Escape handling, and all Firebase-backed states. Visual and backend verification remains outstanding; the Institution source migration must not be treated as production sign-off.
