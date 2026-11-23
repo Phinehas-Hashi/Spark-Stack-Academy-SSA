@@ -58,7 +58,7 @@
     right: -70px;
     top: -90px;
     border-radius: 50%;
-    background: rgba(41,121,255,.06);
+    background: rgba(118,44,255,.06);
     pointer-events: none;
 }
 
@@ -77,7 +77,7 @@
     place-items: center;
     flex-shrink: 0;
     border-radius: 14px;
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
@@ -160,7 +160,7 @@
 
 .announcements-filters select:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 
@@ -457,7 +457,7 @@
 }
 
 .announcement-action-btn:hover {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
@@ -744,7 +744,7 @@
 .form-field textarea:focus,
 .form-field select:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 
