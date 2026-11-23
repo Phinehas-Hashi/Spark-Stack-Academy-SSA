@@ -28,7 +28,7 @@
     border-radius: 24px;
 
     background:
-        linear-gradient(135deg, #081c3a, #123d70);
+        linear-gradient(135deg, #17152f, #123d70);
 
     color: #fff;
 
@@ -44,7 +44,7 @@
     top: -100px;
 
     border-radius: 50%;
-    background: rgba(41, 121, 255, .18);
+    background: rgba(118, 44, 255, .18);
 }
 
 .dashboard-hero::before {
@@ -56,7 +56,7 @@
     bottom: -80px;
 
     border-radius: 50%;
-    background: rgba(255, 193, 7, .08);
+    background: rgba(32, 207, 232, .08);
 }
 
 .hero-content,
@@ -85,7 +85,7 @@
 }
 
 .dashboard-hero h1 span {
-    color: #ffc107;
+    color: #20cfe8;
 }
 
 .dashboard-hero p {
@@ -130,10 +130,10 @@
 }
 
 .dashboard-btn.primary {
-    background: #2979ff;
+    background: #762cff;
     color: #fff;
 
-    box-shadow: 0 8px 20px rgba(41,121,255,.28);
+    box-shadow: 0 8px 20px rgba(118,44,255,.28);
 }
 
 .dashboard-btn.primary:hover {
@@ -209,7 +209,7 @@
 
 .stat-icon.blue {
     background: #edf4ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .stat-icon.purple {
@@ -229,7 +229,7 @@
 
 .stat-icon.navy {
     background: #eaf0f8;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .stat-info {
@@ -250,7 +250,7 @@
 .stat-info strong {
     display: block;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 21px;
     font-weight: 800;
@@ -305,7 +305,7 @@
 
     margin-bottom: 4px;
 
-    color: #2979ff;
+    color: #762cff;
 
     font-size: 9px;
     font-weight: 800;
@@ -315,7 +315,7 @@
 .card-header h2 {
     margin: 0;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 18px;
     font-weight: 800;
@@ -326,7 +326,7 @@
     align-items: center;
     gap: 5px;
 
-    color: #2979ff;
+    color: #762cff;
 
     font-size: 11px;
     font-weight: 700;
@@ -366,7 +366,7 @@
 }
 
 .course-item:hover {
-    border-color: rgba(41,121,255,.2);
+    border-color: rgba(118,44,255,.2);
     background: #fafcff;
 }
 
@@ -383,7 +383,7 @@
     border-radius: 12px;
 
     background: #edf4ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .course-thumbnail svg {
@@ -402,7 +402,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 13px;
 }
@@ -461,7 +461,7 @@
 
 .quick-action:hover {
     background: #fafcff;
-    border-color: rgba(41,121,255,.18);
+    border-color: rgba(118,44,255,.18);
     transform: translateX(3px);
 }
 
@@ -484,7 +484,7 @@
 
 .quick-icon.blue {
     background: #edf4ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .quick-icon.purple {
@@ -515,7 +515,7 @@
 .quick-action strong {
     display: block;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 11px;
 }
@@ -573,7 +573,7 @@
     border-radius: 14px;
 
     background: #edf4ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .empty-icon svg {
@@ -583,7 +583,7 @@
 .empty-state h3 {
     margin: 0;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 13px;
 }
@@ -609,7 +609,7 @@
     border: 0;
     border-radius: 10px;
 
-    background: #2979ff;
+    background: #762cff;
     color: #fff;
 
     font-family: inherit;
@@ -660,7 +660,7 @@
     border-radius: 11px;
 
     background: #edf4ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .activity-icon svg {
@@ -671,7 +671,7 @@
 .task-item h4 {
     margin: 0;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 11px;
 }
@@ -724,7 +724,7 @@
 
     margin-bottom: 10px;
 
-    color: #081c3a;
+    color: #17152f;
 
     font-size: 22px;
     font-weight: 800;
@@ -747,7 +747,7 @@
 
     border-radius: inherit;
 
-    background: #2979ff;
+    background: #762cff;
 
     transition: width .5s ease;
 }
