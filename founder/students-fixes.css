@@ -10,8 +10,8 @@ body.founder-portal-page {
     --students-text: #0f172a;
     --students-muted: #64748b;
     --students-border: #e2e8f0;
-    --students-blue: #2563eb;
-    --students-blue-soft: #eff6ff;
+    --students-blue: #762cff;
+    --students-blue-soft: #f0eaff;
     --students-shadow: 0 10px 30px rgba(15, 23, 42, .07);
 }
 
@@ -40,7 +40,7 @@ body.founder-portal-page {
 }
 
 .page-hero { padding: 30px !important; }
-.hero-badge { background: var(--students-blue-soft) !important; color: #1d4ed8 !important; }
+.hero-badge { background: var(--students-blue-soft) !important; color: #5d1ed6 !important; }
 .hero-content h1,
 .hero-content p,
 .stat-card h2,
@@ -57,7 +57,7 @@ body.founder-portal-page {
     color: #fff !important;
     box-shadow: 0 5px 14px rgba(37, 99, 235, .18);
 }
-.primary-btn:hover { background: #1d4ed8 !important; }
+.primary-btn:hover { background: #5d1ed6 !important; }
 .secondary-btn {
     background: #fff !important;
     color: #334155 !important;
@@ -75,7 +75,7 @@ body.founder-portal-page {
 .search-box input::placeholder { color: #94a3b8 !important; }
 .filter-right option { background: #fff !important; color: var(--students-text) !important; }
 
-.stat-card:hover { transform: translateY(-3px) !important; border-color: #bfdbfe !important; }
+.stat-card:hover { transform: translateY(-3px) !important; border-color: #d7c8ff !important; }
 .stat-icon { border-color: var(--students-border) !important; }
 
 .table-responsive { border: 1px solid var(--students-border); }
@@ -89,7 +89,7 @@ td { color: #334155 !important; border-color: #eef2f7 !important; background: #f
 tbody tr:hover td { background: #f8fafc !important; }
 .student-details strong { color: var(--students-text) !important; }
 .student-details small { color: var(--students-muted) !important; }
-.student-avatar { background: linear-gradient(135deg, #2563eb, #60a5fa) !important; }
+.student-avatar { background: linear-gradient(135deg, #762cff, #60a5fa) !important; }
 
 .empty-state { color: var(--students-muted) !important; }
 .empty-content h3 { color: var(--students-text) !important; }
@@ -102,7 +102,7 @@ tbody tr:hover td { background: #f8fafc !important; }
     border: 1px solid var(--students-border) !important;
     border-radius: 10px !important;
 }
-.page-btn:hover:not(:disabled) { border-color: #93c5fd !important; color: var(--students-blue) !important; background: #eff6ff !important; }
+.page-btn:hover:not(:disabled) { border-color: #c6a8ff !important; color: var(--students-blue) !important; background: #f0eaff !important; }
 .page-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 /* Student modal */
@@ -132,7 +132,7 @@ body.founder-portal-page.modal-open { overflow: hidden; }
     border: 1px solid #cbd5e1; border-radius: 12px; outline: none;
     background: #fff; color: #0f172a; font: inherit;
 }
-#studentForm input:focus, #studentForm select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+#studentForm input:focus, #studentForm select:focus { border-color: #762cff; box-shadow: 0 0 0 3px rgba(118,44,255,.12); }
 #saveStudentBtn { width: 100%; margin-top: 4px; }
 
 .action-buttons { display: flex; align-items: center; gap: 8px; }
@@ -140,19 +140,19 @@ body.founder-portal-page.modal-open { overflow: hidden; }
     width: 38px; height: 38px; display: inline-grid; place-items: center; padding: 0;
     border: 1px solid #dbe3ef; border-radius: 10px; background: #fff; color: #475569; cursor: pointer;
 }
-.action-btn:hover { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+.action-btn:hover { background: #f0eaff; color: #762cff; border-color: #d7c8ff; }
 .action-btn:disabled { opacity: .5; cursor: wait; }
 .action-btn svg { width: 17px; height: 17px; }
 
 .status { display: inline-flex; align-items: center; }
 .status.active { background: #ecfdf3; color: #15803d; border-color: #bbf7d0; }
-.status.graduated { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.status.graduated { background: #f0eaff; color: #5d1ed6; border-color: #d7c8ff; }
 .status.suspended { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
 .status.pending { background: #fffbeb; color: #a16207; border-color: #fde68a; }
 
 .progress { min-width: 120px; display: flex; align-items: center; gap: 9px; }
 .progress-bar { flex: 1; height: 7px; overflow: hidden; border-radius: 99px; background: #e2e8f0; }
-.progress-fill { height: 100%; border-radius: inherit; background: #2563eb; }
+.progress-fill { height: 100%; border-radius: inherit; background: #762cff; }
 .progress > span { min-width: 36px; font-size: .78rem; font-weight: 700; color: #475569; }
 
 @keyframes studentsModalIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
