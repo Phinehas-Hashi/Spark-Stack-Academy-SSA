@@ -7,7 +7,7 @@
 /* ===================================
    RESET
 =================================== */
- body.founder-portal-page * {
+ body.founder-portal-page *{
     margin:0;
     padding:0;
     box-sizing:border-box;
@@ -18,7 +18,7 @@
    ROOT
 =================================== */
 
-body.founder-portal-page {
+body.founder-portal-page{
 
     --primary:#22d3ee;
     --primary-light:#67e8f9;
@@ -59,7 +59,7 @@ body.founder-portal-page {
    BODY
 =================================== */
 
-body.founder-portal-page {
+body.founder-portal-page{
 
     font-family:"Inter",sans-serif;
 
@@ -89,7 +89,7 @@ body.founder-portal-page {
    BACKGROUND ORBS
 =================================== */
 
-.bg-orb{
+body.founder-portal-page .bg-orb{
 
     position:fixed;
 
@@ -107,7 +107,7 @@ body.founder-portal-page {
 
 }
 
-.orb-1{
+body.founder-portal-page .orb-1{
 
     width:320px;
     height:320px;
@@ -119,7 +119,7 @@ body.founder-portal-page {
 
 }
 
-.orb-2{
+body.founder-portal-page .orb-2{
 
     width:260px;
     height:260px;
@@ -133,7 +133,7 @@ body.founder-portal-page {
 
 }
 
-.orb-3{
+body.founder-portal-page .orb-3{
 
     width:240px;
     height:240px;
@@ -152,7 +152,7 @@ body.founder-portal-page {
    LAYOUT
 =================================== */
 
-.dashboard-layout{
+body.founder-portal-page .dashboard-layout{
 
     display:flex;
 
@@ -165,7 +165,7 @@ body.founder-portal-page {
 }
 
 
-.main-content{
+body.founder-portal-page .main-content{
 
     flex:1;
 
@@ -188,7 +188,7 @@ body.founder-portal-page {
    GLASS CARD
 =================================== */
 
-.glass-card{
+body.founder-portal-page .glass-card{
 
     background:var(--surface);
 
@@ -211,7 +211,7 @@ body.founder-portal-page {
 }
 
 
-.glass-card::before{
+body.founder-portal-page .glass-card::before{
 
     content:"";
 
@@ -236,7 +236,7 @@ body.founder-portal-page {
 }
 
 
-.glass-card:hover{
+body.founder-portal-page .glass-card:hover{
 
     transform:translateY(-4px);
 
@@ -249,9 +249,9 @@ body.founder-portal-page {
    BUTTONS
 =================================== */
 
-.primary-btn,
-.secondary-btn,
-.toggle-btn{
+body.founder-portal-page .primary-btn,
+body.founder-portal-page .secondary-btn,
+body.founder-portal-page .toggle-btn{
 
     border:none;
 
@@ -268,7 +268,7 @@ body.founder-portal-page {
 }
 
 
-.primary-btn{
+body.founder-portal-page .primary-btn{
 
     height:48px;
 
@@ -290,14 +290,14 @@ body.founder-portal-page {
 }
 
 
-.primary-btn:hover{
+body.founder-portal-page .primary-btn:hover{
 
     transform:translateY(-3px);
 
 }
 
 
-.secondary-btn{
+body.founder-portal-page .secondary-btn{
 
     height:48px;
 
@@ -312,7 +312,7 @@ body.founder-portal-page {
 }
 
 
-.secondary-btn:hover{
+body.founder-portal-page .secondary-btn:hover{
 
     background:rgba(255,255,255,.08);
 
@@ -321,7 +321,7 @@ body.founder-portal-page {
 }
 
 
-.toggle-btn{
+body.founder-portal-page .toggle-btn{
 
     width:72px;
 
@@ -334,7 +334,7 @@ body.founder-portal-page {
 }
 
 
-.toggle-btn.active{
+body.founder-portal-page .toggle-btn.active{
 
     background:var(--success);
 
@@ -347,7 +347,7 @@ body.founder-portal-page {
    PAGE HEADER
 =================================== */
 
-.page-header{
+body.founder-portal-page .page-header{
 
     display:flex;
 
@@ -364,7 +364,7 @@ body.founder-portal-page {
 }
 
 
-.page-header h1{
+body.founder-portal-page .page-header h1{
 
     font-size:2.2rem;
 
@@ -375,7 +375,7 @@ body.founder-portal-page {
 }
 
 
-.page-header p{
+body.founder-portal-page .page-header p{
 
     color:var(--muted);
 
@@ -390,14 +390,14 @@ body.founder-portal-page {
    SECTION TITLE
 =================================== */
 
-.section-title{
+body.founder-portal-page .section-title{
 
     margin-bottom:24px;
 
 }
 
 
-.section-title h2{
+body.founder-portal-page .section-title h2{
 
     font-size:1.4rem;
 
@@ -408,7 +408,7 @@ body.founder-portal-page {
 }
 
 
-.section-title p{
+body.founder-portal-page .section-title p{
 
     color:var(--muted);
 
@@ -421,7 +421,7 @@ body.founder-portal-page {
    FLOAT ANIMATION
 =================================== */
 
-@keyframes float{
+body.founder-portal-page @keyframes float{
 
     0%,100%{
 
@@ -440,7 +440,7 @@ body.founder-portal-page {
    PAYMENT PAGE LAYOUT
 =================================== */
 
-.main-content{
+body.founder-portal-page .main-content{
 
     flex:1;
 
@@ -463,7 +463,7 @@ body.founder-portal-page {
    PAGE HEADER
 =================================== */
 
-.page-header{
+body.founder-portal-page .page-header{
 
     display:flex;
 
@@ -477,7 +477,7 @@ body.founder-portal-page {
 
 }
 
-.page-header h1{
+body.founder-portal-page .page-header h1{
 
     font-size:38px;
 
@@ -489,7 +489,7 @@ body.founder-portal-page {
 
 }
 
-.page-header p{
+body.founder-portal-page .page-header p{
 
     max-width:650px;
 
@@ -504,13 +504,13 @@ body.founder-portal-page {
    SECTION TITLES
 =================================== */
 
-.section-title{
+body.founder-portal-page .section-title{
 
     margin-bottom:20px;
 
 }
 
-.section-title h2{
+body.founder-portal-page .section-title h2{
 
     font-size:24px;
 
@@ -522,7 +522,7 @@ body.founder-portal-page {
 
 }
 
-.section-title p{
+body.founder-portal-page .section-title p{
 
     color:var(--muted);
 
@@ -535,7 +535,7 @@ body.founder-portal-page {
    PAYMENT PROVIDERS
 =================================== */
 
-.providers-section{
+body.founder-portal-page .providers-section{
 
     display:flex;
 
@@ -545,7 +545,7 @@ body.founder-portal-page {
 
 }
 
-.providers-grid{
+body.founder-portal-page .providers-grid{
 
     display:grid;
 
@@ -555,7 +555,7 @@ body.founder-portal-page {
 
 }
 
-.provider-card{
+body.founder-portal-page .provider-card{
 
     display:flex;
 
@@ -569,7 +569,7 @@ body.founder-portal-page {
 
 }
 
-.provider-card:hover{
+body.founder-portal-page .provider-card:hover{
 
     transform:translateY(-5px);
 
@@ -577,7 +577,7 @@ body.founder-portal-page {
 
 }
 
-.provider-top{
+body.founder-portal-page .provider-top{
 
     display:flex;
 
@@ -587,7 +587,7 @@ body.founder-portal-page {
 
 }
 
-.provider-icon{
+body.founder-portal-page .provider-icon{
 
     width:64px;
 
@@ -607,31 +607,31 @@ body.founder-portal-page {
 
 }
 
-.provider-icon.mpesa{
+body.founder-portal-page .provider-icon.mpesa{
 
     background:rgba(34,197,94,.15);
 
 }
 
-.provider-icon.card{
+body.founder-portal-page .provider-icon.card{
 
     background:rgba(34,211,238,.15);
 
 }
 
-.provider-icon.bank{
+body.founder-portal-page .provider-icon.bank{
 
     background:rgba(245,158,11,.15);
 
 }
 
-.provider-icon.paypal{
+body.founder-portal-page .provider-icon.paypal{
 
     background:rgba(139,92,246,.15);
 
 }
 
-.provider-top h3{
+body.founder-portal-page .provider-top h3{
 
     font-size:18px;
 
@@ -639,7 +639,7 @@ body.founder-portal-page {
 
 }
 
-.provider-card p{
+body.founder-portal-page .provider-card p{
 
     color:var(--muted);
 
@@ -654,7 +654,7 @@ body.founder-portal-page {
    STATUS
 =================================== */
 
-.status{
+body.founder-portal-page .status{
 
     display:inline-flex;
 
@@ -668,7 +668,7 @@ body.founder-portal-page {
 
 }
 
-.connected{
+body.founder-portal-page .connected{
 
     color:#22c55e;
 
@@ -676,7 +676,7 @@ body.founder-portal-page {
 
 }
 
-.pending{
+body.founder-portal-page .pending{
 
     color:#f59e0b;
 
@@ -689,7 +689,7 @@ body.founder-portal-page {
    PROVIDER ACTIONS
 =================================== */
 
-.provider-actions{
+body.founder-portal-page .provider-actions{
 
     display:flex;
 
@@ -699,13 +699,13 @@ body.founder-portal-page {
 
 }
 
-.provider-actions .secondary-btn{
+body.founder-portal-page .provider-actions .secondary-btn{
 
     flex:1;
 
 }
 
-.toggle-btn{
+body.founder-portal-page .toggle-btn{
 
     min-width:82px;
 
@@ -725,7 +725,7 @@ body.founder-portal-page {
 
 }
 
-.toggle-btn.active{
+body.founder-portal-page .toggle-btn.active{
 
     background:#22c55e;
 
@@ -736,7 +736,7 @@ body.founder-portal-page {
    GATEWAY CONFIGURATION
 =================================== */
 
-.gateway-section{
+body.founder-portal-page .gateway-section{
 
     display:flex;
 
@@ -746,7 +746,7 @@ body.founder-portal-page {
 
 }
 
-.gateway-card{
+body.founder-portal-page .gateway-card{
 
     padding:28px;
 
@@ -757,7 +757,7 @@ body.founder-portal-page {
    GATEWAY GRID
 =================================== */
 
-.gateway-grid{
+body.founder-portal-page .gateway-grid{
 
     display:grid;
 
@@ -769,7 +769,7 @@ body.founder-portal-page {
 
 }
 
-.form-group{
+body.founder-portal-page .form-group{
 
     display:flex;
 
@@ -779,13 +779,13 @@ body.founder-portal-page {
 
 }
 
-.form-group.full-width{
+body.founder-portal-page .form-group.full-width{
 
     grid-column:1 / -1;
 
 }
 
-.form-group label{
+body.founder-portal-page .form-group label{
 
     font-size:14px;
 
@@ -795,8 +795,8 @@ body.founder-portal-page {
 
 }
 
-.form-group input,
-.form-group select{
+body.founder-portal-page .form-group input,
+body.founder-portal-page .form-group select{
 
     width:100%;
 
@@ -820,14 +820,14 @@ body.founder-portal-page {
 
 }
 
-.form-group input::placeholder{
+body.founder-portal-page .form-group input::placeholder{
 
     color:var(--muted);
 
 }
 
-.form-group input:focus,
-.form-group select:focus{
+body.founder-portal-page .form-group input:focus,
+body.founder-portal-page .form-group select:focus{
 
     outline:none;
 
@@ -838,7 +838,7 @@ body.founder-portal-page {
 
 }
 
-.form-group option{
+body.founder-portal-page .form-group option{
 
     background:#0f172a;
 
@@ -851,7 +851,7 @@ body.founder-portal-page {
    GATEWAY STATUS
 =================================== */
 
-.gateway-status{
+body.founder-portal-page .gateway-status{
 
     margin-top:28px;
 
@@ -863,7 +863,7 @@ body.founder-portal-page {
 
 }
 
-.gateway-status div{
+body.founder-portal-page .gateway-status div{
 
     background:rgba(255,255,255,.04);
 
@@ -875,7 +875,7 @@ body.founder-portal-page {
 
 }
 
-.gateway-status strong{
+body.founder-portal-page .gateway-status strong{
 
     display:block;
 
@@ -887,7 +887,7 @@ body.founder-portal-page {
 
 }
 
-.gateway-status p{
+body.founder-portal-page .gateway-status p{
 
     font-size:18px;
 
@@ -900,7 +900,7 @@ body.founder-portal-page {
    ACTION BUTTONS
 =================================== */
 
-.gateway-actions{
+body.founder-portal-page .gateway-actions{
 
     margin-top:28px;
 
@@ -914,8 +914,8 @@ body.founder-portal-page {
 
 }
 
-.gateway-actions .primary-btn,
-.gateway-actions .secondary-btn{
+body.founder-portal-page .gateway-actions .primary-btn,
+body.founder-portal-page .gateway-actions .secondary-btn{
 
     min-width:190px;
 
@@ -926,7 +926,7 @@ body.founder-portal-page {
    RESPONSIVE
 =================================== */
 
-@media(max-width:992px){
+body.founder-portal-page @media(max-width:992px){
 
     .gateway-grid{
 
@@ -944,14 +944,14 @@ body.founder-portal-page {
 
 @media(max-width:768px){
 
-    .gateway-actions{
+    body.founder-portal-page .gateway-actions{
 
         flex-direction:column;
 
     }
 
-    .gateway-actions .primary-btn,
-    .gateway-actions .secondary-btn{
+    body.founder-portal-page .gateway-actions .primary-btn,
+    body.founder-portal-page .gateway-actions .secondary-btn{
 
         width:100%;
 
@@ -962,7 +962,7 @@ body.founder-portal-page {
    TRANSACTION LEDGER
 =================================== */
 
-.transactions-section{
+body.founder-portal-page .transactions-section{
 
     padding:28px;
 
@@ -979,7 +979,7 @@ body.founder-portal-page {
    SECTION HEADER
 =================================== */
 
-.section-header{
+body.founder-portal-page .section-header{
 
     display:flex;
 
@@ -993,7 +993,7 @@ body.founder-portal-page {
 
 }
 
-.section-header h2{
+body.founder-portal-page .section-header h2{
 
     font-size:24px;
 
@@ -1005,7 +1005,7 @@ body.founder-portal-page {
 
 }
 
-.section-header p{
+body.founder-portal-page .section-header p{
 
     color:var(--muted);
 
@@ -1018,7 +1018,7 @@ body.founder-portal-page {
    HEADER ACTIONS
 =================================== */
 
-.header-actions{
+body.founder-portal-page .header-actions{
 
     display:flex;
 
@@ -1030,8 +1030,8 @@ body.founder-portal-page {
 
 }
 
-.header-actions input,
-.header-actions select{
+body.founder-portal-page .header-actions input,
+body.founder-portal-page .header-actions select{
 
     height:50px;
 
@@ -1055,20 +1055,20 @@ body.founder-portal-page {
 
 }
 
-.header-actions input{
+body.founder-portal-page .header-actions input{
 
     width:320px;
 
 }
 
-.header-actions input::placeholder{
+body.founder-portal-page .header-actions input::placeholder{
 
     color:var(--muted);
 
 }
 
-.header-actions input:focus,
-.header-actions select:focus{
+body.founder-portal-page .header-actions input:focus,
+body.founder-portal-page .header-actions select:focus{
 
     border-color:var(--primary);
 
@@ -1076,7 +1076,7 @@ body.founder-portal-page {
 
 }
 
-.header-actions option{
+body.founder-portal-page .header-actions option{
 
     background:#0f172a;
 
@@ -1089,7 +1089,7 @@ body.founder-portal-page {
    TABLE
 =================================== */
 
-.table-responsive{
+body.founder-portal-page .table-responsive{
 
     width:100%;
 
@@ -1101,7 +1101,7 @@ body.founder-portal-page {
 
 }
 
-.transactions-section table{
+body.founder-portal-page .transactions-section table{
 
     width:100%;
 
@@ -1111,13 +1111,13 @@ body.founder-portal-page {
 
 }
 
-.transactions-section thead{
+body.founder-portal-page .transactions-section thead{
 
     background:rgba(255,255,255,.05);
 
 }
 
-.transactions-section th{
+body.founder-portal-page .transactions-section th{
 
     padding:18px;
 
@@ -1135,7 +1135,7 @@ body.founder-portal-page {
 
 }
 
-.transactions-section td{
+body.founder-portal-page .transactions-section td{
 
     padding:18px;
 
@@ -1149,13 +1149,13 @@ body.founder-portal-page {
 
 }
 
-.transactions-section tbody tr{
+body.founder-portal-page .transactions-section tbody tr{
 
     transition:var(--transition);
 
 }
 
-.transactions-section tbody tr:hover{
+body.founder-portal-page .transactions-section tbody tr:hover{
 
     background:rgba(34,211,238,.06);
 
@@ -1166,7 +1166,7 @@ body.founder-portal-page {
    EMPTY TABLE
 =================================== */
 
-.empty-table{
+body.founder-portal-page .empty-table{
 
     text-align:center;
 
@@ -1183,7 +1183,7 @@ body.founder-portal-page {
    TRANSACTION STATUS
 =================================== */
 
-.status.completed{
+body.founder-portal-page .status.completed{
 
     background:rgba(34,197,94,.12);
 
@@ -1191,7 +1191,7 @@ body.founder-portal-page {
 
 }
 
-.status.pending{
+body.founder-portal-page .status.pending{
 
     background:rgba(245,158,11,.12);
 
@@ -1199,7 +1199,7 @@ body.founder-portal-page {
 
 }
 
-.status.failed{
+body.founder-portal-page .status.failed{
 
     background:rgba(239,68,68,.12);
 
@@ -1207,7 +1207,7 @@ body.founder-portal-page {
 
 }
 
-.status.refunded{
+body.founder-portal-page .status.refunded{
 
     background:rgba(59,130,246,.12);
 
@@ -1220,7 +1220,7 @@ body.founder-portal-page {
    TABLE ACTIONS
 =================================== */
 
-.table-actions{
+body.founder-portal-page .table-actions{
 
     display:flex;
 
@@ -1230,7 +1230,7 @@ body.founder-portal-page {
 
 }
 
-.table-action{
+body.founder-portal-page .table-action{
 
     border:none;
 
@@ -1248,7 +1248,7 @@ body.founder-portal-page {
 
 }
 
-.table-action:hover{
+body.founder-portal-page .table-action:hover{
 
     background:var(--primary);
 
@@ -1261,7 +1261,7 @@ body.founder-portal-page {
    MOBILE
 =================================== */
 
-@media(max-width:768px){
+body.founder-portal-page @media(max-width:768px){
 
     .section-header{
 
@@ -1291,7 +1291,7 @@ body.founder-portal-page {
    RECEIPT CENTER
 =================================== */
 
-.receipt-grid{
+body.founder-portal-page .receipt-grid{
 
     display:grid;
 
@@ -1303,13 +1303,13 @@ body.founder-portal-page {
 
 }
 
-.receipt-preview{
+body.founder-portal-page .receipt-preview{
 
     padding:28px;
 
 }
 
-.receipt-actions{
+body.founder-portal-page .receipt-actions{
 
     padding:28px;
 
@@ -1325,7 +1325,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-actions h2{
+body.founder-portal-page .receipt-actions h2{
 
     font-size:24px;
 
@@ -1333,7 +1333,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-actions p{
+body.founder-portal-page .receipt-actions p{
 
     color:var(--muted);
 
@@ -1343,7 +1343,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-actions button{
+body.founder-portal-page .receipt-actions button{
 
     width:100%;
 
@@ -1354,7 +1354,7 @@ body.founder-portal-page {
    RECEIPT PAPER
 =================================== */
 
-.receipt-paper{
+body.founder-portal-page .receipt-paper{
 
     position:relative;
 
@@ -1383,7 +1383,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-paper::before{
+body.founder-portal-page .receipt-paper::before{
 
     content:"THE SPARK STACK ACADEMY";
 
@@ -1416,7 +1416,7 @@ body.founder-portal-page {
    RECEIPT HEADER
 =================================== */
 
-.receipt-header{
+body.founder-portal-page .receipt-header{
 
     display:flex;
 
@@ -1432,7 +1432,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-logo{
+body.founder-portal-page .receipt-logo{
 
     width:90px;
 
@@ -1442,7 +1442,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-header h2{
+body.founder-portal-page .receipt-header h2{
 
     font-size:30px;
 
@@ -1452,7 +1452,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-header p{
+body.founder-portal-page .receipt-header p{
 
     color:#64748b;
 
@@ -1463,7 +1463,7 @@ body.founder-portal-page {
    RECEIPT DETAILS
 =================================== */
 
-.receipt-details{
+body.founder-portal-page .receipt-details{
 
     display:grid;
 
@@ -1473,7 +1473,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-details p{
+body.founder-portal-page .receipt-details p{
 
     display:flex;
 
@@ -1491,13 +1491,13 @@ body.founder-portal-page {
 
 }
 
-.receipt-details strong{
+body.founder-portal-page .receipt-details strong{
 
     color:#0f172a;
 
 }
 
-.receipt-details span{
+body.founder-portal-page .receipt-details span{
 
     color:#334155;
 
@@ -1510,7 +1510,7 @@ body.founder-portal-page {
    FOOTER
 =================================== */
 
-.receipt-footer{
+body.founder-portal-page .receipt-footer{
 
     margin-top:auto;
 
@@ -1528,13 +1528,13 @@ body.founder-portal-page {
 
 }
 
-.receipt-footer strong{
+body.founder-portal-page .receipt-footer strong{
 
     color:#0f172a;
 
 }
 
-.receipt-footer p{
+body.founder-portal-page .receipt-footer p{
 
     color:#64748b;
 
@@ -1542,7 +1542,7 @@ body.founder-portal-page {
 
 }
 
-.receipt-seal{
+body.founder-portal-page .receipt-seal{
 
     width:120px;
 
@@ -1555,7 +1555,7 @@ body.founder-portal-page {
    PRINT
 =================================== */
 
-@media print{
+body.founder-portal-page @media print{
 
     body.founder-portal-page {
 
@@ -1578,7 +1578,7 @@ body.founder-portal-page {
    RESPONSIVE
 =================================== */
 
-@media(max-width:1100px){
+body.founder-portal-page @media(max-width:1100px){
 
     .receipt-grid{
 
@@ -1596,13 +1596,13 @@ body.founder-portal-page {
 
 @media(max-width:768px){
 
-    .receipt-paper{
+    body.founder-portal-page .receipt-paper{
 
         padding:24px;
 
     }
 
-    .receipt-header{
+    body.founder-portal-page .receipt-header{
 
         flex-direction:column;
 
@@ -1610,13 +1610,13 @@ body.founder-portal-page {
 
     }
 
-    .receipt-details{
+    body.founder-portal-page .receipt-details{
 
         grid-template-columns:1fr;
 
     }
 
-    .receipt-footer{
+    body.founder-portal-page .receipt-footer{
 
         flex-direction:column;
 
@@ -1631,7 +1631,7 @@ body.founder-portal-page {
    PAYMENT SETTINGS
 =================================== */
 
-.settings-grid{
+body.founder-portal-page .settings-grid{
 
     display:grid;
 
@@ -1643,15 +1643,15 @@ body.founder-portal-page {
 
 }
 
-.settings-card,
-.system-card{
+body.founder-portal-page .settings-card,
+body.founder-portal-page .system-card{
 
     padding:28px;
 
 }
 
-.settings-card h2,
-.system-card h2{
+body.founder-portal-page .settings-card h2,
+body.founder-portal-page .system-card h2{
 
     font-size:24px;
 
@@ -1664,7 +1664,7 @@ body.founder-portal-page {
    SETTINGS LIST
 =================================== */
 
-.settings-list{
+body.founder-portal-page .settings-list{
 
     display:flex;
 
@@ -1674,7 +1674,7 @@ body.founder-portal-page {
 
 }
 
-.setting-item{
+body.founder-portal-page .setting-item{
 
     display:flex;
 
@@ -1690,13 +1690,13 @@ body.founder-portal-page {
 
 }
 
-.setting-item:last-child{
+body.founder-portal-page .setting-item:last-child{
 
     border-bottom:none;
 
 }
 
-.setting-item span{
+body.founder-portal-page .setting-item span{
 
     color:var(--text);
 
@@ -1704,8 +1704,8 @@ body.founder-portal-page {
 
 }
 
-.setting-item input,
-.setting-item select{
+body.founder-portal-page .setting-item input,
+body.founder-portal-page .setting-item select{
 
     width:260px;
 
@@ -1725,8 +1725,8 @@ body.founder-portal-page {
 
 }
 
-.setting-item input:focus,
-.setting-item select:focus{
+body.founder-portal-page .setting-item input:focus,
+body.founder-portal-page .setting-item select:focus{
 
     outline:none;
 
@@ -1739,7 +1739,7 @@ body.founder-portal-page {
    SWITCH
 =================================== */
 
-.switch{
+body.founder-portal-page .switch{
 
     position:relative;
 
@@ -1749,13 +1749,13 @@ body.founder-portal-page {
 
 }
 
-.switch input{
+body.founder-portal-page .switch input{
 
     display:none;
 
 }
 
-.slider{
+body.founder-portal-page .slider{
 
     position:absolute;
 
@@ -1771,7 +1771,7 @@ body.founder-portal-page {
 
 }
 
-.slider::before{
+body.founder-portal-page .slider::before{
 
     content:"";
 
@@ -1793,13 +1793,13 @@ body.founder-portal-page {
 
 }
 
-.switch input:checked + .slider{
+body.founder-portal-page .switch input:checked + .slider{
 
     background:#22c55e;
 
 }
 
-.switch input:checked + .slider::before{
+body.founder-portal-page .switch input:checked + .slider::before{
 
     transform:translateX(28px);
 
@@ -1810,7 +1810,7 @@ body.founder-portal-page {
    SYSTEM STATUS
 =================================== */
 
-.system-status{
+body.founder-portal-page .system-status{
 
     display:flex;
 
@@ -1820,7 +1820,7 @@ body.founder-portal-page {
 
 }
 
-.system-status div{
+body.founder-portal-page .system-status div{
 
     padding:18px;
 
@@ -1832,7 +1832,7 @@ body.founder-portal-page {
 
 }
 
-.system-status strong{
+body.founder-portal-page .system-status strong{
 
     display:block;
 
@@ -1842,7 +1842,7 @@ body.founder-portal-page {
 
 }
 
-.system-status p{
+body.founder-portal-page .system-status p{
 
     font-size:26px;
 
@@ -1855,7 +1855,7 @@ body.founder-portal-page {
    ACTION BAR
 =================================== */
 
-.action-bar{
+body.founder-portal-page .action-bar{
 
     display:flex;
 
@@ -1880,7 +1880,7 @@ body.founder-portal-page {
    MOBILE RESPONSIVE
 =================================== */
 
-@media(max-width:1200px){
+body.founder-portal-page @media(max-width:1200px){
 
     .providers-grid{
 
@@ -1898,10 +1898,10 @@ body.founder-portal-page {
 
 @media(max-width:992px){
 
-    .providers-grid,
-    .gateway-grid,
-    .receipt-grid,
-    .settings-grid{
+    body.founder-portal-page .providers-grid,
+    body.founder-portal-page .gateway-grid,
+    body.founder-portal-page .receipt-grid,
+    body.founder-portal-page .settings-grid{
 
         grid-template-columns:1fr;
 
@@ -1911,7 +1911,7 @@ body.founder-portal-page {
 
 @media(max-width:768px){
 
-    .main-content{
+    body.founder-portal-page .main-content{
 
         margin-left:0;
 
@@ -1919,7 +1919,7 @@ body.founder-portal-page {
 
     }
 
-    .page-header{
+    body.founder-portal-page .page-header{
 
         flex-direction:column;
 
@@ -1927,13 +1927,13 @@ body.founder-portal-page {
 
     }
 
-    .page-header .primary-btn{
+    body.founder-portal-page .page-header .primary-btn{
 
         width:100%;
 
     }
 
-    .setting-item{
+    body.founder-portal-page .setting-item{
 
         flex-direction:column;
 
@@ -1941,20 +1941,20 @@ body.founder-portal-page {
 
     }
 
-    .setting-item input,
-    .setting-item select{
+    body.founder-portal-page .setting-item input,
+    body.founder-portal-page .setting-item select{
 
         width:100%;
 
     }
 
-    .action-bar{
+    body.founder-portal-page .action-bar{
 
         flex-direction:column;
 
     }
 
-    .action-bar button{
+    body.founder-portal-page .action-bar button{
 
         width:100%;
 
@@ -1964,30 +1964,30 @@ body.founder-portal-page {
 
 @media(max-width:480px){
 
-    .page-header h1{
+    body.founder-portal-page .page-header h1{
 
         font-size:30px;
 
     }
 
-    .glass-card{
+    body.founder-portal-page .glass-card{
 
         padding:20px;
 
     }
 
-    .provider-card,
-    .gateway-card,
-    .receipt-preview,
-    .receipt-actions,
-    .settings-card,
-    .system-card{
+    body.founder-portal-page .provider-card,
+    body.founder-portal-page .gateway-card,
+    body.founder-portal-page .receipt-preview,
+    body.founder-portal-page .receipt-actions,
+    body.founder-portal-page .settings-card,
+    body.founder-portal-page .system-card{
 
         padding:20px;
 
     }
 
-    .receipt-logo{
+    body.founder-portal-page .receipt-logo{
 
         width:70px;
 
@@ -1995,8 +1995,8 @@ body.founder-portal-page {
 
     }
 
-    .transactions-section th,
-    .transactions-section td{
+    body.founder-portal-page .transactions-section th,
+    body.founder-portal-page .transactions-section td{
 
         padding:14px;
 
@@ -2009,22 +2009,22 @@ body.founder-portal-page {
 /* ============================================================
    PERSONAL M-PESA COLLECTION SETTINGS
 ============================================================ */
-.manual-mpesa-settings{padding:28px;border:1px solid rgba(34,211,238,.2);background:linear-gradient(145deg,rgba(15,23,42,.92),rgba(10,25,49,.92))}
-.manual-mpesa-settings .section-title h2{color:#f8fafc}
-.manual-mpesa-settings .section-title p{max-width:760px;color:#9eacc2}
-.manual-mpesa-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.manual-mpesa-form>label{display:flex;flex-direction:column;gap:8px;color:#e7eef9;font-size:13px;font-weight:600}
-.manual-mpesa-form input:not([type=checkbox]),.manual-mpesa-form textarea{width:100%;padding:13px 15px;border:1px solid rgba(148,163,184,.2);border-radius:12px;background:rgba(255,255,255,.055);color:#fff;font:500 14px Inter,sans-serif;outline:none}
-.manual-mpesa-form input:focus,.manual-mpesa-form textarea:focus{border-color:#22d3ee;box-shadow:0 0 0 3px rgba(34,211,238,.1)}
-.manual-mpesa-form input::placeholder,.manual-mpesa-form textarea::placeholder{color:#71819a}
-.manual-mpesa-wide{grid-column:1/-1}
-.manual-mpesa-toggle{grid-column:1/-1;display:flex!important;flex-direction:row!important;align-items:center;gap:12px!important;padding:14px;border:1px solid rgba(34,197,94,.18);border-radius:13px;background:rgba(34,197,94,.06)}
-.manual-mpesa-toggle input{width:18px;height:18px;accent-color:#22c55e}
-.manual-mpesa-toggle span{display:grid;gap:4px}
-.manual-mpesa-toggle small{color:#9eacc2;font-size:11px;font-weight:400}
-.manual-mpesa-actions{grid-column:1/-1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.manual-mpesa-actions span{color:#86efac;font-size:12px}
-.manual-mpesa-actions span.error{color:#fca5a5}
-.manual-mpesa-warning{margin-top:18px;padding:14px;border:1px solid rgba(245,158,11,.2);border-radius:12px;background:rgba(245,158,11,.07);color:#d6c5a4;font-size:11px;line-height:1.65}
-.manual-mpesa-warning strong{color:#fbbf24}
-@media(max-width:720px){.manual-mpesa-settings{padding:19px}.manual-mpesa-form{grid-template-columns:1fr}.manual-mpesa-wide,.manual-mpesa-toggle,.manual-mpesa-actions{grid-column:1}}
+body.founder-portal-page .manual-mpesa-settings{padding:28px;border:1px solid rgba(34,211,238,.2);background:linear-gradient(145deg,rgba(15,23,42,.92),rgba(10,25,49,.92))}
+body.founder-portal-page .manual-mpesa-settings .section-title h2{color:#f8fafc}
+body.founder-portal-page .manual-mpesa-settings .section-title p{max-width:760px;color:#9eacc2}
+body.founder-portal-page .manual-mpesa-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+body.founder-portal-page .manual-mpesa-form>label{display:flex;flex-direction:column;gap:8px;color:#e7eef9;font-size:13px;font-weight:600}
+body.founder-portal-page .manual-mpesa-form input:not([type=checkbox]),body.founder-portal-page .manual-mpesa-form textarea{width:100%;padding:13px 15px;border:1px solid rgba(148,163,184,.2);border-radius:12px;background:rgba(255,255,255,.055);color:#fff;font:500 14px Inter,sans-serif;outline:none}
+body.founder-portal-page .manual-mpesa-form input:focus,body.founder-portal-page .manual-mpesa-form textarea:focus{border-color:#22d3ee;box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+body.founder-portal-page .manual-mpesa-form input::placeholder,body.founder-portal-page .manual-mpesa-form textarea::placeholder{color:#71819a}
+body.founder-portal-page .manual-mpesa-wide{grid-column:1/-1}
+body.founder-portal-page .manual-mpesa-toggle{grid-column:1/-1;display:flex!important;flex-direction:row!important;align-items:center;gap:12px!important;padding:14px;border:1px solid rgba(34,197,94,.18);border-radius:13px;background:rgba(34,197,94,.06)}
+body.founder-portal-page .manual-mpesa-toggle input{width:18px;height:18px;accent-color:#22c55e}
+body.founder-portal-page .manual-mpesa-toggle span{display:grid;gap:4px}
+body.founder-portal-page .manual-mpesa-toggle small{color:#9eacc2;font-size:11px;font-weight:400}
+body.founder-portal-page .manual-mpesa-actions{grid-column:1/-1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+body.founder-portal-page .manual-mpesa-actions span{color:#86efac;font-size:12px}
+body.founder-portal-page .manual-mpesa-actions span.error{color:#fca5a5}
+body.founder-portal-page .manual-mpesa-warning{margin-top:18px;padding:14px;border:1px solid rgba(245,158,11,.2);border-radius:12px;background:rgba(245,158,11,.07);color:#d6c5a4;font-size:11px;line-height:1.65}
+body.founder-portal-page .manual-mpesa-warning strong{color:#fbbf24}
+@media(max-width:720px){body.founder-portal-page .manual-mpesa-settings{padding:19px}body.founder-portal-page .manual-mpesa-form{grid-template-columns:1fr}body.founder-portal-page .manual-mpesa-wide,body.founder-portal-page .manual-mpesa-toggle,body.founder-portal-page .manual-mpesa-actions{grid-column:1}}
