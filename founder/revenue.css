@@ -3,7 +3,7 @@
    FOUNDER OS
 =================================== */
 
-:root{
+body.founder-shell-ready{
 
 --bg:#07111f;
 
@@ -39,7 +39,7 @@
    RESET
 =================================== */
 
-*{
+body.founder-shell-ready, body.founder-shell-ready *{
 
 margin:0;
 
@@ -50,7 +50,7 @@ box-sizing:border-box;
 }
 
 
-body{
+body.founder-shell-ready{
 
 font-family:"Inter",sans-serif;
 
@@ -67,7 +67,7 @@ overflow-x:hidden;
    BACKGROUND
 =================================== */
 
-.bg-orb{
+body.founder-shell-ready .bg-orb{
 
 position:fixed;
 
@@ -84,7 +84,7 @@ z-index:-1;
 }
 
 
-.orb-1{
+body.founder-shell-ready .orb-1{
 
 width:320px;
 
@@ -99,7 +99,7 @@ left:-120px;
 }
 
 
-.orb-2{
+body.founder-shell-ready .orb-2{
 
 width:280px;
 
@@ -114,7 +114,7 @@ top:35%;
 }
 
 
-.orb-3{
+body.founder-shell-ready .orb-3{
 
 width:300px;
 
@@ -133,7 +133,7 @@ left:40%;
    CONTENT AREA ONLY
 =================================== */
 
-.main-content{
+body.founder-shell-ready .main-content{
 
 flex:1;
 
@@ -154,7 +154,7 @@ min-width:0;
    GLASS CARD
 =================================== */
 
-.glass-card{
+body.founder-shell-ready .glass-card{
 
 background:var(--card);
 
@@ -175,7 +175,7 @@ animation:fadeUp .45s ease;
 }
 
 
-.glass-card:hover{
+body.founder-shell-ready .glass-card:hover{
 
 border-color:
 
@@ -213,7 +213,7 @@ transform:translateY(0);
    PAGE HEADER
 =================================== */
 
-.page-header{
+body.founder-shell-ready .page-header{
 
 padding:30px;
 
@@ -228,7 +228,7 @@ gap:24px;
 }
 
 
-.page-header h1{
+body.founder-shell-ready .page-header h1{
 
 font-size:2rem;
 
@@ -241,7 +241,7 @@ line-height:1.2;
 }
 
 
-.page-header p{
+body.founder-shell-ready .page-header p{
 
 color:var(--muted);
 
@@ -256,9 +256,9 @@ max-width:650px;
    BUTTONS
 =================================== */
 
-.primary-btn,
+body.founder-shell-ready .primary-btn,
 
-.secondary-btn{
+body.founder-shell-ready .secondary-btn{
 
 padding:14px 24px;
 
@@ -279,7 +279,7 @@ font-family:inherit;
 }
 
 
-.primary-btn{
+body.founder-shell-ready .primary-btn{
 
 background:
 
@@ -302,7 +302,7 @@ box-shadow:
 }
 
 
-.primary-btn:hover{
+body.founder-shell-ready .primary-btn:hover{
 
 transform:translateY(-3px);
 
@@ -313,7 +313,7 @@ box-shadow:
 }
 
 
-.secondary-btn{
+body.founder-shell-ready .secondary-btn{
 
 background:
 
@@ -326,7 +326,7 @@ color:#fff;
 }
 
 
-.secondary-btn:hover{
+body.founder-shell-ready .secondary-btn:hover{
 
 background:
 
@@ -341,7 +341,7 @@ transform:translateY(-2px);
    KPI GRID
 =================================== */
 
-.stats-grid{
+body.founder-shell-ready .stats-grid{
 
 display:grid;
 
@@ -358,7 +358,7 @@ gap:22px;
    KPI CARD
 =================================== */
 
-.stat-card{
+body.founder-shell-ready .stat-card{
 
 display:flex;
 
@@ -375,7 +375,7 @@ overflow:hidden;
 }
 
 
-.stat-card::before{
+body.founder-shell-ready .stat-card::before{
 
 content:"";
 
@@ -404,14 +404,14 @@ linear-gradient(
 }
 
 
-.stat-card:hover{
+body.founder-shell-ready .stat-card:hover{
 
 transform:translateY(-6px);
 
 }
 
 
-.stat-icon{
+body.founder-shell-ready .stat-icon{
 
 width:62px;
 
@@ -432,7 +432,7 @@ flex-shrink:0;
 }
 
 
-.stat-icon.blue{
+body.founder-shell-ready .stat-icon.blue{
 
 background:
 
@@ -441,7 +441,7 @@ rgba(59,130,246,.14);
 }
 
 
-.stat-icon.green{
+body.founder-shell-ready .stat-icon.green{
 
 background:
 
@@ -450,7 +450,7 @@ rgba(34,197,94,.14);
 }
 
 
-.stat-icon.gold{
+body.founder-shell-ready .stat-icon.gold{
 
 background:
 
@@ -459,7 +459,7 @@ rgba(245,158,11,.14);
 }
 
 
-.stat-icon.red{
+body.founder-shell-ready .stat-icon.red{
 
 background:
 
@@ -468,7 +468,7 @@ rgba(239,68,68,.14);
 }
 
 
-.stat-card h4{
+body.founder-shell-ready .stat-card h4{
 
 font-size:.95rem;
 
@@ -481,7 +481,7 @@ margin-bottom:8px;
 }
 
 
-.stat-card h2{
+body.founder-shell-ready .stat-card h2{
 
 font-size:2rem;
 
@@ -494,7 +494,7 @@ line-height:1;
 }
 
 
-.stat-card small{
+body.founder-shell-ready .stat-card small{
 
 color:var(--muted);
 
@@ -505,7 +505,7 @@ font-size:.85rem;
    ANALYTICS GRID
 =================================== */
 
-.analytics-grid{
+body.founder-shell-ready .analytics-grid{
 
 display:grid;
 
@@ -522,7 +522,7 @@ align-items:start;
    CHART CARD
 =================================== */
 
-.chart-card{
+body.founder-shell-ready .chart-card{
 
 padding:28px;
 
@@ -537,7 +537,7 @@ min-height:420px;
 }
 
 
-.card-header{
+body.founder-shell-ready .card-header{
 
 display:flex;
 
@@ -552,7 +552,7 @@ flex-wrap:wrap;
 }
 
 
-.card-header h2{
+body.founder-shell-ready .card-header h2{
 
 font-size:1.25rem;
 
@@ -561,7 +561,7 @@ font-weight:700;
 }
 
 
-.card-header select{
+body.founder-shell-ready .card-header select{
 
 background:rgba(255,255,255,.05);
 
@@ -586,14 +586,14 @@ min-width:180px;
 }
 
 
-.card-header select:hover{
+body.founder-shell-ready .card-header select:hover{
 
 border-color:#3b82f6;
 
 }
 
 
-.card-header select:focus{
+body.founder-shell-ready .card-header select:focus{
 
 outline:none;
 
@@ -606,7 +606,7 @@ box-shadow:
 }
 
 
-.card-header option{
+body.founder-shell-ready .card-header option{
 
 background:#07111f;
 
@@ -619,7 +619,7 @@ color:#fff;
    CHART PLACEHOLDER
 =================================== */
 
-.chart-placeholder{
+body.founder-shell-ready .chart-placeholder{
 
 flex:1;
 
@@ -664,7 +664,7 @@ transition:.3s;
 }
 
 
-.chart-placeholder:hover{
+body.founder-shell-ready .chart-placeholder:hover{
 
 border-color:#3b82f6;
 
@@ -687,7 +687,7 @@ rgba(139,92,246,.10)
    BREAKDOWN CARD
 =================================== */
 
-.breakdown-card{
+body.founder-shell-ready .breakdown-card{
 
 padding:28px;
 
@@ -700,7 +700,7 @@ gap:22px;
 }
 
 
-.breakdown-card h2{
+body.founder-shell-ready .breakdown-card h2{
 
 font-size:1.25rem;
 
@@ -709,7 +709,7 @@ font-weight:700;
 }
 
 
-.breakdown-list{
+body.founder-shell-ready .breakdown-list{
 
 display:flex;
 
@@ -720,7 +720,7 @@ gap:16px;
 }
 
 
-.breakdown-item{
+body.founder-shell-ready .breakdown-item{
 
 display:flex;
 
@@ -741,7 +741,7 @@ transition:.3s;
 }
 
 
-.breakdown-item:hover{
+body.founder-shell-ready .breakdown-item:hover{
 
 background:rgba(59,130,246,.08);
 
@@ -750,7 +750,7 @@ transform:translateX(4px);
 }
 
 
-.breakdown-item span{
+body.founder-shell-ready .breakdown-item span{
 
 font-weight:600;
 
@@ -759,7 +759,7 @@ color:#cbd5e1;
 }
 
 
-.breakdown-item strong{
+body.founder-shell-ready .breakdown-item strong{
 
 font-size:1rem;
 
@@ -770,7 +770,7 @@ color:#fff;
 }
 
 
-.breakdown-item.total{
+body.founder-shell-ready .breakdown-item.total{
 
 background:
 
@@ -793,7 +793,7 @@ padding:18px;
 }
 
 
-.breakdown-item.total span{
+body.founder-shell-ready .breakdown-item.total span{
 
 font-size:1rem;
 
@@ -804,7 +804,7 @@ color:#fff;
 }
 
 
-.breakdown-item.total strong{
+body.founder-shell-ready .breakdown-item.total strong{
 
 font-size:1.2rem;
 
@@ -817,7 +817,7 @@ color:#4ade80;
    PAYMENT GRID
 =================================== */
 
-.payment-grid{
+body.founder-shell-ready .payment-grid{
 
 display:grid;
 
@@ -834,7 +834,7 @@ align-items:start;
    PAYMENT CARD
 =================================== */
 
-.payment-card{
+body.founder-shell-ready .payment-card{
 
 padding:28px;
 
@@ -847,7 +847,7 @@ gap:18px;
 }
 
 
-.payment-card h2{
+body.founder-shell-ready .payment-card h2{
 
 font-size:1.25rem;
 
@@ -858,7 +858,7 @@ margin-bottom:4px;
 }
 
 
-.payment-method{
+body.founder-shell-ready .payment-method{
 
 display:flex;
 
@@ -879,7 +879,7 @@ transition:.3s;
 }
 
 
-.payment-method:hover{
+body.founder-shell-ready .payment-method:hover{
 
 background:rgba(59,130,246,.08);
 
@@ -888,7 +888,7 @@ transform:translateY(-3px);
 }
 
 
-.payment-method span{
+body.founder-shell-ready .payment-method span{
 
 font-weight:600;
 
@@ -897,7 +897,7 @@ color:#cbd5e1;
 }
 
 
-.payment-method strong{
+body.founder-shell-ready .payment-method strong{
 
 font-size:1rem;
 
@@ -912,7 +912,7 @@ color:#4ade80;
    GROWTH CARD
 =================================== */
 
-.growth-card{
+body.founder-shell-ready .growth-card{
 
 padding:28px;
 
@@ -925,7 +925,7 @@ gap:18px;
 }
 
 
-.growth-card h2{
+body.founder-shell-ready .growth-card h2{
 
 font-size:1.25rem;
 
@@ -936,7 +936,7 @@ margin-bottom:4px;
 }
 
 
-.growth-item{
+body.founder-shell-ready .growth-item{
 
 display:flex;
 
@@ -957,7 +957,7 @@ transition:.3s;
 }
 
 
-.growth-item:hover{
+body.founder-shell-ready .growth-item:hover{
 
 background:rgba(34,197,94,.08);
 
@@ -966,7 +966,7 @@ transform:translateY(-3px);
 }
 
 
-.growth-item span{
+body.founder-shell-ready .growth-item span{
 
 font-weight:600;
 
@@ -975,7 +975,7 @@ color:#cbd5e1;
 }
 
 
-.growth-item strong{
+body.founder-shell-ready .growth-item strong{
 
 font-size:1rem;
 
@@ -988,7 +988,7 @@ color:#22c55e;
    TRANSACTIONS SECTION
 =================================== */
 
-.transactions-section{
+body.founder-shell-ready .transactions-section{
 
 padding:28px;
 
@@ -1005,7 +1005,7 @@ gap:24px;
    SECTION HEADER
 =================================== */
 
-.section-header{
+body.founder-shell-ready .section-header{
 
 display:flex;
 
@@ -1020,7 +1020,7 @@ flex-wrap:wrap;
 }
 
 
-.section-header h2{
+body.founder-shell-ready .section-header h2{
 
 font-size:1.25rem;
 
@@ -1033,7 +1033,7 @@ font-weight:700;
    HEADER ACTIONS
 =================================== */
 
-.header-actions{
+body.founder-shell-ready .header-actions{
 
 display:flex;
 
@@ -1046,9 +1046,9 @@ flex-wrap:wrap;
 }
 
 
-.header-actions input,
+body.founder-shell-ready .header-actions input,
 
-.header-actions select{
+body.founder-shell-ready .header-actions select{
 
 height:46px;
 
@@ -1071,23 +1071,23 @@ transition:.3s;
 }
 
 
-.header-actions input{
+body.founder-shell-ready .header-actions input{
 
 width:260px;
 
 }
 
 
-.header-actions input::placeholder{
+body.founder-shell-ready .header-actions input::placeholder{
 
 color:#94a3b8;
 
 }
 
 
-.header-actions input:focus,
+body.founder-shell-ready .header-actions input:focus,
 
-.header-actions select:focus{
+body.founder-shell-ready .header-actions select:focus{
 
 outline:none;
 
@@ -1100,7 +1100,7 @@ box-shadow:
 }
 
 
-.header-actions option{
+body.founder-shell-ready .header-actions option{
 
 background:#07111f;
 
@@ -1113,7 +1113,7 @@ color:#fff;
    TABLE
 =================================== */
 
-.table-responsive{
+body.founder-shell-ready .table-responsive{
 
 width:100%;
 
@@ -1124,7 +1124,7 @@ border-radius:18px;
 }
 
 
-table{
+body.founder-shell-ready table{
 
 width:100%;
 
@@ -1135,14 +1135,14 @@ min-width:1100px;
 }
 
 
-thead{
+body.founder-shell-ready thead{
 
 background:rgba(255,255,255,.05);
 
 }
 
 
-th{
+body.founder-shell-ready th{
 
 padding:18px;
 
@@ -1161,7 +1161,7 @@ white-space:nowrap;
 }
 
 
-td{
+body.founder-shell-ready td{
 
 padding:18px;
 
@@ -1176,14 +1176,14 @@ white-space:nowrap;
 }
 
 
-tbody tr{
+body.founder-shell-ready tbody tr{
 
 transition:.3s;
 
 }
 
 
-tbody tr:hover{
+body.founder-shell-ready tbody tr:hover{
 
 background:rgba(59,130,246,.06);
 
@@ -1194,7 +1194,7 @@ background:rgba(59,130,246,.06);
    EMPTY TABLE
 =================================== */
 
-.empty-table{
+body.founder-shell-ready .empty-table{
 
 text-align:center;
 
@@ -1211,7 +1211,7 @@ color:#94a3b8;
    STATUS BADGES
 =================================== */
 
-.status{
+body.founder-shell-ready .status{
 
 display:inline-flex;
 
@@ -1230,7 +1230,7 @@ font-weight:700;
 }
 
 
-.status.completed{
+body.founder-shell-ready .status.completed{
 
 background:rgba(34,197,94,.15);
 
@@ -1239,7 +1239,7 @@ color:#4ade80;
 }
 
 
-.status.pending{
+body.founder-shell-ready .status.pending{
 
 background:rgba(245,158,11,.15);
 
@@ -1248,7 +1248,7 @@ color:#fbbf24;
 }
 
 
-.status.failed{
+body.founder-shell-ready .status.failed{
 
 background:rgba(239,68,68,.15);
 
@@ -1261,7 +1261,7 @@ color:#f87171;
    ACTION BUTTONS
 =================================== */
 
-.table-action{
+body.founder-shell-ready .table-action{
 
 padding:8px 14px;
 
@@ -1282,7 +1282,7 @@ transition:.3s;
 }
 
 
-.table-action:hover{
+body.founder-shell-ready .table-action:hover{
 
 background:#2563eb;
 
@@ -1295,7 +1295,7 @@ color:#fff;
    SUMMARY GRID
 =================================== */
 
-.summary-grid{
+body.founder-shell-ready .summary-grid{
 
 display:grid;
 
@@ -1308,7 +1308,7 @@ gap:22px;
 }
 
 
-.summary-card{
+body.founder-shell-ready .summary-card{
 
 padding:24px;
 
@@ -1317,7 +1317,7 @@ text-align:center;
 }
 
 
-.summary-card h3{
+body.founder-shell-ready .summary-card h3{
 
 font-size:1rem;
 
@@ -1328,7 +1328,7 @@ margin-bottom:14px;
 }
 
 
-.summary-card h2{
+body.founder-shell-ready .summary-card h2{
 
 font-size:2rem;
 
@@ -1339,7 +1339,7 @@ margin-bottom:10px;
 }
 
 
-.summary-card p{
+body.founder-shell-ready .summary-card p{
 
 font-size:.9rem;
 
@@ -1352,7 +1352,7 @@ color:#94a3b8;
    WITHDRAWALS
 =================================== */
 
-.withdrawals-section{
+body.founder-shell-ready .withdrawals-section{
 
 padding:28px;
 
@@ -1369,7 +1369,7 @@ gap:24px;
    WITHDRAWAL BUTTONS
 =================================== */
 
-.withdraw-action{
+body.founder-shell-ready .withdraw-action{
 
 padding:8px 16px;
 
@@ -1386,7 +1386,7 @@ transition:.3s;
 }
 
 
-.withdraw-action.approve{
+body.founder-shell-ready .withdraw-action.approve{
 
 background:rgba(34,197,94,.15);
 
@@ -1395,7 +1395,7 @@ color:#4ade80;
 }
 
 
-.withdraw-action.approve:hover{
+body.founder-shell-ready .withdraw-action.approve:hover{
 
 background:#22c55e;
 
@@ -1404,7 +1404,7 @@ color:#fff;
 }
 
 
-.withdraw-action.reject{
+body.founder-shell-ready .withdraw-action.reject{
 
 background:rgba(239,68,68,.15);
 
@@ -1413,7 +1413,7 @@ color:#f87171;
 }
 
 
-.withdraw-action.reject:hover{
+body.founder-shell-ready .withdraw-action.reject:hover{
 
 background:#ef4444;
 
@@ -1424,7 +1424,7 @@ color:#fff;
    FINANCIAL REPORTS
 =================================== */
 
-.reports-section{
+body.founder-shell-ready .reports-section{
 
 padding:28px;
 
@@ -1441,7 +1441,7 @@ gap:24px;
    REPORT CARDS
 =================================== */
 
-.report-grid{
+body.founder-shell-ready .report-grid{
 
 display:grid;
 
@@ -1454,7 +1454,7 @@ gap:22px;
 }
 
 
-.report-card{
+body.founder-shell-ready .report-card{
 
 padding:26px;
 
@@ -1465,7 +1465,7 @@ overflow:hidden;
 }
 
 
-.report-card::before{
+body.founder-shell-ready .report-card::before{
 
 content:"";
 
@@ -1486,7 +1486,7 @@ border-radius:50%;
 }
 
 
-.report-card h3{
+body.founder-shell-ready .report-card h3{
 
 font-size:.95rem;
 
@@ -1497,7 +1497,7 @@ margin-bottom:14px;
 }
 
 
-.report-card h2{
+body.founder-shell-ready .report-card h2{
 
 font-size:2.1rem;
 
@@ -1508,7 +1508,7 @@ margin-bottom:10px;
 }
 
 
-.report-card span{
+body.founder-shell-ready .report-card span{
 
 font-size:.85rem;
 
@@ -1517,7 +1517,7 @@ color:#94a3b8;
 }
 
 
-.report-growth{
+body.founder-shell-ready .report-growth{
 
 display:flex;
 
@@ -1534,14 +1534,14 @@ font-weight:700;
 }
 
 
-.report-growth.up{
+body.founder-shell-ready .report-growth.up{
 
 color:#4ade80;
 
 }
 
 
-.report-growth.down{
+body.founder-shell-ready .report-growth.down{
 
 color:#f87171;
 
@@ -1553,7 +1553,7 @@ color:#f87171;
    ACTION BAR
 =================================== */
 
-.action-bar{
+body.founder-shell-ready .action-bar{
 
 display:flex;
 
@@ -1570,7 +1570,7 @@ flex-wrap:wrap;
 }
 
 
-.action-buttons{
+body.founder-shell-ready .action-buttons{
 
 display:flex;
 
@@ -1581,7 +1581,7 @@ flex-wrap:wrap;
 }
 
 
-.action-btn{
+body.founder-shell-ready .action-btn{
 
 height:44px;
 
@@ -1606,7 +1606,7 @@ transition:.3s;
 }
 
 
-.action-btn.primary{
+body.founder-shell-ready .action-btn.primary{
 
 background:#2563eb;
 
@@ -1615,7 +1615,7 @@ color:#fff;
 }
 
 
-.action-btn.primary:hover{
+body.founder-shell-ready .action-btn.primary:hover{
 
 background:#1d4ed8;
 
@@ -1624,7 +1624,7 @@ transform:translateY(-2px);
 }
 
 
-.action-btn.secondary{
+body.founder-shell-ready .action-btn.secondary{
 
 background:rgba(255,255,255,.06);
 
@@ -1635,7 +1635,7 @@ border:1px solid rgba(255,255,255,.08);
 }
 
 
-.action-btn.secondary:hover{
+body.founder-shell-ready .action-btn.secondary:hover{
 
 background:rgba(255,255,255,.12);
 
@@ -1647,7 +1647,7 @@ background:rgba(255,255,255,.12);
    CUSTOM SCROLLBAR
 =================================== */
 
-::-webkit-scrollbar{
+body.founder-shell-ready ::-webkit-scrollbar{
 
 width:8px;
 
@@ -1656,14 +1656,14 @@ height:8px;
 }
 
 
-::-webkit-scrollbar-track{
+body.founder-shell-ready ::-webkit-scrollbar-track{
 
 background:#07111f;
 
 }
 
 
-::-webkit-scrollbar-thumb{
+body.founder-shell-ready ::-webkit-scrollbar-thumb{
 
 background:#334155;
 
@@ -1672,7 +1672,7 @@ border-radius:20px;
 }
 
 
-::-webkit-scrollbar-thumb:hover{
+body.founder-shell-ready ::-webkit-scrollbar-thumb:hover{
 
 background:#3b82f6;
 
@@ -1687,7 +1687,7 @@ background:#3b82f6;
 
 /* TABLET */
 
-@media(max-width:900px){
+body.founder-shell-ready @media(max-width:900px){
 
 
 .transactions-section,
@@ -1750,7 +1750,7 @@ repeat(2,1fr);
 
 /* MOBILE */
 
-@media(max-width:600px){
+body.founder-shell-ready @media(max-width:600px){
 
 
 .section-header h2{
@@ -1828,9 +1828,9 @@ min-width:900px;
    FINAL CARD POLISH
 =================================== */
 
-.summary-card,
-.report-card,
-.action-bar{
+body.founder-shell-ready .summary-card,
+body.founder-shell-ready .report-card,
+body.founder-shell-ready .action-bar{
 
 background:
 
@@ -1860,10 +1860,10 @@ backdrop-filter:blur(18px);
    PREMIUM ANIMATIONS
 =================================== */
 
-.summary-card,
-.report-card,
-.action-bar,
-.table-responsive{
+body.founder-shell-ready .summary-card,
+body.founder-shell-ready .report-card,
+body.founder-shell-ready .action-bar,
+body.founder-shell-ready .table-responsive{
 
 animation:
 
@@ -1894,10 +1894,10 @@ transform:translateY(0);
 
 
 
-.status,
-.table-action,
-.withdraw-action,
-.action-btn{
+body.founder-shell-ready .status,
+body.founder-shell-ready .table-action,
+body.founder-shell-ready .withdraw-action,
+body.founder-shell-ready .action-btn{
 
 transition:
 
@@ -1908,10 +1908,10 @@ background .25s ease;
 }
 
 
-.status:hover,
-.table-action:hover,
-.withdraw-action:hover,
-.action-btn:hover{
+body.founder-shell-ready .status:hover,
+body.founder-shell-ready .table-action:hover,
+body.founder-shell-ready .withdraw-action:hover,
+body.founder-shell-ready .action-btn:hover{
 
 transform:translateY(-2px);
 
@@ -1920,7 +1920,7 @@ transform:translateY(-2px);
    LOADING SCREEN
 =================================== */
 
-.loading-overlay{
+body.founder-shell-ready .loading-overlay{
 
 position:fixed;
 
@@ -1943,7 +1943,7 @@ gap:15px;
 }
 
 
-.loader{
+body.founder-shell-ready .loader{
 
 width:45px;
 
@@ -1971,7 +1971,7 @@ transform:rotate(360deg);
 }
 
 
-.loading-overlay p{
+body.founder-shell-ready .loading-overlay p{
 
 color:#cbd5e1;
 
@@ -1981,7 +1981,7 @@ font-weight:600;
 @media(max-width:600px){
 
 
-.page-header{
+body.founder-shell-ready .page-header{
 
 flex-direction:column;
 
@@ -1990,36 +1990,36 @@ align-items:flex-start;
 }
 
 
-.page-header button{
+body.founder-shell-ready .page-header button{
 
 width:100%;
 
 }
 
 
-.analytics-grid,
-.payment-grid{
+body.founder-shell-ready .analytics-grid,
+body.founder-shell-ready .payment-grid{
 
 grid-template-columns:1fr;
 
 }
 
 
-.transactions-section{
+body.founder-shell-ready .transactions-section{
 
 overflow:hidden;
 
 }
 
 
-.table-responsive{
+body.founder-shell-ready .table-responsive{
 
 overflow-x:auto;
 
 }
 
 
-.stat-card{
+body.founder-shell-ready .stat-card{
 
 padding:18px;
 
