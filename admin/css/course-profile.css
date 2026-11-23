@@ -76,7 +76,7 @@
     background:
         linear-gradient(
             135deg,
-            rgba(41,121,255,.12),
+            rgba(118,44,255,.12),
             rgba(109,93,252,.16)
         );
 
@@ -434,7 +434,7 @@
 }
 
 .course-view-instructor:hover {
-    background: #eaf2ff;
+    background: #f0eaff;
     color: var(--admin-blue);
 }
 
