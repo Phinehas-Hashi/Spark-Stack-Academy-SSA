@@ -67,6 +67,9 @@ function setupMobileSidebar() {
     const sidebar = document.getElementById("instructorSidebar");
     const overlay = document.getElementById("sidebarOverlay");
 
+    overlay?.setAttribute("aria-hidden", "true");
+    menuButton?.setAttribute("aria-expanded", "false");
+
     menuButton?.addEventListener("click", event => {
         event.stopPropagation();
         if (sidebar?.classList.contains("open")) closeSidebar();
