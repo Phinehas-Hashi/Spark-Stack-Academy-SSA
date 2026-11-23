@@ -24,14 +24,14 @@
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .14em;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .calendar-hero h1 {
     margin: 0;
     font-size: clamp(26px, 3vw, 38px);
     font-weight: 800;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .calendar-hero p {
@@ -79,7 +79,7 @@
     margin: 0;
     text-align: center;
     font-size: 20px;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .calendar-icon-btn,
@@ -99,7 +99,7 @@
     place-items: center;
     border-radius: 10px;
     background: #f3f6fa;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .calendar-icon-btn:hover {
@@ -110,7 +110,7 @@
     padding: 9px 15px;
     border-radius: 10px;
     background: #edf4ff;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .calendar-primary-btn {
@@ -120,9 +120,9 @@
     gap: 8px;
     padding: 11px 17px;
     border-radius: 11px;
-    background: #2979ff;
+    background: #762cff;
     color: #fff;
-    box-shadow: 0 8px 18px rgba(41,121,255,.2);
+    box-shadow: 0 8px 18px rgba(118,44,255,.2);
 }
 
 .calendar-primary-btn:hover {
@@ -172,7 +172,7 @@
 }
 
 .calendar-day:hover {
-    border-color: rgba(41,121,255,.35);
+    border-color: rgba(118,44,255,.35);
     transform: translateY(-1px);
 }
 
@@ -182,8 +182,8 @@
 }
 
 .calendar-day.today {
-    border-color: #2979ff;
-    box-shadow: inset 0 0 0 1px rgba(41,121,255,.16);
+    border-color: #762cff;
+    box-shadow: inset 0 0 0 1px rgba(118,44,255,.16);
 }
 
 .calendar-day-number {
@@ -199,7 +199,7 @@
 }
 
 .calendar-day.today .calendar-day-number {
-    background: #2979ff;
+    background: #762cff;
     color: #fff;
 }
 
@@ -215,7 +215,7 @@
     width: 100%;
     padding: 4px 6px;
     border: 0;
-    border-left: 3px solid #2979ff;
+    border-left: 3px solid #762cff;
     border-radius: 5px;
     background: #edf4ff;
     color: #17345f;
@@ -240,7 +240,7 @@
 }
 
 .calendar-event-chip.course {
-    border-left-color: #2979ff;
+    border-left-color: #762cff;
     background: #edf4ff;
 }
 
@@ -279,7 +279,7 @@
 
 .legend-dot.assignment { background: #f59e0b; }
 .legend-dot.quiz { background: #8b5cf6; }
-.legend-dot.course { background: #2979ff; }
+.legend-dot.course { background: #762cff; }
 .legend-dot.announcement { background: #10b981; }
 
 .upcoming-card {
@@ -298,17 +298,17 @@
     font-size: 10px;
     font-weight: 800;
     letter-spacing: .12em;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .calendar-card-header h2 {
     margin: 3px 0 0;
-    color: #081c3a;
+    color: #17152f;
     font-size: 21px;
 }
 
 .calendar-card-header > i {
-    color: #2979ff;
+    color: #762cff;
 }
 
 .upcoming-events {
@@ -326,7 +326,7 @@
 }
 
 .upcoming-event:hover {
-    border-color: rgba(41,121,255,.25);
+    border-color: rgba(118,44,255,.25);
 }
 
 .upcoming-event-top {
@@ -341,7 +341,7 @@
     font-weight: 800;
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .upcoming-event-date {
@@ -352,7 +352,7 @@
 
 .upcoming-event-title {
     margin-top: 7px;
-    color: #081c3a;
+    color: #17152f;
     font-size: 13px;
     font-weight: 700;
 }
@@ -448,7 +448,7 @@
 .calendar-modal-type {
     display: inline-block;
     margin-bottom: 7px;
-    color: #2979ff;
+    color: #762cff;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: .12em;
@@ -456,7 +456,7 @@
 
 .calendar-modal-dialog h2 {
     margin: 0 38px 20px 0;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .calendar-detail-row {
@@ -470,7 +470,7 @@
 
 .calendar-detail-row svg {
     flex: 0 0 auto;
-    color: #2979ff;
+    color: #762cff;
 }
 
 .calendar-modal-dialog > p {
@@ -505,7 +505,7 @@
     padding: 11px 12px;
     outline: 0;
     background: #fff;
-    color: #081c3a;
+    color: #17152f;
     font: inherit;
     font-size: 13px;
 }
@@ -513,8 +513,8 @@
 .calendar-create-dialog input:focus,
 .calendar-create-dialog select:focus,
 .calendar-create-dialog textarea:focus {
-    border-color: #2979ff;
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    border-color: #762cff;
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 .calendar-form-grid {
