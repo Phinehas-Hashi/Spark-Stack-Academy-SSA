@@ -1,10 +1,10 @@
 
-*{
+body.founder-shell-ready, body.founder-shell-ready *{
     box-sizing:border-box;
 }
 
 
-body{
+body.founder-shell-ready{
 
     margin:0;
 
@@ -27,7 +27,7 @@ body{
 =================================== */
 
 
-.bg-orb{
+body.founder-shell-ready .bg-orb{
 
     position:fixed;
 
@@ -43,7 +43,7 @@ body{
 
 
 
-.orb-1{
+body.founder-shell-ready .orb-1{
 
     width:350px;
 
@@ -59,7 +59,7 @@ body{
 
 
 
-.orb-2{
+body.founder-shell-ready .orb-2{
 
     width:300px;
 
@@ -75,7 +75,7 @@ body{
 
 
 
-.orb-3{
+body.founder-shell-ready .orb-3{
 
     width:280px;
 
@@ -98,7 +98,7 @@ body{
 =================================== */
 
 
-.dashboard-layout{
+body.founder-shell-ready .dashboard-layout{
 
     display:flex;
 
@@ -108,7 +108,7 @@ body{
 
 
 
-.main-content{
+body.founder-shell-ready .main-content{
 
     flex:1;
 
@@ -127,7 +127,7 @@ body{
 =================================== */
 
 
-.glass-card{
+body.founder-shell-ready .glass-card{
 
     background:
 
@@ -160,7 +160,7 @@ body{
 =================================== */
 
 
-.notification-header{
+body.founder-shell-ready .notification-header{
 
     display:flex;
 
@@ -174,7 +174,7 @@ body{
 
 
 
-.notification-header h1{
+body.founder-shell-ready .notification-header h1{
 
     font-size:32px;
 
@@ -184,7 +184,7 @@ body{
 
 
 
-.notification-header p{
+body.founder-shell-ready .notification-header p{
 
     color:#b8c4d9;
 
@@ -201,8 +201,8 @@ body{
 =================================== */
 
 
-.primary-btn,
-.secondary-btn{
+body.founder-shell-ready .primary-btn,
+body.founder-shell-ready .secondary-btn{
 
     border:none;
 
@@ -220,7 +220,7 @@ body{
 
 
 
-.primary-btn{
+body.founder-shell-ready .primary-btn{
 
     background:
 
@@ -236,7 +236,7 @@ body{
 
 
 
-.secondary-btn{
+body.founder-shell-ready .secondary-btn{
 
     background:
 
@@ -248,8 +248,8 @@ body{
 
 
 
-.primary-btn:hover,
-.secondary-btn:hover{
+body.founder-shell-ready .primary-btn:hover,
+body.founder-shell-ready .secondary-btn:hover{
 
     transform:translateY(-2px);
 
@@ -260,7 +260,7 @@ body{
 =================================== */
 
 
-.notification-stats{
+body.founder-shell-ready .notification-stats{
 
     display:grid;
 
@@ -275,7 +275,7 @@ body{
 
 
 
-.notification-stat{
+body.founder-shell-ready .notification-stat{
 
     display:flex;
 
@@ -287,7 +287,7 @@ body{
 
 
 
-.stat-icon{
+body.founder-shell-ready .stat-icon{
 
     width:60px;
 
@@ -311,7 +311,7 @@ body{
 
 
 
-.stat-icon.unread{
+body.founder-shell-ready .stat-icon.unread{
 
     background:
     rgba(41,121,255,.25);
@@ -320,7 +320,7 @@ body{
 
 
 
-.stat-icon.payment{
+body.founder-shell-ready .stat-icon.payment{
 
     background:
     rgba(0,200,83,.25);
@@ -329,7 +329,7 @@ body{
 
 
 
-.stat-icon.security{
+body.founder-shell-ready .stat-icon.security{
 
     background:
     rgba(255,193,7,.25);
@@ -338,7 +338,7 @@ body{
 
 
 
-.notification-stat h3{
+body.founder-shell-ready .notification-stat h3{
 
     margin:0;
 
@@ -350,7 +350,7 @@ body{
 
 
 
-.notification-stat h2{
+body.founder-shell-ready .notification-stat h2{
 
     margin:5px 0;
 
@@ -360,7 +360,7 @@ body{
 
 
 
-.notification-stat p{
+body.founder-shell-ready .notification-stat p{
 
     margin:0;
 
@@ -379,7 +379,7 @@ body{
 =================================== */
 
 
-.notification-filter{
+body.founder-shell-ready .notification-filter{
 
     margin-bottom:25px;
 
@@ -387,7 +387,7 @@ body{
 
 
 
-.filter-group{
+body.founder-shell-ready .filter-group{
 
     display:flex;
 
@@ -399,7 +399,7 @@ body{
 
 
 
-.filter-btn{
+body.founder-shell-ready .filter-btn{
 
     border:none;
 
@@ -421,7 +421,7 @@ body{
 
 
 
-.filter-btn:hover{
+body.founder-shell-ready .filter-btn:hover{
 
     background:
 
@@ -431,7 +431,7 @@ body{
 
 
 
-.filter-btn.active{
+body.founder-shell-ready .filter-btn.active{
 
     background:
 
@@ -451,7 +451,7 @@ body{
 =================================== */
 
 
-.notification-panel{
+body.founder-shell-ready .notification-panel{
 
     margin-bottom:25px;
 
@@ -459,7 +459,7 @@ body{
 
 
 
-.section-header{
+body.founder-shell-ready .section-header{
 
     display:flex;
 
@@ -473,7 +473,7 @@ body{
 
 
 
-.section-header h2{
+body.founder-shell-ready .section-header h2{
 
     margin:0;
 
@@ -483,7 +483,7 @@ body{
 
 
 
-.section-header p{
+body.founder-shell-ready .section-header p{
 
     color:#9aa8c1;
 
@@ -493,7 +493,7 @@ body{
 
 
 
-.notification-tools{
+body.founder-shell-ready .notification-tools{
 
     display:flex;
 
@@ -505,8 +505,8 @@ body{
 
 
 
-.notification-tools input,
-.notification-tools select{
+body.founder-shell-ready .notification-tools input,
+body.founder-shell-ready .notification-tools select{
 
     background:
 
@@ -535,7 +535,7 @@ body{
 =================================== */
 
 
-.notification-list{
+body.founder-shell-ready .notification-list{
 
     display:flex;
 
@@ -549,7 +549,7 @@ body{
 
 
 
-.notification-card{
+body.founder-shell-ready .notification-card{
 
     display:flex;
 
@@ -573,7 +573,7 @@ body{
 
 
 
-.notification-card:hover{
+body.founder-shell-ready .notification-card:hover{
 
     transform:translateY(-3px);
 
@@ -587,7 +587,7 @@ body{
 
 
 
-.notification-icon{
+body.founder-shell-ready .notification-icon{
 
     width:50px;
 
@@ -613,7 +613,7 @@ body{
 
 
 
-.notification-content{
+body.founder-shell-ready .notification-content{
 
     flex:1;
 
@@ -623,7 +623,7 @@ body{
 
 
 
-.notification-top{
+body.founder-shell-ready .notification-top{
 
     display:flex;
 
@@ -633,7 +633,7 @@ body{
 
 
 
-.notification-title{
+body.founder-shell-ready .notification-title{
 
     margin:0;
 
@@ -643,7 +643,7 @@ body{
 
 
 
-.notification-time{
+body.founder-shell-ready .notification-time{
 
     color:#8f9bb3;
 
@@ -655,7 +655,7 @@ body{
 
 
 
-.notification-message{
+body.founder-shell-ready .notification-message{
 
     color:#c7d2e6;
 
@@ -667,7 +667,7 @@ body{
 
 
 
-.notification-footer{
+body.founder-shell-ready .notification-footer{
 
     display:flex;
 
@@ -681,7 +681,7 @@ body{
 
 
 
-.notification-type{
+body.founder-shell-ready .notification-type{
 
     padding:5px 12px;
 
@@ -697,7 +697,7 @@ body{
 
 
 
-.notification-actions{
+body.founder-shell-ready .notification-actions{
 
     display:flex;
 
@@ -709,8 +709,8 @@ body{
 
 
 
-.read-btn,
-.view-btn{
+body.founder-shell-ready .read-btn,
+body.founder-shell-ready .view-btn{
 
     border:none;
 
@@ -733,7 +733,7 @@ body{
 =================================== */
 
 
-.settings-grid{
+body.founder-shell-ready .settings-grid{
 
     display:grid;
 
@@ -750,7 +750,7 @@ body{
 
 
 
-.settings-card{
+body.founder-shell-ready .settings-card{
 
     min-height:100%;
 
@@ -760,7 +760,7 @@ body{
 
 
 
-.settings-list{
+body.founder-shell-ready .settings-list{
 
     display:flex;
 
@@ -781,7 +781,7 @@ body{
 =================================== */
 
 
-.setting-item{
+body.founder-shell-ready .setting-item{
 
     display:flex;
 
@@ -801,7 +801,7 @@ body{
 
 
 
-.setting-item strong{
+body.founder-shell-ready .setting-item strong{
 
     display:block;
 
@@ -811,7 +811,7 @@ body{
 
 
 
-.setting-item p{
+body.founder-shell-ready .setting-item p{
 
     margin:0;
 
@@ -832,7 +832,7 @@ body{
 =================================== */
 
 
-.switch{
+body.founder-shell-ready .switch{
 
     position:relative;
 
@@ -846,7 +846,7 @@ body{
 
 
 
-.switch input{
+body.founder-shell-ready .switch input{
 
     opacity:0;
 
@@ -858,7 +858,7 @@ body{
 
 
 
-.slider{
+body.founder-shell-ready .slider{
 
     position:absolute;
 
@@ -878,7 +878,7 @@ body{
 
 
 
-.slider:before{
+body.founder-shell-ready .slider:before{
 
     content:"";
 
@@ -902,7 +902,7 @@ body{
 
 
 
-.switch input:checked + .slider{
+body.founder-shell-ready .switch input:checked + .slider{
 
     background:#2979ff;
 
@@ -910,7 +910,7 @@ body{
 
 
 
-.switch input:checked + .slider:before{
+body.founder-shell-ready .switch input:checked + .slider:before{
 
     transform:translateX(24px);
 
@@ -927,7 +927,7 @@ body{
 =================================== */
 
 
-.delivery-card{
+body.founder-shell-ready .delivery-card{
 
     border-left:
 
@@ -947,7 +947,7 @@ body{
 =================================== */
 
 
-.broadcast-center{
+body.founder-shell-ready .broadcast-center{
 
     margin-top:25px;
 
@@ -957,7 +957,7 @@ body{
 
 
 
-.broadcast-form{
+body.founder-shell-ready .broadcast-form{
 
     display:grid;
 
@@ -973,7 +973,7 @@ body{
 
 
 
-.form-group{
+body.founder-shell-ready .form-group{
 
     display:flex;
 
@@ -985,7 +985,7 @@ body{
 
 
 
-.form-group.full-width{
+body.founder-shell-ready .form-group.full-width{
 
     grid-column:
 
@@ -997,7 +997,7 @@ body{
 
 
 
-.form-group label{
+body.founder-shell-ready .form-group label{
 
     font-size:14px;
 
@@ -1009,9 +1009,9 @@ body{
 
 
 
-.form-group input,
-.form-group select,
-.form-group textarea{
+body.founder-shell-ready .form-group input,
+body.founder-shell-ready .form-group select,
+body.founder-shell-ready .form-group textarea{
 
 
     background:
@@ -1044,7 +1044,7 @@ body{
 
 
 
-.form-group textarea{
+body.founder-shell-ready .form-group textarea{
 
     resize:none;
 
@@ -1054,9 +1054,9 @@ body{
 
 
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus{
+body.founder-shell-ready .form-group input:focus,
+body.founder-shell-ready .form-group select:focus,
+body.founder-shell-ready .form-group textarea:focus{
 
 
     border-color:#2979ff;
@@ -1075,8 +1075,8 @@ body{
 =================================== */
 
 
-.settings-card .primary-btn,
-.broadcast-center .primary-btn{
+body.founder-shell-ready .settings-card .primary-btn,
+body.founder-shell-ready .broadcast-center .primary-btn{
 
     margin-top:20px;
 
@@ -1089,7 +1089,7 @@ body{
 =================================== */
 
 
-critical-section{
+body.founder-shell-ready critical-section{
 
     margin-top:25px;
 
@@ -1097,7 +1097,7 @@ critical-section{
 
 
 
-.critical-section{
+body.founder-shell-ready .critical-section{
 
     border-left:
 
@@ -1109,7 +1109,7 @@ critical-section{
 
 
 
-.alert-count{
+body.founder-shell-ready .alert-count{
 
     padding:8px 15px;
 
@@ -1129,7 +1129,7 @@ critical-section{
 
 
 
-.critical-list{
+body.founder-shell-ready .critical-list{
 
     display:flex;
 
@@ -1143,7 +1143,7 @@ critical-section{
 
 
 
-.critical-item{
+body.founder-shell-ready .critical-item{
 
     display:flex;
 
@@ -1165,7 +1165,7 @@ critical-section{
 
 
 
-.critical-icon{
+body.founder-shell-ready .critical-icon{
 
     width:45px;
 
@@ -1196,8 +1196,8 @@ critical-section{
 =================================== */
 
 
-.empty-state,
-.critical-empty{
+body.founder-shell-ready .empty-state,
+body.founder-shell-ready .critical-empty{
 
     text-align:center;
 
@@ -1209,7 +1209,7 @@ critical-section{
 
 
 
-.empty-icon{
+body.founder-shell-ready .empty-icon{
 
     font-size:50px;
 
@@ -1219,7 +1219,7 @@ critical-section{
 
 
 
-.empty-state h3{
+body.founder-shell-ready .empty-state h3{
 
     color:white;
 
@@ -1229,7 +1229,7 @@ critical-section{
 
 
 
-.critical-empty{
+body.founder-shell-ready .critical-empty{
 
     border-radius:15px;
 
@@ -1253,7 +1253,7 @@ critical-section{
 =================================== */
 
 
-.notification-history{
+body.founder-shell-ready .notification-history{
 
     margin-top:25px;
 
@@ -1263,7 +1263,7 @@ critical-section{
 
 
 
-.table-responsive{
+body.founder-shell-ready .table-responsive{
 
     overflow-x:auto;
 
@@ -1273,7 +1273,7 @@ critical-section{
 
 
 
-table{
+body.founder-shell-ready table{
 
     width:100%;
 
@@ -1285,7 +1285,7 @@ table{
 
 
 
-thead{
+body.founder-shell-ready thead{
 
     background:
 
@@ -1297,7 +1297,7 @@ thead{
 
 
 
-th{
+body.founder-shell-ready th{
 
     text-align:left;
 
@@ -1313,7 +1313,7 @@ th{
 
 
 
-td{
+body.founder-shell-ready td{
 
     padding:15px;
 
@@ -1329,7 +1329,7 @@ td{
 
 
 
-tbody tr{
+body.founder-shell-ready tbody tr{
 
     transition:.3s;
 
@@ -1339,7 +1339,7 @@ tbody tr{
 
 
 
-tbody tr:hover{
+body.founder-shell-ready tbody tr:hover{
 
     background:
 
@@ -1351,7 +1351,7 @@ tbody tr:hover{
 
 
 
-.empty-table{
+body.founder-shell-ready .empty-table{
 
     text-align:center;
 
@@ -1373,7 +1373,7 @@ tbody tr:hover{
 =================================== */
 
 
-.priority{
+body.founder-shell-ready .priority{
 
     padding:6px 12px;
 
@@ -1387,7 +1387,7 @@ tbody tr:hover{
 
 
 
-.priority.normal{
+body.founder-shell-ready .priority.normal{
 
     background:
 
@@ -1399,7 +1399,7 @@ tbody tr:hover{
 
 
 
-.priority.high{
+body.founder-shell-ready .priority.high{
 
     background:
 
@@ -1411,7 +1411,7 @@ tbody tr:hover{
 
 
 
-.priority.critical{
+body.founder-shell-ready .priority.critical{
 
     background:
 
@@ -1433,7 +1433,7 @@ tbody tr:hover{
 =================================== */
 
 
-.load-more-area{
+body.founder-shell-ready .load-more-area{
 
     display:flex;
 
@@ -1449,7 +1449,7 @@ tbody tr:hover{
 =================================== */
 
 
-.security-grid{
+body.founder-shell-ready .security-grid{
 
     display:grid;
 
@@ -1473,8 +1473,8 @@ tbody tr:hover{
 =================================== */
 
 
-.security-card,
-.rules-card{
+body.founder-shell-ready .security-card,
+body.founder-shell-ready .rules-card{
 
     padding:25px;
 
@@ -1484,7 +1484,7 @@ tbody tr:hover{
 
 
 
-.security-list{
+body.founder-shell-ready .security-list{
 
     display:flex;
 
@@ -1498,7 +1498,7 @@ tbody tr:hover{
 
 
 
-.security-item{
+body.founder-shell-ready .security-item{
 
     display:flex;
 
@@ -1520,7 +1520,7 @@ tbody tr:hover{
 
 
 
-.security-item span:first-child{
+body.founder-shell-ready .security-item span:first-child{
 
     color:#c7d2e6;
 
@@ -1530,7 +1530,7 @@ tbody tr:hover{
 
 
 
-.status{
+body.founder-shell-ready .status{
 
     padding:6px 14px;
 
@@ -1546,7 +1546,7 @@ tbody tr:hover{
 
 
 
-.status.connected{
+body.founder-shell-ready .status.connected{
 
     background:
 
@@ -1560,7 +1560,7 @@ tbody tr:hover{
 
 
 
-.status.warning{
+body.founder-shell-ready .status.warning{
 
     background:
 
@@ -1574,7 +1574,7 @@ tbody tr:hover{
 
 
 
-.status.error{
+body.founder-shell-ready .status.error{
 
     background:
 
@@ -1596,7 +1596,7 @@ tbody tr:hover{
 =================================== */
 
 
-.rules-list{
+body.founder-shell-ready .rules-list{
 
     display:flex;
 
@@ -1610,7 +1610,7 @@ tbody tr:hover{
 
 
 
-.rule-item{
+body.founder-shell-ready .rule-item{
 
     display:flex;
 
@@ -1634,7 +1634,7 @@ tbody tr:hover{
 
 
 
-.rule-item h3{
+body.founder-shell-ready .rule-item h3{
 
     margin:0 0 5px;
 
@@ -1646,7 +1646,7 @@ tbody tr:hover{
 
 
 
-.rule-item p{
+body.founder-shell-ready .rule-item p{
 
     margin:0;
 
@@ -1668,7 +1668,7 @@ tbody tr:hover{
 =================================== */
 
 
-.sound-panel{
+body.founder-shell-ready .sound-panel{
 
     margin-top:25px;
 
@@ -1682,7 +1682,7 @@ tbody tr:hover{
 
 
 
-.sound-control{
+body.founder-shell-ready .sound-control{
 
     display:flex;
 
@@ -1704,7 +1704,7 @@ tbody tr:hover{
 
 
 
-.sound-info{
+body.founder-shell-ready .sound-info{
 
     display:flex;
 
@@ -1718,7 +1718,7 @@ tbody tr:hover{
 
 
 
-.sound-icon{
+body.founder-shell-ready .sound-icon{
 
     width:50px;
 
@@ -1746,7 +1746,7 @@ tbody tr:hover{
 
 
 
-.sound-select{
+body.founder-shell-ready .sound-select{
 
     background:
 
@@ -1776,7 +1776,7 @@ tbody tr:hover{
 =================================== */
 
 
-.audio-status{
+body.founder-shell-ready .audio-status{
 
     margin-top:15px;
 
@@ -1799,7 +1799,7 @@ tbody tr:hover{
 =================================== */
 
 
-.action-bar{
+body.founder-shell-ready .action-bar{
 
     display:flex;
 
@@ -1824,7 +1824,7 @@ tbody tr:hover{
 =================================== */
 
 
-.finance-toast{
+body.founder-shell-ready .finance-toast{
 
     position:fixed;
 
@@ -1868,7 +1868,7 @@ tbody tr:hover{
 
 
 
-.finance-toast.visible{
+body.founder-shell-ready .finance-toast.visible{
 
     transform:
 
@@ -1882,7 +1882,7 @@ tbody tr:hover{
 
 
 
-.finance-toast.success{
+body.founder-shell-ready .finance-toast.success{
 
     border-left:
 
@@ -1894,7 +1894,7 @@ tbody tr:hover{
 
 
 
-.finance-toast.error{
+body.founder-shell-ready .finance-toast.error{
 
     border-left:
 
@@ -1906,7 +1906,7 @@ tbody tr:hover{
 
 
 
-.finance-toast.warning{
+body.founder-shell-ready .finance-toast.warning{
 
     border-left:
 
@@ -1926,7 +1926,7 @@ tbody tr:hover{
 =================================== */
 
 
-.sound-playing .sound-icon{
+body.founder-shell-ready .sound-playing .sound-icon{
 
     animation:
 
@@ -1979,7 +1979,7 @@ tbody tr:hover{
 =================================== */
 
 
-::-webkit-scrollbar{
+body.founder-shell-ready ::-webkit-scrollbar{
 
     width:8px;
 
@@ -1987,7 +1987,7 @@ tbody tr:hover{
 
 
 
-::-webkit-scrollbar-track{
+body.founder-shell-ready ::-webkit-scrollbar-track{
 
     background:#050b18;
 
@@ -1995,7 +1995,7 @@ tbody tr:hover{
 
 
 
-::-webkit-scrollbar-thumb{
+body.founder-shell-ready ::-webkit-scrollbar-thumb{
 
     background:#2979ff;
 
@@ -2015,7 +2015,7 @@ tbody tr:hover{
 =================================== */
 
 
-@media(max-width:1200px){
+body.founder-shell-ready @media(max-width:1200px){
 
 
 .notification-stats{
@@ -2049,7 +2049,7 @@ tbody tr:hover{
 @media(max-width:768px){
 
 
-.main-content{
+body.founder-shell-ready .main-content{
 
     margin-left:0;
 
@@ -2059,8 +2059,8 @@ tbody tr:hover{
 
 
 
-.notification-header,
-.section-header{
+body.founder-shell-ready .notification-header,
+body.founder-shell-ready .section-header{
 
     flex-direction:column;
 
@@ -2074,7 +2074,7 @@ tbody tr:hover{
 
 
 
-.notification-stats{
+body.founder-shell-ready .notification-stats{
 
     grid-template-columns:
 
@@ -2086,7 +2086,7 @@ tbody tr:hover{
 
 
 
-.broadcast-form{
+body.founder-shell-ready .broadcast-form{
 
     grid-template-columns:
 
@@ -2098,7 +2098,7 @@ tbody tr:hover{
 
 
 
-.form-group.full-width{
+body.founder-shell-ready .form-group.full-width{
 
     grid-column:
 
@@ -2110,7 +2110,7 @@ tbody tr:hover{
 
 
 
-.notification-tools{
+body.founder-shell-ready .notification-tools{
 
     width:100%;
 
@@ -2122,8 +2122,8 @@ tbody tr:hover{
 
 
 
-.notification-top,
-.notification-footer{
+body.founder-shell-ready .notification-top,
+body.founder-shell-ready .notification-footer{
 
     flex-direction:column;
 
@@ -2135,9 +2135,9 @@ tbody tr:hover{
 
 
 
-.security-item,
-.rule-item,
-.setting-item{
+body.founder-shell-ready .security-item,
+body.founder-shell-ready .rule-item,
+body.founder-shell-ready .setting-item{
 
     flex-direction:column;
 
@@ -2149,7 +2149,7 @@ tbody tr:hover{
 
 
 
-.action-bar{
+body.founder-shell-ready .action-bar{
 
     justify-content:center;
 
@@ -2161,7 +2161,7 @@ tbody tr:hover{
 
 }
 /* Founder feedback for broadcast and notification actions. */
-.founder-toast {
+body.founder-shell-ready .founder-toast{
     position: fixed;
     right: 24px;
     bottom: 24px;
@@ -2176,6 +2176,6 @@ tbody tr:hover{
     font-weight: 600;
 }
 
-.founder-toast.error {
+body.founder-shell-ready .founder-toast.error{
     border-color: rgba(248, 113, 113, .45);
 }
