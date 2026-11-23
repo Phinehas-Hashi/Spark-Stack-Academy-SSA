@@ -12,10 +12,10 @@ body.founder-portal-page {
     sans-serif;
 
     background:
-    #050b18;
+    #f5f4fb;
 
     color:
-    #ffffff;
+    #17152f;
 
 }
 
@@ -130,7 +130,7 @@ body.founder-portal-page {
 
     background:
 
-    rgba(255,255,255,.06);
+    #ffffff;
 
     backdrop-filter:
 
@@ -138,7 +138,7 @@ body.founder-portal-page {
 
     border:
 
-    1px solid rgba(255,255,255,.12);
+    1px solid #e8e6f0;
 
     border-radius:22px;
 
@@ -146,7 +146,7 @@ body.founder-portal-page {
 
     box-shadow:
 
-    0 20px 50px rgba(0,0,0,.25);
+    0 12px 34px rgba(27,20,65,.10);
 
 }
 
@@ -185,7 +185,7 @@ body.founder-portal-page {
 
 .notification-header p{
 
-    color:#b8c4d9;
+    color:#77758f;
 
     max-width:650px;
 
@@ -304,7 +304,7 @@ body.founder-portal-page {
 
     background:
 
-    rgba(255,255,255,.12);
+    #e8e6f0;
 
 }
 
@@ -343,7 +343,7 @@ body.founder-portal-page {
 
     font-size:14px;
 
-    color:#b8c4d9;
+    color:#77758f;
 
 }
 
@@ -410,7 +410,7 @@ body.founder-portal-page {
 
     background:
 
-    rgba(255,255,255,.08);
+    #e8e6f0;
 
     color:white;
 
@@ -509,7 +509,7 @@ body.founder-portal-page {
 
     background:
 
-    rgba(255,255,255,.08);
+    #e8e6f0;
 
     border:
 
@@ -560,11 +560,11 @@ body.founder-portal-page {
 
     background:
 
-    rgba(255,255,255,.05);
+    #fbfaff;
 
     border:
 
-    1px solid rgba(255,255,255,.08);
+    1px solid #e8e6f0;
 
     transition:.3s;
 
@@ -794,7 +794,7 @@ body.founder-portal-page {
 
     background:
 
-    rgba(255,255,255,.05);
+    #fbfaff;
 
 }
 
@@ -1015,7 +1015,7 @@ body.founder-portal-page {
 
     background:
 
-    rgba(255,255,255,.08);
+    #e8e6f0;
 
 
     border:
@@ -1288,7 +1288,7 @@ thead{
 
     background:
 
-    rgba(255,255,255,.06);
+    #ffffff;
 
 }
 
@@ -1304,7 +1304,7 @@ th{
 
     font-size:13px;
 
-    color:#b8c4d9;
+    color:#77758f;
 
 }
 
@@ -1318,7 +1318,7 @@ td{
 
     border-bottom:
 
-    1px solid rgba(255,255,255,.08);
+    1px solid #e8e6f0;
 
     color:#e5ecf8;
 
@@ -1511,7 +1511,7 @@ tbody tr:hover{
 
     background:
 
-    rgba(255,255,255,.05);
+    #fbfaff;
 
 }
 
@@ -1625,7 +1625,7 @@ tbody tr:hover{
 
     background:
 
-    rgba(255,255,255,.05);
+    #fbfaff;
 
 }
 
@@ -1695,7 +1695,7 @@ tbody tr:hover{
 
     background:
 
-    rgba(255,255,255,.05);
+    #fbfaff;
 
 }
 
@@ -1749,7 +1749,7 @@ tbody tr:hover{
 
     background:
 
-    rgba(255,255,255,.08);
+    #e8e6f0;
 
     color:white;
 
