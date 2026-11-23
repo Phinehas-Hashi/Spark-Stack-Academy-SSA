@@ -58,7 +58,7 @@
 
 .admin-btn.primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(41,121,255,.22);
+    box-shadow: 0 8px 20px rgba(118,44,255,.22);
 }
 
 .admin-btn.secondary {
@@ -115,7 +115,7 @@
 
 .admin-badge.info {
     color: #175cd3;
-    background: #eaf2ff;
+    background: #f0eaff;
 }
 
 /* STAT CARDS */
@@ -151,7 +151,7 @@
 
 .admin-stat-icon.blue {
     color: var(--admin-blue);
-    background: #eaf2ff;
+    background: #f0eaff;
 }
 
 .admin-stat-icon.purple {
@@ -247,7 +247,7 @@
 
 .admin-search input:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 /* FORMS */
@@ -284,7 +284,7 @@
 .admin-form-group select:focus,
 .admin-form-group textarea:focus {
     border-color: var(--admin-blue);
-    box-shadow: 0 0 0 3px rgba(41,121,255,.1);
+    box-shadow: 0 0 0 3px rgba(118,44,255,.1);
 }
 
 /* MODERATOR NOTICE */
@@ -393,7 +393,7 @@
     display: grid;
     place-items: center;
     border-radius: 11px;
-    background: linear-gradient(135deg, #2979ff, #ffc107);
+    background: linear-gradient(135deg, #762cff, #20cfe8);
     color: #fff;
     font-size: 12px;
     font-weight: 800;
@@ -429,7 +429,7 @@
     place-items: center;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #2979ff;
+    background: #762cff;
     font-weight: 800;
 }
 
@@ -504,7 +504,7 @@
 
 .admin-nav-item.active {
     color: #fff;
-    background: rgba(41,121,255,.22);
+    background: rgba(118,44,255,.22);
 }
 
 .admin-nav-item.active::before {
@@ -514,7 +514,7 @@
     width: 3px;
     height: 20px;
     border-radius: 4px;
-    background: #2979ff;
+    background: #762cff;
 }
 
 .admin-nav-badge {
