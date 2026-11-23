@@ -2,7 +2,7 @@
    ROOT
 =================================== */
 
-:root{
+body.founder-shell-ready{
 
 --bg:#07111f;
 
@@ -30,7 +30,7 @@
    BODY
 =================================== */
 
-*{
+body.founder-shell-ready, body.founder-shell-ready *{
 
 margin:0;
 
@@ -40,7 +40,7 @@ box-sizing:border-box;
 
 }
 
-body{
+body.founder-shell-ready{
 
 font-family:"Inter",sans-serif;
 
@@ -56,7 +56,7 @@ overflow-x:hidden;
    MAIN CONTENT
 =================================== */
 
-.main-content{
+body.founder-shell-ready .main-content{
 
 padding:30px;
 
@@ -72,7 +72,7 @@ gap:24px;
    GLASS CARD
 =================================== */
 
-.glass-card{
+body.founder-shell-ready .glass-card{
 
 background:var(--card);
 
@@ -90,13 +90,13 @@ box-shadow:var(--shadow);
    PAGE HEADER
 =================================== */
 
-.page-header{
+body.founder-shell-ready .page-header{
 
 padding:28px;
 
 }
 
-.page-header h1{
+body.founder-shell-ready .page-header h1{
 
 font-size:2rem;
 
@@ -106,7 +106,7 @@ margin-bottom:10px;
 
 }
 
-.page-header p{
+body.founder-shell-ready .page-header p{
 
 color:var(--muted);
 
@@ -118,13 +118,13 @@ line-height:1.7;
    SECTION CARD
 =================================== */
 
-.section-card{
+body.founder-shell-ready .section-card{
 
 padding:28px;
 
 }
 
-.section-card h2{
+body.founder-shell-ready .section-card h2{
 
 margin-bottom:24px;
 
@@ -138,7 +138,7 @@ font-weight:700;
    PROFILE GRID
 =================================== */
 
-.profile-grid{
+body.founder-shell-ready .profile-grid{
 
 display:grid;
 
@@ -154,7 +154,7 @@ margin-bottom:30px;
    IMAGE UPLOAD
 =================================== */
 
-.upload-box{
+body.founder-shell-ready .upload-box{
 
 display:flex;
 
@@ -176,7 +176,7 @@ transition:.3s;
 
 }
 
-.upload-box:hover{
+body.founder-shell-ready .upload-box:hover{
 
 border-color:#3b82f6;
 
@@ -184,7 +184,7 @@ background:rgba(59,130,246,.08);
 
 }
 
-.upload-box img{
+body.founder-shell-ready .upload-box img{
 
 width:140px;
 
@@ -200,7 +200,7 @@ border:3px solid rgba(255,255,255,.08);
 
 }
 
-.upload-box label{
+body.founder-shell-ready .upload-box label{
 
 font-weight:600;
 
@@ -208,7 +208,7 @@ margin-bottom:12px;
 
 }
 
-.upload-box input{
+body.founder-shell-ready .upload-box input{
 
 width:100%;
 
@@ -218,7 +218,7 @@ width:100%;
    FORM GRID
 =================================== */
 
-.form-grid{
+body.founder-shell-ready .form-grid{
 
 display:grid;
 
@@ -228,7 +228,7 @@ gap:22px;
 
 }
 
-.input-group{
+body.founder-shell-ready .input-group{
 
 display:flex;
 
@@ -238,13 +238,13 @@ gap:10px;
 
 }
 
-.input-group.full{
+body.founder-shell-ready .input-group.full{
 
 grid-column:1/-1;
 
 }
 
-.input-group label{
+body.founder-shell-ready .input-group label{
 
 font-weight:600;
 
@@ -254,11 +254,11 @@ color:#dbeafe;
 
 }
 
-.input-group input,
+body.founder-shell-ready .input-group input,
 
-.input-group textarea,
+body.founder-shell-ready .input-group textarea,
 
-.input-group select{
+body.founder-shell-ready .input-group select{
 
 background:rgba(255,255,255,.05);
 
@@ -278,7 +278,7 @@ transition:.3s;
 
 }
 
-.input-group textarea{
+body.founder-shell-ready .input-group textarea{
 
 resize:vertical;
 
@@ -286,19 +286,19 @@ min-height:160px;
 
 }
 
-.input-group input::placeholder,
+body.founder-shell-ready .input-group input::placeholder,
 
-.input-group textarea::placeholder{
+body.founder-shell-ready .input-group textarea::placeholder{
 
 color:#64748b;
 
 }
 
-.input-group input:focus,
+body.founder-shell-ready .input-group input:focus,
 
-.input-group textarea:focus,
+body.founder-shell-ready .input-group textarea:focus,
 
-.input-group select:focus{
+body.founder-shell-ready .input-group select:focus{
 
 border-color:#3b82f6;
 
@@ -306,7 +306,7 @@ box-shadow:0 0 0 3px rgba(59,130,246,.18);
 
 }
 
-select option{
+body.founder-shell-ready select option{
 
 background:#07111f;
 
@@ -317,7 +317,7 @@ color:#fff;
    STATS GRID
 =================================== */
 
-.stats-grid{
+body.founder-shell-ready .stats-grid{
 
 display:grid;
 
@@ -327,7 +327,7 @@ gap:22px;
 
 }
 
-.stat-card{
+body.founder-shell-ready .stat-card{
 
 padding:24px;
 
@@ -343,7 +343,7 @@ text-align:center;
 
 }
 
-.stat-card:hover{
+body.founder-shell-ready .stat-card:hover{
 
 transform:translateY(-5px);
 
@@ -353,7 +353,7 @@ border-color:rgba(59,130,246,.25);
 
 }
 
-.stat-card h4{
+body.founder-shell-ready .stat-card h4{
 
 font-size:.95rem;
 
@@ -365,7 +365,7 @@ font-weight:600;
 
 }
 
-.stat-card h2{
+body.founder-shell-ready .stat-card h2{
 
 font-size:2rem;
 
@@ -379,7 +379,7 @@ color:#fff;
    ACTION BAR
 =================================== */
 
-.action-bar{
+body.founder-shell-ready .action-bar{
 
 display:flex;
 
@@ -395,9 +395,9 @@ margin-top:10px;
 
 }
 
-.primary-btn,
+body.founder-shell-ready .primary-btn,
 
-.secondary-btn{
+body.founder-shell-ready .secondary-btn{
 
 padding:14px 26px;
 
@@ -415,7 +415,7 @@ transition:.3s;
 
 }
 
-.primary-btn{
+body.founder-shell-ready .primary-btn{
 
 background:linear-gradient(
 135deg,
@@ -429,7 +429,7 @@ box-shadow:0 12px 28px rgba(37,99,235,.35);
 
 }
 
-.primary-btn:hover{
+body.founder-shell-ready .primary-btn:hover{
 
 transform:translateY(-3px);
 
@@ -437,7 +437,7 @@ box-shadow:0 18px 40px rgba(37,99,235,.45);
 
 }
 
-.secondary-btn{
+body.founder-shell-ready .secondary-btn{
 
 background:rgba(255,255,255,.08);
 
@@ -447,7 +447,7 @@ color:#fff;
 
 }
 
-.secondary-btn:hover{
+body.founder-shell-ready .secondary-btn:hover{
 
 background:rgba(255,255,255,.14);
 
@@ -457,7 +457,7 @@ background:rgba(255,255,255,.14);
    FILE INPUT
 =================================== */
 
-input[type="file"]{
+body.founder-shell-ready input[type="file"]{
 
 color:#cbd5e1;
 
@@ -467,7 +467,7 @@ cursor:pointer;
 
 }
 
-input[type="file"]::file-selector-button{
+body.founder-shell-ready input[type="file"]::file-selector-button{
 
 background:#2563eb;
 
@@ -487,7 +487,7 @@ transition:.3s;
 
 }
 
-input[type="file"]::file-selector-button:hover{
+body.founder-shell-ready input[type="file"]::file-selector-button:hover{
 
 background:#1d4ed8;
 
@@ -497,7 +497,7 @@ background:#1d4ed8;
    ANIMATION
 =================================== */
 
-.glass-card{
+body.founder-shell-ready .glass-card{
 
 animation:fadeUp .45s ease;
 
@@ -527,19 +527,19 @@ transform:translateY(0);
    SCROLLBAR
 =================================== */
 
-::-webkit-scrollbar{
+body.founder-shell-ready ::-webkit-scrollbar{
 
 width:8px;
 
 }
 
-::-webkit-scrollbar-track{
+body.founder-shell-ready ::-webkit-scrollbar-track{
 
 background:transparent;
 
 }
 
-::-webkit-scrollbar-thumb{
+body.founder-shell-ready ::-webkit-scrollbar-thumb{
 
 background:#334155;
 
@@ -547,7 +547,7 @@ border-radius:20px;
 
 }
 
-::-webkit-scrollbar-thumb:hover{
+body.founder-shell-ready ::-webkit-scrollbar-thumb:hover{
 
 background:#475569;
 
@@ -557,7 +557,7 @@ background:#475569;
    RESPONSIVE
 =================================== */
 
-@media(max-width:992px){
+body.founder-shell-ready @media(max-width:992px){
 
 .main-content{
 
@@ -575,33 +575,33 @@ grid-template-columns:repeat(2,1fr);
 
 @media(max-width:768px){
 
-.form-grid{
+body.founder-shell-ready .form-grid{
 
 grid-template-columns:1fr;
 
 }
 
-.profile-grid{
+body.founder-shell-ready .profile-grid{
 
 grid-template-columns:1fr;
 
 }
 
-.action-bar{
+body.founder-shell-ready .action-bar{
 
 flex-direction:column;
 
 }
 
-.primary-btn,
+body.founder-shell-ready .primary-btn,
 
-.secondary-btn{
+body.founder-shell-ready .secondary-btn{
 
 width:100%;
 
 }
 
-.page-header h1{
+body.founder-shell-ready .page-header h1{
 
 font-size:1.7rem;
 
@@ -611,13 +611,13 @@ font-size:1.7rem;
 
 @media(max-width:480px){
 
-.section-card{
+body.founder-shell-ready .section-card{
 
 padding:20px;
 
 }
 
-.upload-box img{
+body.founder-shell-ready .upload-box img{
 
 width:110px;
 
@@ -625,7 +625,7 @@ height:110px;
 
 }
 
-.stat-card h2{
+body.founder-shell-ready .stat-card h2{
 
 font-size:1.6rem;
 
