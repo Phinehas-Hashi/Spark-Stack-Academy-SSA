@@ -1,0 +1,42 @@
+/* Institution shell components — scoped to the injected portal root. */
+.institution-app .institution-sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--navy);color:#fff;z-index:20;overflow:auto}
+.institution-app .sidebar-inner{min-height:100%;display:flex;flex-direction:column;padding:22px 16px}
+.institution-app .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 24px}
+.institution-app .brand-mark{width:39px;height:39px;border-radius:12px;background:linear-gradient(145deg,#2979ff,#7456d9);display:grid;place-items:center}
+.institution-app .brand-mark svg{width:21px}
+.institution-app .brand strong, .institution-app .brand small, .institution-app .profile-mini strong, .institution-app .profile-mini small{display:block}
+.institution-app .brand strong{font-size:15px}
+.institution-app .brand small{font-size:10px;color:#aabbd1;margin-top:2px}
+.institution-app .profile-mini{display:flex;align-items:center;gap:11px;padding:14px 10px;margin-bottom:18px;border:1px solid #ffffff1b;background:#ffffff0b;border-radius:14px}
+.institution-app .avatar, .institution-app .topbar-avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#244a78;color:#fff;font-weight:700}
+.institution-app .profile-mini strong{font-size:11px}
+.institution-app .profile-mini small{font-size:9px;color:#9eb1ca;margin-top:3px}
+.institution-app .navigation{display:grid;gap:5px}
+.institution-app .nav-label{padding:17px 10px 5px;color:#8298b6;font-size:9px;font-weight:700;letter-spacing:.13em}
+.institution-app .nav-link{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;color:#c2cee0;font-size:11px;font-weight:500;transition:.2s}
+.institution-app .nav-link svg{width:16px;height:16px}
+.institution-app .nav-link:hover, .institution-app .nav-link.active{background:#ffffff15;color:#fff}
+.institution-app .nav-link.active{box-shadow:inset 3px 0 #ffc107}
+.institution-app .logout-button{display:flex;align-items:center;gap:10px;margin-top:auto;padding:13px 12px;border:1px solid #ffffff20;border-radius:10px;background:transparent;color:#d7e0ec;text-align:left;cursor:pointer}
+.institution-app .logout-button svg{width:16px}
+.institution-app .institution-main{min-height:100vh;margin-left:var(--sidebar)}
+.institution-app .institution-topbar{height:70px;position:sticky;top:0;z-index:10;background:#ffffffed;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+.institution-app .topbar-inner{height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+.institution-app .topbar-left, .institution-app .topbar-right{display:flex;align-items:center;gap:13px}
+.institution-app .topbar-left span{display:block;color:var(--blue);font-size:9px;font-weight:800;letter-spacing:.12em}
+.institution-app .topbar-left strong{display:block;font-size:13px;margin-top:3px}
+.institution-app .topbar-right{font-size:11px;font-weight:600}
+.institution-app .secure-label{display:flex;align-items:center;gap:6px;color:#5d718b}
+.institution-app .secure-label svg{width:15px;color:#15966d}
+.institution-app .topbar-avatar{width:31px;height:31px;background:#e9eff9;color:var(--navy)}
+.institution-app .menu-button{display:none;width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:9px}
+.institution-app .sidebar-overlay{display:none}
+.institution-app .brand-mark{background:transparent!important;box-shadow:none!important}
+.institution-app .institution-sidebar{z-index:1000;width:270px;height:100vh;height:100dvh;overflow:hidden;border-right:1px solid rgba(255,255,255,.08);background:#090625;box-shadow:8px 0 22px rgba(8,28,58,.12)}
+.institution-app .sidebar-inner{height:100%;min-height:0;overflow:hidden}
+.institution-app .navigation{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.institution-app .institution-topbar{z-index:900;background:linear-gradient(105deg,#0b082d,#171052);color:#fff;border-bottom:1px solid rgba(164,112,255,.36);box-shadow:0 8px 24px rgba(12,5,48,.12)}
+.institution-app .topbar-left strong,.institution-app .topbar-right{color:#fff}
+.institution-app .menu-button{display:none;place-items:center;color:#fff;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.14);cursor:pointer}
+.institution-app .sidebar-overlay{display:none}
+.institution-app .logout-button{cursor:pointer}
