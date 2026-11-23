@@ -18,7 +18,16 @@ function loadCSS(path){
 
 function ensureFounderShell(){
   document.body.classList.add("founder-portal-page","founder-shell-ready");
-  loadCSS("founder-unified.css");
+  const unifiedLinks=[...document.querySelectorAll('link[rel="stylesheet"]')].filter(link=>/(?:^|\\/)founder-unified\\.css(?:\\?|$)/.test(link.getAttribute("href")||""));
+  const unifiedHref=unifiedLinks[0]?.getAttribute("href")||founderPath("founder-unified.css");
+  unifiedLinks.forEach(link=>link.remove());
+  loadCSS("components/sidebar.css");
+  loadCSS("components/topbar.css");
+  const unifiedLink=document.createElement("link");
+  unifiedLink.rel="stylesheet";
+  unifiedLink.href=unifiedHref;
+  unifiedLink.dataset.founderUnified="true";
+  document.head.appendChild(unifiedLink);
   if(!document.getElementById("sidebarOverlay")){
     const overlay=document.createElement("div"); overlay.id="sidebarOverlay"; overlay.className="sidebar-overlay"; document.body.appendChild(overlay);
   }
