@@ -2,7 +2,7 @@
    SECURITY SETTINGS
 =================================== */
 
-body.founder-portal-page {
+body.founder-portal-page{
 
 --bg:#07111f;
 
@@ -32,7 +32,7 @@ body.founder-portal-page {
 /* ===================================
    GLOBAL
 =================================== */
- body.founder-portal-page * {
+ body.founder-portal-page *{
 
 margin:0;
 
@@ -43,7 +43,7 @@ box-sizing:border-box;
 }
 
 
-body.founder-portal-page {
+body.founder-portal-page{
 
 font-family:"Inter",sans-serif;
 
@@ -60,7 +60,7 @@ overflow-x:hidden;
    BACKGROUND ORBS
 =================================== */
 
-.bg-orb{
+body.founder-portal-page .bg-orb{
 
 position:fixed;
 
@@ -75,7 +75,7 @@ z-index:-1;
 }
 
 
-.orb-1{
+body.founder-portal-page .orb-1{
 
 width:320px;
 
@@ -90,7 +90,7 @@ left:-120px;
 }
 
 
-.orb-2{
+body.founder-portal-page .orb-2{
 
 width:280px;
 
@@ -105,7 +105,7 @@ top:35%;
 }
 
 
-.orb-3{
+body.founder-portal-page .orb-3{
 
 width:300px;
 
@@ -124,7 +124,7 @@ left:40%;
    MAIN CONTENT
 =================================== */
 
-.main-content{
+body.founder-portal-page .main-content{
 
 padding:30px;
 
@@ -142,7 +142,7 @@ gap:24px;
    GLASS CARD
 =================================== */
 
-.glass-card{
+body.founder-portal-page .glass-card{
 
 background:var(--card);
 
@@ -162,14 +162,14 @@ box-shadow:var(--shadow);
    HEADER
 =================================== */
 
-.page-header{
+body.founder-portal-page .page-header{
 
 padding:28px;
 
 }
 
 
-.page-header h1{
+body.founder-portal-page .page-header h1{
 
 font-size:2rem;
 
@@ -180,7 +180,7 @@ margin-bottom:10px;
 }
 
 
-.page-header p{
+body.founder-portal-page .page-header p{
 
 color:var(--muted);
 
@@ -194,14 +194,14 @@ line-height:1.7;
    SECTION
 =================================== */
 
-.section-card{
+body.founder-portal-page .section-card{
 
 padding:26px;
 
 }
 
 
-.section-card h2{
+body.founder-portal-page .section-card h2{
 
 font-size:1.2rem;
 
@@ -217,7 +217,7 @@ font-weight:700;
    FORM
 =================================== */
 
-.form-grid{
+body.founder-portal-page .form-grid{
 
 display:grid;
 
@@ -230,7 +230,7 @@ gap:22px;
 }
 
 
-.input-group{
+body.founder-portal-page .input-group{
 
 display:flex;
 
@@ -241,7 +241,7 @@ gap:10px;
 }
 
 
-.input-group label{
+body.founder-portal-page .input-group label{
 
 font-weight:600;
 
@@ -252,7 +252,7 @@ color:#dbeafe;
 }
 
 
-.input-group input{
+body.founder-portal-page .input-group input{
 
 background:rgba(255,255,255,.05);
 
@@ -273,7 +273,7 @@ transition:.3s;
 }
 
 
-.input-group input:focus{
+body.founder-portal-page .input-group input:focus{
 
 border-color:#762cff;
 
@@ -286,7 +286,7 @@ box-shadow:
    TOGGLE LIST
 =================================== */
 
-.toggle-list{
+body.founder-portal-page .toggle-list{
 
 display:flex;
 
@@ -297,7 +297,7 @@ gap:16px;
 }
 
 
-.toggle-item{
+body.founder-portal-page .toggle-item{
 
 display:flex;
 
@@ -318,14 +318,14 @@ transition:.3s;
 }
 
 
-.toggle-item:hover{
+body.founder-portal-page .toggle-item:hover{
 
 background:rgba(59,130,246,.08);
 
 }
 
 
-.toggle-item span{
+body.founder-portal-page .toggle-item span{
 
 font-weight:600;
 
@@ -334,7 +334,7 @@ color:#e2e8f0;
 }
 
 
-.toggle-item input{
+body.founder-portal-page .toggle-item input{
 
 width:20px;
 
@@ -351,7 +351,7 @@ cursor:pointer;
    SESSION CARD
 =================================== */
 
-.session-card{
+body.founder-portal-page .session-card{
 
 display:flex;
 
@@ -372,7 +372,7 @@ border:1px solid rgba(255,255,255,.06);
 }
 
 
-.session-info h3{
+body.founder-portal-page .session-info h3{
 
 font-size:1rem;
 
@@ -381,7 +381,7 @@ margin-bottom:6px;
 }
 
 
-.session-info p{
+body.founder-portal-page .session-info p{
 
 color:var(--muted);
 
@@ -394,7 +394,7 @@ font-size:.9rem;
    STATUS
 =================================== */
 
-.status-online{
+body.founder-portal-page .status-online{
 
 background:rgba(34,197,94,.15);
 
@@ -416,7 +416,7 @@ font-weight:700;
    SECURITY ACTIVITY
 =================================== */
 
-#securityActivity{
+body.founder-portal-page #securityActivity{
 
 display:flex;
 
@@ -427,7 +427,7 @@ gap:14px;
 }
 
 
-.activity-item{
+body.founder-portal-page .activity-item{
 
 padding:16px;
 
@@ -440,14 +440,14 @@ border-left:4px solid #762cff;
 }
 
 
-.activity-item h4{
+body.founder-portal-page .activity-item h4{
 
 margin-bottom:6px;
 
 }
 
 
-.activity-item p{
+body.founder-portal-page .activity-item p{
 
 color:var(--muted);
 
@@ -461,7 +461,7 @@ font-size:.9rem;
    EMPTY STATE
 =================================== */
 
-.empty-state{
+body.founder-portal-page .empty-state{
 
 text-align:center;
 
@@ -477,7 +477,7 @@ color:var(--muted);
    BUTTONS
 =================================== */
 
-.action-bar{
+body.founder-portal-page .action-bar{
 
 display:flex;
 
@@ -488,7 +488,7 @@ margin-top:10px;
 }
 
 
-.primary-btn{
+body.founder-portal-page .primary-btn{
 
 padding:14px 28px;
 
@@ -521,7 +521,7 @@ box-shadow:
 }
 
 
-.primary-btn:hover{
+body.founder-portal-page .primary-btn:hover{
 
 transform:translateY(-3px);
 
@@ -536,7 +536,7 @@ box-shadow:
    ANIMATION
 =================================== */
 
-.glass-card{
+body.founder-portal-page .glass-card{
 
 animation:fadeUp .45s ease;
 
@@ -569,7 +569,7 @@ transform:translateY(0);
    RESPONSIVE
 =================================== */
 
-@media(max-width:768px){
+body.founder-portal-page @media(max-width:768px){
 
 .main-content{
 
