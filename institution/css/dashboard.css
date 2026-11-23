@@ -1,0 +1,48 @@
+/* Institution dashboard page styles, isolated from the shell. */
+.institution-app .page-wrap{max-width:1500px;margin:auto;padding:30px}
+.institution-app .welcome-panel{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:30px;border-radius:22px;background:linear-gradient(125deg,#081c3a,#164777);color:#fff;position:relative;overflow:hidden}
+.institution-app .welcome-panel:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;background:#2979ff26;right:-65px;top:-110px}
+.institution-app .welcome-panel>div{position:relative;z-index:1}
+.institution-app .eyebrow{display:block;color:#3985ff;font-size:9px;font-weight:800;letter-spacing:.14em}
+.institution-app .welcome-panel .eyebrow{color:#84b5ff}
+.institution-app .welcome-panel h1{font-size:26px;line-height:1.25;margin:9px 0}
+.institution-app .welcome-panel h1 span{color:var(--gold)}
+.institution-app .welcome-panel p{max-width:640px;margin:0;color:#c0cddd;font-size:12px;line-height:1.8}
+.institution-app .welcome-mark{width:70px;height:70px;border:1px solid #ffffff30;border-radius:20px;display:grid;place-items:center;background:#ffffff10}
+.institution-app .welcome-mark svg{width:34px;height:34px;color:#ffc107}
+.institution-app .notice-panel{display:flex;gap:13px;align-items:flex-start;margin:20px 0;padding:17px 19px;border:1px solid #dbe8fb;background:#f0f6ff;border-radius:14px;color:#28558d}
+.institution-app .notice-panel>svg{width:19px;flex-shrink:0;margin-top:2px}
+.institution-app .notice-panel strong{font-size:12px}
+.institution-app .notice-panel p{margin:4px 0 0;font-size:11px;line-height:1.7;color:#587394}
+.institution-app .section-heading{display:flex;align-items:end;justify-content:space-between;margin:27px 0 14px}
+.institution-app .section-heading h2{font-size:18px;margin:5px 0 0}
+.institution-app .muted{font-size:10px;color:var(--muted)}
+.institution-app .metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.institution-app .metric-card{display:flex;align-items:center;gap:13px;padding:17px;background:#fff;border:1px solid var(--line);border-radius:15px;min-width:0}
+.institution-app .metric-icon, .institution-app .service-icon{width:42px;height:42px;flex-shrink:0;display:grid;place-items:center;border-radius:12px}
+.institution-app .metric-icon svg, .institution-app .service-icon svg{width:20px}
+.institution-app .blue{background:#edf4ff;color:#2979ff}
+.institution-app .violet{background:#f2edff;color:#7659d8}
+.institution-app .gold{background:#fff7df;color:#c58c00}
+.institution-app .green{background:#eafaf3;color:#15966d}
+.institution-app .cyan{background:#e9faff;color:#1595b8}
+.institution-app .slate{background:#eef1f5;color:#607087}
+.institution-app .metric-card div>span{display:block;font-size:10px;color:var(--muted)}
+.institution-app .metric-card strong{display:block;font-size:21px;margin:3px 0}
+.institution-app .metric-card small{display:block;font-size:9px;color:#9aa6b5}
+.institution-app .services-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.institution-app .service-card{padding:19px;background:#fff;border:1px solid var(--line);border-radius:16px;transition:.2s}
+.institution-app .service-card:hover{transform:translateY(-3px);border-color:#c8d9f3;box-shadow:0 10px 24px #0a2a5010}
+.institution-app .service-icon{margin-bottom:14px}
+.institution-app .service-card strong{display:block;font-size:12px}
+.institution-app .service-card p{min-height:38px;margin:7px 0 13px;color:var(--muted);font-size:10px;line-height:1.7}
+.institution-app .service-link{display:flex;align-items:center;gap:5px;color:var(--blue);font-size:10px;font-weight:700}
+.institution-app .service-link svg{width:13px}
+.institution-app .module-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:24px}
+.institution-app .module-panel{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px;background:#fff;border:1px solid var(--line);border-radius:14px;scroll-margin-top:90px}
+.institution-app .module-title{display:flex;align-items:center;gap:12px}
+.institution-app .module-title>svg{width:20px;color:var(--blue);flex-shrink:0}
+.institution-app .module-title h3{font-size:11px;margin:0 0 4px}
+.institution-app .module-title p{font-size:9px;color:var(--muted);margin:0;line-height:1.5}
+.institution-app .module-state{font-size:8px;color:#8b6a16;background:#fff8e5;border-radius:20px;padding:6px 8px;white-space:nowrap}
+.institution-app .page-footer{text-align:center;padding:28px 0 8px;color:#9aa6b5;font-size:9px}
