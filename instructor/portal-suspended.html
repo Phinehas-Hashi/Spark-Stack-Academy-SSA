@@ -1,1 +1,30 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Portal Unavailable | Spark Stack Academy</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#08152b;color:#fff;font-family:Inter,system-ui,sans-serif}.box{width:min(560px,calc(100% - 40px));padding:42px;border:1px solid #294064;border-radius:28px;background:#0b1d3a;text-align:center;box-sizing:border-box}.icon{font-size:52px}.badge{display:inline-block;padding:8px 12px;border-radius:999px;background:#17345b;color:#8fc2ff;font-size:12px;font-weight:800;letter-spacing:.08em}h1{margin:14px 0 12px;font-size:32px}p{color:#b8c5d9;line-height:1.7}.time{font-size:12px;color:#8192ac}</style></head><body><main class="box"><div class="icon">🛠️</div><span class="badge">SSA SYSTEM CONTROL</span><h1>Instructor Portal Temporarily Unavailable</h1><p id="message">The Instructor Portal is currently unavailable. Please check back shortly.</p><p class="time">If this is scheduled maintenance, access will return automatically.</p></main><script>document.getElementById('message').textContent=sessionStorage.getItem('ssaPortalMessage')||document.getElementById('message').textContent;</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Portal Unavailable | Spark Stack Academy</title>
+<link rel="stylesheet" href="../css/design-tokens.css?v=20261123-foundation1">
+<link rel="stylesheet" href="css/portal-suspended.css?v=20261123-migration1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="instructor-suspended-page">
+<main class="box">
+    <div class="icon" aria-hidden="true">⚙</div>
+    <span class="badge">SSA SYSTEM CONTROL</span>
+    <h1>Instructor Portal Temporarily Unavailable</h1>
+    <p id="message">The Instructor Portal is currently unavailable. Please check back shortly.</p>
+    <p class="time">If this is scheduled maintenance, access will return automatically.</p>
+</main>
+<script>
+const message = document.getElementById("message");
+try {
+    message.textContent = sessionStorage.getItem("ssaPortalMessage") || message.textContent;
+} catch (error) {
+    // Keep the safe default message when session storage is unavailable.
+}
+</script>
+</body>
+</html>
