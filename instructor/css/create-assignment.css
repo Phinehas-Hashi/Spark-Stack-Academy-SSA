@@ -77,7 +77,7 @@
 
 .primary-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 10px 25px rgba(8, 28, 58, .18);
+    box-shadow: 0 10px 25px rgba(23, 21, 47, .18);
 }
 
 .primary-btn:disabled {
