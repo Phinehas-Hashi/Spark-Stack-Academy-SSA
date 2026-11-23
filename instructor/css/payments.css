@@ -96,7 +96,7 @@
     background: #fff;
     border: 1px solid #e8e6f0;
     border-radius: 18px;
-    box-shadow: 0 8px 28px rgba(8, 28, 58, .05);
+    box-shadow: 0 8px 28px rgba(23, 21, 47, .05);
 }
 
 .payment-stat > div:last-child {
@@ -172,7 +172,7 @@
         #25116a
     );
     color: #fff;
-    box-shadow: 0 15px 35px rgba(8, 28, 58, .16);
+    box-shadow: 0 15px 35px rgba(23, 21, 47, .16);
 }
 
 .pro-banner::after {
@@ -257,7 +257,7 @@
     border: 1px solid #e8e6f0;
     border-radius: 20px;
     padding: 25px;
-    box-shadow: 0 8px 28px rgba(8, 28, 58, .05);
+    box-shadow: 0 8px 28px rgba(23, 21, 47, .05);
 }
 
 .payments-toolbar {
