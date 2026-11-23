@@ -8,21 +8,21 @@
    ============================================================ */
 
 body.founder-portal-page {
-    --spark-navy: #081c3a;
+    --spark-navy: #17152f;
     --spark-blue: #762cff;
-    --spark-blue-dark: #1557c0;
+    --spark-blue-dark: #5d1ed6;
     --spark-gold: #ffc107;
 
-    --spark-bg: #f5f7fb;
+    --spark-bg: #f5f4fb;
     --spark-surface: #ffffff;
-    --spark-surface-soft: #f8faff;
+    --spark-surface-soft: #fbfaff;
 
-    --spark-text: #10213d;
-    --spark-text-soft: #64748b;
-    --spark-text-muted: #94a3b8;
+    --spark-text: #17152f;
+    --spark-text-soft: #514b6b;
+    --spark-text-muted: #77758f;
 
-    --spark-border: #e5eaf2;
-    --spark-border-soft: #edf1f7;
+    --spark-border: #e8e6f0;
+    --spark-border-soft: #e8e6f0;
 
     --spark-success: #16a34a;
     --spark-danger: #dc2626;
@@ -32,13 +32,13 @@ body.founder-portal-page {
     --spark-radius-lg: 22px;
 
     --spark-shadow-sm:
-        0 4px 16px rgba(8, 28, 58, 0.05);
+        0 4px 16px rgba(27,20,65,.06);
 
     --spark-shadow-md:
-        0 12px 35px rgba(8, 28, 58, 0.08);
+        0 12px 35px rgba(27,20,65,.10);
 
     --spark-shadow-lg:
-        0 20px 55px rgba(8, 28, 58, 0.10);
+        0 20px 55px rgba(27,20,65,.12);
 }
 
 
@@ -814,7 +814,7 @@ body.founder-portal-page {
     background: #ffffff;
 
     box-shadow:
-        0 5px 20px rgba(8, 28, 58, 0.05);
+        0 5px 20px rgba(27,20,65,.06);
 
     transition:
         border-color 0.18s ease,
