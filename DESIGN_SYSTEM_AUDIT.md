@@ -52,3 +52,34 @@ This is not yet a complete selector-by-selector or page-by-page audit. The file 
 3. Map shared shell markup and JavaScript ownership for all five portals.
 4. Produce a page-to-stylesheet dependency map and prioritised remediation plan.
 5. Only then implement the unified architecture and migrate portal-by-portal.
+
+## Expanded Student Portal dependency scan
+
+All 33 Student Portal HTML pages were enumerated. A complete per-page stylesheet reference pass identified these exceptions to the common shell pattern:
+
+- `student/progress.html`: no stylesheet references detected.
+- `student/certificate-view.html`: only its standalone `certificate-view.css` is referenced.
+- `student/portal-suspended.html`: only its page stylesheet is referenced.
+- `student/premium-success.html`: uses core/components/page CSS but does not reference the shared design tokens, responsive stylesheet or portal shell.
+- `student/chat.html`, `student/messages.html`, `student/new-chat.html`, and `student/help-center.html`: use some shared foundation styles but do not reference `portal-shell.css`; these need route/standalone classification before any shell is added.
+
+Most regular Student Portal pages load this sequence:
+`design-tokens → student-core → components → responsive → portal-shell → page stylesheet`.
+This is consistent across the sampled regular pages, but it differs from the previously proposed canonical order (portal shell before responsive primitives). The correct order must be established by inspecting actual selector ownership and responsive overrides; do not reorder blindly.
+
+Additional observations:
+- Several Student pages retain inline style attributes, including course details, course player, learning progress, notifications and premium screens.
+- The shared Student shell is present on most regular learning pages, but not every HTML route. The standalone/transactional pages need an explicit route classification.
+- No CSS or HTML changes were made during this dependency scan.
+
+## Prioritised findings for remediation
+
+**P0 — establish source of truth:** agree canonical stylesheet order and selector ownership before further visual patching.
+
+**P1 — route classification:** classify every HTML route as portal-shell page, standalone/auth/transactional page, or embedded component. Do not inject shell CSS indiscriminately.
+
+**P1 — global cascade containment:** inspect root brand system imports and global selectors; replace accidental portal-wide reach with explicit design tokens and scoped component rules.
+
+**P2 — inline-style review:** migrate static inline styles into page-scoped CSS where safe; preserve dynamic JS-set inline styles.
+
+**P2 — regression verification:** test drawer, modal, topbar, page overflow and responsive layout at mobile, tablet and desktop widths.
