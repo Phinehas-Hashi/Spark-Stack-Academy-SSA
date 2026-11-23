@@ -8,7 +8,7 @@
     max-width: 1500px;
     margin: 0 auto;
     padding: 32px;
-    color: #081c3a;
+    color: #17152f;
 }
 
 
@@ -27,7 +27,7 @@
 .page-eyebrow,
 .card-eyebrow {
     display: block;
-    color: #2979ff;
+    color: #762cff;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 1.5px;
@@ -67,7 +67,7 @@
     border: 1px solid #e3e9f1;
     border-radius: 11px;
     background: #fff;
-    color: #081c3a;
+    color: #17152f;
     font-family: inherit;
     font-size: 12px;
     font-weight: 600;
@@ -77,12 +77,12 @@
 }
 
 .analytics-select:hover {
-    border-color: #2979ff;
+    border-color: #762cff;
 }
 
 .analytics-select:focus {
-    border-color: #2979ff;
-    box-shadow: 0 0 0 3px rgba(41,121,255,.10);
+    border-color: #762cff;
+    box-shadow: 0 0 0 3px rgba(118,44,255,.10);
 }
 
 
@@ -160,7 +160,7 @@
 }
 
 .stat-icon.blue {
-    color: #2979ff;
+    color: #762cff;
     background: #eaf2ff;
 }
 
@@ -189,7 +189,7 @@
 
 .analytics-stat strong {
     display: block;
-    color: #081c3a;
+    color: #17152f;
     font-size: 25px;
     font-weight: 800;
     letter-spacing: -.5px;
@@ -237,7 +237,7 @@
 
 .analytics-card .card-header h2 {
     margin: 5px 0 0;
-    color: #081c3a;
+    color: #17152f;
     font-size: 17px;
     font-weight: 750;
 }
@@ -247,7 +247,7 @@
     align-items: center;
     gap: 5px;
 
-    color: #2979ff;
+    color: #762cff;
     font-size: 11px;
     font-weight: 700;
     text-decoration: none;
@@ -293,7 +293,7 @@
     place-items: center;
 
     border-radius: 12px;
-    color: #2979ff;
+    color: #762cff;
     background: #edf4ff;
 }
 
@@ -309,7 +309,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 
-    color: #081c3a;
+    color: #17152f;
     font-size: 13px;
 }
 
@@ -365,8 +365,8 @@
 
     border-radius: 50%;
     border: 10px solid transparent;
-    border-top-color: #2979ff;
-    border-right-color: #2979ff;
+    border-top-color: #762cff;
+    border-right-color: #762cff;
 
     transform: rotate(-35deg);
 }
@@ -375,7 +375,7 @@
     position: relative;
     font-size: 27px;
     font-weight: 800;
-    color: #081c3a;
+    color: #17152f;
 }
 
 .engagement-circle span {
@@ -408,7 +408,7 @@
 }
 
 .engagement-details strong {
-    color: #081c3a;
+    color: #17152f;
     font-size: 14px;
     font-weight: 750;
 }
@@ -451,7 +451,7 @@
 }
 
 .completion-item-header strong {
-    color: #081c3a;
+    color: #17152f;
     font-size: 12px;
 }
 
@@ -469,7 +469,7 @@
     height: 100%;
 
     border-radius: inherit;
-    background: #2979ff;
+    background: #762cff;
 
     transition: width .5s ease;
 }
@@ -498,7 +498,7 @@
 }
 
 .performance-row strong {
-    color: #081c3a;
+    color: #17152f;
     font-size: 14px;
     font-weight: 750;
 }
@@ -536,7 +536,7 @@
 
 .earnings-main strong {
     display: block;
-    color: #081c3a;
+    color: #17152f;
     font-size: 30px;
     font-weight: 800;
     letter-spacing: -.8px;
@@ -548,7 +548,7 @@
 }
 
 .earnings-mini strong {
-    color: #081c3a;
+    color: #17152f;
     font-size: 17px;
     font-weight: 750;
 }
@@ -577,7 +577,7 @@
     height: 25px;
 
     border: 3px solid #e8edf4;
-    border-top-color: #2979ff;
+    border-top-color: #762cff;
 
     border-radius: 50%;
 
