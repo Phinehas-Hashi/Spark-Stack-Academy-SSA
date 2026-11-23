@@ -127,7 +127,7 @@ function updateFounderUI(founder){
 
 function listenToNotifications(uid){
   const badge=document.getElementById("notificationCount"); if(!badge)return;
-  onSnapshot(query(collection(db,"notifications"),where("userId","==",uid)),snapshot=>{let unread=0;snapshot.forEach(item=>{if(item.data().read===false)unread++;});badge.textContent=unread;badge.style.display=unread?"flex":"none";},error=>console.error("Notification badge error:",error));
+  onSnapshot(query(collection(db,"notifications"),where("userId","==",uid)),snapshot=>{let unread=0;snapshot.forEach(item=>{if(item.data().read===false)unread++;});badge.textContent=unread;badge.style.display=unread?"grid":"none";},error=>console.error("Notification badge error:",error));
 }
 
 function loadTopNotifications(uid){
