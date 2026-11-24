@@ -34,7 +34,10 @@ const DEFAULT_SETTINGS = {
     platformTaxPercent: 0,
     withdrawalFeePercent: 0,
     minimumWithdrawal: 100,
-    premiumMonthlyPrice: 999
+    premiumMonthlyPrice: 999,
+    withdrawalsEnabled: true,
+    mpesaWithdrawalsEnabled: true,
+    withdrawalApproval: true
 };
 
 
@@ -238,11 +241,22 @@ async function loadEarnings() {
 
         const status = $("withdrawalStatus");
         const message = $("withdrawalMessage");
-        const canWithdraw = currentBalance >= Number(earningsSettings.minimumWithdrawal || 100);
-        if (status) status.textContent = canWithdraw ? "Withdrawal available" : "Minimum balance not reached";
-        if (message) message.textContent = canWithdraw
-            ? "Your available balance is ready for an M-Pesa payout request."
-            : `You need ${formatMoney(Math.max(0, Number(earningsSettings.minimumWithdrawal || 100) - currentBalance))} more to reach the withdrawal minimum.`;
+        const withdrawalsEnabled = earningsSettings.withdrawalsEnabled !== false
+            && earningsSettings.mpesaWithdrawalsEnabled !== false
+            && earningsSettings.withdrawalApproval !== false;
+        const canWithdraw = withdrawalsEnabled && currentBalance >= Number(earningsSettings.minimumWithdrawal || 100);
+        if (status) status.textContent = !withdrawalsEnabled
+            ? "M-Pesa withdrawals disabled"
+            : canWithdraw ? "Withdrawal available" : "Minimum balance not reached";
+        if (message) message.textContent = !withdrawalsEnabled
+            ? "The Founder has disabled M-Pesa withdrawals or manual payout approval."
+            : canWithdraw
+                ? "Your available balance is ready for an M-Pesa payout request."
+                : `You need ${formatMoney(Math.max(0, Number(earningsSettings.minimumWithdrawal || 100) - currentBalance))} more to reach the withdrawal minimum.`;
+        ["withdrawBtn", "heroWithdrawBtn"].forEach(id => {
+            const button = $(id);
+            if (button) button.disabled = !canWithdraw;
+        });
 
         renderTransactions(transactions);
         renderWithdrawalHistory(withdrawals);
@@ -427,7 +441,12 @@ let previousBodyOverflow = "";
 
 function openWithdrawalWindow() {
     const modal = $("withdrawalModal");
-    if (!modal || currentBalance < Number(earningsSettings.minimumWithdrawal || 100)) return;
+    if (!modal) return;
+    if (earningsSettings.withdrawalsEnabled === false || earningsSettings.mpesaWithdrawalsEnabled === false || earningsSettings.withdrawalApproval === false) {
+        alert("M-Pesa withdrawals are currently disabled by the Founder.");
+        return;
+    }
+    if (currentBalance < Number(earningsSettings.minimumWithdrawal || 100)) return;
     withdrawalTrigger = document.activeElement;
     previousBodyOverflow = document.body.style.overflow;
     const available = $("modalAvailableBalance");
