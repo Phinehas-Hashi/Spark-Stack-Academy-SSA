@@ -14,16 +14,19 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
-    addDoc,
-    collection,
-    serverTimestamp
+    addDoc, collection, doc, onSnapshot, orderBy, query,
+    serverTimestamp, updateDoc, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { submitReport } from "../../js/reports.js";
 
 
 console.log("🛟 Help Center Loaded");
 
 
 let currentUser = null;
+let unsubscribeTickets = null;
+let unsubscribeThread = null;
+let openTicketId = null;
 
 
 // =====================================
@@ -44,6 +47,8 @@ onAuthStateChanged(
         }
 
         currentUser = user;
+        unsubscribeTickets?.();
+        unsubscribeTickets = subscribeToTickets(user.uid);
 
     }
 );
@@ -756,168 +761,172 @@ function closeSupportModal() {
 // SUBMIT SUPPORT REQUEST
 // =====================================
 
-async function submitSupportRequest(
-    event
-) {
-
+async function submitSupportRequest(event) {
     event.preventDefault();
-
-
     if (!currentUser) {
-
-        alert(
-            "Please sign in again before contacting support."
-        );
-
+        alert("Please sign in again before contacting support.");
         return;
-
     }
-
-
-    const subject =
-        document.getElementById(
-            "supportSubject"
-        )?.value.trim();
-
-
-    const message =
-        document.getElementById(
-            "supportMessage"
-        )?.value.trim();
-
-
-    if (
-        !subject ||
-        !message
-    ) {
-
-        alert(
-            "Please complete both fields."
-        );
-
+    const subject = document.getElementById("supportSubject")?.value.trim();
+    const message = document.getElementById("supportMessage")?.value.trim();
+    const category = document.getElementById("supportCategory")?.value || "other";
+    const priority = document.getElementById("supportPriority")?.value || "medium";
+    if (!subject || !message) {
+        alert("Please complete the subject and description.");
         return;
-
     }
-
-
-    const submitButton =
-        document.querySelector(
-            ".submit-support"
-        );
-
-
-    const original =
-        submitButton?.innerHTML;
-
-
+    const button = document.querySelector(".submit-support");
+    const original = button?.innerHTML;
     try {
-
-        if (submitButton) {
-
-            submitButton.disabled =
-                true;
-
-            submitButton.textContent =
-                "Sending...";
-
-        }
-
-
-        await addDoc(
-            collection(
-                db,
-                "supportRequests"
-            ),
-            {
-
-                userId:
-                    currentUser.uid,
-
-                email:
-                    currentUser.email || "",
-
-                subject:
-                    subject,
-
-                message:
-                    message,
-
-                status:
-                    "open",
-
-                source:
-                    "student-help-center",
-
-                createdAt:
-                    serverTimestamp()
-
-            }
-        );
-
-
-        if (submitButton) {
-
-            submitButton.textContent =
-                "Request Sent ✓";
-
-        }
-
-
-        setTimeout(
-            () => {
-
-                closeSupportModal();
-
-                document
-                    .getElementById(
-                        "supportForm"
-                    )
-                    ?.reset();
-
-                if (submitButton) {
-
-                    submitButton.innerHTML =
-                        original;
-
-                    submitButton.disabled =
-                        false;
-
-                }
-
-            },
-            1200
-        );
-
-
+        if (button) { button.disabled = true; button.textContent = "Creating ticket…"; }
+        const ticket = await submitReport({
+            title: subject,
+            description: message,
+            category,
+            type: "support",
+            priority,
+            metadata: { portal: "student", channel: "help-center" }
+        });
+        const result = document.getElementById("supportSubmissionResult");
+        if (result) result.textContent = `Ticket ${ticket.reportId} created. Keep this reference for follow-up.`;
+        document.getElementById("supportForm")?.reset();
+        closeSupportModal();
+        document.getElementById("mySupportTicketsSection")?.scrollIntoView({ behavior: "smooth" });
+        window.ssaToast?.(`Ticket ${ticket.reportId} created successfully.`, "success", "Spark Support");
+    } catch (error) {
+        console.error("Support ticket submission failed:", error);
+        window.ssaToast?.(window.ssaFriendlyError?.(error, "We couldn't create your ticket. Please try again.") || "We couldn't create your ticket. Please try again.", "error", "Spark Support");
+    } finally {
+        if (button) { button.disabled = false; button.innerHTML = original || "Send Request"; }
     }
-
-    catch (error) {
-
-        console.error(
-            "❌ Support request failed:",
-            error
-        );
-
-
-        if (submitButton) {
-
-            submitButton.innerHTML =
-                original;
-
-            submitButton.disabled =
-                false;
-
-        }
-
-
-        alert(
-            "We couldn't send your request. Please try again."
-        );
-
-    }
-
 }
 
+function subscribeToTickets(uid) {
+    const root = document.getElementById("mySupportTickets");
+    const summary = document.getElementById("ticketSummary");
+    if (!root) return null;
+    const q = query(collection(db, "reports"), where("reporterId", "==", uid));
+    return onSnapshot(q, snapshot => {
+        const tickets = snapshot.docs.map(item => ({ id: item.id, ...item.data() }))
+            .filter(item => item.type === "support" || item.metadata?.channel === "help-center")
+            .sort((a, b) => timestamp(b.updatedAt || b.createdAt) - timestamp(a.updatedAt || a.createdAt));
+        const open = tickets.filter(item => !["resolved", "closed", "dismissed"].includes(item.status)).length;
+        if (summary) summary.innerHTML = `<span><strong>${tickets.length}</strong> total tickets</span><span><strong>${open}</strong> awaiting resolution</span><span><strong>${tickets.length-open}</strong> closed or resolved</span>`;
+        if (!tickets.length) {
+            root.innerHTML = '<div class="ticket-empty"><strong>No support tickets yet</strong><p>When you contact Spark Support, your ticket and every response will appear here.</p></div>';
+            return;
+        }
+        root.innerHTML = tickets.map(ticket => {
+            const status = normalizeStatus(ticket.status);
+            return `<article class="ticket-card">
+                <div class="ticket-card-top"><span class="ticket-reference">${escapeHTML(ticket.reportId || ticket.id)}</span><span class="ticket-status ${status}">${escapeHTML(statusLabel(status))}</span></div>
+                <h3>${escapeHTML(ticket.title || "Support request")}</h3>
+                <p class="ticket-description">${escapeHTML(ticket.description || "")}</p>
+                <div class="ticket-meta"><span>${escapeHTML(ticket.category || "General")}</span><span>${escapeHTML(ticket.priority || "medium")} priority</span><span>${escapeHTML(formatTicketDate(ticket.createdAt))}</span></div>
+                ${ticket.feedback ? `<div class="ticket-feedback"><strong>Latest review</strong><p>${escapeHTML(ticket.feedback)}</p></div>` : ""}
+                <div class="ticket-actions"><button type="button" data-ticket-thread="${escapeHTML(ticket.id)}">View conversation</button>
+                ${status === "resolved" ? `<button type="button" data-ticket-close="${escapeHTML(ticket.id)}">Yes, resolved</button><button type="button" data-ticket-reopen="${escapeHTML(ticket.id)}">Not resolved — reopen</button>` : ""}
+                ${status === "dismissed" || status === "closed" ? `<button type="button" data-ticket-reopen="${escapeHTML(ticket.id)}">Reopen ticket</button>` : ""}
+                </div>
+                <div class="ticket-thread" id="ticket-thread-${escapeHTML(ticket.id)}" hidden></div>
+            </article>`;
+        }).join("");
+        refreshIcons();
+    }, error => {
+        console.error("Ticket subscription failed:", error);
+        root.textContent = "We couldn't load your tickets. Refresh the page or try again later.";
+    });
+}
+
+function timestamp(value) {
+    if (!value) return 0;
+    if (typeof value.toMillis === "function") return value.toMillis();
+    if (typeof value.seconds === "number") return value.seconds * 1000;
+    const parsed = new Date(value).getTime();
+    return Number.isFinite(parsed) ? parsed : 0;
+}
+function formatTicketDate(value) {
+    const time = timestamp(value);
+    return time ? new Intl.DateTimeFormat("en-KE", { dateStyle: "medium", timeStyle: "short" }).format(new Date(time)) : "Just now";
+}
+function normalizeStatus(value) {
+    return String(value || "pending").toLowerCase().replaceAll(" ", "_");
+}
+function statusLabel(value) {
+    return ({ pending: "Open", reviewing: "Under review", resolved: "Resolved — awaiting your confirmation", dismissed: "Closed by support", closed: "Closed" })[value] || value;
+}
+function escapeTicket(value) {
+    return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+function escapeHTML(value) { return escapeTicket(value); }
+
+document.addEventListener("click", async event => {
+    const threadButton = event.target.closest("[data-ticket-thread]");
+    const replyButton = event.target.closest("[data-ticket-reply]");
+    const reopenButton = event.target.closest("[data-ticket-reopen]");
+    const closeButton = event.target.closest("[data-ticket-close]");
+    if (threadButton) {
+        const id = threadButton.dataset.ticketThread;
+        const panel = document.getElementById(`ticket-thread-${id}`);
+        if (!panel) return;
+        panel.hidden = !panel.hidden;
+        if (!panel.hidden) openTicketThread(id, panel);
+        else if (openTicketId === id) { unsubscribeThread?.(); unsubscribeThread = null; openTicketId = null; }
+    }
+    if (replyButton) await sendTicketReply(replyButton.dataset.ticketReply, replyButton.closest(".ticket-thread"));
+    if (reopenButton) await setStudentTicketStatus(reopenButton.dataset.ticketReopen, "pending");
+    if (closeButton) await setStudentTicketStatus(closeButton.dataset.ticketClose, "closed");
+});
+
+function openTicketThread(id, panel) {
+    unsubscribeThread?.();
+    openTicketId = id;
+    panel.innerHTML = '<div class="ticket-thread-loading">Loading conversation…</div>';
+    const q = query(collection(db, "reports", id, "responses"), orderBy("createdAt", "asc"));
+    unsubscribeThread = onSnapshot(q, snapshot => {
+        const messages = snapshot.docs.map(item => item.data());
+        panel.innerHTML = `<div class="ticket-conversation">${messages.length ? messages.map(message => `
+            <article class="ticket-message ${message.senderId === currentUser?.uid ? "student-message" : "support-message"}">
+                <strong>${escapeHTML(message.senderName || (message.senderId === currentUser?.uid ? "You" : "Spark Support"))}</strong>
+                <p>${escapeHTML(message.message || "")}</p><time>${escapeHTML(formatTicketDate(message.createdAt))}</time>
+            </article>`).join("") : '<p class="ticket-thread-empty">No replies yet. Spark Support will respond here.</p>'}</div>
+            <form class="ticket-reply-form"><label for="ticket-reply-${escapeHTML(id)}">Reply to this ticket</label><textarea id="ticket-reply-${escapeHTML(id)}" maxlength="5000" required placeholder="Add details or respond to the support team…"></textarea><button type="button" data-ticket-reply="${escapeHTML(id)}">Send reply</button><small>Never share your password, M-Pesa PIN or verification codes.</small></form>`;
+        panel.scrollTop = panel.scrollHeight;
+    }, error => { console.error(error); panel.textContent = "Conversation unavailable. Please try again later."; });
+}
+async function sendTicketReply(id, panel) {
+    const textarea = panel?.querySelector("textarea");
+    const message = textarea?.value.trim();
+    if (!message || !currentUser) return;
+    const button = panel.querySelector("[data-ticket-reply]");
+    button.disabled = true;
+    try {
+        await addDoc(collection(db, "reports", id, "responses"), {
+            message, senderId: currentUser.uid,
+            senderName: currentUser.displayName || currentUser.email || "Student",
+            senderRole: "student", createdAt: serverTimestamp()
+        });
+        textarea.value = "";
+        window.ssaToast?.("Your reply has been added to the ticket.", "success", "Spark Support");
+    } catch (error) {
+        console.error(error);
+        window.ssaToast?.("Your reply could not be sent. Please retry.", "error", "Spark Support");
+    } finally { button.disabled = false; }
+}
+async function setStudentTicketStatus(id, status) {
+    if (!currentUser || !["pending", "closed"].includes(status)) return;
+    try {
+        await updateDoc(doc(db, "reports", id), {
+            status,
+            studentStatusUpdatedAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+        window.ssaToast?.(status === "closed" ? "Ticket marked as resolved." : "Ticket reopened. Support can continue assisting you.", "success", "Spark Support");
+    } catch (error) {
+        console.error(error);
+        window.ssaToast?.("Ticket status could not be updated.", "error", "Spark Support");
+    }
+}
 
 // =====================================
 // KEYBOARD SHORTCUT
