@@ -35,6 +35,8 @@ let currentUser = null;
 let purchase = null;
 let activePaymentUnsubscribe = null;
 let pendingProofPaymentId = "";
+let pendingProofStoragePath = "";
+let pendingProofUploaded = false;
 
 backBtn?.addEventListener("click", () => {
   location.href = purchaseType === "premium" ? "premium.html" : "courses.html";
@@ -195,12 +197,16 @@ async function submitManualPayment() {
 async function uploadManualProof(file) {
   if (!currentUser || !pendingProofPaymentId || !file) return;
   const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-  const path = `student-payment-proofs/${currentUser.uid}/${pendingProofPaymentId}/receipt.${extension}`;
+  const path = pendingProofStoragePath || `student-payment-proofs/${currentUser.uid}/${pendingProofPaymentId}/receipt.${extension}`;
+  pendingProofStoragePath = path;
   try {
-    await uploadBytes(storageRef(storage, path), file, {
-      contentType: file.type,
-      customMetadata: { paymentId: pendingProofPaymentId }
-    });
+    if (!pendingProofUploaded) {
+      await uploadBytes(storageRef(storage, path), file, {
+        contentType: file.type,
+        customMetadata: { paymentId: pendingProofPaymentId }
+      });
+      pendingProofUploaded = true;
+    }
     await attachProof({ paymentId: pendingProofPaymentId, storagePath: path });
     $("retryProofUpload").hidden = true;
     $("manualProof").value = "";
