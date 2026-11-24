@@ -70,7 +70,8 @@ async function loadPurchase() {
   } else if (purchaseType === "premium" && plan) {
     request = { purchaseType: "premium", plan, billingPeriod };
   } else {
-    throw new Error("No valid course or membership was selected.");
+    purchase = null;
+    return;
   }
 
   // The server calculates the amount from the published course or Founder
@@ -89,6 +90,25 @@ async function loadPurchase() {
   if (!Number.isSafeInteger(purchase.amount) || purchase.amount < 1) {
     throw new Error("The Academy returned an invalid payment amount.");
   }
+}
+
+function renderPaymentOverview() {
+  if (!courseList) return;
+  courseList.innerHTML = `
+    <article class="course-card payment-checkout-card">
+      <div class="checkout-course-info">
+        <span class="checkout-badge">PAYMENT CENTER</span>
+        <h3>Choose what you want to pay for</h3>
+        <p>Select a course or a Premium membership to view the current amount and available M-Pesa payment methods. Your transaction history appears below.</p>
+      </div>
+      <div class="student-payment-method">
+        <a class="pay-btn" href="courses.html">Browse My Courses</a>
+        <a class="pay-btn" href="premium.html">View Premium Memberships</a>
+      </div>
+    </article>
+  `;
+  if (balance) balance.textContent = money(0);
+  if (paymentStatus) paymentStatus.textContent = "No active checkout";
 }
 
 function renderCheckout() {
@@ -334,12 +354,18 @@ onAuthStateChanged(auth, async user => {
   currentUser = user;
   try {
     if (courseList) courseList.textContent = "Loading secure payment details…";
-    await loadPurchase();
-    renderCheckout();
+    try {
+      await loadPurchase();
+      if (purchase) renderCheckout();
+      else renderPaymentOverview();
+    } catch (error) {
+      console.error("Payment checkout could not be loaded:", error);
+      if (courseList) courseList.textContent = error.message || "Payment details could not be loaded.";
+    }
     loadPaymentHistory(user);
   } catch (error) {
-    console.error("Payment checkout could not be loaded:", error);
-    if (courseList) courseList.textContent = error.message || "Payment details could not be loaded.";
+    console.error("Student payments could not be initialized:", error);
+    if (courseList) courseList.textContent = "Payments are temporarily unavailable. Please refresh.";
   }
 });
 
