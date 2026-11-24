@@ -1,4 +1,4 @@
-import { auth, db } from "../../js/firebase.js";
+import { auth, db, storage } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   addDoc,
@@ -13,6 +13,7 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { uploadFile } from "./uploads.js";
+import { getBlob, ref as storageRef } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const params = new URLSearchParams(location.search);
 const chatId = params.get("chatId") || params.get("conversation");
@@ -33,6 +34,7 @@ let stopChat = null;
 let typingTimer = null;
 let typingHideTimer = null;
 let sending = false;
+let typingActive = false;
 
 const toDate = value => {
   if (!value) return null;
@@ -80,17 +82,31 @@ function renderMessage(message, peerLastReadAt) {
     row.append(body);
   }
 
-  if (message.attachment && typeof message.attachment.url === "string") {
-    const url = message.attachment.url;
-    if (/^https:\/\//i.test(url)) {
-      const link = document.createElement("a");
-      link.className = "message-attachment";
-      link.href = url;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = message.attachment.name || "Open attachment";
-      row.append(link);
-    }
+  if (message.attachment && typeof message.attachment.path === "string") {
+    const attachmentButton = document.createElement("button");
+    attachmentButton.type = "button";
+    attachmentButton.className = "message-attachment";
+    attachmentButton.textContent = message.attachment.name || "Download attachment";
+    attachmentButton.addEventListener("click", async () => {
+      attachmentButton.disabled = true;
+      try {
+        const blob = await getBlob(storageRef(storage, message.attachment.path));
+        const objectUrl = URL.createObjectURL(blob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = objectUrl;
+        downloadLink.download = message.attachment.name || "ssa-attachment";
+        document.body.append(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+      } catch (error) {
+        console.error("Attachment download failed:", error);
+        window.SSA?.toast?.("This attachment could not be downloaded.", "error");
+      } finally {
+        attachmentButton.disabled = false;
+      }
+    });
+    row.append(attachmentButton);
   }
 
   const meta = document.createElement("div");
@@ -139,14 +155,18 @@ async function markRead() {
 function setTyping(active) {
   if (!chatRef || !currentUser) return;
   clearTimeout(typingTimer);
-  updateDoc(chatRef, {
-    typing: {
-      uid: currentUser.uid,
-      status: Boolean(active),
-      updatedAt: serverTimestamp()
-    }
-  }).catch(() => {});
-  if (active) typingTimer = setTimeout(() => setTyping(false), 1800);
+  const nextState = Boolean(active);
+  if (nextState !== typingActive) {
+    typingActive = nextState;
+    updateDoc(chatRef, {
+      typing: {
+        uid: currentUser.uid,
+        status: nextState,
+        updatedAt: serverTimestamp()
+      }
+    }).catch(() => {});
+  }
+  if (nextState) typingTimer = setTimeout(() => setTyping(false), 1800);
 }
 
 function startChatListeners() {
