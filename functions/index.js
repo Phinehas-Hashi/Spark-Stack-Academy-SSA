@@ -730,6 +730,30 @@ async function activateStudentPayment(paymentRef, payment, verification) {
   });
 }
 
+exports.attachStudentPaymentProof = onCall(async request => {
+  const { uid } = await requireActiveStudent(request);
+  const paymentId = safeText(request.data?.paymentId);
+  const storagePath = safeText(request.data?.storagePath);
+  const expectedPrefix = "student-payment-proofs/" + uid + "/" + paymentId + "/";
+  if (!paymentId || !storagePath.startsWith(expectedPrefix)
+      || !/\.(jpg|jpeg|png|webp)$/i.test(storagePath)) {
+    throw new HttpsError("invalid-argument", "The payment proof path is invalid.");
+  }
+  const paymentRef = db.doc("payments/" + paymentId);
+  const paymentSnap = await paymentRef.get();
+  if (!paymentSnap.exists) throw new HttpsError("not-found", "Payment record not found.");
+  const payment = paymentSnap.data();
+  if (payment.userId !== uid || payment.method !== "manual_mpesa" || payment.status !== "pending_review") {
+    throw new HttpsError("permission-denied", "This payment cannot accept proof from this account.");
+  }
+  await paymentRef.set({
+    proofStoragePath: storagePath,
+    proofUploadedAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
+  }, { merge: true });
+  return { success: true };
+});
+
 exports.reviewStudentManualPayment = onCall(async request => {
   const reviewer = await requireInstitutionReviewer(request);
   const paymentId = safeText(request.data?.paymentId);
@@ -744,6 +768,9 @@ exports.reviewStudentManualPayment = onCall(async request => {
   const payment = paymentSnap.data();
   if (payment.method !== "manual_mpesa" || payment.status !== "pending_review") {
     throw new HttpsError("failed-precondition", "This payment is not awaiting manual M-Pesa review.");
+  }
+  if (decision === "approve" && !safeText(payment.proofStoragePath)) {
+    throw new HttpsError("failed-precondition", "A payment proof image must be uploaded before approval.");
   }
   if (decision === "reject") {
     await paymentRef.set({
