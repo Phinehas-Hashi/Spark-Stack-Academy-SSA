@@ -664,3 +664,63 @@
     }
 
 }
+
+/* ============================================================
+   OBSIDIAN LUXURY — INSTRUCTOR PROFILE
+============================================================ */
+.profile-page { color: #f4f1ff; }
+.profile-page .page-header h1,
+.profile-page .profile-name-row h2,
+.profile-page .card-header h2 { color: #f4f1ff; }
+.profile-page .page-header p,
+.profile-page .profile-identity > p { color: #aaa6bd; }
+.profile-page .page-eyebrow,
+.profile-page .card-eyebrow { color: #e0c17c; }
+.profile-hero,
+.profile-card {
+    border: 1px solid rgba(190,183,225,.14);
+    background: linear-gradient(145deg,#211f2d,#191824);
+    box-shadow: 0 14px 36px rgba(0,0,0,.17);
+}
+.profile-hero { background: radial-gradient(circle at 90% 10%,rgba(167,139,250,.16),transparent 35%),linear-gradient(145deg,#211f2d,#191824); }
+.profile-avatar { border: 4px solid #302c40; background: linear-gradient(135deg,#7654c8,#4c78a8); }
+.avatar-edit { border-color: #211f2d; background: #e0c17c; color: #211f2d; }
+.profile-status { background: rgba(103,217,232,.10); color: #83e2ed; }
+.profile-card label,
+.profile-stat strong,
+.account-status-item strong { color: #d5d1e2; }
+.profile-card input,
+.profile-card textarea {
+    border-color: rgba(190,183,225,.18);
+    background: #14131e;
+    color: #f4f1ff;
+}
+.profile-card input:focus,
+.profile-card textarea:focus {
+    border-color: #a78bfa;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(167,139,250,.13);
+}
+.profile-card input::placeholder,
+.profile-card textarea::placeholder { color: #77738a; }
+.profile-stat,
+.account-status-item { border-color: rgba(190,183,225,.13); }
+.profile-stat span,
+.account-status-item span { color: #aaa6bd; }
+.profile-page #saveProfileBtn {
+    border: 1px solid rgba(167,139,250,.25);
+    background: linear-gradient(110deg,#7654c8,#4c78a8);
+    box-shadow: none;
+}
+.profile-page .secondary-btn {
+    border-color: rgba(190,183,225,.18);
+    background: #171622;
+    color: #d5d1e2;
+}
+@media (max-width: 760px) {
+    .profile-page { padding: 16px; }
+    .profile-page .page-header { align-items: stretch; flex-direction: column; }
+    .profile-page #saveProfileBtn { width: 100%; }
+    .profile-hero { align-items: flex-start; flex-direction: column; padding: 20px; }
+    .profile-grid { grid-template-columns: minmax(0,1fr); }
+}
