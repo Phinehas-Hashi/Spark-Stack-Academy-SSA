@@ -36,18 +36,23 @@ function renderUsers(list){
 
 async function createChat(user){
  try{
-  const snap=await getDocs(query(
-    collection(db,"chats"),
-    where("memberIds","array-contains",currentUser.uid),
-    limit(50)
-  ));
-  let existing=null;
-  snap.forEach(d=>{
-    const m=d.data().memberIds||[];
-    if(m.includes(user.id)) existing=d.id;
+  const chats = collection(db,"chats");
+  const [memberSnap, participantSnap] = await Promise.all([
+    getDocs(query(chats, where("memberIds","array-contains",currentUser.uid), limit(100))),
+    getDocs(query(chats, where("participants","array-contains",currentUser.uid), limit(100)))
+  ]);
+  const existingDocs = new Map();
+  [...memberSnap.docs, ...participantSnap.docs].forEach(item => existingDocs.set(item.id, item));
+  let existing = null;
+  existingDocs.forEach(item => {
+    const data = item.data();
+    const ids = Array.isArray(data.memberIds) && data.memberIds.length
+      ? data.memberIds
+      : (Array.isArray(data.participants) ? data.participants : []);
+    if (ids.includes(user.id)) existing = item.id;
   });
   if(existing){location.href=`chat.html?chatId=${existing}`;return;}
-  const chat=await addDoc(collection(db,"chats"),{members:[{uid:currentUser.uid,name:currentProfile.name||currentProfile.displayName||currentUser.email||"Student",role:"student"},{uid:user.id,name:user.name||user.displayName||"Instructor",role:"instructor"}],memberIds:[currentUser.uid,user.id],lastMessage:"",createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+  const chat=await addDoc(collection(db,"chats"),{members:[{uid:currentUser.uid,name:currentProfile.name||currentProfile.fullName||currentProfile.displayName||currentUser.email||"Student",role:"student"},{uid:user.id,name:user.name||user.displayName||"Instructor",role:"instructor"}],memberIds:[currentUser.uid,user.id],lastMessage:"",createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
   location.href=`chat.html?chatId=${chat.id}`;
  }catch(error){console.error("Chat creation failed:",error);alert("We couldn't start this conversation. Please try again.");}
 }
