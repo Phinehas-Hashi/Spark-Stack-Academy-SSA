@@ -1381,24 +1381,56 @@ service cloud.firestore {
           && resource.data.instructorId == uid()
         );
 
+      // Student attempts are created once. Their score fields are still
+      // client-generated in the current player and require server grading
+      // before they can be treated as authoritative.
       allow create:
         if isStudent()
         && studentPortalOpen()
-        && request.resource.data.studentId == uid();
+        && request.resource.data.studentId == uid()
+        && request.resource.data.quizId is string
+        && exists(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId))
+        && get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.get('status', 'draft') in ['published', 'active']
+        && request.resource.data.instructorId == get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.instructorId
+        && request.resource.data.keys().hasOnly([
+          'studentId', 'quizId', 'courseId', 'instructorId',
+          'attemptNumber', 'answers', 'score', 'correct', 'total',
+          'passed', 'completed', 'status', 'xpEarned', 'submittedAt'
+        ]);
 
+      // Student attempts cannot be edited after creation. Only the owning
+      // instructor can update review and grade fields.
       allow update:
         if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && resource.data.studentId == uid()
-          && request.resource.data.studentId == uid()
-        )
         || (
           isInstructor()
           && instructorPortalOpen()
           && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
+          && resource.data.quizId is string
+          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
+          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
+          && request.resource.data.instructorId == resource.data.instructorId
+          && request.resource.data.quizId == resource.data.quizId
+          && request.resource.data.studentId == resource.data.studentId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'answers', 'score', 'totalMarks', 'percentage', 'status',
+            'result', 'instructorFeedback', 'gradedBy', 'gradedAt',
+            'reviewedAt', 'updatedAt'
+          ])
+          && request.resource.data.status == 'graded'
+          && request.resource.data.answers is list
+          && request.resource.data.score is number
+          && request.resource.data.totalMarks is number
+          && request.resource.data.totalMarks > 0
+          && request.resource.data.score >= 0
+          && request.resource.data.score <= request.resource.data.totalMarks
+          && request.resource.data.percentage is number
+          && request.resource.data.percentage >= 0
+          && request.resource.data.percentage <= 100
+          && request.resource.data.result in ['passed', 'failed']
+          && request.resource.data.instructorFeedback is string
+          && request.resource.data.instructorFeedback.size() <= 5000
+          && request.resource.data.gradedBy == uid()
         );
 
       allow delete:
