@@ -232,8 +232,8 @@ async function loadEarnings() {
         updateMoney("lifetimeEarnings", lifetime);
         setText("totalSales", transactions.length);
         updateMoney("minimumWithdrawal", earningsSettings.minimumWithdrawal);
-        updateMoney("withdrawalFee", earningsSettings.withdrawalFeePercent);
-        updateMoney("platformTax", earningsSettings.platformTaxPercent);
+        setText("withdrawalFee", `${Number(earningsSettings.withdrawalFeePercent || 0)}%`);
+        setText("platformTax", `${Number(earningsSettings.platformTaxPercent || 0)}%`);
         updateMoney("premiumPrice", earningsSettings.premiumMonthlyPrice);
 
         const status = $("withdrawalStatus");
@@ -329,7 +329,7 @@ function renderTransactions(items) {
         items.slice(0, 20).map(item => {
 
             const amount =
-                Number(item.netAmount || 0);
+                Number(item.netAmount ?? item.amount ?? item.total ?? item.earnings ?? 0);
 
 
             return `
@@ -423,11 +423,13 @@ function renderWithdrawalHistory(items) {
 // ============================================================
 
 let withdrawalTrigger = null;
+let previousBodyOverflow = "";
 
 function openWithdrawalWindow() {
     const modal = $("withdrawalModal");
     if (!modal || currentBalance < Number(earningsSettings.minimumWithdrawal || 100)) return;
     withdrawalTrigger = document.activeElement;
+    previousBodyOverflow = document.body.style.overflow;
     const available = $("modalAvailableBalance");
     if (available) available.textContent = formatMoney(currentBalance);
     const amount = $("withdrawalAmount");
@@ -447,7 +449,7 @@ function closeWithdrawalWindow() {
     if (!modal || modal.classList.contains("hidden")) return;
     modal.classList.add("hidden");
     modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+    document.body.style.overflow = previousBodyOverflow;
     if (withdrawalTrigger?.isConnected) withdrawalTrigger.focus();
 }
 
