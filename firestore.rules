@@ -156,12 +156,14 @@ service cloud.firestore {
       // messaging directory useful without exposing arbitrary
       // user records to the browser.
       allow list:
-        if activePortalUser()
-        && (
-          (isStudent() && resource.data.get('role', '') == 'instructor')
-          || (isInstructor() && resource.data.get('role', '') in ['student', 'admin'])
-          || (isAdmin() && resource.data.get('role', '') in ['instructor', 'founder'])
-          || isFounder()
+        if isFounder()
+        || (
+          activePortalUser()
+          && (
+            (isStudent() && resource.data.get('role', '') == 'instructor')
+            || (isInstructor() && resource.data.get('role', '') in ['student', 'admin'])
+            || (isAdmin() && resource.data.get('role', '') in ['instructor', 'founder'])
+          )
         );
 
       // ----------------------------------------------------------
@@ -678,6 +680,29 @@ service cloud.firestore {
       // Subscription state is trusted data.
       allow create, update, delete:
         if isFounder();
+    }
+
+    // ============================================================
+    // FOUNDER-CONTROLLED STUDENT MEMBERSHIP PRICING
+    // Students can read only the published global price catalogue.
+    // Only the verified Founder can create or change pricing.
+    // ============================================================
+    match /premiumPricing/{pricingId} {
+      allow get:
+        if pricingId == 'global'
+        && (
+          isFounder()
+          || (isStudent() && studentPortalOpen())
+        );
+
+      allow list:
+        if false;
+
+      allow create, update:
+        if pricingId == 'global' && isFounder();
+
+      allow delete:
+        if false;
     }
 
 
