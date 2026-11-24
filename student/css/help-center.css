@@ -1423,3 +1423,6 @@
  .ticket-actions button,.ticket-reply-form button { width:100%; }
  .ticket-message { max-width:96%; }
 }
+
+.ticket-creation-notice:empty { display:none; }
+.ticket-creation-notice:not(:empty) { margin-bottom:14px; padding:14px 16px; border:1px solid #d9c58b; border-radius:12px; background:#fbf7e9; color:#5c4815; font-size:13px; font-weight:700; overflow-wrap:anywhere; }
