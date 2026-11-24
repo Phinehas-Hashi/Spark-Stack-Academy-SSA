@@ -399,6 +399,12 @@ body:has(.achievements-page) {
     box-shadow: var(--achievement-shadow);
 }
 
+.streak-stat .stat-icon {
+    border-color: #f0dfb4;
+    background: linear-gradient(145deg, #fff8e6, #f7e7bd);
+    color: #9a7620;
+}
+
 .stat-icon {
     width: 43px;
     height: 43px;
