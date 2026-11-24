@@ -812,7 +812,7 @@ function setupDashboardActions() {
         () => {
 
             window.location.href =
-                "course-builder.html";
+                "courses.html";
 
         }
     );
