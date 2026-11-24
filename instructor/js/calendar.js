@@ -477,19 +477,7 @@ async function createEvent(event) {
         setupFormDefaults();
         closeCreateModal();
 
-        await onAuthStateChanged(auth, user => {
-    if (!user) {
-        calendarGrid.innerHTML = `
-            <div class="calendar-empty">
-                <i data-lucide="lock"></i>
-                <strong>Sign in required</strong>
-                <span>Please sign in to view your teaching calendar.</span>
-            </div>`;
-        refreshIcons();
-        return;
-    }
-    loadEvents();
-});
+        await loadEvents();
     } catch (error) {
         console.error("❌ Event creation failed:", error);
         showFormError("Couldn't create the event. Check your Firebase permissions and try again.");
@@ -581,4 +569,16 @@ window.addEventListener("load", () => {
     refreshIcons();
 });
 
-loadEvents();
+onAuthStateChanged(auth, user => {
+    if (!user) {
+        calendarGrid.innerHTML = `
+            <div class="calendar-empty">
+                <i data-lucide="lock"></i>
+                <strong>Sign in required</strong>
+                <span>Please sign in to view your teaching calendar.</span>
+            </div>`;
+        refreshIcons();
+        return;
+    }
+    loadEvents();
+});
