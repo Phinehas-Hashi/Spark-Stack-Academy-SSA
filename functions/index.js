@@ -47,16 +47,18 @@ exports.requestInstructorWithdrawal = onCall(async request => {
 
   const userRef = db.doc("users/" + uid);
   const settingsRef = db.doc("platformSettings/earnings");
+  const monetizationRef = db.doc("settings/monetization");
   const walletRef = db.doc("instructorWallets/" + uid);
   const earningsQuery = db.collection("instructorEarnings").where("instructorId", "==", uid);
   const withdrawalsQuery = db.collection("withdrawalRequests").where("instructorId", "==", uid);
   const requestRef = db.collection("withdrawalRequests").doc();
 
   return db.runTransaction(async transaction => {
-    const [userSnap, controlsSnap, settingsSnap, earningsSnap, withdrawalsSnap, walletSnap] = await Promise.all([
+    const [userSnap, controlsSnap, settingsSnap, monetizationSnap, earningsSnap, withdrawalsSnap, walletSnap] = await Promise.all([
       transaction.get(userRef),
       transaction.get(platformRef),
       transaction.get(settingsRef),
+      transaction.get(monetizationRef),
       transaction.get(earningsQuery),
       transaction.get(withdrawalsQuery),
       transaction.get(walletRef)
@@ -81,9 +83,19 @@ exports.requestInstructorWithdrawal = onCall(async request => {
     }
 
     const settings = settingsSnap.exists ? settingsSnap.data() || {} : {};
-    const minimum = Number(settings.minimumWithdrawal ?? 100);
+    const monetization = monetizationSnap.exists ? monetizationSnap.data() || {} : {};
+    if (settings.withdrawalsEnabled === false || monetization.enableWithdrawals === false) {
+      throw new HttpsError("failed-precondition", "Instructor withdrawals are currently disabled by the Founder.");
+    }
+    if (settings.mpesaWithdrawalsEnabled === false || monetization.enableMpesa === false) {
+      throw new HttpsError("failed-precondition", "M-Pesa withdrawals are currently disabled by the Founder.");
+    }
+    if (settings.withdrawalApproval === false || monetization.withdrawalApproval === false || monetization.automaticPayouts === true) {
+      throw new HttpsError("failed-precondition", "Manual Founder approval is required. Automatic payouts are not enabled for this workflow.");
+    }
+    const minimum = Number(monetization.minimumWithdrawal ?? settings.minimumWithdrawal ?? 100);
     const taxRate = Number(settings.platformTaxPercent ?? 0);
-    const feeRate = Number(settings.withdrawalFeePercent ?? 0);
+    const feeRate = Number(monetization.withdrawalFeePercent ?? settings.withdrawalFeePercent ?? 0);
     if (!Number.isFinite(minimum) || minimum < 0
         || !Number.isFinite(taxRate) || taxRate < 0 || taxRate > 100
         || !Number.isFinite(feeRate) || feeRate < 0 || feeRate > 100) {
