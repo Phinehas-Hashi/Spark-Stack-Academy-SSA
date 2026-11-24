@@ -230,9 +230,7 @@ async function loadQuiz() {
 
 
     if (
-        data.instructorId &&
-        data.instructorId !==
-            instructor.uid
+        data.instructorId !== instructor.uid
     ) {
 
         throw new Error(
@@ -370,30 +368,22 @@ async function loadQuestions() {
         );
 
 
+    // Quiz questions include answer keys. Only the owning instructor
+    // may load them; student delivery must use a sanitized server response.
     const q =
         query(
             ref,
-            where(
-                "quizId",
-                "==",
-                quizId
-            )
+            where("quizId", "==", quizId),
+            where("instructorId", "==", instructor.uid)
         );
 
-
-    const snapshot =
-        await getDocs(q);
-
+    const snapshot = await getDocs(q);
 
     questions =
         snapshot.docs
             .map(item => ({
-
-                id:
-                    item.id,
-
+                id: item.id,
                 ...item.data()
-
             }))
             .sort(
                 (a, b) =>
