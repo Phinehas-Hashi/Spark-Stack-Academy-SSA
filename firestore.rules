@@ -1034,6 +1034,7 @@ service cloud.firestore {
         || (
           isStudent()
           && studentPortalOpen()
+          && resource.data.get('status', 'published') in ['published', 'pending', 'active']
         )
         || (
           isInstructor()
