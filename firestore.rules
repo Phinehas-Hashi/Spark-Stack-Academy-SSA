@@ -899,6 +899,65 @@ service cloud.firestore {
 
 
     // ============================================================
+    // CALENDAR EVENTS
+    // ============================================================
+
+    match /calendarEvents/{eventId} {
+      allow get, list:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && (
+            resource.data.get('userId', '') == uid()
+            || resource.data.get('audience', '') in ['students', 'instructors', 'all']
+          )
+        )
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && (
+            resource.data.get('userId', '') == uid()
+            || resource.data.get('audience', '') in ['students', 'all']
+          )
+        );
+
+      allow create:
+        if isInstructor()
+        && instructorPortalOpen()
+        && request.resource.data.userId == uid()
+        && request.resource.data.get('audience', '') in ['students', 'instructors', 'all', 'user', 'private']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.startAt is timestamp
+        && request.resource.data.endAt is timestamp
+        && request.resource.data.endAt > request.resource.data.startAt
+        && request.resource.data.get('description', '') is string
+        && request.resource.data.get('description', '').size() <= 1000
+        && request.resource.data.keys().hasOnly([
+          'title', 'description', 'type', 'startAt', 'endAt',
+          'courseId', 'courseName', 'meetingProvider', 'meetingUrl',
+          'userId', 'audience', 'createdAt'
+        ]);
+
+      allow update, delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.userId == uid()
+          && request.resource.data.userId == uid()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'title', 'description', 'type', 'startAt', 'endAt',
+            'courseId', 'courseName', 'meetingProvider', 'meetingUrl',
+            'audience', 'updatedAt'
+          ])
+        );
+    }
+
+
+    // ============================================================
     // ANNOUNCEMENTS
     // ============================================================
 
