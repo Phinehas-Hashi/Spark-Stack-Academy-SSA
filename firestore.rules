@@ -553,17 +553,8 @@ service cloud.firestore {
           && resource.data.instructorId == uid()
         );
 
-      allow create:
-        if isInstructor()
-        && instructorPortalOpen()
-        && request.resource.data.instructorId == uid()
-        && request.resource.data.status == 'pending'
-        && request.resource.data.amount is number
-        && request.resource.data.amount > 0
-        && request.resource.data.method == 'mpesa'
-        && request.resource.data.account is string
-        && request.resource.data.account.matches('^[+]254[17][0-9]{8}
-        && request.resource.data.netAmount >= 0;
+      // Creation is handled by the trusted requestInstructorWithdrawal callable.
+      allow create: if false;
 
       allow update, delete:
         if isFounder();
