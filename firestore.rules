@@ -1224,6 +1224,56 @@ service cloud.firestore {
 
 
     // ============================================================
+    // QUIZ QUESTIONS — ANSWER KEYS ARE INSTRUCTOR-ONLY
+    // Students must receive sanitized question payloads from a trusted
+    // server endpoint; never expose correctAnswer through direct reads.
+    // ============================================================
+
+    match /quizQuestions/{questionId} {
+      allow get, list:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+        );
+
+      allow create:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && request.resource.data.instructorId == uid()
+          && request.resource.data.quizId is string
+          && exists(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId))
+          && get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.instructorId == uid()
+        );
+
+      allow update:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+          && request.resource.data.instructorId == uid()
+          && request.resource.data.quizId == resource.data.quizId
+          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
+          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
+        );
+
+      allow delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
+          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
+        );
+    }
+
+
+    // ============================================================
     // SUBMISSIONS
     // ============================================================
 
