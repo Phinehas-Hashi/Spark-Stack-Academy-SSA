@@ -77,6 +77,9 @@ async function loadAssignments(uid) {
         assignments = [];
         assignmentResult.value.forEach(assignmentDoc => {
             const data = assignmentDoc.data();
+            const status = String(data.status || "published").toLowerCase();
+            const isStudentVisible = ["published", "pending", "active"].includes(status);
+            if (!isStudentVisible || data.published === false) return;
             if (!data.courseId || !courseIds.has(String(data.courseId))) return;
 
             assignments.push({
