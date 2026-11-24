@@ -70,7 +70,7 @@ export function subscribeToMyReports(uid, callback, onError = () => {}) {
 export function subscribeToReportMessages(reportDocId, callback, onError = () => {}) {
   if (!reportDocId) return () => {};
   const messagesQuery = query(
-    collection(db, "reports", reportDocId, "messages"),
+    collection(db, "reports", reportDocId, "responses),
     orderBy("createdAt", "asc")
   );
   return onSnapshot(messagesQuery, snapshot => {
@@ -101,12 +101,12 @@ export async function sendReportMessage({ reportDocId, body }) {
   } catch {}
 
   const batch = writeBatch(db);
-  const messageRef = doc(collection(db, "reports", reportDocId, "messages"));
+  const messageRef = doc(collection(db, "reports", reportDocId, "responses));
   batch.set(messageRef, {
     senderId: user.uid,
     senderRole,
     senderName,
-    body: message,
+    message,
     createdAt: serverTimestamp()
   });
 
