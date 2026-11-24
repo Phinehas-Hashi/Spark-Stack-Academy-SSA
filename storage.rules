@@ -55,7 +55,7 @@ service firebase.storage {
         && firestore.exists(/databases/(default)/documents/users/$(studentId))
         && firestore.get(/databases/(default)/documents/users/$(studentId)).data.get('role', '') == 'student'
         && firestore.get(/databases/(default)/documents/users/$(studentId)).data.get('status', '') == 'active'
-        && firestore.get(/databases/(default)/documents/users/$(studentId)).data.get('active', false) == true;
+        && firestore.get(/databases/(default)/documents/users/$(studentId)).data.get('active', true) == true;
     }
 
     function isPaymentReviewer() {
