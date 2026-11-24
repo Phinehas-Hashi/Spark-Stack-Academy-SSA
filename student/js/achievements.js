@@ -13,8 +13,6 @@ import {
     doc,
     getDoc,
     updateDoc,
-    increment,
-    runTransaction,
     serverTimestamp,
     collection,
     query,
@@ -27,6 +25,8 @@ import {
 import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 import {
     XP_REWARDS,
@@ -209,71 +209,33 @@ function renderLevel(student) {
 // ============================================================
 
 export async function awardXP(userId, amount, reason = "Learning activity", source = "system") {
-    if (!userId) throw new Error("Missing user ID.");
-    amount = Number(amount);
-    if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid XP amount.");
-
-    const studentRef = doc(db, "students", userId);
+    if (!userId || auth.currentUser?.uid !== userId) throw new Error("XP can only be awarded to the signed-in student.");
     const sourceKey = String(source || "").trim();
-    const eventId = sourceKey && sourceKey !== "system"
-        ? "xp_" + encodeURIComponent(sourceKey).replaceAll("%", "_").slice(0, 140)
-        : doc(collection(db, "students", userId, "activity")).id;
-    const eventRef = doc(db, "students", userId, "activity", eventId);
+    if (!sourceKey) throw new Error("Missing learning activity source.");
 
-    const counterField =
-        sourceKey.startsWith("lesson_") ? "lessonsCompleted" :
-        sourceKey.startsWith("quiz_") ? "quizzesCompleted" :
-        sourceKey.startsWith("assignment_") ? "assignmentsSubmitted" :
-        sourceKey.startsWith("course_") ? "coursesCompleted" :
-        sourceKey.startsWith("project_") ? "projectsSubmitted" : null;
-
-    const result = await runTransaction(db, async transaction => {
-        const studentSnap = await transaction.get(studentRef);
-        const eventSnap = await transaction.get(eventRef);
-        if (!studentSnap.exists()) throw new Error("Student profile not found.");
-        if (eventSnap.exists()) return { duplicate: true };
-
-        const student = studentSnap.data();
-        const oldXP = Number(student.xp || 0);
-        const newXP = oldXP + amount;
-        const oldLevel = calculateLevel(oldXP);
-        const newLevel = calculateLevel(newXP);
-        const updates = {
-            xp: increment(amount),
-            lastXPReward: serverTimestamp(),
-            lastXPReason: reason,
-            level: newLevel
-        };
-
-        transaction.update(studentRef, updates);
-        transaction.set(eventRef, {
-            type: "xp_earned", amount, reason, source: sourceKey || "system",
-            previousXP: oldXP, newXP, previousLevel: oldLevel, newLevel,
-            createdAt: serverTimestamp()
-        });
-
-        return {
-            duplicate: false,
-            student: {
-                ...student, xp: newXP,
-                ...(counterField ? { [counterField]: Number(student[counterField] || 0) + 1 } : {})
-            },
-            xpAdded: amount, oldXP, newXP, oldLevel, newLevel,
-            levelUp: newLevel > oldLevel
-        };
+    const award = httpsCallable(getFunctions(), "awardStudentXP");
+    const response = await award({
+        source: sourceKey,
+        reason: String(reason || "Learning activity").slice(0, 180)
     });
+    const result = response.data || {};
 
     if (result.duplicate) {
-        const current = await getDoc(studentRef);
-        const xp = Number(current.data()?.xp || 0);
-        return { duplicate: true, xp, level: calculateLevel(xp) };
+        return {
+            duplicate: true,
+            xp: Number(result.student?.xp || result.xp || 0),
+            level: Number(result.student?.level || result.level || 1)
+        };
     }
-    if (result.levelUp) await handleLevelUp(userId, result.oldLevel, result.newLevel);
-    await processBadges(userId, result.student);
+
+    if (result.student) {
+        await processBadges(userId, result.student);
+    }
     return result;
 }
 
 
+// ============================================================
 // ACTIVITY CREATOR
 // ============================================================
 
@@ -660,9 +622,6 @@ function getEligibleBadges(student) {
 
     }
 
-
-    // ASSIGNMENTS
-    if (Number(student.assignmentsSubmitted || 0) >= 1) eligible.push("assignment_starter");
 
     // ASSIGNMENTS
     if (Number(student.assignmentsSubmitted || 0) >= 1) eligible.push("assignment_starter");
