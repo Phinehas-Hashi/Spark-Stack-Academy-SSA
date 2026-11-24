@@ -446,6 +446,380 @@ exports.reconcileInstitutionOnboardingPayments = onSchedule({
 
 
 
+// ============================================================
+// STUDENT PAYMENTS — COURSE + PREMIUM
+// Both M-Pesa STK Push and manual receipt review use the same
+// server-owned payment ledger and entitlement activation path.
+// ============================================================
+
+async function requireActiveStudent(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in with your student account.");
+  const snap = await db.doc("users/" + uid).get();
+  const user = snap.exists ? snap.data() : {};
+  if (safeText(user.role).toLowerCase() !== "student"
+      || user.status !== "active" || user.active !== true) {
+    throw new HttpsError("permission-denied", "An active student account is required.");
+  }
+  return { uid, user };
+}
+
+async function resolveStudentPurchase(uid, data) {
+  const purchaseType = safeText(data.purchaseType).toLowerCase();
+  if (purchaseType === "course") {
+    const courseId = safeText(data.courseId);
+    if (!courseId) throw new HttpsError("invalid-argument", "Course ID is required.");
+    const courseSnap = await db.doc("courses/" + courseId).get();
+    if (!courseSnap.exists) throw new HttpsError("not-found", "Course not found.");
+    const course = courseSnap.data();
+    if (course.published !== true && safeText(course.status).toLowerCase() !== "published") {
+      throw new HttpsError("failed-precondition", "This course is not currently available for purchase.");
+    }
+    const amount = Number(course.price);
+    if (!Number.isSafeInteger(amount) || amount < 1 || safeText(course.currency, "KES").toUpperCase() !== "KES") {
+      throw new HttpsError("failed-precondition", "This course does not have a valid KES payment price.");
+    }
+    const enrollmentRef = db.doc("enrollments/" + uid + "_" + courseId);
+    const enrollmentSnap = await enrollmentRef.get();
+    if (enrollmentSnap.exists) {
+      const enrollment = enrollmentSnap.data();
+      if (["active", "approved", "completed", "paid"].includes(safeText(enrollment.status).toLowerCase())
+          && ["paid", "free"].includes(safeText(enrollment.paymentStatus).toLowerCase())) {
+        throw new HttpsError("already-exists", "You already have access to this course.");
+      }
+    }
+    return {
+      purchaseType, courseId, courseTitle: safeText(course.title, "Academy Course"),
+      amount, currency: "KES", plan: "", billingPeriod: ""
+    };
+  }
+
+  if (purchaseType === "premium") {
+    const plan = safeText(data.plan).toLowerCase();
+    const billingPeriod = safeText(data.billingPeriod).toLowerCase();
+    if (!["learner_plus", "pro_learner", "career_accelerator"].includes(plan)
+        || !["monthly", "quarterly"].includes(billingPeriod)) {
+      throw new HttpsError("invalid-argument", "Choose a valid membership plan and billing period.");
+    }
+    const pricingSnap = await db.doc("premiumPricing/global").get();
+    const pricing = pricingSnap.exists ? pricingSnap.data() : {};
+    const planData = pricing.plans?.[plan] || {};
+    const priceKey = billingPeriod === "monthly" ? "monthlyPrice" : "quarterlyPrice";
+    const amount = Number(planData[priceKey]);
+    if (pricing.published !== true || planData.enabled === false
+        || !Number.isSafeInteger(amount) || amount < 1
+        || safeText(pricing.currency, "KSh") !== "KSh") {
+      throw new HttpsError("failed-precondition", "This membership price is not currently published by the Founder.");
+    }
+    return {
+      purchaseType, courseId: "", courseTitle: "Premium — " + safeText(planData.name, plan),
+      amount, currency: "KES", plan, billingPeriod
+    };
+  }
+
+  throw new HttpsError("invalid-argument", "Unsupported student payment type.");
+}
+
+async function createStudentPaymentRecord({ uid, user, purchase, method, phoneNumber, status }) {
+  const paymentRef = db.collection("payments").doc();
+  const now = Timestamp.now();
+  await paymentRef.set({
+    paymentId: paymentRef.id,
+    userId: uid,
+    studentId: uid,
+    studentName: safeText(user.name || user.displayName || user.fullName, requestNameFallback(user)),
+    studentEmail: safeText(user.email),
+    admissionNumber: safeText(user.admissionNumber),
+    purchaseType: purchase.purchaseType,
+    paymentType: purchase.purchaseType === "course" ? "course" : "premium_membership",
+    courseId: purchase.courseId || null,
+    course: purchase.courseTitle,
+    plan: purchase.plan || null,
+    billingPeriod: purchase.billingPeriod || null,
+    amount: purchase.amount,
+    currency: purchase.currency,
+    method,
+    provider: method === "mpesa_stk" ? "safaricom_daraja" : "manual_mpesa",
+    phoneNumber: phoneNumber || "",
+    status,
+    createdAt: now,
+    updatedAt: now
+  });
+  return paymentRef;
+}
+
+function requestNameFallback(user) {
+  return safeText(user.email, "Student");
+}
+
+function studentDarajaCallbackUrl() {
+  const projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
+  if (!projectId) throw new Error("Firebase project ID is unavailable for the student M-Pesa callback URL.");
+  return "https://us-central1-" + projectId + ".cloudfunctions.net/darajaStudentCallback";
+}
+
+exports.initiateStudentStkPayment = onCall({ secrets: DARAJA_SECRETS }, async request => {
+  const { uid, user } = await requireActiveStudent(request);
+  const phoneNumber = normalizeKenyanPhone(request.data?.phoneNumber);
+  const purchase = await resolveStudentPurchase(uid, request.data || {});
+  const paymentRef = await createStudentPaymentRecord({
+    uid, user, purchase, method: "mpesa_stk", phoneNumber, status: "initiating"
+  });
+
+  try {
+    const token = await getDarajaAccessToken();
+    const shortcode = MPESA_SHORTCODE.value();
+    const passkey = MPESA_PASSKEY.value();
+    if (!shortcode || !passkey) throw new HttpsError("failed-precondition", "M-Pesa shortcode and passkey are not configured.");
+    const timestamp = darajaTimestamp();
+    const password = Buffer.from(shortcode + passkey + timestamp).toString("base64");
+    const response = await fetch(darajaBaseUrl() + "/mpesa/stkpush/v1/processrequest", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        BusinessShortCode: shortcode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: MPESA_TRANSACTION_TYPE.value() || "CustomerPayBillOnline",
+        Amount: purchase.amount,
+        PartyA: phoneNumber,
+        PartyB: shortcode,
+        PhoneNumber: phoneNumber,
+        CallBackURL: studentDarajaCallbackUrl(),
+        AccountReference: ("SSA" + paymentRef.id.replace(/[^a-zA-Z0-9]/g, "").slice(-9)).slice(0, 12),
+        TransactionDesc: purchase.purchaseType === "course" ? "SSA Course Fee" : "SSA Premium"
+      })
+    });
+    const result = await response.json();
+    if (!response.ok || String(result.ResponseCode) !== "0" || !result.CheckoutRequestID) {
+      throw new Error("Safaricom did not accept the STK Push request.");
+    }
+    await paymentRef.set({
+      status: "pending",
+      merchantRequestId: safeText(result.MerchantRequestID),
+      checkoutRequestId: safeText(result.CheckoutRequestID),
+      customerMessage: safeText(result.CustomerMessage, "Check your phone and enter your M-Pesa PIN."),
+      updatedAt: Timestamp.now()
+    }, { merge: true });
+    return {
+      success: true, paymentId: paymentRef.id, status: "pending",
+      customerMessage: safeText(result.CustomerMessage, "Check your phone and enter your M-Pesa PIN.")
+    };
+  } catch (error) {
+    await paymentRef.set({
+      status: "initiation_failed",
+      failureMessage: "The M-Pesa prompt could not be started.",
+      updatedAt: Timestamp.now()
+    }, { merge: true });
+    if (error instanceof HttpsError) throw error;
+    console.error("Student STK initiation failed:", error.message);
+    throw new HttpsError("unavailable", "The M-Pesa prompt could not be sent. You can retry or use manual M-Pesa submission.");
+  }
+});
+
+exports.submitStudentManualPayment = onCall(async request => {
+  const { uid, user } = await requireActiveStudent(request);
+  const purchase = await resolveStudentPurchase(uid, request.data || {});
+  const receiptCode = safeText(request.data?.receiptCode).toUpperCase().replace(/\s+/g, "");
+  const payerPhone = normalizeKenyanPhone(request.data?.phoneNumber);
+  if (!/^[A-Z0-9]{8,16}$/.test(receiptCode)) {
+    throw new HttpsError("invalid-argument", "Enter the M-Pesa receipt code exactly as shown in your confirmation message.");
+  }
+  const receiptRef = db.doc("manualMpesaReceipts/" + receiptCode);
+  const paymentRef = db.collection("payments").doc();
+  const now = Timestamp.now();
+  await db.runTransaction(async transaction => {
+    const existing = await transaction.get(receiptRef);
+    if (existing.exists) throw new HttpsError("already-exists", "This M-Pesa receipt code has already been submitted.");
+    transaction.create(receiptRef, {
+      receiptCode, paymentId: paymentRef.id, userId: uid,
+      status: "pending_review", createdAt: now
+    });
+    transaction.create(paymentRef, {
+      paymentId: paymentRef.id,
+      userId: uid, studentId: uid,
+      studentName: safeText(user.name || user.displayName || user.fullName, requestNameFallback(user)),
+      studentEmail: safeText(user.email),
+      admissionNumber: safeText(user.admissionNumber),
+      purchaseType: purchase.purchaseType,
+      paymentType: purchase.purchaseType === "course" ? "course" : "premium_membership",
+      courseId: purchase.courseId || null,
+      course: purchase.courseTitle,
+      plan: purchase.plan || null,
+      billingPeriod: purchase.billingPeriod || null,
+      amount: purchase.amount, currency: purchase.currency,
+      method: "manual_mpesa", provider: "manual_mpesa",
+      phoneNumber: payerPhone, manualReceiptCode: receiptCode,
+      status: "pending_review",
+      createdAt: now, updatedAt: now
+    });
+  });
+  return { success: true, paymentId: paymentRef.id, status: "pending_review" };
+});
+
+async function activateStudentPayment(paymentRef, payment, verification) {
+  const now = Timestamp.now();
+  const courseRef = payment.purchaseType === "course"
+    ? db.doc("enrollments/" + payment.userId + "_" + payment.courseId) : null;
+  const subscriptionRef = payment.purchaseType === "premium"
+    ? db.doc("premiumSubscriptions/" + payment.userId) : null;
+
+  await db.runTransaction(async transaction => {
+    const paymentSnap = await transaction.get(paymentRef);
+    if (!paymentSnap.exists) throw new Error("Student payment record was not found.");
+    if (paymentSnap.data().status === "paid" || paymentSnap.data().status === "completed") return;
+    if (courseRef) {
+      const enrollmentSnap = await transaction.get(courseRef);
+      if (!enrollmentSnap.exists) {
+        transaction.create(courseRef, {
+          userId: payment.userId, studentId: payment.userId,
+          courseId: payment.courseId, courseName: payment.course,
+          status: "active", paymentStatus: "paid", source: "student_payment",
+          paymentId: paymentRef.id, amountPaid: payment.amount,
+          currency: payment.currency, enrolledAt: now, createdAt: now, updatedAt: now
+        });
+      } else {
+        const existing = enrollmentSnap.data();
+        if (safeText(existing.paymentStatus).toLowerCase() !== "paid"
+            && !["active", "approved", "completed"].includes(safeText(existing.status).toLowerCase())) {
+          transaction.set(courseRef, {
+            userId: payment.userId, studentId: payment.userId,
+            courseId: payment.courseId, courseName: payment.course,
+            status: "active", paymentStatus: "paid", source: "student_payment",
+            paymentId: paymentRef.id, amountPaid: payment.amount,
+            currency: payment.currency, enrolledAt: now, updatedAt: now
+          }, { merge: true });
+        }
+      }
+    }
+    if (subscriptionRef) {
+      const subscriptionSnap = await transaction.get(subscriptionRef);
+      const current = subscriptionSnap.exists ? subscriptionSnap.data() : {};
+      const nowMillis = now.toMillis();
+      const existingExpiry = current.expiresAt?.toMillis ? current.expiresAt.toMillis() : 0;
+      const startMillis = Math.max(nowMillis, existingExpiry);
+      const durationDays = payment.billingPeriod === "quarterly" ? 90 : 30;
+      transaction.set(subscriptionRef, {
+        status: "active", plan: payment.plan, source: "payment",
+        billingPeriod: payment.billingPeriod,
+        startsAt: current.status === "active" && existingExpiry > nowMillis ? current.startsAt || now : now,
+        expiresAt: Timestamp.fromMillis(startMillis + durationDays * 86400000),
+        lastPaymentId: paymentRef.id, updatedAt: now
+      }, { merge: true });
+    }
+    transaction.set(paymentRef, {
+      status: "paid", verificationMethod: verification.method,
+      mpesaReceiptNumber: verification.receiptCode || null,
+      transactionDate: verification.transactionDate || null,
+      verifiedAt: now, updatedAt: now
+    }, { merge: true });
+  });
+}
+
+exports.reviewStudentManualPayment = onCall(async request => {
+  const reviewer = await requireInstitutionReviewer(request);
+  const paymentId = safeText(request.data?.paymentId);
+  const decision = safeText(request.data?.decision).toLowerCase();
+  const note = safeText(request.data?.note).slice(0, 500);
+  if (!paymentId || !["approve", "reject"].includes(decision)) {
+    throw new HttpsError("invalid-argument", "Choose a payment and an approve or reject decision.");
+  }
+  const paymentRef = db.doc("payments/" + paymentId);
+  const paymentSnap = await paymentRef.get();
+  if (!paymentSnap.exists) throw new HttpsError("not-found", "Payment record not found.");
+  const payment = paymentSnap.data();
+  if (payment.method !== "manual_mpesa" || payment.status !== "pending_review") {
+    throw new HttpsError("failed-precondition", "This payment is not awaiting manual M-Pesa review.");
+  }
+  if (decision === "reject") {
+    await paymentRef.set({
+      status: "rejected", reviewNote: note, reviewedBy: reviewer.uid,
+      reviewedAt: Timestamp.now(), updatedAt: Timestamp.now()
+    }, { merge: true });
+    if (payment.manualReceiptCode) {
+      await db.doc("manualMpesaReceipts/" + payment.manualReceiptCode).set({
+        status: "rejected", reviewedBy: reviewer.uid, reviewedAt: Timestamp.now()
+      }, { merge: true });
+    }
+    return { success: true, status: "rejected" };
+  }
+  await activateStudentPayment(paymentRef, payment, {
+    method: "manual_admin_verification",
+    receiptCode: payment.manualReceiptCode
+  });
+  await paymentRef.set({
+    reviewedBy: reviewer.uid, reviewedAt: Timestamp.now(),
+    reviewNote: note, status: "paid", updatedAt: Timestamp.now()
+  }, { merge: true });
+  if (payment.manualReceiptCode) {
+    await db.doc("manualMpesaReceipts/" + payment.manualReceiptCode).set({
+      status: "verified", reviewedBy: reviewer.uid, reviewedAt: Timestamp.now()
+    }, { merge: true });
+  }
+  await db.collection("audit_logs").add({
+    action: "student_manual_mpesa_payment_verified", actorId: reviewer.uid,
+    targetId: payment.userId, paymentId, amount: payment.amount,
+    currency: payment.currency, receiptCode: payment.manualReceiptCode || "",
+    createdAt: Timestamp.now()
+  });
+  return { success: true, status: "paid" };
+});
+
+exports.darajaStudentCallback = onRequest({ secrets: DARAJA_SECRETS, invoker: "public" }, async (req, res) => {
+  try {
+    const callback = req.body?.Body?.stkCallback;
+    const checkoutRequestId = safeText(callback?.CheckoutRequestID);
+    if (!checkoutRequestId) { res.status(400).json({ received: false }); return; }
+    const matches = await db.collection("payments")
+      .where("checkoutRequestId", "==", checkoutRequestId).limit(1).get();
+    if (matches.empty) { res.status(200).json({ ResultCode: 0, ResultDesc: "Callback acknowledged." }); return; }
+    const paymentDoc = matches.docs[0];
+    const payment = paymentDoc.data();
+    if (payment.status === "paid") { res.status(200).json({ ResultCode: 0, ResultDesc: "Already processed." }); return; }
+    if (Number(callback.ResultCode) !== 0) {
+      await paymentDoc.ref.set({
+        status: "failed", resultCode: Number(callback.ResultCode),
+        resultDescription: safeText(callback.ResultDesc).slice(0, 250),
+        updatedAt: Timestamp.now()
+      }, { merge: true });
+      res.status(200).json({ ResultCode: 0, ResultDesc: "Callback acknowledged." });
+      return;
+    }
+    const metadataItems = callback.CallbackMetadata?.Item || [];
+    const metadata = Object.fromEntries(metadataItems.map(item => [item.Name, item.Value]));
+    await paymentDoc.ref.set({
+      status: "verification_pending", callbackMetadata: metadata,
+      callbackReceivedAt: Timestamp.now(), updatedAt: Timestamp.now()
+    }, { merge: true });
+    const verified = await verifyDarajaStkCheckout(checkoutRequestId);
+    if (!verified) {
+      res.status(200).json({ ResultCode: 0, ResultDesc: "Payment verification is pending." });
+      return;
+    }
+    if (Number(metadata.Amount) !== Number(payment.amount)
+        || String(metadata.PhoneNumber || "") !== String(payment.phoneNumber || "")
+        || !safeText(metadata.MpesaReceiptNumber)) {
+      throw new Error("Student payment callback metadata did not match the payment record.");
+    }
+    await activateStudentPayment(paymentDoc.ref, payment, {
+      method: "daraja_stk_query",
+      receiptCode: safeText(metadata.MpesaReceiptNumber),
+      transactionDate: metadata.TransactionDate || null
+    });
+    await db.collection("audit_logs").add({
+      action: "student_mpesa_stk_payment_verified", actorId: "daraja_callback",
+      targetId: payment.userId, paymentId: paymentDoc.id,
+      receiptCode: safeText(metadata.MpesaReceiptNumber), amount: payment.amount,
+      currency: payment.currency, createdAt: Timestamp.now()
+    });
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Payment processed." });
+  } catch (error) {
+    console.error("Student Daraja callback processing failed:", error.message);
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Callback received for processing." });
+  }
+});
+
+
 function requireActiveInstitutionMember(request) {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Sign in to manage institution courses.");
