@@ -121,7 +121,11 @@ function renderPlans(data) {
       periodName.textContent = title;
       const amount = document.createElement("strong");
       amount.textContent = formatMoney(price, currency);
-      row.append(periodName, amount);
+      const choose = document.createElement("a");
+      choose.className = "premium-checkout-link";
+      choose.href = `payments.html?purchaseType=premium&plan=${encodeURIComponent(key)}&period=${period}`;
+      choose.textContent = "Continue to M-Pesa";
+      row.append(periodName, amount, choose);
       periods.append(row);
     }
     card.append(periods);
@@ -148,7 +152,7 @@ function renderPlans(data) {
 
     const note = document.createElement("p");
     note.className = "premium-purchase-note";
-    note.textContent = "Online membership checkout is not yet available.";
+    note.textContent = "Pay securely using M-Pesa STK Push or submit a manual M-Pesa receipt for administrator verification.";
     card.append(note);
     premiumPlansContainer.append(card);
   }
