@@ -1,232 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#351078">
+    <meta name="description" content="View and manage your Spark Stack Academy course assignments.">
+    <title>Assignments | Spark Stack Academy</title>
 
-<meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/student-core.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/assignments.css">
+    <link rel="stylesheet" href="css/responsive.css">
 
-<title>
-Assignments | Spark Stack Academy
-</title>
-
-<link rel="stylesheet"
-href="css/student-core.css">
-
-<link rel="stylesheet"
-href="css/components.css">
-
-<link rel="stylesheet"
-href="css/assignments.css">
-
-<link rel="stylesheet"
-href="css/responsive.css">
-
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
-
-<link rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-rel="stylesheet">
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
+    <script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
-
 <body>
-
-<div class="student-layout">
-
-<!-- SIDEBAR -->
-
-<aside
-id="sidebarContainer"
-class="sidebar-container">
-
-</aside>
-
-<div
-id="sidebarOverlay"
-class="sidebar-overlay">
-
-</div>
-
-<main class="student-main">
-
-<!-- TOPBAR -->
-
-<div
-id="topbarContainer"
-class="topbar-container">
-
-</div>
-
-<section class="dashboard-content assignments-page">
-
-<!-- HERO -->
-
-<div class="assignments-header">
-
-<div>
-
-<span class="page-badge">
-
-<i data-lucide="clipboard-list"></i>
-
-Assignments
-
-</span>
-
-<h1>
-
-Course Assignments
-
-</h1>
-
-<p>
-
-Complete and submit your assignments before the deadline.
-
-</p>
-
-</div>
-
-<div class="assignment-summary">
-
-<div class="summary-card">
-
-<strong id="pendingAssignments">
-
-0
-
-</strong>
-
-<span>
-
-Pending
-
-</span>
-
-</div>
-
-<div class="summary-card">
-
-<strong id="submittedAssignments">
-
-0
-
-</strong>
-
-<span>
-
-Submitted
-
-</span>
-
-</div>
-
-<div class="summary-card">
-
-<strong id="gradedAssignments">
-
-0
-
-</strong>
-
-<span>
-
-Graded
-
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- FILTER -->
-
-<div class="assignment-filter">
-
-<input
-type="search"
-id="assignmentSearch"
-placeholder="Search assignments...">
-
-<select id="statusFilter">
-
-<option value="all">
-All
-</option>
-
-<option value="pending">
-Pending
-</option>
-
-<option value="submitted">
-Submitted
-</option>
-
-<option value="graded">
-Graded
-</option>
-
-</select>
-
-</div>
-
-<!-- ASSIGNMENTS -->
-
-<div
-class="assignment-grid"
-id="assignmentContainer">
-
-<!-- Loaded by JS -->
-
-<div class="empty-state">
-
-<i data-lucide="clipboard-list"></i>
-
-<h3>
-
-No Assignments Yet
-
-</h3>
-
-<p>
-
-Assignments from your instructors will appear here.
-
-</p>
-
-</div>
-
-</div>
-
-</section>
-
-</main>
-
-</div>
-
-<script type="module"
-src="js/student-app.js"></script>
-
-<script type="module"
-src="js/assignments.js"></script>
-
-<script>
-
-lucide.createIcons();
-
-</script>
-
+    <div class="student-layout">
+        <aside id="sidebarContainer" class="sidebar-container" aria-label="Student navigation"></aside>
+        <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+        <main class="student-main">
+            <div id="topbarContainer" class="topbar-container"></div>
+
+            <section class="dashboard-content assignments-page" aria-labelledby="assignmentsTitle">
+                <header class="assignments-hero">
+                    <div class="assignments-hero-copy">
+                        <div class="assignments-eyebrow">
+                            <span class="assignments-eyebrow-icon" aria-hidden="true">
+                                <i data-lucide="clipboard-check"></i>
+                            </span>
+                            <span>SPARK STACK ACADEMY</span>
+                            <span class="assignments-eyebrow-divider" aria-hidden="true"></span>
+                            <span>YOUR LEARNING TASKS</span>
+                        </div>
+
+                        <h1 id="assignmentsTitle">Make every task <span>count.</span></h1>
+                        <p>Keep track of coursework, prepare your responses and submit your work before the deadline.</p>
+
+                        <a class="assignments-back-link" href="dashboard.html">
+                            <i data-lucide="arrow-left" aria-hidden="true"></i>
+                            Back to dashboard
+                        </a>
+                    </div>
+
+                    <div class="assignments-hero-art" aria-hidden="true">
+                        <div class="assignments-orbit assignments-orbit-one"></div>
+                        <div class="assignments-orbit assignments-orbit-two"></div>
+                        <div class="assignments-hero-emblem">
+                            <i data-lucide="notebook-pen"></i>
+                        </div>
+                        <span class="assignments-spark assignments-spark-one"></span>
+                        <span class="assignments-spark assignments-spark-two"></span>
+                    </div>
+                </header>
+
+                <section class="assignment-overview" aria-label="Your assignment overview">
+                    <div class="assignment-overview-heading">
+                        <div>
+                            <span class="assignments-section-kicker">YOUR COURSEWORK</span>
+                            <h2>Assignment overview</h2>
+                            <p>Progress updates from your own submissions.</p>
+                        </div>
+                    </div>
+
+                    <div class="assignment-summary">
+                        <article class="summary-card summary-pending">
+                            <span class="summary-icon" aria-hidden="true"><i data-lucide="clock-3"></i></span>
+                            <strong id="pendingAssignments">0</strong>
+                            <span>Pending</span>
+                        </article>
+                        <article class="summary-card summary-submitted">
+                            <span class="summary-icon" aria-hidden="true"><i data-lucide="send"></i></span>
+                            <strong id="submittedAssignments">0</strong>
+                            <span>Submitted</span>
+                        </article>
+                        <article class="summary-card summary-graded">
+                            <span class="summary-icon" aria-hidden="true"><i data-lucide="badge-check"></i></span>
+                            <strong id="gradedAssignments">0</strong>
+                            <span>Graded</span>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="assignment-workspace" aria-label="Assignment list">
+                    <div class="assignment-list-heading">
+                        <div>
+                            <span class="assignments-section-kicker">STAY ON TRACK</span>
+                            <h2>Your assignments</h2>
+                        </div>
+                        <span class="assignment-list-note">
+                            <i data-lucide="shield-check" aria-hidden="true"></i>
+                            Official course tasks
+                        </span>
+                    </div>
+
+                    <div class="assignment-filter">
+                        <label class="assignment-search" for="assignmentSearch">
+                            <i data-lucide="search" aria-hidden="true"></i>
+                            <input
+                                type="search"
+                                id="assignmentSearch"
+                                placeholder="Search by title, details or course..."
+                                autocomplete="off"
+                            >
+                        </label>
+
+                        <label class="assignment-status-filter" for="statusFilter">
+                            <span>Status</span>
+                            <select id="statusFilter">
+                                <option value="all">All assignments</option>
+                                <option value="pending">Pending</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="graded">Graded</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div
+                        class="assignment-grid"
+                        id="assignmentContainer"
+                        aria-live="polite"
+                        aria-busy="true"
+                    >
+                        <div class="assignment-state" role="status">
+                            <span class="assignment-state-icon" aria-hidden="true">
+                                <i data-lucide="loader-circle"></i>
+                            </span>
+                            <h3>Loading your assignments</h3>
+                            <p>Checking your enrolled courses and submissions.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="assignments-page-footer">
+                    <i data-lucide="lightbulb" aria-hidden="true"></i>
+                    <p>Need help with a task? Open the assignment to review its instructions and submission details.</p>
+                </footer>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="js/student-app.js"></script>
+    <script type="module" src="js/assignments.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.lucide) window.lucide.createIcons();
+        });
+    </script>
 </body>
-
 </html>
