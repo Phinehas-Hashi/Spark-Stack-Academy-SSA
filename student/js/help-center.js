@@ -17,7 +17,7 @@ import {
     addDoc, collection, doc, onSnapshot, orderBy, query,
     serverTimestamp, updateDoc, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { submitReport, sendReportMessage } from "../../js/reports.js";
+import { submitReport } from "../../js/reports.js";
 
 
 console.log("🛟 Help Center Loaded");
