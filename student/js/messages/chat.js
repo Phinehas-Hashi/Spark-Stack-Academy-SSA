@@ -134,10 +134,20 @@ function renderMessage(message, peerLastReadAt) {
 
 function renderMessages(snapshot, peerLastReadAt) {
   const fragment = document.createDocumentFragment();
-  snapshot.forEach(item => fragment.append(renderMessage(
-    { id: item.id, ...item.data() },
-    peerLastReadAt
-  )));
+  const latestMessages = snapshot.docs.slice().reverse();
+
+  if (!latestMessages.length) {
+    const welcome = document.createElement("p");
+    welcome.className = "chat-system-notice";
+    welcome.textContent = "This is the beginning of your private conversation.";
+    fragment.append(welcome);
+  } else {
+    latestMessages.forEach(item => fragment.append(renderMessage(
+      { id: item.id, ...item.data() },
+      peerLastReadAt
+    )));
+  }
+
   messagesBox.replaceChildren(fragment);
   messagesBox.scrollTop = messagesBox.scrollHeight;
 }
@@ -173,7 +183,7 @@ function setTyping(active) {
 function startChatListeners() {
   const messagesQuery = query(
     collection(db, "chats", chatId, "messages"),
-    orderBy("timestamp", "asc"),
+    orderBy("timestamp", "desc"),
     limit(100)
   );
 
