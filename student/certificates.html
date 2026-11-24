@@ -1,216 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>My Certificates | Spark Stack Academy</title>
-
-    <!-- CORE -->
-    <link rel="stylesheet" href="css/student-core.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/certificates.css">
-    <link rel="stylesheet" href="css/responsive.css">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#21064F">
+<title>My Certificates | Spark Stack Academy</title>
+<link rel="stylesheet" href="css/student-core.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/certificates.css">
+<link rel="stylesheet" href="css/responsive.css">
 </head>
-
-
 <body>
-
-
-    <!-- =====================================
-         STUDENT APP
-    ====================================== -->
-
-    <div id="studentApp">
-
-
-        <!-- SIDEBAR -->
-
-        <aside id="studentSidebar"></aside>
-
-
-        <!-- MAIN -->
-
-        <main class="student-main">
-
-
-            <!-- TOPBAR -->
-
-            <header id="studentTopbar"></header>
-
-
-            <!-- =================================
-                 CERTIFICATES PAGE
-            ================================== -->
-
-            <section class="certificates-page">
-
-
-                <!-- PAGE HEADER -->
-
-                <div class="page-header">
-
-                    <div>
-
-                        <span class="page-eyebrow">
-                            ACHIEVEMENTS
-                        </span>
-
-                        <h1>
-                            My Certificates
-                        </h1>
-
-                        <p>
-                            View and download certificates
-                            you've earned at Spark Stack Academy.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <!-- =================================
-                     STATS
-                ================================== -->
-
-                <div class="certificate-stats">
-
-
-                    <div class="certificate-stat-card">
-
-                        <div class="stat-icon">
-                            <i data-lucide="award"></i>
-                        </div>
-
-                        <div>
-
-                            <span>
-                                Certificates Earned
-                            </span>
-
-                            <strong id="certificateCount">
-                                0
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="certificate-stat-card">
-
-                        <div class="stat-icon">
-                            <i data-lucide="graduation-cap"></i>
-                        </div>
-
-                        <div>
-
-                            <span>
-                                Courses Completed
-                            </span>
-
-                            <strong id="completedCourses">
-                                0
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-
-                <!-- =================================
-                     CERTIFICATE LIST
-                ================================== -->
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <h2>
-                            Your Certificates
-                        </h2>
-
-                        <p>
-                            Your verified academic achievements.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="certificatesContainer"
-                    class="certificates-grid"
-                >
-
-
-                    <!-- LOADING -->
-
-                    <div class="certificate-loading">
-
-                        <i data-lucide="loader"></i>
-
-                        <h3>
-                            Loading certificates...
-                        </h3>
-
-                        <p>
-                            Fetching your achievements.
-                        </p>
-
-                    </div>
-
-
-                </div>
-
-
-            </section>
-
-
-        </main>
-
-    </div>
-
-
-    <!-- =====================================
-         LUCIDE
-    ====================================== -->
-
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-
-    <!-- =====================================
-         STUDENT APP
-    ====================================== -->
-
-    <script
-        type="module"
-        src="js/student-app.js"
-    ></script>
-
-
-    <!-- =====================================
-         CERTIFICATES
-    ====================================== -->
-
-    <script
-        type="module"
-        src="js/certificates.js"
-    ></script>
-
-
+<div id="studentApp">
+<aside id="studentSidebar"></aside>
+<main class="student-main">
+<header id="studentTopbar"></header>
+<section class="certificates-page" aria-labelledby="certificatesPageTitle">
+<div class="page-header">
+<div>
+<span class="page-eyebrow">ACHIEVEMENTS</span>
+<h1 id="certificatesPageTitle">My Certificates</h1>
+<p>Your verified learning milestones from Spark Stack Academy.</p>
+</div>
+<div class="certificate-header-mark" aria-hidden="true"><i data-lucide="award"></i></div>
+</div>
+<div class="certificate-intro">
+<span class="certificate-intro-icon" aria-hidden="true"><i data-lucide="shield-check"></i></span>
+<p>Certificates are issued and maintained by Academy staff. Open a certificate to view its verified record or save a PDF copy.</p>
+</div>
+<div class="certificate-stats" aria-label="Certificate summary">
+<article class="certificate-stat-card">
+<span class="stat-icon" aria-hidden="true"><i data-lucide="award"></i></span>
+<div><span>Certificates Earned</span><strong id="certificateCount" aria-live="polite">—</strong></div>
+</article>
+<article class="certificate-stat-card">
+<span class="stat-icon" aria-hidden="true"><i data-lucide="graduation-cap"></i></span>
+<div><span>Courses Certified</span><strong id="completedCourses" aria-live="polite">—</strong></div>
+</article>
+</div>
+<div class="section-heading">
+<div><span class="section-kicker">YOUR RECORD</span><h2>Your Certificates</h2><p>Each record is retrieved from your signed-in student account.</p></div>
+</div>
+<div id="certificatesContainer" class="certificates-grid" aria-live="polite" aria-busy="true">
+<div class="certificate-loading" role="status">
+<i data-lucide="loader-circle" aria-hidden="true"></i>
+<h3>Loading certificates</h3><p>Retrieving your verified achievements.</p>
+</div>
+</div>
+</section>
+</main>
+</div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script type="module" src="js/student-app.js"></script>
+<script type="module" src="js/certificates.js"></script>
 </body>
-
 </html>
