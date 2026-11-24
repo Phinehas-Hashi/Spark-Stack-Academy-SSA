@@ -7,6 +7,11 @@ import { db, auth } from "../../js/firebase.js";
 import {
     doc,
     getDoc,
+    getDocs,
+    collection,
+    query,
+    where,
+    limit,
     setDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -150,11 +155,16 @@ function renderResources(resources) {
 }
 
 async function loadSubmission(uid) {
-    const submissionRef = doc(db, "submissions", `${assignmentId}_${uid}`);
-
     try {
-        const snapshot = await getDoc(submissionRef);
-        currentSubmission = snapshot.exists() ? snapshot.data() : null;
+        // Query only the signed-in student's own record. This also handles
+        // first-time submissions without requesting a missing document.
+        const snapshot = await getDocs(query(
+            collection(db, "submissions"),
+            where("studentId", "==", uid),
+            where("assignmentId", "==", assignmentId),
+            limit(1)
+        ));
+        currentSubmission = snapshot.empty ? null : snapshot.docs[0].data();
         submissionLoaded = true;
 
         if (currentSubmission) {
