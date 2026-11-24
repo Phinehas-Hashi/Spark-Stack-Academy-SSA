@@ -63,3 +63,4 @@
 @media(max-width:760px) { .settings-header { padding:22px; }.settings-card { padding:19px; }.settings-grid { grid-template-columns:1fr;gap:13px; } }
 @media(max-width:520px) { .settings-header { align-items:flex-start;flex-direction:column;padding:19px; }.settings-profile-link { width:100%; }.settings-card { padding:16px;border-radius:16px; }.security-status-row,.premium-status { align-items:flex-start;flex-direction:column; }.outline-setting-btn,.premium-btn { width:100%; }.settings-form-footer { align-items:stretch;flex-direction:column; }.primary-setting-btn { width:100%; }.toggle-row { min-height:72px;gap:10px; } }
 @media(prefers-reduced-motion:reduce) { .toggle-row input,.toggle-row input::after { transition:none; } }
+.settings-note { margin:12px 0 0;padding:10px 12px;border-left:3px solid #d4af37;border-radius:0 9px 9px 0;background:#fcfaf4;color:#82765f;font-size:10px;line-height:1.55; }
