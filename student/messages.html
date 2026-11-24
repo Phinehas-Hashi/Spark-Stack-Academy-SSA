@@ -1,293 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#21064F">
+  <meta name="description" content="Your private conversations on Spark Stack Academy.">
+  <title>Messages | Spark Stack Academy</title>
 
-<meta charset="UTF-8">
+  <link rel="stylesheet" href="css/student-core.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/messages.css">
+  <link rel="stylesheet" href="css/responsive.css">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-
-<title>
-Messages | Spark Stack Academy
-</title>
-
-
-<!-- =========================
-     PAGE CSS
-========================= -->
-
-<link rel="stylesheet" href="css/student-core.css">
-
-<link rel="stylesheet" href="css/components.css">
-
-<link rel="stylesheet" href="css/messages.css">
-
-<link rel="stylesheet" href="css/responsive.css">
-
-
-
-<!-- =========================
-     FONTS
-========================= -->
-
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
-
-<link rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-rel="stylesheet">
-
-
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-
-
 <body>
-
-
-
-<!-- =================================
-     APP OVERLAY COMPONENTS
-     Injected by student-app.js
-================================= -->
-
-
-
-
-<!-- =================================
-     FULL SCREEN MESSAGE PAGE
-================================= -->
-
-
-<div class="messages-page">
-
-
-
-<!-- HEADER -->
-
-<header class="messages-header">
-
-
-<div class="messages-title">
-
-
-<h1>
-
-Messages
-
-</h1>
-
-
-<p>
-
-Stay connected with Spark Stack Academy
-
-</p>
-
-
-</div>
-
-
-
-<a href="new-chat.html"
-class="new-chat-btn">
-
-
-<i data-lucide="square-pen"></i>
-
-
-<span>
-
-New Chat
-
-</span>
-
-
-</a>
-
-
-
-</header>
-
-
-
-
-
-<!-- SEARCH -->
-
-<section class="search-section">
-
-
-<div class="search-box">
-
-
-<i data-lucide="search"></i>
-
-
-<input
-
-type="search"
-
-id="searchChats"
-
-placeholder="Search conversations...">
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-<!-- FILTERS -->
-
-
-<section class="chat-filters">
-
-
-<button class="filter active">
-
-All
-
-</button>
-
-
-<button class="filter">
-
-Unread
-
-</button>
-
-
-<button class="filter">
-
-Groups
-
-</button>
-
-
-</section>
-
-
-
-
-
-<!-- CONVERSATIONS -->
-
-
-<section
-
-id="conversationList"
-
-class="conversation-list">
-
-
-</section>
-
-
-
-
-
-<!-- EMPTY STATE -->
-
-
-<section
-
-id="emptyState"
-
-class="empty-state">
-
-
-
-<div class="empty-icon">
-
-<i data-lucide="messages-square"></i>
-
-</div>
-
-
-
-<h2>
-
-No conversations yet
-
-</h2>
-
-
-
-<p>
-
-Start a conversation with students,
-instructors or academy staff.
-
-</p>
-
-
-
-<a href="new-chat.html"
-class="start-chat-btn">
-
-
-<i data-lucide="plus"></i>
-
-
-Start Chatting
-
-
-</a>
-
-
-
-</section>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<!-- =================================
-     SCRIPTS
-================================= -->
-
-
-<script
-type="module"
-src="js/student-app.js">
-</script>
-
-
-<script
-type="module"
-src="js/messages/messages.js">
-</script>
-
-
-<script>
-
-lucide.createIcons();
-
-</script>
-
-
-
+  <main class="messages-page">
+    <header class="messages-header">
+      <div class="messages-heading">
+        <span class="messages-eyebrow">STUDENT PORTAL</span>
+        <h1>Messages</h1>
+        <p>Keep in touch with your instructors and academy team.</p>
+      </div>
+
+      <a href="new-chat.html" class="new-chat-btn" aria-label="Start a new conversation">
+        <i data-lucide="square-pen" aria-hidden="true"></i>
+        <span>New message</span>
+      </a>
+    </header>
+
+    <section class="messages-workspace" aria-label="Your conversations">
+      <div class="messages-toolbar">
+        <label class="search-box" for="searchChats">
+          <i data-lucide="search" aria-hidden="true"></i>
+          <input
+            type="search"
+            id="searchChats"
+            placeholder="Search conversations"
+            autocomplete="off"
+            aria-label="Search conversations">
+        </label>
+
+        <div class="chat-filters" role="group" aria-label="Filter conversations">
+          <button class="filter active" type="button" data-filter="all" aria-pressed="true">All</button>
+          <button class="filter" type="button" data-filter="unread" aria-pressed="false">Unread</button>
+        </div>
+      </div>
+
+      <div id="conversationStatus" class="conversation-status" role="status" aria-live="polite">
+        Loading your conversations…
+      </div>
+
+      <section
+        id="conversationList"
+        class="conversation-list"
+        aria-label="Conversation list"
+        aria-live="polite"
+        aria-busy="true">
+      </section>
+
+      <section id="emptyState" class="empty-state" hidden>
+        <div class="empty-icon" aria-hidden="true">
+          <i data-lucide="messages-square"></i>
+        </div>
+        <h2 id="emptyStateTitle">No conversations yet</h2>
+        <p id="emptyStateText">Start a conversation with an instructor to ask a question or get learning support.</p>
+        <a href="new-chat.html" class="start-chat-btn">
+          <i data-lucide="plus" aria-hidden="true"></i>
+          <span>Start a conversation</span>
+        </a>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="js/student-app.js"></script>
+  <script type="module" src="js/messages/messages.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => window.lucide?.createIcons());
+  </script>
 </body>
-
 </html>
