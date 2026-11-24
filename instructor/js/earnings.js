@@ -33,7 +33,7 @@ import {
 const DEFAULT_SETTINGS = {
     platformTaxPercent: 0,
     withdrawalFeePercent: 0,
-    minimumWithdrawal: 100,
+    minimumWithdrawal: 1000,
     premiumMonthlyPrice: 999,
     withdrawalsEnabled: true,
     mpesaWithdrawalsEnabled: true,
@@ -103,47 +103,19 @@ function formatDate(timestamp) {
 // ============================================================
 
 async function loadEarningsSettings() {
-
     try {
-
-        const ref =
-            doc(
-                db,
-                "platformSettings",
-                "earnings"
-            );
-
-        const snap =
-            await getDoc(ref);
-
-
-        if (snap.exists()) {
-
-            earningsSettings = {
-                ...DEFAULT_SETTINGS,
-                ...snap.data()
-            };
-
-        }
-
-
-        console.log(
-            "✓ Earnings settings loaded",
-            earningsSettings
-        );
-
-
+        const getSettings = httpsCallable(getFunctions(), "getInstructorEarningsSettings");
+        const result = await getSettings();
+        earningsSettings = {
+            ...DEFAULT_SETTINGS,
+            ...(result.data || {})
+        };
+        console.log("Instructor earnings settings loaded", earningsSettings);
     } catch (error) {
-
-        console.error(
-            "❌ Failed loading earnings settings:",
-            error
-        );
-
+        console.error("Failed loading instructor earnings settings:", error);
+        earningsSettings = { ...DEFAULT_SETTINGS };
     }
-
 }
-
 
 // ============================================================
 // LOAD INSTRUCTOR PROFILE
