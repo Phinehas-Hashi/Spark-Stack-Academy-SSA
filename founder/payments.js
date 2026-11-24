@@ -28,6 +28,8 @@ import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/
 const paymentFunctions = getFunctions(app, "us-central1");
 import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 const reviewManualPayment = httpsCallable(paymentFunctions, "reviewStudentManualPayment");
+const getManualSettings = httpsCallable(paymentFunctions, "getManualMpesaSettings");
+const saveManualSettings = httpsCallable(paymentFunctions, "saveManualMpesaSettings");
 
 
 import {
@@ -130,16 +132,62 @@ doc(db,"system","payment_settings");
    INITIALIZER
 =================================== */
 
-async function initializePayments(){
+async function initializePayments() {
+  await Promise.allSettled([loadGatewaySettings(), loadManualMpesaSettings()]);
+  listenForTransactions();
+  attachEvents();
+}
 
-loadGatewaySettings();
+async function loadManualMpesaSettings() {
+  const status = document.getElementById("manualMpesaSettingsStatus");
+  try {
+    const result = await getManualSettings();
+    const data = result.data || {};
+    const fields = {
+      manualMpesaEnabled: data.enabled === true,
+      manualMpesaMethod: data.method || "paybill",
+      manualMpesaBusinessName: data.businessName || "",
+      manualMpesaNumber: data.number || "",
+      manualMpesaAccount: data.account || "",
+      manualMpesaInstructions: data.instructions || ""
+    };
+    for (const [id, value] of Object.entries(fields)) {
+      const node = document.getElementById(id);
+      if (!node) continue;
+      if (node.type === "checkbox") node.checked = value;
+      else node.value = value;
+    }
+    if (status) status.textContent = data.enabled ? "Manual M-Pesa is enabled." : "Manual M-Pesa is currently disabled.";
+  } catch (error) {
+    console.error("Manual M-Pesa settings load failed:", error);
+    if (status) status.textContent = "Could not load manual M-Pesa settings. Check Founder access.";
+  }
+}
 
-listenForTransactions();
-
-loadPaymentSettings();
-
-attachEvents();
-
+async function saveManualMpesaSettings() {
+  const button = document.getElementById("saveManualMpesaSettings");
+  const status = document.getElementById("manualMpesaSettingsStatus");
+  if (!button) return;
+  button.disabled = true;
+  button.textContent = "Saving…";
+  try {
+    await saveManualSettings({
+      enabled: document.getElementById("manualMpesaEnabled")?.checked === true,
+      method: document.getElementById("manualMpesaMethod")?.value || "paybill",
+      businessName: document.getElementById("manualMpesaBusinessName")?.value.trim() || "",
+      number: document.getElementById("manualMpesaNumber")?.value.trim() || "",
+      account: document.getElementById("manualMpesaAccount")?.value.trim() || "",
+      instructions: document.getElementById("manualMpesaInstructions")?.value.trim() || ""
+    });
+    if (status) status.textContent = "Manual M-Pesa instructions saved.";
+    showToast("Manual M-Pesa instructions saved.", "success");
+  } catch (error) {
+    console.error("Manual M-Pesa settings save failed:", error);
+    if (status) status.textContent = error.message || "Could not save manual M-Pesa settings.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Save Manual M-Pesa Instructions";
+  }
 }
 
 
@@ -148,6 +196,7 @@ attachEvents();
 =================================== */
 
 function attachEvents(){
+  document.getElementById("saveManualMpesaSettings")?.addEventListener("click", saveManualMpesaSettings);
 
 refreshBtn?.addEventListener(
 
@@ -157,7 +206,7 @@ refreshBtn?.addEventListener(
 
 loadGatewaySettings();
 
-loadPaymentSettings();
+loadManualMpesaSettings();
 
 listenForTransactions();
 
@@ -901,4 +950,3 @@ function showToast(message, type="success") {
     console.log(`[SSA Payments:${type}] ${message}`);
 }
 
-initPayments();
