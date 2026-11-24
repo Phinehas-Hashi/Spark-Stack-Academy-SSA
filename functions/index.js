@@ -519,11 +519,12 @@ function instructorEnrollmentIsActive(enrollment) {
 
 exports.getInstructorFinanceData = onCall(async request => {
   const { uid } = await requireActiveInstructor(request);
-  const [coursesSnap, earningsSnap, withdrawalsSnap, settingsSnap] = await Promise.all([
+  const [coursesSnap, earningsSnap, withdrawalsSnap, settingsSnap, walletSnap] = await Promise.all([
     db.collection("courses").where("instructorId", "==", uid).get(),
     db.collection("instructorEarnings").where("instructorId", "==", uid).get(),
     db.collection("withdrawalRequests").where("instructorId", "==", uid).get(),
-    db.doc("platformSettings/earnings").get()
+    db.doc("platformSettings/earnings").get(),
+    db.doc("instructorWallets/" + uid).get()
   ]);
   const courses = new Map(coursesSnap.docs.map(item => [item.id, item.data()]));
   const ids = [...courses.keys()];
@@ -561,12 +562,12 @@ exports.getInstructorFinanceData = onCall(async request => {
       status:safeText(w.status,"pending").toLowerCase(),
       createdAt:w.createdAt?.toMillis ? w.createdAt.toMillis() : null };
   }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-  const earned = earnings.filter(e => !["reversed","void","voided","refunded"].includes(e.status))
-    .reduce((sum,e) => sum + e.netAmount,0);
+  const walletRecord = walletSnap.exists ? walletSnap.data() : {};
+  const walletBalance = Math.max(0, Number(walletRecord.balance || 0));
   const reserved = withdrawals.filter(w => ["pending","approved","processing"].includes(w.status))
     .reduce((sum,w) => sum + w.amount,0);
-  const paidOut = withdrawals.filter(w => ["paid","completed","successful"].includes(w.status))
-    .reduce((sum,w) => sum + w.amount,0);
+  const paidOut = Math.max(0, Number(walletRecord.totalPaid || 0));
+  const earned = walletBalance + paidOut;
   const settings = settingsSnap.exists ? settingsSnap.data() : {};
   const stats = payments.reduce((out,p) => {
     if (["paid","success","successful","completed"].includes(p.status)) out.successful += p.amount;
@@ -575,8 +576,8 @@ exports.getInstructorFinanceData = onCall(async request => {
     return out;
   }, {successful:0,pending:0,failed:0});
   return { payments, earnings, withdrawals, wallet:{
-    earned, reserved, paidOut, available:Math.max(0,earned-reserved-paidOut),
-    pending:reserved, lifetime:earned
+    earned, reserved, paidOut, available:Math.max(0,walletBalance-reserved),
+    pending:reserved, lifetime:earned, walletStatus:safeText(walletRecord.status, walletSnap.exists ? "active" : "not_created")
   }, settings:{
     minimumWithdrawal:Number(settings.minimumWithdrawal || 100),
     withdrawalFeePercent:Number(settings.withdrawalFeePercent || 0),
@@ -599,20 +600,21 @@ exports.requestInstructorWithdrawal = onCall(async request => {
   if (!Number.isFinite(feePercent) || feePercent < 0 || feePercent > 100) throw new HttpsError("failed-precondition","Withdrawal fee settings are invalid.");
   const fee = Math.round(amount * feePercent) / 100;
   const requestRef = db.collection("withdrawalRequests").doc();
+  const walletRef = db.doc("instructorWallets/" + uid);
   await db.runTransaction(async transaction => {
-    const [earnedSnap, requestsSnap] = await Promise.all([
-      transaction.get(db.collection("instructorEarnings").where("instructorId","==",uid)),
+    const [walletSnap, requestsSnap] = await Promise.all([
+      transaction.get(walletRef),
       transaction.get(db.collection("withdrawalRequests").where("instructorId","==",uid))
     ]);
-    const earned = earnedSnap.docs.reduce((sum,item) => {
-      const e=item.data();
-      return ["reversed","void","voided","refunded"].includes(safeText(e.status).toLowerCase()) ? sum : sum+Number(e.netAmount||0);
-    },0);
+    if (!walletSnap.exists) throw new HttpsError("failed-precondition","Your instructor wallet has not been provisioned. Contact Academy Finance.");
+    const wallet = walletSnap.data();
+    if (safeText(wallet.status,"active").toLowerCase() !== "active") throw new HttpsError("failed-precondition","Your instructor wallet is currently restricted. Contact Academy Finance.");
     const committed = requestsSnap.docs.reduce((sum,item) => {
       const w=item.data(), status=safeText(w.status).toLowerCase();
-      return ["pending","approved","processing","paid","completed","successful"].includes(status) ? sum+Number(w.amount||0) : sum;
+      return ["pending","approved","processing"].includes(status) ? sum+Number(w.amount||0) : sum;
     },0);
-    if (amount > Math.max(0,earned-committed)) throw new HttpsError("failed-precondition","Your available balance changed. Refresh the wallet and try again.");
+    const available = Math.max(0,Number(wallet.balance||0)-committed);
+    if (amount > available) throw new HttpsError("failed-precondition","Your available wallet balance changed. Refresh the wallet and try again.");
     transaction.create(requestRef,{instructorId:uid,amount,withdrawalFee:fee,netAmount:Math.max(0,amount-fee),
       method,account,status:"pending",createdAt:Timestamp.now(),updatedAt:Timestamp.now()});
   });
