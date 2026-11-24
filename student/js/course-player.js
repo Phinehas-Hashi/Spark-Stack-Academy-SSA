@@ -6,10 +6,9 @@
 import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-    doc, getDoc, setDoc, collection, query, where, getDocs, serverTimestamp
+    doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { awardXP, XP_REWARDS, updateLearningStreak } from "./achievements.js";
-import { issueCertificate } from "./certificate-engine.js";
 
 let currentUser = null;
 let course = null;
@@ -17,6 +16,8 @@ let lessons = [];
 let currentLessonIndex = 0;
 let completedLessons = [];
 let courseId = null;
+let progressEnrollmentRef = null;
+let progressEnrollmentData = null;
 
 const $ = id => document.getElementById(id);
 const courseLocked = $("courseLocked");
@@ -234,26 +235,48 @@ async function loadLiveClassSessions() {
 }
 
 async function loadStudentProgress() {
+    progressEnrollmentRef = null;
+    progressEnrollmentData = null;
+    completedLessons = [];
+    currentLessonIndex = 0;
+    const candidates = [];
+    const canonicalRef = doc(db, 'enrollments', currentUser.uid + '_' + courseId);
     try {
-        const snap = await getDoc(doc(db, "courseProgress", `${currentUser.uid}_${courseId}`));
-        if (!snap.exists()) return;
-
-        const data = snap.data() || {};
-        completedLessons = Array.isArray(data.completedLessons) ? data.completedLessons : [];
-
-        if (data.currentLessonId) {
-            const index = lessons.findIndex(l => l.id === data.currentLessonId);
-            if (index >= 0) currentLessonIndex = index;
-        } else {
-            currentLessonIndex = Number(data.currentLesson || 0);
-        }
-
-        if (currentLessonIndex < 0 || currentLessonIndex >= lessons.length) currentLessonIndex = 0;
-    } catch (error) {
-        console.warn("Progress load failed:", error);
+        const canonical = await getDoc(canonicalRef);
+        if (canonical.exists()) candidates.push({ ref: canonical.ref, data: canonical.data() || {} });
+    } catch (error) { console.warn('Canonical progress lookup unavailable:', error); }
+    const queries = [
+        query(collection(db, 'enrollments'), where('userId', '==', currentUser.uid), where('courseId', '==', courseId)),
+        query(collection(db, 'enrollments'), where('studentId', '==', currentUser.uid), where('courseId', '==', courseId))
+    ];
+    const results = await Promise.allSettled(queries.map(item => getDocs(item)));
+    for (const result of results) {
+        if (result.status !== 'fulfilled') continue;
+        result.value.forEach(item => {
+            if (!candidates.some(candidate => candidate.ref.path === item.ref.path)) candidates.push({ ref: item.ref, data: item.data() || {} });
+        });
     }
+    if (candidates.length) {
+        const selected = candidates.find(item => item.ref.path === canonicalRef.path) || candidates[0];
+        progressEnrollmentRef = selected.ref;
+        progressEnrollmentData = selected.data;
+    } else {
+        try {
+            const nested = await getDoc(doc(db, 'students', currentUser.uid, 'enrollments', courseId));
+            if (nested.exists()) progressEnrollmentData = nested.data() || {};
+        } catch (error) { console.warn('Legacy enrollment progress lookup unavailable:', error); }
+    }
+    const data = progressEnrollmentData || {};
+    completedLessons = Array.isArray(data.completedLessons) ? data.completedLessons : [];
+    const lastLessonId = data.lastLessonId || data.lastLesson || null;
+    if (lastLessonId) {
+        const index = lessons.findIndex(lesson => lesson.id === lastLessonId);
+        if (index >= 0) currentLessonIndex = index;
+    } else if (Number.isInteger(Number(data.currentLesson))) {
+        currentLessonIndex = Number(data.currentLesson);
+    }
+    if (currentLessonIndex < 0 || currentLessonIndex >= lessons.length) currentLessonIndex = 0;
 }
-
 function renderLessons() {
     if (!lessonList) return;
 
@@ -444,8 +467,7 @@ async function completeCurrentLesson() {
 
         if (completedLessons.length === lessons.length) {
             await awardXP(currentUser.uid, XP_REWARDS.course || 50, `Completed course: ${course.title || "Course"}`, `course_${courseId}`);
-            const certificate = await issueCertificate(currentUser.uid, course);
-            toast(certificate?.alreadyExists ? "Course completed! 🎓" : "Course completed! 🎓 Certificate earned!");
+            toast("Course completed! Certificate issuance is handled by Academy staff.");
         } else if (currentLessonIndex < lessons.length - 1) {
             setTimeout(() => showLesson(currentLessonIndex + 1), 650);
         }
@@ -467,37 +489,20 @@ function updateProgress() {
 }
 
 async function saveProgress() {
-    if (!currentUser || !courseId) return;
-
-    const percentage = lessons.length ? Math.round((completedLessons.length / lessons.length) * 100) : 0;
-    const progress = {
-        userId: currentUser.uid,
-        courseId,
-        completedLessons,
-        currentLessonId: lessons[currentLessonIndex]?.id || null,
-        currentLesson: currentLessonIndex,
-        progress: percentage,
-        updatedAt: serverTimestamp()
-    };
-
-    await setDoc(doc(db, "courseProgress", `${currentUser.uid}_${courseId}`), progress, { merge: true });
-
-    try {
-        const q = query(collection(db, "enrollments"), where("userId", "==", currentUser.uid), where("courseId", "==", courseId));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-            await setDoc(snap.docs[0].ref, {
-                progress: percentage,
-                lastLesson: lessons[currentLessonIndex]?.id || null,
-                status: percentage >= 100 ? "completed" : "active",
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-        }
-    } catch (error) {
-        console.warn("Enrollment progress update skipped:", error);
+    if (!currentUser || !courseId) throw new Error('Student session or course is unavailable.');
+    if (!progressEnrollmentRef) {
+        throw new Error('This enrollment is managed by the Academy and does not allow direct progress updates. Contact your instructor if your progress is not being recorded.');
     }
+    const percentage = lessons.length ? Math.round((completedLessons.length / lessons.length) * 100) : 0;
+    await updateDoc(progressEnrollmentRef, {
+        progress: percentage,
+        completedLessons: [...new Set(completedLessons)],
+        lastLessonId: lessons[currentLessonIndex]?.id || null,
+        lastAccessedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    });
+    progressEnrollmentData = { ...(progressEnrollmentData || {}), progress: percentage, completedLessons: [...new Set(completedLessons)], lastLessonId: lessons[currentLessonIndex]?.id || null };
 }
-
 async function loadNotes(lesson) {
     if (!lessonNotes || !currentUser || !lesson) return;
     lessonNotes.value = "";
