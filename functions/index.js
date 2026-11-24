@@ -560,13 +560,16 @@ exports.getInstructorFinanceData = onCall(async request => {
     return { id:item.id, amount:Number(w.amount || 0), withdrawalFee:Number(w.withdrawalFee || 0),
       netAmount:Number(w.netAmount || 0), method:safeText(w.method),
       status:safeText(w.status,"pending").toLowerCase(),
+      walletBalanceDebited:w.walletBalanceDebited === true,
       createdAt:w.createdAt?.toMillis ? w.createdAt.toMillis() : null };
   }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
   const walletRecord = walletSnap.exists ? walletSnap.data() : {};
   const walletBalance = Math.max(0, Number(walletRecord.balance || 0));
   const reserved = withdrawals.filter(w => ["pending","approved","processing"].includes(w.status))
     .reduce((sum,w) => sum + w.amount,0);
-  const paidOut = Math.max(0, Number(walletRecord.totalPaid || 0));
+  const legacyPaid = withdrawals.filter(w => ["paid","completed","successful"].includes(w.status) && w.walletBalanceDebited !== true)
+    .reduce((sum,w) => sum + w.amount,0);
+  const paidOut = Math.max(0, Number(walletRecord.totalPaid || 0)) + legacyPaid;
   const earned = walletBalance + paidOut;
   const settings = settingsSnap.exists ? settingsSnap.data() : {};
   const stats = payments.reduce((out,p) => {
@@ -576,7 +579,7 @@ exports.getInstructorFinanceData = onCall(async request => {
     return out;
   }, {successful:0,pending:0,failed:0});
   return { payments, earnings, withdrawals, wallet:{
-    earned, reserved, paidOut, available:Math.max(0,walletBalance-reserved),
+    earned, reserved, paidOut, available:Math.max(0,walletBalance-reserved-legacyPaid),
     pending:reserved, lifetime:earned, walletStatus:safeText(walletRecord.status, walletSnap.exists ? "active" : "not_created")
   }, settings:{
     minimumWithdrawal:Number(settings.minimumWithdrawal || 100),
@@ -612,7 +615,9 @@ exports.requestInstructorWithdrawal = onCall(async request => {
     if (safeText(wallet.status,"active").toLowerCase() !== "active") throw new HttpsError("failed-precondition","Your instructor wallet is currently restricted. Contact Academy Finance.");
     const committed = requestsSnap.docs.reduce((sum,item) => {
       const w=item.data(), status=safeText(w.status).toLowerCase();
-      return ["pending","approved","processing"].includes(status) ? sum+Number(w.amount||0) : sum;
+      if (["pending","approved","processing"].includes(status)) return sum+Number(w.amount||0);
+      if (["paid","completed","successful"].includes(status) && w.walletBalanceDebited !== true) return sum+Number(w.amount||0);
+      return sum;
     },0);
     const available = Math.max(0,Number(wallet.balance||0)-committed);
     if (amount > available) throw new HttpsError("failed-precondition","Your available wallet balance changed. Refresh the wallet and try again.");
