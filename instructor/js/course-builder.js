@@ -1972,7 +1972,7 @@ function previewCourse() {
                     </div>
                     <p>${escapeHTML(lesson.description || lesson.content || "Lesson content has not been added yet.")}</p>
                     ${objectives.length ? `<div class="builder-preview-objectives"><b>Learning objectives</b><ul>${objectives.map(item => `<li>${escapeHTML(item)}</li>`).join("")}</ul></div>` : ""}
-                    ${resources.length ? `<div class="builder-preview-resources"><b>Resources</b>${resources.map(resource => `<a href="${escapeHTML(resource.url || "#")}" target="_blank" rel="noopener noreferrer">${escapeHTML(resource.title || "Learning resource")}</a>`).join("")}</div>` : ""}
+                    ${resources.length ? `<div class="builder-preview-resources"><b>Resources</b>${resources.map(resource => `<a href="${escapeHTML(safeHttpsUrl(resource.url))}" target="_blank" rel="noopener noreferrer">${escapeHTML(resource.title || "Learning resource")}</a>`).join("")}</div>` : ""}
                 </article>`;
         }).join("");
         return `
