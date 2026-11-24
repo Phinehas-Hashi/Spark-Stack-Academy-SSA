@@ -9,7 +9,8 @@ import {
     doc,
     getDoc,
     updateDoc,
-    serverTimestamp
+    serverTimestamp,
+    writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
@@ -208,7 +209,9 @@ function applyFilters() {
         const matchesSearch =
             !search ||
             name.includes(search) ||
-            email.includes(search);
+            email.includes(search) ||
+            String(application.phone || "").toLowerCase().includes(search) ||
+            String(application.id || "").toLowerCase().includes(search);
 
         const matchesStatus =
             status === "all" ||
@@ -268,6 +271,7 @@ function renderApplications() {
 
                 const status =
                     normalizeStatus(application.status);
+                const safeStatus = ["pending", "approved", "rejected"].includes(status) ? status : "unknown";
 
                 return `
                     <tr>
@@ -309,13 +313,14 @@ function renderApplications() {
                         </td>
 
                         <td>
-                            ${escapeHTML(
-                                application.email || "—"
-                            )}
+                            <div class="admission-contact">
+                                <a href="mailto:${escapeHTML(application.email || "")}">${escapeHTML(application.email || "No email")}</a>
+                                <small>${escapeHTML(application.phone || "No phone")}</small>
+                            </div>
                         </td>
 
                         <td>
-                            <span class="admission-status ${status}">
+                            <span class="admission-status ${safeStatus}">
                                 ${escapeHTML(
                                     application.status ||
                                     "Pending"
@@ -333,13 +338,14 @@ function renderApplications() {
 
                             <button
                                 type="button"
-                                class="icon-action"
+                                class="admission-review-btn"
                                 title="Review application"
                                 data-review="${escapeHTML(
                                     application.id
                                 )}"
                             >
-                                <i data-lucide="eye"></i>
+                                <i data-lucide="scan-eye"></i>
+                                Review
                             </button>
 
                         </td>
@@ -397,11 +403,16 @@ function openModal(application) {
     $("modalPhone").textContent =
         application.phone || "Not provided";
 
-    $("modalStatus").textContent =
-        application.status || "Pending";
-
     $("modalDate").textContent =
         formatDate(application.createdAt);
+    $("modalAdmissionNumber").textContent =
+        application.admissionNumber || application.admissionNo || "Assigned after approval";
+    const statusBadge = $("modalStatusBadge");
+    if (statusBadge) {
+        const status = normalizeStatus(application.status);
+        statusBadge.className = `admission-status ${["pending", "approved", "rejected"].includes(status) ? status : "unknown"}`;
+        statusBadge.textContent = application.status || "Pending";
+    }
 
     const pending =
         normalizeStatus(application.status) === "pending";
@@ -490,49 +501,44 @@ async function approveApplication(id) {
         const admissionNumber =
             await generateAdmissionNumber();
 
-        const approvedAt =
-            serverTimestamp();
+        const approvedAt = serverTimestamp();
+        const batch = writeBatch(db);
 
-        await updateDoc(studentRef, {
-
+        batch.update(studentRef, {
             admissionNumber,
             admissionNo: admissionNumber,
             username: admissionNumber,
-
             status: "Active",
             onboardingStatus: "approved",
-
             approvedAt,
-            approvedBy: "admin"
-
+            approvedBy: "admin",
+            updatedAt: approvedAt
         });
 
         if (userSnap.exists()) {
-
-            await updateDoc(userRef, {
-
+            batch.update(userRef, {
                 status: "active",
                 active: true,
                 verified: true,
-
                 admissionNumber,
                 admissionNo: admissionNumber,
-
-                approvedAt
+                approvedAt,
+                approvedBy: "admin",
+                updatedAt: approvedAt
             });
         }
 
-        await updateDoc(
-            doc(db, "applications", id),
-            {
-                status: "Approved",
-                admissionNumber,
-                admissionNo: admissionNumber,
-                studentUid: application.studentUid,
-                processedAt: approvedAt,
-                processedBy: "admin"
-            }
-        );
+        batch.update(doc(db, "applications", id), {
+            status: "Approved",
+            admissionNumber,
+            admissionNo: admissionNumber,
+            studentUid: application.studentUid,
+            processedAt: approvedAt,
+            processedBy: "admin"
+        });
+
+        // Keep the student profile, user access and application decision in sync.
+        await batch.commit();
 
         closeModal();
 
