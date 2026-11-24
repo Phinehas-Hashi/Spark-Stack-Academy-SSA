@@ -1279,13 +1279,7 @@ service cloud.firestore {
 
     match /platformSettings/{settingsId} {
 
-      // Instructors may read only the non-secret earnings settings needed
-      // to display their withdrawal thresholds and fee preview.
-      allow get:
-        if isFounder()
-        || (settingsId == 'earnings' && isInstructor() && instructorPortalOpen());
-
-      allow list:
+      allow read:
         if isFounder();
 
       allow write:
