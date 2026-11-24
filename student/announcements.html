@@ -1,230 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#351078">
+    <meta name="description" content="Read the latest official Spark Stack Academy announcements and student updates.">
+    <title>Announcements | Spark Stack Academy</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <title>
-        Announcements | Spark Stack Academy
-    </title>
+    <link rel="stylesheet" href="css/student-core.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/announcements.css">
+    <link rel="stylesheet" href="css/responsive.css">
 
-
-    <!-- CORE -->
-
-    <link
-        rel="stylesheet"
-        href="css/student-core.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/components.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/announcements.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/responsive.css"
-    >
-
-
-    <!-- FONT -->
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <!-- ICONS -->
-
-    <script
-        src="https://unpkg.com/lucide@latest"
-    ></script>
-
+    <script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
-
-
 <body>
+    <div class="student-layout">
+        <aside id="sidebarContainer" class="sidebar-container" aria-label="Student navigation"></aside>
+        <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
 
+        <main class="student-main">
+            <div id="topbarContainer" class="topbar-container"></div>
 
-<div class="student-layout">
+            <section class="dashboard-content announcements-page" aria-labelledby="announcementsTitle">
+                <header class="announcements-hero">
+                    <div class="announcements-hero-copy">
+                        <div class="announcements-eyebrow">
+                            <span class="announcements-eyebrow-icon" aria-hidden="true">
+                                <i data-lucide="radio-tower"></i>
+                            </span>
+                            <span>SPARK STACK ACADEMY</span>
+                            <span class="announcements-eyebrow-divider" aria-hidden="true"></span>
+                            <span>STUDENT BULLETIN</span>
+                        </div>
 
+                        <h1 id="announcementsTitle">Stay in the <span>loop.</span></h1>
+                        <p>Official academy notices, learning updates and important information — all in one place.</p>
 
-    <!-- =================================
-         SIDEBAR
-    ================================== -->
-
-    <aside
-        id="sidebarContainer"
-        class="sidebar-container">
-    </aside>
-
-
-    <!-- =================================
-         MOBILE OVERLAY
-    ================================== -->
-
-    <div
-        id="sidebarOverlay"
-        class="sidebar-overlay">
-    </div>
-
-
-    <!-- =================================
-         MAIN
-    ================================== -->
-
-    <main class="student-main">
-
-
-        <!-- TOPBAR -->
-
-        <div
-            id="topbarContainer"
-            class="topbar-container">
-        </div>
-
-
-        <!-- =================================
-             PAGE
-        ================================== -->
-
-        <section
-            class="dashboard-content announcements-page"
-        >
-
-
-            <!-- HEADER -->
-
-            <div class="announcements-hero">
-
-
-                <div class="hero-content">
-
-                    <span class="page-badge">
-
-                        <i data-lucide="megaphone"></i>
-
-                        Academy Updates
-
-                    </span>
-
-
-                    <h1>
-                        Announcements
-                    </h1>
-
-
-                    <p>
-                        Stay updated with the latest
-                        academy news, notices and
-                        important updates.
-                    </p>
-
-                </div>
-
-
-                <div class="hero-icon">
-
-                    <i data-lucide="bell-ring"></i>
-
-                </div>
-
-
-            </div>
-
-
-
-            <!-- =================================
-                 ANNOUNCEMENTS
-            ================================== -->
-
-            <div
-                class="announcements-container"
-                id="announcementsContainer"
-            >
-
-
-                <!-- LOADING -->
-
-                <div class="announcement-loading">
-
-                    <div class="loading-icon">
-
-                        <i data-lucide="loader"></i>
-
+                        <div class="announcements-hero-note">
+                            <i data-lucide="bell-ring" aria-hidden="true"></i>
+                            <span>New updates appear here as soon as they are published.</span>
+                        </div>
                     </div>
 
+                    <div class="announcements-hero-art" aria-hidden="true">
+                        <div class="announcement-orbit announcement-orbit-one"></div>
+                        <div class="announcement-orbit announcement-orbit-two"></div>
+                        <div class="announcement-hero-emblem">
+                            <i data-lucide="megaphone"></i>
+                        </div>
+                        <span class="announcement-spark announcement-spark-one"></span>
+                        <span class="announcement-spark announcement-spark-two"></span>
+                        <span class="announcement-spark announcement-spark-three"></span>
+                    </div>
+                </header>
 
-                    <h3>
-                        Loading announcements...
-                    </h3>
-
-
-                    <p>
-                        Fetching the latest academy
-                        updates.
-                    </p>
-
+                <div class="announcements-section-heading">
+                    <div>
+                        <span class="announcements-section-kicker">THE LATEST FROM THE ACADEMY</span>
+                        <h2>Latest announcements</h2>
+                        <p>Updates shared by the Academy team.</p>
+                    </div>
+                    <div class="announcements-live-indicator" aria-label="Live updates enabled">
+                        <span class="announcements-live-dot" aria-hidden="true"></span>
+                        Live updates
+                    </div>
                 </div>
 
+                <div
+                    class="announcements-container"
+                    id="announcementsContainer"
+                    aria-live="polite"
+                    aria-busy="true"
+                >
+                    <div class="announcement-loading" role="status">
+                        <span class="announcement-loading-icon" aria-hidden="true">
+                            <i data-lucide="loader-circle"></i>
+                        </span>
+                        <h3>Loading announcements</h3>
+                        <p>Connecting to the Academy bulletin…</p>
+                    </div>
+                </div>
 
-            </div>
+                <footer class="announcements-page-footer">
+                    <span class="announcements-footer-mark" aria-hidden="true">
+                        <i data-lucide="shield-check"></i>
+                    </span>
+                    <p>Keep this page handy so you do not miss important Academy updates.</p>
+                </footer>
+            </section>
+        </main>
+    </div>
 
-
-        </section>
-
-
-    </main>
-
-
-</div>
-
-
-
-<!-- =====================================
-     APP
-====================================== -->
-
-<script
-    type="module"
-    src="js/student-app.js">
-</script>
-
-
-<script
-    type="module"
-    src="js/announcements.js">
-</script>
-
-
-<script>
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        () => {
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-
-        }
-    );
-
-</script>
-
-
+    <script type="module" src="js/student-app.js"></script>
+    <script type="module" src="js/announcements.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.lucide) window.lucide.createIcons();
+        });
+    </script>
 </body>
-
 </html>
