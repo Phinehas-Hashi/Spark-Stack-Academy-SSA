@@ -48,6 +48,8 @@ let earningsSettings = {
 };
 
 let currentBalance = 0;
+let withdrawalTrigger = null;
+let previousBodyOverflow = "";
 
 
 // ============================================================
@@ -205,9 +207,22 @@ async function loadEarnings() {
             );
 
 
-        const snapshot =
-            await getDocs(q);
-
+        const withdrawalQuery = query(
+            collection(db, "withdrawalRequests"),
+            where("instructorId", "==", currentInstructor.uid)
+        );
+        const [snapshot, withdrawalSnapshot] = await Promise.all([
+            getDocs(q),
+            getDocs(withdrawalQuery)
+        ]);
+        const withdrawals = withdrawalSnapshot.docs.map(item => ({
+            id: item.id,
+            ...item.data()
+        })).sort((a, b) => {
+            const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+            const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+            return bTime - aTime;
+        });
 
         let total = 0;
         let monthTotal = 0;
@@ -221,7 +236,7 @@ async function loadEarnings() {
             const data = item.data();
 
             const amount =
-                Number(data.netAmount || 0);
+                Number(data.netAmount ?? data.amount ?? data.total ?? data.earnings ?? 0);
 
             total += amount;
 
@@ -251,34 +266,38 @@ async function loadEarnings() {
         });
 
 
-        currentBalance = total;
+        const reservedStatuses = new Set(["pending", "approved", "processing", "paid"]);
+        const reservedAmount = withdrawals.reduce((sum, item) => {
+            const status = String(item.status || "pending").trim().toLowerCase();
+            return sum + (reservedStatuses.has(status) ? Number(item.amount || 0) : 0);
+        }, 0);
+        const pendingAmount = withdrawals.reduce((sum, item) => {
+            return sum + (String(item.status || "pending").trim().toLowerCase() === "pending" ? Number(item.amount || 0) : 0);
+        }, 0);
 
+        currentBalance = Math.max(total - reservedAmount, 0);
 
-        updateMoney(
-            "earningsBalance",
-            total
-        );
+        updateMoney("availableBalance", currentBalance);
+        updateMoney("pendingBalance", pendingAmount);
+        updateMoney("monthlyEarnings", monthTotal);
+        updateMoney("lifetimeEarnings", total);
+        updateMoney("revenueTotal", total);
+        setText("totalSales", transactions.length);
+        setText("balanceStatus", currentBalance >= Number(earningsSettings.minimumWithdrawal || 100)
+            ? "Available for withdrawal"
+            : "Below minimum withdrawal");
+        setText("withdrawalStatus", currentBalance >= Number(earningsSettings.minimumWithdrawal || 100)
+            ? "Withdrawal available"
+            : "Minimum not reached");
+        setText("withdrawalMessage", currentBalance >= Number(earningsSettings.minimumWithdrawal || 100)
+            ? "Your available balance is ready for an M-Pesa withdrawal request."
+            : "Your available balance has not reached the minimum withdrawal threshold.");
+        updateMoney("minimumWithdrawal", Number(earningsSettings.minimumWithdrawal || 100));
+        setText("withdrawalFee", `${Number(earningsSettings.withdrawalFeePercent || 0)}%`);
+        setText("platformTax", `${Number(earningsSettings.platformTaxPercent || 0)}%`);
 
-        updateMoney(
-            "earningsTotal",
-            total
-        );
-
-        updateMoney(
-            "earningsMonth",
-            monthTotal
-        );
-
-
-        setText(
-            "earningsTransactions",
-            transactions.length
-        );
-
-
-        renderTransactions(
-            transactions
-        );
+        renderTransactions(transactions);
+        renderWithdrawalHistory(withdrawals);
 
 
     } catch (error) {
@@ -292,6 +311,31 @@ async function loadEarnings() {
 
     }
 
+}
+
+
+function renderWithdrawalHistory(items) {
+    const container = $("withdrawalHistory");
+    if (!container) return;
+
+    if (!items.length) {
+        container.innerHTML = '<div class="earnings-empty"><i data-lucide="banknote"></i><p>No withdrawals yet.</p></div>';
+        refreshIcons();
+        return;
+    }
+
+    container.innerHTML = items.map(item => {
+        const status = String(item.status || "pending").trim().toLowerCase();
+        const label = status.charAt(0).toUpperCase() + status.slice(1);
+        return `<div class="withdrawal-item">
+            <div class="transaction-info">
+                <div class="transaction-icon"><i data-lucide="wallet"></i></div>
+                <div><strong>${formatMoney(item.amount)}</strong><span>M-Pesa • ${escapeHTML(item.account || "Phone not recorded")} • ${formatDate(item.createdAt)}</span></div>
+            </div>
+            <strong class="withdrawal-status-badge ${escapeHTML(status)}">${escapeHTML(label)}</strong>
+        </div>`;
+    }).join("");
+    refreshIcons();
 }
 
 
@@ -426,49 +470,33 @@ function renderTransactions(items) {
 // WITHDRAWAL WINDOW
 // ============================================================
 
-function openWithdrawalWindow() {
+function openWithdrawalWindow(event) {
+    const modal = $("withdrawalModal");
+    if (!modal || !modal.classList.contains("hidden")) return;
 
-    const modal =
-        $("withdrawalModal");
-
-    if (!modal) return;
-
-
-    const available =
-        $("withdrawAvailable");
-
-
-    if (available) {
-
-        available.textContent =
-            formatMoney(currentBalance);
-
-    }
-
-
+    withdrawalTrigger = event?.currentTarget || document.activeElement;
+    previousBodyOverflow = document.body.style.overflow;
+    $("modalAvailableBalance").textContent = formatMoney(currentBalance);
+    $("withdrawalAmount").max = String(currentBalance);
+    $("withdrawalAmount").value = "";
+    $("withdrawalAccount").value = "";
     updateWithdrawalPreview();
 
-    modal.classList.add("active");
-
-    document.body.style.overflow =
-        "hidden";
-
+    modal.classList.remove("hidden");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    $("withdrawalAmount")?.focus();
 }
 
 
 function closeWithdrawalWindow() {
+    const modal = $("withdrawalModal");
+    if (!modal || modal.classList.contains("hidden")) return;
 
-    const modal =
-        $("withdrawalModal");
-
-    if (!modal) return;
-
-
-    modal.classList.remove("active");
-
-    document.body.style.overflow =
-        "";
-
+    modal.classList.add("hidden");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = previousBodyOverflow;
+    if (withdrawalTrigger?.isConnected) withdrawalTrigger.focus();
 }
 
 
@@ -477,38 +505,18 @@ function closeWithdrawalWindow() {
 // ============================================================
 
 function updateWithdrawalPreview() {
-
-    const input =
-        $("withdrawAmount");
-
+    const input = $("withdrawalAmount");
     if (!input) return;
 
+    const amount = Math.max(0, Number(input.value || 0));
+    const tax = calculatePlatformTax(amount);
+    const fee = calculateWithdrawalFee(amount);
+    const receive = Math.max(amount - tax - fee, 0);
 
-    const amount =
-        Number(input.value || 0);
-
-
-    const fee =
-        calculateWithdrawalFee(amount);
-
-
-    const receive =
-        Math.max(
-            amount - fee,
-            0
-        );
-
-
-    updateMoney(
-        "withdrawFee",
-        fee
-    );
-
-    updateMoney(
-        "withdrawReceive",
-        receive
-    );
-
+    updateMoney("summaryGross", amount);
+    updateMoney("summaryTax", tax);
+    updateMoney("summaryFee", fee);
+    updateMoney("summaryNet", receive);
 }
 
 
@@ -528,6 +536,10 @@ function calculateWithdrawalFee(amount) {
 
 }
 
+function calculatePlatformTax(amount) {
+    return Number(amount || 0) * Number(earningsSettings.platformTaxPercent || 0) / 100;
+}
+
 
 // ============================================================
 // SUBMIT WITHDRAWAL
@@ -543,16 +555,15 @@ async function submitWithdrawal(event) {
 
     const amount =
         Number(
-            $("withdrawAmount")?.value || 0
+            $("withdrawalAmount")?.value || 0
         );
 
 
-    const method =
-        $("withdrawMethod")?.value || "";
+    const method = "mpesa";
 
 
     const account =
-        $("withdrawAccount")?.value.trim() || "";
+        $("withdrawalAccount")?.value.trim() || "";
 
 
     const minimum =
@@ -594,19 +605,19 @@ async function submitWithdrawal(event) {
     }
 
 
-    const fee =
-        calculateWithdrawalFee(amount);
+    const tax = calculatePlatformTax(amount);
+    const fee = calculateWithdrawalFee(amount);
+    const netAmount = Math.max(amount - tax - fee, 0);
 
-
-    const netAmount =
-        Math.max(
-            amount - fee,
-            0
-        );
+    const normalizedPhone = account.replace(/[\\s-]/g, "");
+    if (!/^(?:\\+?254|0)(?:7|1)\\d{8}$/.test(normalizedPhone)) {
+        alert("Enter a valid Kenyan M-Pesa phone number.");
+        return;
+    }
 
 
     const button =
-        $("withdrawSubmit");
+        $("confirmWithdrawalBtn");
 
 
     try {
@@ -636,6 +647,9 @@ async function submitWithdrawal(event) {
                 withdrawalFee:
                     fee,
 
+                platformTax:
+                    tax,
+
                 netAmount,
 
                 method,
@@ -660,6 +674,7 @@ async function submitWithdrawal(event) {
         $("withdrawForm")?.reset();
 
         closeWithdrawalWindow();
+        await loadEarnings();
 
 
     } catch (error) {
@@ -680,8 +695,8 @@ async function submitWithdrawal(event) {
 
             button.disabled = false;
 
-            button.textContent =
-                "Request Withdrawal";
+            button.innerHTML = '<i data-lucide="shield-check"></i> Confirm Withdrawal';
+            refreshIcons();
 
         }
 
@@ -758,75 +773,22 @@ function setupPremiumInstructor() {
 // ============================================================
 
 function setupEvents() {
+    $("withdrawBtn")?.addEventListener("click", openWithdrawalWindow);
+    $("heroWithdrawBtn")?.addEventListener("click", openWithdrawalWindow);
+    $("closeWithdrawalModal")?.addEventListener("click", closeWithdrawalWindow);
+    $("withdrawalAmount")?.addEventListener("input", updateWithdrawalPreview);
+    $("withdrawForm")?.addEventListener("submit", submitWithdrawal);
 
-    $("withdrawBtn")
-        ?.addEventListener(
-            "click",
-            openWithdrawalWindow
-        );
+    $("withdrawalModal")?.addEventListener("click", event => {
+        if (event.target.classList.contains("modal-backdrop")) closeWithdrawalWindow();
+    });
 
-
-    $("withdrawClose")
-        ?.addEventListener(
-            "click",
-            closeWithdrawalWindow
-        );
-
-
-    $("withdrawCancel")
-        ?.addEventListener(
-            "click",
-            closeWithdrawalWindow
-        );
-
-
-    $("withdrawAmount")
-        ?.addEventListener(
-            "input",
-            updateWithdrawalPreview
-        );
-
-
-    $("withdrawForm")
-        ?.addEventListener(
-            "submit",
-            submitWithdrawal
-        );
-
-
-    $("withdrawalModal")
-        ?.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target.id ===
-                    "withdrawalModal"
-                ) {
-
-                    closeWithdrawalWindow();
-
-                }
-
-            }
-        );
-
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Escape"
-            ) {
-
-                closeWithdrawalWindow();
-
-            }
-
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !$("withdrawalModal")?.classList.contains("hidden")) {
+            event.preventDefault();
+            closeWithdrawalWindow();
         }
-    );
-
+    });
 }
 
 
