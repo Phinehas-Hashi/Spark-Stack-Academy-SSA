@@ -17,7 +17,7 @@ import {
     addDoc, collection, doc, onSnapshot, orderBy, query,
     serverTimestamp, updateDoc, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { submitReport } from "../../js/reports.js";
+import { submitReport, sendReportMessage } from "../../js/reports.js";
 
 
 console.log("🛟 Help Center Loaded");
@@ -906,13 +906,7 @@ async function sendTicketReply(id, panel) {
     const button = panel.querySelector("[data-ticket-reply]");
     button.disabled = true;
     try {
-        await addDoc(collection(db, "reports", id, "responses"), {
-            message,
-            senderId: currentUser.uid,
-            senderName: currentUser.displayName || currentUser.email || "Student",
-            senderRole: "student",
-            createdAt: serverTimestamp()
-        });
+        await sendReportMessage({ reportDocId: id, body: message });
         textarea.value = "";
         window.ssaToast?.("Your reply has been added to the ticket.", "success", "Spark Support");
     } catch (error) {
