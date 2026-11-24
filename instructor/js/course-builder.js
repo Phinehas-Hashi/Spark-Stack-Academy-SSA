@@ -2246,7 +2246,7 @@ function getCourseReadiness() {
     lessons.forEach((lesson, index) => {
         const title = String(lesson.title || "").trim();
         if (!title) issues.push(`Add a title to lesson ${index + 1}`);
-        const hasText = Boolean(String(lesson.content || lesson.body || lesson.text || "").trim());
+        const hasText = Boolean(String(lesson.content || lesson.body || lesson.text || lesson.description || "").trim());
         const hasVideo = Boolean(String(lesson.videoUrl || lesson.youtubeUrl || lesson.video || "").trim());
         if (lesson.type === "text" && !hasText) issues.push(`Add learning content to "${lesson.title || "Lesson " + (index + 1)}"`);
         if (lesson.type === "video" && !hasVideo) issues.push(`Add a video URL to "${lesson.title || "Lesson " + (index + 1)}"`);
