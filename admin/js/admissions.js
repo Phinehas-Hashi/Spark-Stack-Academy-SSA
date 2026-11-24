@@ -403,9 +403,6 @@ function openModal(application) {
     $("modalPhone").textContent =
         application.phone || "Not provided";
 
-    $("modalStatus").textContent =
-        application.status || "Pending";
-
     $("modalDate").textContent =
         formatDate(application.createdAt);
     $("modalAdmissionNumber").textContent =
