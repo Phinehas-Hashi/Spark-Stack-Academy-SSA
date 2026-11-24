@@ -175,25 +175,25 @@
       interruptedContext=null;setState("online");status.focus({preventScroll:true});
     },1250);
   }
-  async function probe(url,timeoutMs=4500){
+  async function probe(url,timeoutMs=4500,mode="cors"){
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),timeoutMs);
-    try{const response=await fetch(url,{method:"GET",mode:"cors",cache:"no-store",signal:controller.signal});return response.status<500||response.status===401||response.status===403;}
+    try{const response=await fetch(url,{method:"GET",mode,cache:"no-store",signal:controller.signal});return response.status<500||response.status===401||response.status===403;}
     finally{clearTimeout(timeout);}
   }
   async function checkConnection(){
     if(probeInFlight)return;
     probeInFlight=true;refresh();
-    if(!navigator.onLine){lastCheckedAt=Date.now();lastLatencyMs=null;firestoreReachable=null;setState("offline");probeInFlight=false;refresh();return;}
+    if(!navigator.onLine){lastCheckedAt=Date.now();lastLatencyMs=null;firestoreReachable=null;setState("offline");showRecovery();probeInFlight=false;refresh();return;}
     if(state==="offline"){setState("reconnecting");if(recoveryVisible){recovery.dataset.phase="reconnecting";$("[data-phase-label]").textContent="VALIDATING CONNECTION";moduleState("network","Validating");}}
     const started=performance.now();
     try{
-      await probe("https://www.gstatic.com/generate_204?ssa_ping="+Date.now(),5000);
+      await probe("https://www.gstatic.com/generate_204?ssa_ping="+Date.now(),5000,"no-cors");
       lastLatencyMs=performance.now()-started;lastCheckedAt=Date.now();
       try{firestoreReachable=await probe("https://firestore.googleapis.com/v1/projects/spark-stack-academy/databases/(default)/documents",5000);}catch(_){firestoreReachable=false;}
       const weak=lastLatencyMs>=1800||Number(connection?.rtt||0)>=1200;
       setState(weak?"weak":"online",weak?"Slow network response":"");
       if(recoveryVisible)completeRecovery();
-    }catch(_){lastCheckedAt=Date.now();lastLatencyMs=null;firestoreReachable=false;setState("offline");}
+    }catch(_){lastCheckedAt=Date.now();lastLatencyMs=null;firestoreReachable=false;setState("offline");showRecovery();}
     finally{probeInFlight=false;refresh();}
   }
   function panelOpen(open){panel.hidden=!open;status.setAttribute("aria-expanded",String(open));if(open)panel.querySelector(".close").focus();else status.focus();}
