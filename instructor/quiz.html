@@ -17,7 +17,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/standalone-page.css?v=20261123-standalone1">
+<link rel="stylesheet" href="css/instructor-core.css?v=20261123-shell2">
+<link rel="stylesheet" href="css/components.css?v=20261123-shell2">
 <link rel="stylesheet" href="css/quiz.css?v=20261123-page2">
 <link rel="stylesheet" href="css/responsive.css?v=20261123-responsive2">
 <link rel="stylesheet" href="css/instructor-theme.css?v=20261123-theme2">
@@ -45,14 +46,19 @@
 </head>
 
 
-<body class="instructor-standalone-page">
+<body class="instructor-portal-page">
 
 
 <!-- =========================================================
      PAGE
 ========================================================= -->
 
-<main class="instructor-page quiz-page">
+<div class="instructor-app">
+<aside id="instructorSidebar" class="instructor-sidebar"></aside>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="instructor-main">
+<header id="instructorTopbar" class="instructor-topbar"></header>
+<section class="instructor-page quiz-page">
 
 
     <!-- =====================================================
@@ -749,7 +755,9 @@
 
 
 
+</section>
 </main>
+</div>
 
 
 
@@ -759,7 +767,8 @@
 
 <script
     type="module"
-    src="js/quiz.js"
+    src="js/instructor-app.js?v=20261124-shell3"></script>
+<script type="module" src="js/quiz.js"
 ></script>
 
 
