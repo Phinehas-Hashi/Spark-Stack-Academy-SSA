@@ -159,7 +159,38 @@ async function checkCourseAccess() {
         console.warn("Canonical enrolment check failed:", error);
     }
 
-    // Institution and legacy enrolments live under the student's record.
+    // Some older/imported enrolments are keyed by studentId rather than
+    // userId and do not use the canonical document ID. Query both supported
+    // owner fields so the player matches the Student Courses page.
+    const enrollmentQueries = [
+        query(
+            collection(db, "enrollments"),
+            where("userId", "==", currentUser.uid),
+            where("courseId", "==", courseId)
+        ),
+        query(
+            collection(db, "enrollments"),
+            where("studentId", "==", currentUser.uid),
+            where("courseId", "==", courseId)
+        )
+    ];
+
+    const enrollmentResults = await Promise.allSettled(
+        enrollmentQueries.map(enrollmentQuery => getDocs(enrollmentQuery))
+    );
+
+    for (const result of enrollmentResults) {
+        if (result.status !== "fulfilled") {
+            console.warn("An enrolment lookup was unavailable:", result.reason);
+            continue;
+        }
+
+        if (result.value.docs.some(item => hasEntitlement(item.data()))) {
+            return true;
+        }
+    }
+
+    // Institution and legacy enrolments may also live under the student's record.
     try {
         const nested = await getDoc(doc(db, "students", currentUser.uid, "enrollments", courseId));
         if (nested.exists() && hasEntitlement(nested.data())) return true;
