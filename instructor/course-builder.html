@@ -418,6 +418,44 @@
                 <aside class="builder-side-panel">
 
 
+                    <!-- COURSE DETAILS / PRICING -->
+                    <div class="builder-side-card builder-course-details-card">
+                        <div class="side-card-header">
+                            <span class="card-eyebrow">COURSE SETTINGS</span>
+                            <h3>Pricing &amp; Duration</h3>
+                            <p>These details appear in the student course catalogue.</p>
+                        </div>
+
+                        <div class="builder-course-field">
+                            <label for="builderCourseDuration">Estimated duration (hours)</label>
+                            <input id="builderCourseDuration" type="number" min="1" max="10000" step="1" inputmode="numeric" placeholder="e.g. 12">
+                            <small>Enter the estimated total course duration. Individual lesson durations remain separate.</small>
+                        </div>
+
+                        <label class="builder-course-free-toggle" for="builderCourseFree">
+                            <input id="builderCourseFree" type="checkbox">
+                            <span><strong>Offer this course for free</strong><small>Free courses will be shown as FREE to students.</small></span>
+                        </label>
+
+                        <div class="builder-course-field">
+                            <label for="builderCoursePrice">Course price (KSh)</label>
+                            <input id="builderCoursePrice" type="number" min="1" max="10000000" step="1" inputmode="numeric" placeholder="e.g. 2500">
+                        </div>
+
+                        <div class="builder-course-field">
+                            <label for="builderCourseDiscount">Discount price (KSh)</label>
+                            <input id="builderCourseDiscount" type="number" min="1" max="10000000" step="1" inputmode="numeric" placeholder="Optional sale price">
+                            <small>Leave blank when no discount applies. The discount must be lower than the regular price.</small>
+                        </div>
+
+                        <p class="builder-course-price-preview" id="builderCoursePricePreview" aria-live="polite">Set a price or mark the course as free.</p>
+                        <button type="button" class="secondary-btn full-width" id="saveCourseDetailsBtn">
+                            <i data-lucide="save"></i> Save Pricing &amp; Duration
+                        </button>
+                        <p class="builder-course-save-note" id="builderCourseDetailsMessage" role="status" aria-live="polite"></p>
+                    </div>
+
+
                     <!-- STATUS -->
 
                     <div class="builder-side-card">
