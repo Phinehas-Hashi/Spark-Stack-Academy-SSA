@@ -349,12 +349,6 @@ service cloud.firestore {
                  'name',
                  'phone',
                  'updatedAt',
-                 'xp',
-                 'lastXPReward',
-                 'lastXPReason',
-                 'level',
-                 'lastLevelUp',
-                 'lastLevelUpAt',
                  'streak',
                  'lastActiveDate',
                  'lastActiveAt',
@@ -381,10 +375,12 @@ service cloud.firestore {
           && uid() == studentId
         );
 
+      // XP and level events are created only by trusted Cloud Functions.
       allow create:
         if isStudent()
         && studentPortalOpen()
-        && uid() == studentId;
+        && uid() == studentId
+        && request.resource.data.type == 'badge_unlocked';
 
       allow update, delete:
         if isFounder();
