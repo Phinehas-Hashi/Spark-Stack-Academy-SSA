@@ -173,13 +173,16 @@ async function loadCourse() {
         }
 
         course = {
-
-            id:
-                snapshot.id,
-
+            id: snapshot.id,
             ...snapshot.data()
-
         };
+
+        const courseStatus = String(course.status || "").trim().toLowerCase();
+        if (courseStatus === "deleted" || course.deletedAt
+            || (course.published !== true && courseStatus !== "published")) {
+            showError("This course is no longer available in the Academy Marketplace.");
+            return;
+        }
 
         console.log(
             "📚 COURSE:",
@@ -278,6 +281,20 @@ function renderCourse() {
         course.title ||
         "Untitled Course"
     );
+
+    const coverImage = document.getElementById("courseCoverImage");
+    const coverFallback = document.getElementById("courseCoverFallback");
+    const coverUrl = course.thumbnail || course.image || course.coverImage || "";
+    if (coverImage && /^https:\/\//i.test(String(coverUrl))) {
+        coverImage.src = coverUrl;
+        coverImage.alt = course.title || "Course cover";
+        coverImage.hidden = false;
+        if (coverFallback) coverFallback.hidden = true;
+    } else if (coverImage) {
+        coverImage.hidden = true;
+        coverImage.removeAttribute("src");
+        if (coverFallback) coverFallback.hidden = false;
+    }
 
 
     setText(
@@ -1378,8 +1395,5 @@ function refreshIcons() {
 
 
 function goBack() {
-
-    window.location.href =
-        "course-library.html";
-
+    window.location.href = "marketplace.html";
 }
