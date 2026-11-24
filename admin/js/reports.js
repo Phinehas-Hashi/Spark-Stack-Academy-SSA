@@ -209,7 +209,7 @@ function updateStats() {
     const total = reports.length;
 
     const pending = reports.filter(
-        r => normalize(r.status) === "pending"
+        r => ["pending", "reopened"].includes(normalize(r.status))
     ).length;
 
     const reviewing = reports.filter(
@@ -1709,8 +1709,7 @@ async function loadTimeline(report) {
 
             container.innerHTML = entries.map(entry => {
                 if (entry.kind === "response") {
-                    const staffMessage = entry.senderRole === "staff" ||
-                        entry.senderRole === "admin" || entry.senderRole === "founder";
+                    const staffMessage = entry.senderId !== report.reporterId;
                     return `<article class="timeline-item ticket-timeline-message ${staffMessage ? "staff" : "reporter"}">
                         <div class="timeline-dot"></div>
                         <div class="ticket-timeline-content">
