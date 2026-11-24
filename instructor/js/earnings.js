@@ -434,6 +434,7 @@ function openWithdrawalWindow() {
     if (available) available.textContent = formatMoney(currentBalance);
     const amount = $("withdrawalAmount");
     if (amount) {
+        amount.min = String(Number(earningsSettings.minimumWithdrawal || 100));
         amount.max = String(currentBalance);
         amount.value = "";
     }
