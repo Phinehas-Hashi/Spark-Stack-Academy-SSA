@@ -285,7 +285,7 @@ function normalizeEvent(id, data) {
 // EVENT VISIBILITY
 // ============================================================
 
-function eventBelongsToStudent(event, user) {
+function eventBelongsToStudent(event, user, enrolledCourseIds = new Set()) {
 
     if (!user) {
         return false;
@@ -308,11 +308,22 @@ function eventBelongsToStudent(event, user) {
         return event.userId === user.uid;
     }
 
+    if (
+        audience === "course" ||
+        audience === "enrolled" ||
+        audience === "enrolled_students"
+    ) {
+        return Boolean(
+            event.courseId &&
+            enrolledCourseIds.has(String(event.courseId))
+        );
+    }
+
     if (event.userId) {
         return event.userId === user.uid;
     }
 
-    // Do not expose events with an unknown or staff-only audience.
+    // Unknown and staff-only audiences are never exposed to students.
     return false;
 }
 
@@ -344,8 +355,9 @@ async function loadEvents(user) {
             const payment = String(enrollment.paymentStatus || "").toLowerCase();
             const active = ["active", "approved", "completed"].includes(status);
             const paidOrFree = ["paid", "free"].includes(payment) || status === "paid";
-            if (enrollment.courseId && (enrollment.institutionId ? active : active && paidOrFree)) {
-                courseIds.add(String(enrollment.courseId));
+            const enrolledCourseId = enrollment.courseId || enrollment.course_id;
+            if (enrolledCourseId && (enrollment.institutionId ? active : active && paidOrFree)) {
+                courseIds.add(String(enrolledCourseId));
             }
         });
     });
@@ -366,7 +378,7 @@ async function loadEvents(user) {
             type,
             startAt: dateValue
         });
-        if (event && eventBelongsToStudent(event, user)) events.push(event);
+        if (event && eventBelongsToStudent(event, user, courseIds)) events.push(event);
     };
 
     const assignments = sourceResults[0];
@@ -393,7 +405,9 @@ async function loadEvents(user) {
     if (announcements.status === "fulfilled") {
         announcements.value.forEach(item => {
             const data = item.data();
-            addEvent(item.id, data, "announcement", data.eventDate || data.scheduledAt || data.createdAt);
+            // Only genuinely scheduled announcements belong on the calendar.
+            // createdAt is an audit timestamp, not an event date.
+            addEvent(item.id, data, "announcement", data.eventDate || data.event_date || data.scheduledAt || data.scheduled_at);
         });
     } else console.warn("SSA Calendar: announcements unavailable.", announcements.reason);
 
