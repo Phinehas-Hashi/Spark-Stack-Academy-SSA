@@ -858,8 +858,6 @@ function statusLabel(value) {
 function escapeTicket(value) {
     return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
-function escapeHTML(value) { return escapeTicket(value); }
-
 document.addEventListener("click", async event => {
     const threadButton = event.target.closest("[data-ticket-thread]");
     const replyButton = event.target.closest("[data-ticket-reply]");
