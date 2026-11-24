@@ -832,6 +832,13 @@ function subscribeToTickets(uid) {
             </article>`;
         }).join("");
         refreshIcons();
+        if (openTicketId) {
+            const activePanel = document.getElementById(`ticket-thread-${openTicketId}`);
+            if (activePanel) {
+                activePanel.hidden = false;
+                openTicketThread(openTicketId, activePanel);
+            }
+        }
     }, error => {
         console.error("Ticket subscription failed:", error);
         root.textContent = "We couldn't load your tickets. Refresh the page or try again later.";
