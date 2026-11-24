@@ -164,20 +164,18 @@ exports.awardStudentXP = onCall(async request => {
       reward = 40;
       counterField = "assignmentsSubmitted";
     } else if (type === "quiz") {
-      const quizId = parts[1];
-      const attemptNumber = Number(parts[2]);
-      if (!quizId || !Number.isInteger(attemptNumber) || attemptNumber < 1 || parts.length !== 3) {
-        throw new HttpsError("invalid-argument", "Invalid quiz reward source.");
+      const submissionId = parts.slice(1).join(":");
+      if (!submissionId || parts.length !== 2) throw new HttpsError("invalid-argument", "Invalid quiz reward source.");
+      const submissionRef = db.doc("quizSubmissions/" + submissionId);
+      const submissionSnap = await transaction.get(submissionRef);
+      if (!submissionSnap.exists) throw new HttpsError("failed-precondition", "Submit the quiz before receiving XP.");
+      const submission = submissionSnap.data() || {};
+      if (submission.studentId !== uid || submission.completed !== true || submission.status !== "graded" || !submission.quizId) {
+        throw new HttpsError("failed-precondition", "The quiz attempt is not complete.");
       }
-      const quizRef = db.doc("quizzes/" + quizId);
-      const submissionQuery = db.collection("quizSubmissions")
-        .where("studentId", "==", uid)
-        .where("quizId", "==", quizId)
-        .where("attemptNumber", "==", attemptNumber);
-      const [quizSnap, submissionSnap] = await Promise.all([transaction.get(quizRef), transaction.get(submissionQuery)]);
-      if (!quizSnap.exists || submissionSnap.empty) throw new HttpsError("failed-precondition", "Submit the quiz before receiving XP.");
-      const submission = submissionSnap.docs[0].data() || {};
-      if (submission.completed !== true || submission.status !== "graded") throw new HttpsError("failed-precondition", "The quiz attempt is not complete.");
+      const quizRef = db.doc("quizzes/" + submission.quizId);
+      const quizSnap = await transaction.get(quizRef);
+      if (!quizSnap.exists) throw new HttpsError("failed-precondition", "The quiz no longer exists.");
       const baseXP = Math.min(100, Math.max(1, Number(quizSnap.data().xpReward ?? quizSnap.data().xp ?? 30)));
       const score = Math.max(0, Math.min(100, Number(submission.score || 0)));
       reward = submission.passed === true ? Math.max(Math.floor(baseXP * score / 100), 1) : Math.floor(baseXP * 0.25);
