@@ -227,9 +227,12 @@ async function loadModules() {
 
 async function loadAssignments() {
     assignments = [];
-    const snapshot = await getDocs(query(collection(db, "assignments"), where("courseId", "==", courseId)));
+    const snapshot = await getDocs(query(
+        collection(db, "assignments"),
+        where("status", "in", ["published", "pending", "active"])
+    ));
     assignments = snapshot.docs.map(item => ({ id: item.id, ...(item.data() || {}) }))
-        .filter(item => item.published !== false && ["published", "pending", "active"].includes(String(item.status || "published").toLowerCase()))
+        .filter(item => item.courseId === courseId && item.published !== false && ["published", "pending", "active"].includes(String(item.status || "published").toLowerCase()))
         .sort((a,b) => {
             const da = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
             const dbValue = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
