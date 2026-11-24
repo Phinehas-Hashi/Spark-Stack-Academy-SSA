@@ -43,22 +43,34 @@ function initializeTopbar() {
     window.lucide?.createIcons();
 
     const menuBtn = document.getElementById("mobileMenuBtn");
-    const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebarOverlay");
 
+    // The topbar and sidebar load in parallel. Resolve the sidebar at
+    // interaction time rather than capturing a possibly-not-yet-injected node.
     const closeSidebar = () => {
-        sidebar?.classList.remove("open");
+        document.getElementById("sidebar")?.classList.remove("open");
         overlay?.classList.remove("show");
         overlay?.setAttribute("aria-hidden", "true");
+        menuBtn?.setAttribute("aria-expanded", "false");
+        menuBtn?.setAttribute("aria-label", "Open menu");
         document.body.classList.remove("ssa-sidebar-open");
     };
 
     if (menuBtn && !menuBtn.dataset.bound) {
         menuBtn.dataset.bound = "true";
+        menuBtn.setAttribute("aria-expanded", "false");
         menuBtn.addEventListener("click", () => {
-            const open = sidebar?.classList.toggle("open") ?? false;
+            const sidebar = document.getElementById("sidebar");
+            if (!sidebar) {
+                console.warn("Student sidebar is not available yet.");
+                return;
+            }
+
+            const open = sidebar.classList.toggle("open");
             overlay?.classList.toggle("show", open);
             overlay?.setAttribute("aria-hidden", String(!open));
+            menuBtn.setAttribute("aria-expanded", String(open));
+            menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
             document.body.classList.toggle("ssa-sidebar-open", open);
         });
     }
