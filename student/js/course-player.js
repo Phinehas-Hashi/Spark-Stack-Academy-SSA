@@ -451,31 +451,57 @@ async function completeCurrentLesson() {
     updateNavigation();
 
     try {
-        await saveProgress();
-        await awardXP(currentUser.uid, XP_REWARDS.lesson, `Completed lesson: ${lesson.title || "Lesson"}`, `lesson:${courseId}:${lesson.id}`);
-        await updateLearningStreak(currentUser.uid);
-        toast(`Lesson completed! ⚡ +${XP_REWARDS.lesson || 20} XP`);
+        try {
+            await saveProgress();
+        } catch (saveError) {
+            completedLessons = completedLessons.filter(id => id !== lesson.id);
+            renderLessons();
+            updateProgress();
+            updateNavigation();
+            console.error("Lesson progress could not be saved:", saveError);
+            toast("We couldn't save your progress. Please try again.");
+            return;
+        }
+
+        let lessonRewarded = false;
+        try {
+            await awardXP(currentUser.uid, XP_REWARDS.lesson, `Completed lesson: ${lesson.title || "Lesson"}`, `lesson:${courseId}:${lesson.id}`);
+            lessonRewarded = true;
+        } catch (xpError) {
+            console.warn("Lesson was saved, but XP synchronization is pending:", xpError);
+        }
+
+        try {
+            await updateLearningStreak(currentUser.uid);
+        } catch (streakError) {
+            console.warn("Lesson was saved, but the learning streak could not be updated:", streakError);
+        }
+
+        toast(lessonRewarded
+            ? `Lesson completed! +${XP_REWARDS.lesson || 20} XP`
+            : "Lesson completed. Your XP reward will sync when the service is available.");
 
         if (completedLessons.length === lessons.length) {
-            await awardXP(currentUser.uid, XP_REWARDS.course || 50, `Completed course: ${course.title || "Course"}`, `course:${courseId}`);
-            const certificate = await issueCertificate(currentUser.uid, course);
-            toast(certificate?.alreadyExists ? "Course completed! 🎓" : "Course completed! 🎓 Certificate earned!");
+            try {
+                await awardXP(currentUser.uid, XP_REWARDS.course || 50, `Completed course: ${course.title || "Course"}`, `course:${courseId}`);
+            } catch (courseXpError) {
+                console.warn("Course completion saved, but the course XP reward is pending:", courseXpError);
+            }
+            try {
+                const certificate = await issueCertificate(currentUser.uid, course);
+                toast(certificate?.alreadyExists ? "Course completed! Certificate already issued." : "Course completed! Certificate earned!");
+            } catch (certificateError) {
+                console.error("Course completed, but certificate issuance failed:", certificateError);
+                toast("Course completed. Your certificate is being prepared.");
+            }
         } else if (currentLessonIndex < lessons.length - 1) {
             setTimeout(() => showLesson(currentLessonIndex + 1), 650);
         }
-    } catch (error) {
-        console.error("Lesson completion failed:", error);
-        completedLessons = completedLessons.filter(id => id !== lesson.id);
-        renderLessons();
-        updateProgress();
-        updateNavigation();
-        toast("We couldn't save your progress. Please try again.");
     } finally {
         isCompletingLesson = false;
         updateNavigation();
     }
 }
-
 function updateProgress() {
     const percent = lessons.length ? Math.round((completedLessons.length / lessons.length) * 100) : 0;
     if (courseProgressText) courseProgressText.textContent = `${percent}%`;
