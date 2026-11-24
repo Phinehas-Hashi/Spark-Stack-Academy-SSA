@@ -312,7 +312,8 @@ function eventBelongsToStudent(event, user) {
         return event.userId === user.uid;
     }
 
-    return true;
+    // Do not expose events with an unknown or staff-only audience.
+    return false;
 }
 
 
