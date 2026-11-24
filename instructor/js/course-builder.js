@@ -59,6 +59,16 @@ function escapeHTML(value) {
 
 }
 
+function safeHttpsUrl(value) {
+    try {
+        const parsed = new URL(String(value || ""));
+        return parsed.protocol === "https:" ? parsed.href : "#";
+    } catch {
+        return "#";
+    }
+}
+
+
 
 
     function getCourseId() {
@@ -1412,7 +1422,7 @@ function openLessonModal(
 
 
     $("lessonVideoUrl").value =
-        lesson?.videoUrl || "";
+        lesson?.videoUrl || lesson?.youtubeUrl || lesson?.video || "";
 
     $("lessonObjectives").value =
         Array.isArray(lesson?.learningObjectives) ? lesson.learningObjectives.join("\n") : "";
