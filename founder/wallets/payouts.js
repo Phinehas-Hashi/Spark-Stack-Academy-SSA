@@ -142,6 +142,8 @@ async function action(id, type) {
 
   const status = type === "approve" ? "approved" : type === "reject" ? "rejected" : "paid";
   const treasuryRef = doc(db, "finance", "treasury");
+  if (!request.instructorId) throw new Error("Payout request is missing its instructor ID.");
+  const walletRef = doc(db, "instructorWallets", request.instructorId);
   let paymentReference = "";
 
   if (status === "paid") {
@@ -155,7 +157,7 @@ async function action(id, type) {
     const financeTransactionRef = doc(collection(db, "financeTransactions"));
     const transactionId = "PAY-" + Date.now() + "-" + Math.random().toString(36).slice(2,7).toUpperCase();
     await runTransaction(db, async tx => {
-      const [requestSnap, treasurySnap] = await Promise.all([tx.get(ref), tx.get(treasuryRef)]);
+      const [requestSnap, treasurySnap, walletSnap] = await Promise.all([tx.get(ref), tx.get(treasuryRef), tx.get(walletRef)]);
       if (!requestSnap.exists()) throw new Error("Payout request no longer exists.");
       if (!treasurySnap.exists()) throw new Error("Treasury is not initialized.");
 
@@ -175,6 +177,11 @@ async function action(id, type) {
         updatedAt: serverTimestamp()
       });
       tx.update(treasuryRef, { balance: treasuryBalance - payoutAmount, updatedAt: serverTimestamp() });
+      tx.set(walletRef, {
+        instructorId: request.instructorId,
+        withdrawalGuardUpdatedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
       tx.set(financeTransactionRef, {
         transactionId,
         type: "withdrawal",
@@ -190,11 +197,23 @@ async function action(id, type) {
       });
     });
   } else {
-    await updateDoc(ref, {
-      status,
-      reviewedBy: me.uid,
-      reviewedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+    await runTransaction(db, async tx => {
+      const [latestSnap, walletSnap] = await Promise.all([tx.get(ref), tx.get(walletRef)]);
+      if (!latestSnap.exists()) throw new Error("Payout request no longer exists.");
+      if (String(latestSnap.data().status || "pending").toLowerCase() !== "pending") {
+        throw new Error("This payout request has already been reviewed.");
+      }
+      tx.update(ref, {
+        status,
+        reviewedBy: me.uid,
+        reviewedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      tx.set(walletRef, {
+        instructorId: request.instructorId,
+        withdrawalGuardUpdatedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
     });
   }
 
