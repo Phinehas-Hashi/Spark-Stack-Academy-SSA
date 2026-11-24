@@ -787,8 +787,8 @@ async function submitSupportRequest(event) {
             priority,
             metadata: { portal: "student", channel: "help-center" }
         });
-        const result = document.getElementById("supportSubmissionResult");
-        if (result) result.textContent = `Ticket ${ticket.reportId} created. Keep this reference for follow-up.`;
+        const result = document.getElementById("ticketCreationNotice");
+        if (result) result.textContent = `Ticket ${ticket.reportId} created successfully. Keep this reference for follow-up.`;
         document.getElementById("supportForm")?.reset();
         closeSupportModal();
         document.getElementById("mySupportTicketsSection")?.scrollIntoView({ behavior: "smooth" });
