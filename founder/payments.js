@@ -5,7 +5,7 @@
 
 import "./js/founder-app.js";
 
-import { db, auth }
+import { app, db, auth }
 
 from "../js/firebase.js";
 
@@ -22,6 +22,12 @@ onSnapshot,
 setDoc
 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const paymentFunctions = getFunctions(app, "us-central1");
+const reviewManualPayment = httpsCallable(paymentFunctions, "reviewStudentManualPayment");
+
 
 import {
 
@@ -475,106 +481,68 @@ error
    RENDER TRANSACTIONS
 =================================== */
 
-function renderTransactions(data){
+function renderTransactions(data) {
+  transactionTable.innerHTML = "";
+  if (!data.length) {
+    transactionTable.innerHTML = '<tr><td colspan="10" class="empty-table">No transactions found.</td></tr>';
+    return;
+  }
 
-transactionTable.innerHTML = "";
+  data.forEach(payment => {
+    const row = document.createElement("tr");
+    const created = payment.createdAt?.toDate ? formatDate(payment.createdAt.toDate()) : "-";
+    const safe = value => String(value ?? "-").replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+    const needsReview = payment.method === "manual_mpesa" && payment.status === "pending_review";
+    row.innerHTML = `
+      <td>${safe(payment.receiptNumber || payment.manualReceiptCode || "-")}</td>
+      <td>${safe(payment.studentName || payment.studentEmail || "-")}</td>
+      <td>${safe(payment.admissionNumber || "-")}</td>
+      <td>${safe(payment.paymentType || payment.purchaseType || "-")}</td>
+      <td>${safe(payment.method || "-")}</td>
+      <td>KES ${Number(payment.amount || 0).toLocaleString()}</td>
+      <td>${safe(payment.transactionId || payment.mpesaReceiptNumber || "-")}</td>
+      <td><span class="status ${safe(payment.status)}">${safe(payment.status)}</span></td>
+      <td>${safe(created)}</td>
+      <td><div class="table-actions">
+        <button class="table-action" type="button" data-preview-payment="${safe(payment.id)}">View</button>
+        ${needsReview ? `
+          <button class="table-action" type="button" data-review-payment="${safe(payment.id)}" data-decision="approve">Approve</button>
+          <button class="table-action" type="button" data-review-payment="${safe(payment.id)}" data-decision="reject">Reject</button>
+        ` : ""}
+      </div></td>`;
+    transactionTable.appendChild(row);
+  });
 
-if(data.length===0){
-
-transactionTable.innerHTML = `
-
-<tr>
-
-<td colspan="10"
-class="empty-table">
-
-No transactions found.
-
-</td>
-
-</tr>
-
-`;
-
-return;
-
+  transactionTable.querySelectorAll("[data-preview-payment]").forEach(button => {
+    button.addEventListener("click", () => previewReceipt(button.dataset.previewPayment));
+  });
+  transactionTable.querySelectorAll("[data-review-payment]").forEach(button => {
+    button.addEventListener("click", () => reviewManualStudentPayment(button.dataset.reviewPayment, button.dataset.decision, button));
+  });
 }
 
-data.forEach((payment)=>{
-
-const row = document.createElement("tr");
-
-row.innerHTML = `
-
-<td>${payment.receiptNumber || "-"}</td>
-
-<td>${payment.studentName || "-"}</td>
-
-<td>${payment.admissionNumber || "-"}</td>
-
-<td>${payment.paymentType || "-"}</td>
-
-<td>${payment.method || "-"}</td>
-
-<td>KES ${Number(payment.amount || 0).toLocaleString()}</td>
-
-<td>${payment.transactionId || "-"}</td>
-
-<td>
-
-<span class="status ${payment.status}">
-
-${payment.status}
-
-</span>
-
-</td>
-
-<td>
-
-${payment.createdAt
-
-?
-
-formatDate(
-
-payment.createdAt.toDate()
-
-)
-
-:
-
-"-"
-
+async function reviewManualStudentPayment(paymentId, decision, button) {
+  if (!paymentId || !["approve", "reject"].includes(decision)) return;
+  const promptText = decision === "approve"
+    ? "Optional review note (confirm the receipt against the M-Pesa statement before approving):"
+    : "Reason for rejecting this M-Pesa receipt:";
+  const note = window.prompt(promptText, "");
+  if (note === null) return;
+  if (decision === "reject" && !note.trim()) {
+    window.ssaToast?.("Add a reason before rejecting a payment.", "error", "Payment Review");
+    return;
+  }
+  button.disabled = true;
+  try {
+    await reviewManualPayment({ paymentId, decision, note: note.trim() });
+    window.ssaToast?.(decision === "approve" ? "Payment verified and access activated." : "Payment rejected.", "success", "Payment Review");
+  } catch (error) {
+    console.error("Manual student payment review failed:", error);
+    window.ssaToast?.(error.message || "Payment review failed.", "error", "Payment Review");
+    button.disabled = false;
+  }
 }
-
-</td>
-
-<td>
-
-<div class="table-actions">
-
-<button
-class="table-action"
-
-onclick="previewReceipt('${payment.id}')">
-
-View
-
-</button>
-
-</div>
-
-</td>
-
-`;
-
-transactionTable.appendChild(row);
-
-});
-
-}
-
 
 /* ===================================
    PAYMENT KPIs
