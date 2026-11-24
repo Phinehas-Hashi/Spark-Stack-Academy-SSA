@@ -109,7 +109,7 @@ async function loadUsers() {
   ]);
   const premiumByUid = new Map(premiumSnap.docs.map(item => [item.id, item.data()]));
   const users = usersSnap.docs.map(item => ({ id: item.id, ...item.data() }))
-    .filter(user => ["student", "instructor"].includes(String(user.role || "").toLowerCase()));
+    .filter(user => {\n      const role = String(user.role || "").toLowerCase();\n      if (role === "student") return user.status === "active" && user.active !== false;\n      if (role === "instructor") return user.status === "active" && user.active === true && user.verified === true;\n      return false;\n    });
   if (!users.length) {
     usersRoot.textContent = "No student or instructor accounts found.";
     return;
