@@ -2198,6 +2198,31 @@ function updateStatus() {
     const sideStatus =
         $("sideCourseStatus");
 
+    const publishLocked = ["published", "pending_review", "awaiting_admin_review"].includes(status);
+    ["publishCourseBtn", "sidePublishBtn"].forEach(id => {
+        const button = $(id);
+        if (button) {
+            button.disabled = publishLocked;
+            button.title = status === "published"
+                ? "This course is already published."
+                : publishLocked
+                    ? "This course is awaiting administrator review."
+                    : "Submit this course for administrator review.";
+        }
+    });
+
+    const requirements = $("publishRequirements");
+    if (requirements) {
+        requirements.textContent = status === "published"
+            ? "This course is live. Contact an administrator if it needs a review or status change."
+            : ["pending_review", "awaiting_admin_review"].includes(status)
+                ? "Your course has been submitted. Wait for administrator feedback before resubmitting."
+                : status === "rejected"
+                    ? "Review the administrator's feedback, update your lessons and submit again."
+                    : !modules.length || !lessons.length
+                        ? "Add at least one module and one lesson before submitting for review."
+                        : "Your curriculum is ready to be submitted for administrator review.";
+    }
 
     if (headerStatus) {
 
