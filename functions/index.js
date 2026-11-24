@@ -174,11 +174,25 @@ exports.awardStudentXP = onCall(async request => {
         throw new HttpsError("failed-precondition", "The quiz attempt is not complete.");
       }
       const quizRef = db.doc("quizzes/" + submission.quizId);
-      const quizSnap = await transaction.get(quizRef);
-      if (!quizSnap.exists) throw new HttpsError("failed-precondition", "The quiz no longer exists.");
+      const questionQuery = db.collection("quizQuestions").where("quizId", "==", submission.quizId);
+      const [quizSnap, questionSnap] = await Promise.all([transaction.get(quizRef), transaction.get(questionQuery)]);
+      if (!quizSnap.exists || questionSnap.empty) throw new HttpsError("failed-precondition", "The quiz or its published questions could not be found.");
+      const answers = submission.answers && typeof submission.answers === "object" ? submission.answers : {};
+      let correctCount = 0;
+      questionSnap.docs.forEach(questionDoc => {
+        const question = questionDoc.data() || {};
+        const expected = question.correctAnswer ?? question.answer ?? question.correctOption;
+        const actual = answers[questionDoc.id];
+        if (expected !== undefined && expected !== null && actual !== undefined && actual !== null
+            && String(actual).trim().toLowerCase() === String(expected).trim().toLowerCase()) {
+          correctCount += 1;
+        }
+      });
+      const score = Math.round((correctCount / questionSnap.size) * 100);
+      const passingScore = Number(quizSnap.data().passingScore || 0);
+      const passed = score >= passingScore;
       const baseXP = Math.min(100, Math.max(1, Number(quizSnap.data().xpReward ?? quizSnap.data().xp ?? 30)));
-      const score = Math.max(0, Math.min(100, Number(submission.score || 0)));
-      reward = submission.passed === true ? Math.max(Math.floor(baseXP * score / 100), 1) : Math.floor(baseXP * 0.25);
+      reward = passed ? Math.max(Math.floor(baseXP * score / 100), 1) : Math.floor(baseXP * 0.25);
       if (reward <= 0) throw new HttpsError("failed-precondition", "This quiz attempt did not qualify for XP.");
       counterField = "quizzesCompleted";
     }
