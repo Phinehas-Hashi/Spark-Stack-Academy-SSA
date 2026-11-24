@@ -151,7 +151,7 @@ async function action(id, type) {
       if (treasuryBalance < amount) throw new Error(`Insufficient treasury funds. Available: ${money(treasuryBalance)}.`);
       if (walletBalance < amount) throw new Error(`Insufficient instructor wallet balance. Available: ${money(walletBalance)}.`);
 
-      tx.update(ref, { status:"paid", paidBy:me.uid, paidAt:serverTimestamp(), updatedAt:serverTimestamp() });
+      tx.update(ref, { status:"paid", walletBalanceDebited:true, paidBy:me.uid, paidAt:serverTimestamp(), updatedAt:serverTimestamp() });
       tx.update(treasuryRef, { balance:treasuryBalance - amount, updatedAt:serverTimestamp() });
       tx.update(walletRef, { balance:walletBalance - amount, totalPaid:Number(walletSnap.data().totalPaid||0)+amount, updatedAt:serverTimestamp() });
     });
