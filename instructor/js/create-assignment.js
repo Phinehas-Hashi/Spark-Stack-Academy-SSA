@@ -33,8 +33,6 @@ document.addEventListener(
 
         try {
 
-            await waitForInstructor();
-
             instructor = await waitForInstructor();
 
 
@@ -44,7 +42,7 @@ document.addEventListener(
             const dueDateField = $("dueDate");
             if (dueDateField) {
                 const localNow = new Date();
-                localNow.setMinutes(localNow.getMinutes() - localNow.getTimezoneOffset());
+                localNow.setMinutes(localNow.getMinutes() - localNow.getTimezoneOffset() + 1, 0, 0);
                 dueDateField.min = localNow.toISOString().slice(0, 16);
             }
 
@@ -59,9 +57,17 @@ document.addEventListener(
         } catch (error) {
 
             console.error(
-                "❌ Create Assignment boot error:",
+                "Create Assignment boot error:",
                 error
             );
+
+            showMessage(
+                "Your instructor session could not be loaded. Refresh the page and sign in again.",
+                "error"
+            );
+
+            const button = $("saveAssignmentBtn");
+            if (button) button.disabled = true;
 
         }
 
