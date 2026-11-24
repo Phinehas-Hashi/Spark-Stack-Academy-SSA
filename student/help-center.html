@@ -939,6 +939,23 @@
 
 
 
+    <!-- MY SUPPORT TICKETS -->
+    <section class="help-section ticket-center" id="mySupportTicketsSection">
+        <div class="section-heading">
+            <div>
+                <span>YOUR SUPPORT DESK</span>
+                <h2>My support tickets</h2>
+                <p>Track every request, read team responses and continue the conversation until your issue is resolved.</p>
+            </div>
+        </div>
+        <div class="ticket-summary" id="ticketSummary" aria-live="polite">
+            <span>Loading your support history…</span>
+        </div>
+        <div class="ticket-list" id="mySupportTickets" aria-live="polite">
+            <div class="ticket-empty">Your support tickets will appear here.</div>
+        </div>
+    </section>
+
     <!-- =========================================
          SUPPORT CENTER
     ========================================== -->
@@ -1054,6 +1071,31 @@
 
             <form id="supportForm">
 
+
+                <label>
+                    Category
+                    <select id="supportCategory" required>
+                        <option value="technical">Technical issue</option>
+                        <option value="account">Account and login</option>
+                        <option value="payments">Payments and Premium</option>
+                        <option value="course">Course access and learning</option>
+                        <option value="assignments">Assignments and assessments</option>
+                        <option value="certificates">Certificates</option>
+                        <option value="privacy">Privacy and security</option>
+                        <option value="feedback">Feedback or feature request</option>
+                        <option value="other">Other</option>
+                    </select>
+                </label>
+
+                <label>
+                    Priority
+                    <select id="supportPriority" required>
+                        <option value="low">Low — general question</option>
+                        <option value="medium" selected>Normal — need assistance</option>
+                        <option value="high">High — blocking my learning</option>
+                        <option value="critical">Critical — account or security concern</option>
+                    </select>
+                </label>
 
                 <label>
 
