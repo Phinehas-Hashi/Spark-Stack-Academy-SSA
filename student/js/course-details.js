@@ -713,88 +713,60 @@ function renderCurriculum() {
 // ============================================
 
 async function checkEnrollment() {
+    if (!currentUser) return false;
 
-    if (!currentUser)
-        return false;
+    const enrollmentQueries = [
+        query(
+            collection(db, "enrollments"),
+            where("userId", "==", currentUser.uid),
+            where("courseId", "==", courseId)
+        ),
+        query(
+            collection(db, "enrollments"),
+            where("studentId", "==", currentUser.uid),
+            where("courseId", "==", courseId)
+        )
+    ];
 
+    const results = await Promise.allSettled(
+        enrollmentQueries.map(enrollmentQuery => getDocs(enrollmentQuery))
+    );
 
-    try {
-
-        const mainQuery =
-            query(
-                collection(
-                    db,
-                    "enrollments"
-                ),
-                where(
-                    "userId",
-                    "==",
-                    currentUser.uid
-                ),
-                where(
-                    "courseId",
-                    "==",
-                    courseId
-                )
-            );
-
-
-        const snapshot =
-            await getDocs(
-                mainQuery
-            );
-
-
-        if (!snapshot.empty) {
-
-            const enrollment =
-                snapshot.docs[0].data();
-
-
-            console.log(
-                "✅ ENROLLMENT FOUND:",
-                enrollment
-            );
-
-
-            if (
-                hasAccess(
-                    enrollment
-                )
-            ) {
-
-                setEnrolledState(
-                    enrollment
-                );
-
-                return enrollment;
-
-            }
-
+    const candidates = [];
+    for (const result of results) {
+        if (result.status !== "fulfilled") {
+            console.warn("An enrollment lookup was unavailable:", result.reason);
+            continue;
         }
-
-
-        setAvailableState();
-
-        return false;
-
+        result.value.docs.forEach(item => {
+            if (!candidates.some(candidate => candidate.id === item.id)) {
+                candidates.push({ id: item.id, ...item.data() });
+            }
+        });
     }
 
-    catch (error) {
-
-        console.error(
-            "❌ ENROLLMENT CHECK FAILED:",
-            error
+    // Legacy institution enrollments are stored under students/{uid}/enrollments.
+    try {
+        const nested = await getDoc(
+            doc(db, "students", currentUser.uid, "enrollments", courseId)
         );
-
-        setAvailableState();
-
-        return false;
-
+        if (nested.exists()) {
+            candidates.push({ id: nested.id, ...nested.data() });
+        }
+    } catch (error) {
+        console.warn("Legacy enrollment lookup was unavailable:", error);
     }
 
-}
+    const enrollment = candidates.find(hasAccess);
+    if (enrollment) {
+        console.log("Student enrollment found:", enrollment);
+        setEnrolledState(enrollment);
+        return enrollment;
+    }
 
+    setAvailableState();
+    return false;
+}
 
 // ============================================
 // ACCESS RULE
