@@ -290,7 +290,7 @@ function setupAssignmentSubmission(user) {
           user.uid,
           XP_REWARDS.assignment,
           `Submitted assignment: ${assignmentData.title || "Assignment"}`,
-          `assignment_${assignmentId}`
+          `assignment:${assignmentId}`
         );
         alert("Assignment submitted successfully. +" + XP_REWARDS.assignment + " XP earned.");
       } catch (xpError) {
