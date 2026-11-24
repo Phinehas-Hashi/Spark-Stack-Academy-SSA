@@ -34,7 +34,6 @@ export async function submitReport({
   const ticketNumber = makeTicketNumber();
   const ref = await addDoc(collection(db, "reports"), {
     reportId: ticketNumber,
-    ticketNumber,
     title: cleanTitle,
     description: cleanDescription,
     category,
