@@ -12,6 +12,8 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
 import {
     collection,
     query,
@@ -21,8 +23,6 @@ import {
     getDocs,
     doc,
     getDoc,
-    addDoc,
-    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -501,23 +501,14 @@ async function submitWithdrawal() {
         button.textContent = "Submitting request…";
     }
     try {
-        await addDoc(collection(db, "withdrawalRequests"), {
-            instructorId: currentInstructor.uid,
-            amount,
-            platformTax: tax,
-            withdrawalFee: fee,
-            netAmount,
-            method: "mpesa",
-            account: phone,
-            status: "pending",
-            createdAt: serverTimestamp()
-        });
+        const requestWithdrawal = httpsCallable(getFunctions(), "requestInstructorWithdrawal");
+        await requestWithdrawal({ amount, phone });
         await loadEarnings();
         closeWithdrawalWindow();
         alert("Your M-Pesa withdrawal request has been submitted for review.");
     } catch (error) {
         console.error("Withdrawal request failed:", error);
-        alert("Unable to submit the withdrawal request. Please try again.");
+        alert(error?.message || "Unable to submit the withdrawal request. Please try again.");
     } finally {
         if (button) {
             button.disabled = false;
