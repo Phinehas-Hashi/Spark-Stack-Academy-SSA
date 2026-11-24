@@ -111,9 +111,14 @@ export async function sendReportMessage({ reportDocId, body }) {
   });
 
   const isReporter = report.reporterId === user.uid;
+  const isStaffSender = ["admin", "founder"].includes(String(senderRole).toLowerCase());
   if (isReporter && ["resolved", "dismissed", "closed"].includes(report.status)) {
-    batch.update(reportRef, { status: "reopened", updatedAt: serverTimestamp() });
-  } else {
+    batch.update(reportRef, {
+      status: "pending",
+      studentStatusUpdatedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  } else if (isStaffSender) {
     batch.update(reportRef, { updatedAt: serverTimestamp() });
   }
   await batch.commit();
