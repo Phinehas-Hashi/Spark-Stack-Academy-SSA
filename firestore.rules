@@ -1267,7 +1267,7 @@ service cloud.firestore {
           && resource.data.studentId == uid()
           && request.resource.data.studentId == uid()
           && request.resource.data.assignmentId == resource.data.assignmentId
-          && resource.data.get('status', '') not in ['graded', 'reviewed', 'returned']
+          && !(resource.data.get('status', '') in ['graded', 'reviewed', 'returned'])
           && request.resource.data.status in ['submitted', 'resubmitted']
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'content', 'notes', 'status', 'submittedAt', 'updatedAt'
