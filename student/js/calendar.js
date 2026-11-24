@@ -2,27 +2,17 @@
 // SPARK STACK ACADEMY
 // STUDENT CALENDAR
 //
-// Firestore collection:
-//     calendarEvents
-//
-// Supported audience values:
-//     all
-//     students
-//     user
-//
-// Supported event types:
-//     assignment
-//     quiz
-//     course
-//     announcement
-//     event
+// Derives scheduled items from Firestore collections readable by students.
+// Does not query the unruled calendarEvents collection.
 // ============================================================
 
 import { auth, db } from "../../js/firebase.js";
 
 import {
     collection,
-    getDocs
+    getDocs,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -295,7 +285,7 @@ function normalizeEvent(id, data) {
 // EVENT VISIBILITY
 // ============================================================
 
-function eventBelongsToStudent(event, user) {
+function eventBelongsToStudent(event, user, enrolledCourseIds = new Set()) {
 
     if (!user) {
         return false;
@@ -318,11 +308,23 @@ function eventBelongsToStudent(event, user) {
         return event.userId === user.uid;
     }
 
+    if (
+        audience === "course" ||
+        audience === "enrolled" ||
+        audience === "enrolled_students"
+    ) {
+        return Boolean(
+            event.courseId &&
+            enrolledCourseIds.has(String(event.courseId))
+        );
+    }
+
     if (event.userId) {
         return event.userId === user.uid;
     }
 
-    return true;
+    // Unknown and staff-only audiences are never exposed to students.
+    return false;
 }
 
 
@@ -331,61 +333,93 @@ function eventBelongsToStudent(event, user) {
 // ============================================================
 
 async function loadEvents(user) {
+    state.events = [];
+    if (!user) return;
 
-    if (!user) {
-        state.events = [];
-        return;
-    }
+    const enrollmentReads = [
+        getDocs(query(collection(db, "enrollments"), where("userId", "==", user.uid))),
+        getDocs(query(collection(db, "enrollments"), where("studentId", "==", user.uid))),
+        getDocs(collection(db, "students", user.uid, "enrollments"))
+    ];
+    const enrollmentResults = await Promise.allSettled(enrollmentReads);
+    const courseIds = new Set();
 
-    try {
-
-        const snapshot = await getDocs(
-            collection(db, "calendarEvents")
-        );
-
-        const events = [];
-
-        snapshot.forEach(documentSnapshot => {
-
-            const event = normalizeEvent(
-                documentSnapshot.id,
-                documentSnapshot.data()
-            );
-
-            if (!event) return;
-
-            if (!eventBelongsToStudent(event, user)) {
-                return;
+    enrollmentResults.forEach(result => {
+        if (result.status !== "fulfilled") {
+            console.warn("SSA Calendar: enrollment source unavailable.", result.reason);
+            return;
+        }
+        result.value.forEach(item => {
+            const enrollment = item.data();
+            const status = String(enrollment.status || "").toLowerCase();
+            const payment = String(enrollment.paymentStatus || "").toLowerCase();
+            const active = ["active", "approved", "completed"].includes(status);
+            const paidOrFree = ["paid", "free"].includes(payment) || status === "paid";
+            const enrolledCourseId = enrollment.courseId || enrollment.course_id;
+            if (enrolledCourseId && (enrollment.institutionId ? active : active && paidOrFree)) {
+                courseIds.add(String(enrolledCourseId));
             }
-
-            events.push(event);
         });
+    });
 
-        events.sort(
-            (first, second) =>
-                first.startAt.getTime() -
-                second.startAt.getTime()
-        );
+    const sourceResults = await Promise.allSettled([
+        getDocs(collection(db, "assignments")),
+        getDocs(collection(db, "quizzes")),
+        getDocs(collection(db, "announcements"))
+    ]);
+    const successfulSources = sourceResults.filter(result => result.status === "fulfilled").length;
+    if (!successfulSources) throw new Error("No student-readable calendar sources responded.");
 
-        state.events = events;
+    const events = [];
+    const addEvent = (id, data, type, dateValue) => {
+        if (!dateValue) return;
+        const event = normalizeEvent(id, {
+            ...data,
+            type,
+            startAt: dateValue
+        });
+        if (event && eventBelongsToStudent(event, user, courseIds)) events.push(event);
+    };
 
-        console.info(
-            `SSA Calendar: loaded ${events.length} event(s).`
-        );
+    const assignments = sourceResults[0];
+    if (assignments.status === "fulfilled") {
+        assignments.value.forEach(item => {
+            const data = item.data();
+            if (!data.courseId || !courseIds.has(String(data.courseId))) return;
+            addEvent(item.id, data, "assignment", data.dueDate || data.due_at || data.deadline);
+        });
+    } else console.warn("SSA Calendar: assignments unavailable.", assignments.reason);
 
-    } catch (error) {
+    const quizzes = sourceResults[1];
+    if (quizzes.status === "fulfilled") {
+        quizzes.value.forEach(item => {
+            const data = item.data();
+            if (!data.courseId || !courseIds.has(String(data.courseId))) return;
+            const published = data.published === true || String(data.status || "").toLowerCase() === "published";
+            if (!published) return;
+            addEvent(item.id, data, "quiz", data.dueDate || data.dueAt || data.scheduledAt || data.startAt || data.date);
+        });
+    } else console.warn("SSA Calendar: quizzes unavailable.", quizzes.reason);
 
-        console.error(
-            "SSA Calendar: failed to load events.",
-            error
-        );
+    const announcements = sourceResults[2];
+    if (announcements.status === "fulfilled") {
+        announcements.value.forEach(item => {
+            const data = item.data();
+            // Only genuinely scheduled announcements belong on the calendar.
+            // createdAt is an audit timestamp, not an event date.
+            addEvent(item.id, data, "announcement", data.eventDate || data.event_date || data.scheduledAt || data.scheduled_at);
+        });
+    } else console.warn("SSA Calendar: announcements unavailable.", announcements.reason);
 
-        state.events = [];
-    }
+    const unique = new Map();
+    events.forEach(event => unique.set(`${event.type}:${event.id}`, event));
+    state.events = Array.from(unique.values()).sort(
+        (a, b) => a.startAt.getTime() - b.startAt.getTime()
+    );
+    console.info(`SSA Calendar: loaded ${state.events.length} item(s) from ${successfulSources} source(s).`);
 }
 
 
-// ============================================================
 // GET EVENTS FOR DAY
 // ============================================================
 
@@ -1001,9 +1035,45 @@ auth.onAuthStateChanged(
             return;
         }
 
-        await loadEvents(user);
+        if (elements.grid) elements.grid.setAttribute("aria-busy", "true");
 
-        renderCalendar();
+        try {
+            await loadEvents(user);
+            if (elements.grid) elements.grid.setAttribute("aria-busy", "false");
+            renderCalendar();
+        } catch (error) {
+            console.error("SSA Calendar: initial load failed.", error);
+            if (elements.grid) {
+                elements.grid.setAttribute("aria-busy", "false");
+                elements.grid.innerHTML = `
+                    <div class="calendar-loading calendar-load-error" role="alert">
+                        <strong>Calendar unavailable</strong>
+                        <span>We could not load your learning schedule.</span>
+                        <button id="calendarRetryBtn" class="calendar-retry-btn" type="button">Try again</button>
+                    </div>
+                `;
+                document.getElementById("calendarRetryBtn")?.addEventListener("click", async () => {
+                    if (elements.grid) {
+                        elements.grid.setAttribute("aria-busy", "true");
+                        elements.grid.innerHTML = `<div class="calendar-loading"><div class="calendar-loading-spinner"></div><span>Loading your calendar…</span></div>`;
+                    }
+                    try {
+                        await loadEvents(user);
+                        if (elements.grid) elements.grid.setAttribute("aria-busy", "false");
+                        renderCalendar();
+                    } catch (retryError) {
+                        console.error("SSA Calendar: retry failed.", retryError);
+                        if (elements.grid) {
+                            elements.grid.setAttribute("aria-busy", "false");
+                            elements.grid.innerHTML = `<div class="calendar-loading calendar-load-error" role="alert"><strong>Still unavailable</strong><span>Please check your connection and try again.</span></div>`;
+                        }
+                    }
+                }, { once: true });
+            }
+            if (elements.upcoming) {
+                elements.upcoming.innerHTML = `<div class="upcoming-empty" role="alert"><strong>Schedule unavailable</strong><p>We could not retrieve your upcoming items.</p></div>`;
+            }
+        }
 
     }
 );

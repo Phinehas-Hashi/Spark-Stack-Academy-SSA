@@ -1,173 +1,344 @@
-import { auth } from "../../js/firebase.js";
+import { auth, db, storage } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getMessages, sendMessage, subscribeToMessages, subscribeToReadReceipts, markConversationRead, getProfileByFirebaseUid, getConversationPeople, createChatPresence, touchLastSeen } from "../../js/messaging-service.js";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { uploadFile } from "./uploads.js";
+import { getBlob, ref as storageRef } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const params = new URLSearchParams(location.search);
-const chatId = params.get("conversation") || params.get("chatId");
+const chatId = params.get("chatId") || params.get("conversation");
 const messagesBox = document.getElementById("chatMessages");
 const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
+const chatComposer = document.getElementById("chatComposer");
 const chatName = document.getElementById("chatName");
 const chatStatus = document.getElementById("chatStatus");
 const chatAvatar = document.getElementById("chatAvatar");
-const onlineDot = document.getElementById("onlineDot");
 const typingIndicator = document.getElementById("typingIndicator");
-const backBtn = document.getElementById("backBtn");
+const fileInput = document.getElementById("fileInput");
 
-let firebaseUser = null;
-let profile = null;
+let currentUser = null;
+let chatRef = null;
 let peer = null;
-let peerLastReadAt = null;
-let unsubscribeMessages = null;
-let unsubscribeReads = null;
-let presence = null;
+let stopMessages = null;
+let stopChat = null;
+let typingTimer = null;
 let typingHideTimer = null;
+let sending = false;
+let typingActive = false;
 
-const escapeHTML = value => String(value ?? "").replace(/[&<>\"]/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;" }[char]));
-const toast = (message, type = "error") => window.SSA?.toast?.(message, type) || console.warn(message);
+const toDate = value => {
+  if (!value) return null;
+  if (typeof value.toDate === "function") return value.toDate();
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+const escapeHtml = value => String(value ?? "").replace(/[&<>"]/g, char => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
+}[char]));
 
-function formatLastSeen(value) {
-  if (!value) return "Offline";
-  const time = new Date(value);
-  const diff = Date.now() - time.getTime();
-  if (diff < 60000) return "Last seen just now";
-  if (diff < 3600000) return `Last seen ${Math.floor(diff / 60000)}m ago`;
-  if (diff < 86400000) return `Last seen ${Math.floor(diff / 3600000)}h ago`;
-  return `Last seen ${time.toLocaleDateString([], { month: "short", day: "numeric" })}`;
+function showNotice(message) {
+  if (!messagesBox) return;
+  const notice = document.createElement("div");
+  notice.className = "chat-system-notice";
+  notice.textContent = message;
+  messagesBox.replaceChildren(notice);
 }
 
-function setPeerStatus(online, lastSeen) {
-  onlineDot?.classList.toggle("is-online", online);
-  onlineDot?.classList.toggle("is-offline", !online);
-  if (chatStatus) chatStatus.textContent = online ? "Online" : formatLastSeen(lastSeen);
+function formatTime(value) {
+  const date = toDate(value);
+  return date
+    ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "Sending…";
 }
 
-function showTyping() {
-  typingIndicator?.classList.remove("hidden");
-  clearTimeout(typingHideTimer);
-  typingHideTimer = setTimeout(() => typingIndicator?.classList.add("hidden"), 2600);
+function peerReadMessage(message, peerLastReadAt) {
+  const sentAt = toDate(message.timestamp);
+  const readAt = toDate(peerLastReadAt);
+  return Boolean(sentAt && readAt && readAt >= sentAt);
 }
 
-function isRead(message) {
-  if (!peerLastReadAt || !message.created_at) return false;
-  return new Date(peerLastReadAt).getTime() >= new Date(message.created_at).getTime();
+function renderMessage(message, peerLastReadAt) {
+  const mine = message.senderId === currentUser.uid;
+  const row = document.createElement("article");
+  row.className = mine ? "message sent" : "message received";
+  row.dataset.messageId = message.id;
+  const sentAt = toDate(message.timestamp);
+  row.dataset.createdAt = sentAt ? sentAt.toISOString() : "";
+
+  if (message.text) {
+    const body = document.createElement("div");
+    body.className = "message-text";
+    body.textContent = message.text;
+    row.append(body);
+  }
+
+  if (message.attachment && typeof message.attachment.path === "string") {
+    const attachmentButton = document.createElement("button");
+    attachmentButton.type = "button";
+    attachmentButton.className = "message-attachment";
+    attachmentButton.textContent = message.attachment.name || "Download attachment";
+    attachmentButton.addEventListener("click", async () => {
+      attachmentButton.disabled = true;
+      try {
+        const blob = await getBlob(storageRef(storage, message.attachment.path));
+        const objectUrl = URL.createObjectURL(blob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = objectUrl;
+        downloadLink.download = message.attachment.name || "ssa-attachment";
+        document.body.append(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+      } catch (error) {
+        console.error("Attachment download failed:", error);
+        window.SSA?.toast?.("This attachment could not be downloaded.", "error");
+      } finally {
+        attachmentButton.disabled = false;
+      }
+    });
+    row.append(attachmentButton);
+  }
+
+  const meta = document.createElement("div");
+  meta.className = "message-meta";
+  const time = document.createElement("time");
+  time.className = "message-time";
+  const date = toDate(message.timestamp);
+  time.textContent = formatTime(message.timestamp);
+  if (date) time.dateTime = date.toISOString();
+  meta.append(time);
+
+  if (mine) {
+    const read = document.createElement("span");
+    const isRead = peerReadMessage(message, peerLastReadAt);
+    read.className = `message-read${isRead ? " is-read" : ""}`;
+    read.textContent = isRead ? "✓✓" : "✓";
+    read.setAttribute("aria-label", isRead ? "Read" : "Sent");
+    meta.append(read);
+  }
+
+  row.append(meta);
+  return row;
 }
 
-function renderMessage(message, { scroll = true } = {}) {
-  const mine = message.sender_id === profile.id;
-  const read = mine && isRead(message);
-  const element = document.createElement("div");
-  element.className = mine ? "message sent" : "message received";
-  element.dataset.messageId = message.id;
-  element.dataset.createdAt = message.created_at || "";
-  element.innerHTML = `<div class="message-text">${escapeHTML(message.body)}</div><div class="message-meta"><time class="message-time">${new Date(message.created_at).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}</time>${mine ? `<span class="message-read${read ? " is-read" : ""}" aria-label="${read ? "Read" : "Sent"}">${read ? "✓✓" : "✓"}</span>` : ""}</div>`;
-  messagesBox.appendChild(element);
-  if (scroll) messagesBox.scrollTop = messagesBox.scrollHeight;
+function renderMessages(snapshot, peerLastReadAt) {
+  const fragment = document.createDocumentFragment();
+  const latestMessages = snapshot.docs.slice().reverse();
+
+  if (!latestMessages.length) {
+    const welcome = document.createElement("p");
+    welcome.className = "chat-system-notice";
+    welcome.textContent = "This is the beginning of your private conversation.";
+    fragment.append(welcome);
+  } else {
+    latestMessages.forEach(item => fragment.append(renderMessage(
+      { id: item.id, ...item.data() },
+      peerLastReadAt
+    )));
+  }
+
+  messagesBox.replaceChildren(fragment);
+  messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
-function refreshReadStates() {
-  messagesBox?.querySelectorAll(".message.sent").forEach(element => {
-    const read = isRead({ created_at: element.dataset.createdAt });
-    const indicator = element.querySelector(".message-read");
-    if (!indicator) return;
-    indicator.textContent = read ? "✓✓" : "✓";
-    indicator.classList.toggle("is-read", read);
-    indicator.setAttribute("aria-label", read ? "Read" : "Sent");
+async function markRead() {
+  if (!chatRef || !currentUser) return;
+  try {
+    await updateDoc(chatRef, {
+      [`lastReadAt.${currentUser.uid}`]: serverTimestamp()
+    });
+  } catch (error) {
+    console.warn("Read receipt update skipped:", error);
+  }
+}
+
+function setTyping(active) {
+  if (!chatRef || !currentUser) return;
+  clearTimeout(typingTimer);
+  const nextState = Boolean(active);
+  if (nextState !== typingActive) {
+    typingActive = nextState;
+    updateDoc(chatRef, {
+      typing: {
+        uid: currentUser.uid,
+        status: nextState,
+        updatedAt: serverTimestamp()
+      }
+    }).catch(() => {});
+  }
+  if (nextState) typingTimer = setTimeout(() => setTyping(false), 1800);
+}
+
+function startChatListeners() {
+  const messagesQuery = query(
+    collection(db, "chats", chatId, "messages"),
+    orderBy("timestamp", "desc"),
+    limit(100)
+  );
+
+  stopMessages = onSnapshot(messagesQuery, snapshot => {
+    renderMessages(snapshot, peer?.lastReadAt);
+    const hasIncoming = snapshot.docs.some(item => item.data().senderId !== currentUser.uid);
+    if (hasIncoming) markRead();
+  }, error => {
+    console.error("Message listener failed:", error);
+    showNotice("Messages could not be updated. Check your connection.");
   });
+
+  stopChat = onSnapshot(chatRef, snapshot => {
+    if (!snapshot.exists()) return;
+    const data = snapshot.data();
+    const peerReadAt = data.lastReadAt?.[peer?.uid];
+    peer.lastReadAt = peerReadAt || null;
+
+    messagesBox.querySelectorAll(".message.sent").forEach(row => {
+      const indicator = row.querySelector(".message-read");
+      if (!indicator) return;
+      const sentAt = toDate(row.dataset.createdAt);
+      const readAt = toDate(peerReadAt);
+      const read = Boolean(sentAt && readAt && readAt >= sentAt);
+      indicator.textContent = read ? "✓✓" : "✓";
+      indicator.classList.toggle("is-read", read);
+      indicator.setAttribute("aria-label", read ? "Read" : "Sent");
+    });
+
+    const typing = data.typing;
+    if (typing?.uid === peer?.uid && typing.status) {
+      typingIndicator?.classList.remove("hidden");
+      clearTimeout(typingHideTimer);
+      typingHideTimer = setTimeout(() => typingIndicator?.classList.add("hidden"), 2200);
+    } else {
+      typingIndicator?.classList.add("hidden");
+    }
+  }, error => console.warn("Conversation status listener failed:", error));
 }
+
 
 async function loadChat() {
-  profile = await getProfileByFirebaseUid(firebaseUser.uid);
-  const people = await getConversationPeople(chatId);
-  peer = people.find(person => person.id !== profile.id) || people[0];
-  if (!peer) throw new Error("This conversation is unavailable.");
-  peerLastReadAt = peer.last_read_at || null;
+  if (!chatId) throw new Error("Conversation link is missing.");
 
-  if (chatName) chatName.textContent = peer.username ? `@${peer.username}` : (peer.full_name || "User");
-  if (chatAvatar && peer.avatar_url) chatAvatar.src = peer.avatar_url;
-  setPeerStatus(false, peer.last_seen_at);
+  chatRef = doc(db, "chats", chatId);
+  const snapshot = await getDoc(chatRef);
+  if (!snapshot.exists()) throw new Error("This conversation does not exist.");
 
-  const messages = await getMessages(chatId);
-  messagesBox.innerHTML = "";
-  messages.forEach(message => renderMessage(message, { scroll: false }));
-  messagesBox.scrollTop = messagesBox.scrollHeight;
+  const data = snapshot.data();
+  const memberIds = Array.isArray(data.memberIds) ? data.memberIds : [];
+  const participants = Array.isArray(data.participants) ? data.participants : [];
+  const allowedMembers = memberIds.length ? memberIds : participants;
+  if (!allowedMembers.includes(currentUser.uid)) {
+    throw new Error("You do not have access to this conversation.");
+  }
 
-  await markConversationRead({ conversationId: chatId, userId: profile.id });
-  await touchLastSeen(profile.id);
+  const members = Array.isArray(data.members) ? data.members : [];
+  peer = members.find(member => member?.uid && member.uid !== currentUser.uid) || {
+    uid: allowedMembers.find(id => id !== currentUser.uid),
+    name: "Instructor"
+  };
+  if (!peer.uid) throw new Error("The other participant could not be identified.");
 
-  unsubscribeMessages?.();
-  unsubscribeReads?.();
-  unsubscribeMessages = subscribeToMessages(chatId, message => {
-    renderMessage(message);
-    if (message.sender_id !== profile.id) {
-      markConversationRead({ conversationId: chatId, userId: profile.id }).catch(() => {});
-    }
-  });
-  unsubscribeReads = subscribeToReadReceipts(chatId, member => {
-    if (member.user_id === peer.id) {
-      peerLastReadAt = member.last_read_at || peerLastReadAt;
-      refreshReadStates();
-    }
-  });
+  const peerName = peer.name || peer.displayName || "Instructor";
+  chatName.textContent = peerName;
+  chatStatus.textContent = "Private conversation";
+  const avatarUrl = peer.photo || peer.photoURL;
+  if (typeof avatarUrl === "string" && /^https:\/\//i.test(avatarUrl)) {
+    chatAvatar.src = avatarUrl;
+  }
 
-  presence?.stop?.();
-  presence = createChatPresence(chatId, profile, {
-    onSync(state) {
-      const entries = Object.values(state).flat();
-      const peerPresence = entries.find(entry => entry.user_id === peer.id);
-      setPeerStatus(Boolean(peerPresence), peer.last_seen_at);
-    },
-    onTyping(payload) {
-      if (payload?.typing) showTyping();
-      else typingIndicator?.classList.add("hidden");
-    }
-  });
+  startChatListeners();
+  await markRead();
 }
 
 async function send() {
-  const body = input?.value.trim();
-  if (!body || !chatId || !profile) return;
-  sendBtn.disabled = true;
+  const text = input?.value.trim() || "";
+  if (!chatRef || !currentUser || sending) return;
+
+  const hasFile = Boolean(fileInput?.files?.[0]);
+  if (!text && !hasFile) return;
+  if (text.length > 4000) {
+    window.SSA?.toast?.("Messages must be 4,000 characters or fewer.", "error");
+    return;
+  }
+
+  sending = true;
+  if (sendBtn) sendBtn.disabled = true;
+
   try {
-    presence?.setTyping(false);
-    await sendMessage({ conversationId: chatId, senderId: profile.id, body });
+    let attachment = null;
+    if (hasFile) {
+      const file = fileInput.files[0];
+      if (file.size >= 10 * 1024 * 1024) {
+        throw new Error("Attachments must be smaller than 10 MB.");
+      }
+      attachment = await uploadFile();
+      if (!attachment) throw new Error("The attachment could not be uploaded.");
+    }
+
+    const message = {
+      senderId: currentUser.uid,
+      text,
+      timestamp: serverTimestamp(),
+      seen: false
+    };
+    if (attachment) message.attachment = attachment;
+
+    await addDoc(collection(db, "chats", chatId, "messages"), message);
+    await updateDoc(chatRef, {
+      lastMessage: text || `Attachment: ${attachment.name}`,
+      lastSenderId: currentUser.uid,
+      lastMessageAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    await markRead();
+
     input.value = "";
     input.style.height = "auto";
+    setTyping(false);
     input.focus();
   } catch (error) {
     console.error("Message send failed:", error);
-    toast("We couldn't send that message. Check your connection and try again.");
+    window.SSA?.toast?.(error.message || "We couldn't send that message. Check your connection.", "error");
   } finally {
-    sendBtn.disabled = false;
+    sending = false;
+    if (sendBtn) sendBtn.disabled = false;
   }
 }
 
-sendBtn?.addEventListener("click", send);
-input?.addEventListener("input", () => {
-  input.style.height = "auto";
-  input.style.height = `${Math.min(input.scrollHeight, 130)}px`;
-  presence?.setTyping(Boolean(input.value.trim()));
+chatComposer?.addEventListener("submit", event => {
+  event.preventDefault();
+  send();
 });
-input?.addEventListener("keydown", event => {
-  if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); }
-});
-backBtn?.addEventListener("click", () => history.length > 1 ? history.back() : (location.href = "messages.html"));
+input?.addEventListener("input", () => setTyping(Boolean(input.value.trim())));
 
-onAuthStateChanged(auth, async current => {
-  if (!current) { location.href = "../../login.html"; return; }
-  firebaseUser = current;
-  if (!chatId) { location.href = "messages.html"; return; }
-  try { await loadChat(); }
-  catch (error) {
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    window.location.replace("../login.html");
+    return;
+  }
+  if (currentUser) return;
+  currentUser = user;
+  try {
+    await loadChat();
+  } catch (error) {
     console.error("Chat loading failed:", error);
-    messagesBox.innerHTML = `<div class="empty-state"><h2>Messages are temporarily unavailable</h2><p>We couldn't load this conversation. Please try again.</p></div>`;
-    toast("We couldn't load this conversation. Please try again.");
+    showNotice(error.message || "We couldn't load this conversation. Please try again.");
+    window.SSA?.toast?.(error.message || "Conversation unavailable.", "error");
   }
 });
 
-window.addEventListener("beforeunload", () => {
-  unsubscribeMessages?.();
-  unsubscribeReads?.();
-  presence?.stop?.();
-  if (profile?.id) touchLastSeen(profile.id);
+window.addEventListener("pagehide", () => {
+  stopMessages?.();
+  stopChat?.();
+  clearTimeout(typingTimer);
+  clearTimeout(typingHideTimer);
 });

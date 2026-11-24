@@ -97,8 +97,8 @@
     color: #ffffff;
     background: linear-gradient(
         135deg,
-        #2979ff,
-        #1557c9
+        #7049a9,
+        #351078
     );
 
     box-shadow: 0 8px 22px rgba(41, 121, 255, 0.25);
@@ -179,9 +179,9 @@
         ),
         linear-gradient(
             135deg,
-            #06162e,
-            #0b2345 55%,
-            #071a34
+            #21064f,
+            #351078 55%,
+            #21064f
         );
 }
 
@@ -242,7 +242,7 @@
 
     margin-bottom: 18px;
 
-    color: #7eb1ff;
+    color: #f2df9a;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.18em;
@@ -389,7 +389,7 @@
 
 
 .section-heading span {
-    color: #2979ff;
+    color: #7049a9;
 
     font-size: 10px;
     font-weight: 800;
@@ -480,7 +480,7 @@
 
 
 .help-action:hover > svg {
-    color: #2979ff;
+    color: #7049a9;
     transform: translate(2px, -2px);
 }
 
@@ -522,8 +522,8 @@
 
 
 .action-icon.blue {
-    color: #2979ff;
-    background: #eaf2ff;
+    color: #7049a9;
+    background: #f0e9fc;
 }
 
 
@@ -622,13 +622,13 @@
 
 
 .faq-item.active .faq-question {
-    color: #2979ff;
+    color: #7049a9;
 }
 
 
 .faq-item.active .faq-question svg {
     transform: rotate(45deg);
-    color: #2979ff;
+    color: #7049a9;
 }
 
 
@@ -747,8 +747,8 @@
 
     border-radius: 13px;
 
-    color: #2979ff;
-    background: #eaf2ff;
+    color: #7049a9;
+    background: #f0e9fc;
 }
 
 
@@ -788,7 +788,7 @@
 
     border: 0;
 
-    color: #2979ff;
+    color: #7049a9;
     background: transparent;
 
     cursor: pointer;
@@ -872,7 +872,7 @@
 
 
 .support-content span {
-    color: #7eb1ff;
+    color: #f2df9a;
 
     font-size: 10px;
     font-weight: 800;
@@ -931,7 +931,7 @@
 .primary-support-btn {
     border: 0;
 
-    color: #071a34;
+    color: #21064f;
     background: #ffc107;
 }
 
@@ -1043,7 +1043,7 @@
 
 
 .support-modal-card > span {
-    color: #2979ff;
+    color: #7049a9;
 
     font-size: 10px;
     font-weight: 800;
@@ -1118,7 +1118,7 @@
 
 #supportForm input:focus,
 #supportForm textarea:focus {
-    border-color: #2979ff;
+    border-color: #7049a9;
 
     background: #ffffff;
 
@@ -1146,7 +1146,7 @@
     border-radius: 11px;
 
     color: #ffffff;
-    background: #2979ff;
+    background: #7049a9;
 
     cursor: pointer;
 
@@ -1379,4 +1379,89 @@
         display: none;
     }
 
+}
+
+/* =========================================================
+   LIVE STUDENT SUPPORT TICKETS
+========================================================= */
+.ticket-center { padding-bottom: 10px; }
+.ticket-summary { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+.ticket-summary span { padding:10px 14px; border:1px solid #e6def5; border-radius:12px; background:#fff; color:#55436f; font-size:12px; }
+.ticket-summary strong { color:#351078; margin-right:4px; }
+.ticket-list { display:grid; gap:14px; }
+.ticket-card { padding:20px; border:1px solid #e6def5; border-radius:18px; background:#fff; box-shadow:0 8px 24px rgba(53,16,120,.05); }
+.ticket-card-top,.ticket-meta,.ticket-actions { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.ticket-reference { color:#7049a9; font-size:11px; font-weight:800; letter-spacing:.04em; overflow-wrap:anywhere; }
+.ticket-status { padding:6px 10px; border-radius:999px; background:#f0e9fc; color:#51278a; font-size:11px; font-weight:700; }
+.ticket-status.resolved,.ticket-status.closed { background:#e8f7ef; color:#17633a; }
+.ticket-status.dismissed { background:#fff1ed; color:#9b3824; }
+.ticket-card h3 { margin:12px 0 6px; color:#251044; font-size:17px; }
+.ticket-description { color:#655b72; font-size:13px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; }
+.ticket-meta { justify-content:flex-start; margin:12px 0; color:#847a91; font-size:11px; text-transform:capitalize; }
+.ticket-feedback { margin:14px 0; padding:13px 15px; border-left:3px solid #d4af37; border-radius:8px; background:#fbf8ef; color:#5e4b20; }
+.ticket-feedback p { margin:6px 0 0; font-size:13px; line-height:1.6; white-space:pre-wrap; }
+.ticket-actions { justify-content:flex-start; margin-top:14px; }
+.ticket-actions button,.ticket-reply-form button { min-height:40px; padding:9px 14px; border:1px solid #ded2f2; border-radius:10px; background:#f6f1ff; color:#51278a; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+.ticket-actions button:hover,.ticket-reply-form button:hover { background:#eae0fa; }
+.ticket-thread { margin-top:16px; padding-top:15px; border-top:1px solid #eee8f6; }
+.ticket-conversation { display:grid; gap:10px; max-height:420px; overflow:auto; padding:4px 2px 14px; }
+.ticket-message { max-width:88%; padding:12px 14px; border-radius:14px; background:#f3eff9; color:#33244b; }
+.ticket-message.student-message { justify-self:end; background:#351078; color:#fff; }
+.ticket-message strong,.ticket-message time { display:block; font-size:11px; opacity:.8; }
+.ticket-message p { margin:6px 0; font-size:13px; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+.ticket-reply-form { display:grid; gap:9px; margin-top:10px; }
+.ticket-reply-form label { color:#3d2a59; font-size:12px; font-weight:700; }
+.ticket-reply-form textarea { width:100%; min-height:95px; box-sizing:border-box; padding:12px; border:1px solid #ded2f2; border-radius:12px; color:#281a3d; background:#fff; font-family:inherit; font-size:13px; resize:vertical; }
+.ticket-reply-form small { color:#847a91; font-size:11px; }
+.ticket-thread-empty,.ticket-thread-loading,.ticket-empty { padding:20px; border:1px dashed #ded2f2; border-radius:14px; color:#756987; text-align:center; }
+.ticket-empty p { margin-bottom:0; font-size:13px; }
+.support-submission-result { color:#3e2862; font-size:12px; }
+@media(max-width:700px) {
+ .ticket-card { padding:15px; }
+ .ticket-card-top { align-items:flex-start; }
+ .ticket-actions { display:grid; grid-template-columns:1fr; }
+ .ticket-actions button,.ticket-reply-form button { width:100%; }
+ .ticket-message { max-width:96%; }
+}
+
+.ticket-creation-notice:empty { display:none; }
+.ticket-creation-notice:not(:empty) { margin-bottom:14px; padding:14px 16px; border:1px solid #d9c58b; border-radius:12px; background:#fbf7e9; color:#5c4815; font-size:13px; font-weight:700; overflow-wrap:anywhere; }
+
+
+/* EXPANDED STUDENT GUIDES */
+.guide-detail-panel {
+    position: relative;
+    margin-top: 18px;
+    padding: 22px 24px;
+    border: 1px solid #e3d8f3;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #fbf9ff, #f1eafb);
+    color: #2b1749;
+}
+.guide-detail-panel[hidden] { display: none; }
+.guide-detail-panel h3 { margin: 0 0 12px; color: #351078; font-size: 18px; }
+.guide-detail-panel ol { display: grid; gap: 10px; padding-left: 22px; color: #5e526e; font-size: 13px; line-height: 1.7; }
+.guide-detail-panel button { float: right; min-height: 34px; padding: 7px 12px; border: 1px solid #d8c9ed; border-radius: 9px; background: #fff; color: #51278a; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.ticket-status.reopened { background: #fff5df; color: #80520a; }
+.ticket-card { scroll-margin-top: 90px; }
+@media(max-width:600px) { .guide-detail-panel { padding: 18px; } .guide-detail-panel h3 { padding-right: 75px; } }
+
+.ticket-status-guide {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px 14px;
+    margin: 14px 0 18px;
+    padding: 16px;
+    border: 1px solid #e7def4;
+    border-radius: 14px;
+    background: #fbf9ff;
+}
+.ticket-status-guide span {
+    color: #756987;
+    font-size: 11px;
+    line-height: 1.55;
+}
+.ticket-status-guide strong { color: #51278a; }
+@media(max-width:600px) {
+    .ticket-status-guide { grid-template-columns: 1fr; padding: 13px; }
 }

@@ -1,1 +1,93 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Premium Management | Founder OS</title><link rel="stylesheet" href="founder-unified.css"><style>body{background:#f6f8fc;font-family:Inter,Poppins,system-ui;color:#0f172a}.pm-page{max-width:1200px;margin:auto;padding:32px}.pm-card{background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:24px;margin-bottom:18px;box-shadow:0 12px 35px rgba(15,23,42,.06)}.pm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.pm-user{border:1px solid #e2e8f0;border-radius:16px;padding:16px}.pm-user strong,.pm-user span{display:block}.pm-user span{font-size:12px;color:#64748b;margin-top:4px}.pm-user button{margin-top:12px;border:0;border-radius:10px;padding:10px 12px;background:#2979ff;color:#fff;font-weight:800}.pm-user button.danger{background:#dc2626}@media(max-width:800px){.pm-page{padding:16px}.pm-grid{grid-template-columns:1fr}}</style></head><body><main class="pm-page"><section class="pm-card"><small>FOUNDER CONTROL</small><h1>Premium Subscription Manager</h1><p>Only the Founder can activate, extend or revoke Premium across Student and Instructor portals.</p></section><section class="pm-card"><div class="pm-grid" id="premiumUsers"><p>Loading premium accounts…</p></div></section></main><script type="module" src="premium-management.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Premium Management | Founder OS</title>
+<link rel="stylesheet" href="founder-unified.css">
+<style>
+:root{color-scheme:light}
+body{background:#f6f8fc;font-family:Inter,Poppins,system-ui;color:#0f172a}
+.pm-page{max-width:1200px;margin:auto;padding:32px}
+.pm-card{background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:24px;margin-bottom:18px;box-shadow:0 12px 35px rgba(15,23,42,.06)}
+.pm-muted{color:#64748b;line-height:1.6}
+.pm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pm-user{border:1px solid #e2e8f0;border-radius:16px;padding:16px;min-width:0}
+.pm-user strong,.pm-user span{display:block;overflow-wrap:anywhere}
+.pm-user span{font-size:12px;color:#64748b;margin-top:4px}
+.pm-user button,.pm-save{margin-top:12px;border:0;border-radius:10px;padding:11px 14px;background:#21064f;color:#fff;font-weight:800;cursor:pointer}
+.pm-user button.danger{background:#b42318}
+.pm-user button:disabled,.pm-save:disabled{opacity:.55;cursor:not-allowed}
+.pm-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.pm-plan{border:1px solid #e2e8f0;border-radius:16px;padding:18px}
+.pm-plan h3{margin:0 0 14px;color:#21064f}
+.pm-field{display:grid;gap:6px;margin:12px 0}
+.pm-field label{font-size:13px;font-weight:700;color:#334155}
+.pm-field input,.pm-field textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;resize:vertical}
+.pm-periods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pm-publish{display:flex;align-items:center;gap:10px;margin:18px 0;font-weight:700}
+.pm-status{padding:12px 14px;border-radius:12px;background:#f5f1fb;color:#4c3470;margin:12px 0;line-height:1.5}
+.pm-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+@media(max-width:850px){.pm-plan-grid,.pm-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.pm-page{padding:14px}.pm-card{padding:18px}.pm-plan-grid,.pm-grid,.pm-periods{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="pm-page">
+  <section class="pm-card">
+    <a href="dashboard.html" style="display:inline-block;margin-bottom:14px;color:#612bb5;font-weight:700;text-decoration:none">← Founder Dashboard</a><br><small>FOUNDER CONTROL</small>
+    <h1>Premium & Membership Management</h1>
+    <p class="pm-muted">Manage membership pricing and premium access. The Founder is the only authority that can publish student membership prices. Students see prices only after publication.</p>
+    <div id="premiumManagerStatus" class="pm-status" role="status" aria-live="polite">Verifying Founder access…</div>
+  </section>
+
+  <section class="pm-card">
+    <div class="pm-section-head">
+      <div><h2>Student Membership Pricing</h2><p class="pm-muted">Enter the approved KSh prices. Empty fields remain unavailable. Proposed prices from the master specification are not preloaded or published automatically.</p></div>
+      <strong>Currency: KSh</strong>
+    </div>
+    <form id="premiumPricingForm">
+      <div class="pm-plan-grid">
+        <article class="pm-plan">
+          <h3>Learner Plus</h3>
+          <div class="pm-periods">
+            <div class="pm-field"><label for="learnerPlusMonthly">Monthly (KSh)</label><input id="learnerPlusMonthly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
+            <div class="pm-field"><label for="learnerPlusQuarterly">Quarterly (KSh)</label><input id="learnerPlusQuarterly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
+          </div>
+          <div class="pm-field"><label for="learnerPlusBenefits">Included benefits (one per line)</label><textarea id="learnerPlusBenefits" rows="4" placeholder="Enter only approved benefits"></textarea></div>
+          <label class="pm-publish"><input id="learnerPlusEnabled" type="checkbox" checked> Offer this plan</label>
+        </article>
+        <article class="pm-plan">
+          <h3>Pro Learner</h3>
+          <div class="pm-periods">
+            <div class="pm-field"><label for="proLearnerMonthly">Monthly (KSh)</label><input id="proLearnerMonthly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
+            <div class="pm-field"><label for="proLearnerQuarterly">Quarterly (KSh)</label><input id="proLearnerQuarterly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
+          </div>
+          <div class="pm-field"><label for="proLearnerBenefits">Included benefits (one per line)</label><textarea id="proLearnerBenefits" rows="4" placeholder="Enter only approved benefits"></textarea></div>
+          <label class="pm-publish"><input id="proLearnerEnabled" type="checkbox" checked> Offer this plan</label>
+        </article>
+        <article class="pm-plan">
+          <h3>Career Accelerator</h3>
+          <div class="pm-periods">
+            <div class="pm-field"><label for="careerAcceleratorMonthly">Monthly (KSh)</label><input id="careerAcceleratorMonthly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
+            <div class="pm-field"><label for="careerAcceleratorQuarterly">Quarterly (KSh)</label><input id="careerAcceleratorQuarterly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
+          </div>
+          <div class="pm-field"><label for="careerAcceleratorBenefits">Included benefits (one per line)</label><textarea id="careerAcceleratorBenefits" rows="4" placeholder="Enter only approved benefits"></textarea></div>
+          <label class="pm-publish"><input id="careerAcceleratorEnabled" type="checkbox" checked> Offer this plan</label>
+        </article>
+      </div>
+      <label class="pm-publish"><input id="premiumPricingPublished" type="checkbox"> Publish prices to Student Portal</label>
+      <p class="pm-muted">Publishing makes configured prices visible to students. It does not activate a payment provider or process a purchase.</p>
+      <button class="pm-save" id="savePremiumPricing" type="submit">Save Founder Pricing</button>
+    </form>
+  </section>
+
+  <section class="pm-card">
+    <h2>Premium Account Access</h2>
+    <p class="pm-muted">Founder-granted access is recorded in the trusted premium subscription document. No student profile role or identity fields are changed.</p>
+    <div class="pm-grid" id="premiumUsers"><p>Loading premium accounts…</p></div>
+  </section>
+</main>
+<script type="module" src="premium-management.js"></script>
+</body>
+</html>

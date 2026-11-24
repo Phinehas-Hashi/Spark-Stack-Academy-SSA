@@ -1,1 +1,114 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Chat | Spark Stack Academy</title><link rel="stylesheet" href="css/student-core.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/chat.css"><link rel="stylesheet" href="css/responsive.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"><script src="https://unpkg.com/lucide@latest"></script></head><body><div class="chat-page"><header class="chat-header"><div class="chat-left"><button id="backBtn" class="header-btn" aria-label="Go back"><i data-lucide="arrow-left"></i></button><div class="chat-avatar"><img id="chatAvatar" src="../assets/images/ssa-logo.png" alt="User"><span id="onlineDot" class="online-dot is-offline"></span></div><div class="chat-user"><h3 id="chatName">Loading...</h3><p id="chatStatus">Offline</p></div></div><div class="chat-actions"><button id="voiceCallBtn" class="header-btn" aria-label="Voice call"><i data-lucide="phone"></i></button><button id="videoCallBtn" class="header-btn" aria-label="Video call"><i data-lucide="video"></i></button><button id="chatMenuBtn" class="header-btn" aria-label="Chat options"><i data-lucide="more-vertical"></i></button></div></header><main class="chat-body"><div id="chatMessages" class="chat-messages"><div class="date-divider"><span>Today</span></div></div><div id="typingIndicator" class="typing-indicator hidden"><div class="typing-bubble"><span></span><span></span><span></span></div><p>Typing...</p></div></main><footer class="chat-composer"><button id="emojiBtn" class="composer-btn" aria-label="Emoji"><i data-lucide="smile"></i></button><button id="attachBtn" class="composer-btn" aria-label="Attach file"><i data-lucide="paperclip"></i></button><input type="file" id="fileInput" hidden><textarea id="messageInput" placeholder="Message by username…" rows="1" aria-label="Message"></textarea><button id="cameraBtn" class="composer-btn" aria-label="Camera"><i data-lucide="camera"></i></button><button id="voiceBtn" class="composer-btn" aria-label="Voice message"><i data-lucide="mic"></i></button><button id="sendBtn" class="send-btn" aria-label="Send message"><i data-lucide="send-horizontal"></i></button></footer><div id="uploadPreview" class="upload-preview hidden"><div class="preview-info"><i data-lucide="file"></i><span id="fileName">No file selected</span></div><button id="removeFileBtn" aria-label="Remove file"><i data-lucide="x"></i></button></div></div><script type="module" src="js/student-app.js"></script><script type="module" src="js/messages/chat.js"></script><script type="module" src="js/messages/emoji.js"></script><script type="module" src="js/messages/input.js"></script><script type="module" src="js/messages/chat-controls.js"></script><script type="module" src="js/messages/uploads.js"></script><script>lucide.createIcons();</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#21064F">
+  <meta name="description" content="Private one-to-one messaging on Spark Stack Academy.">
+  <title>Conversation | Spark Stack Academy</title>
+
+  <link rel="stylesheet" href="css/student-core.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+  <main class="chat-page">
+    <header class="chat-header">
+      <div class="chat-left">
+        <button id="backBtn" class="header-btn back-btn" type="button" aria-label="Back to messages">
+          <i data-lucide="arrow-left" aria-hidden="true"></i>
+        </button>
+
+        <div class="chat-avatar">
+          <img
+            id="chatAvatar"
+            src="../assets/images/default-avatar.png"
+            alt=""
+            width="48"
+            height="48">
+        </div>
+
+        <div class="chat-user">
+          <h1 id="chatName">Loading conversation…</h1>
+          <p id="chatStatus">Private conversation</p>
+        </div>
+      </div>
+
+      <div class="chat-header-label">
+        <i data-lucide="shield-check" aria-hidden="true"></i>
+        <span>PRIVATE CHAT</span>
+      </div>
+    </header>
+
+    <section class="chat-body" aria-label="Conversation">
+      <div
+        id="chatMessages"
+        class="chat-messages"
+        role="log"
+        aria-label="Messages"
+        aria-live="polite"
+        aria-relevant="additions text">
+      </div>
+
+      <div id="typingIndicator" class="typing-indicator hidden" role="status" aria-live="polite">
+        <div class="typing-bubble" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <p>Instructor is typing…</p>
+      </div>
+    </section>
+
+    <div id="uploadPreview" class="upload-preview hidden">
+      <div class="preview-info">
+        <i data-lucide="file" aria-hidden="true"></i>
+        <span id="fileName">No file selected</span>
+      </div>
+      <button id="removeFileBtn" class="remove-file-btn" type="button" aria-label="Remove attachment">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <form class="chat-composer" id="chatComposer">
+      <button id="emojiBtn" class="composer-btn" type="button" aria-label="Choose emoji">
+        <i data-lucide="smile" aria-hidden="true"></i>
+      </button>
+
+      <button id="attachBtn" class="composer-btn" type="button" aria-label="Attach a file">
+        <i data-lucide="paperclip" aria-hidden="true"></i>
+      </button>
+
+      <input type="file" id="fileInput" hidden>
+
+      <label class="sr-only" for="messageInput">Write a message</label>
+      <textarea
+        id="messageInput"
+        name="message"
+        placeholder="Write a message…"
+        rows="1"
+        maxlength="4000"
+        aria-label="Write a message"></textarea>
+
+      <button id="sendBtn" class="send-btn" type="submit" aria-label="Send message">
+        <i data-lucide="send" aria-hidden="true"></i>
+      </button>
+    </form>
+  </main>
+
+  <script type="module" src="js/student-app.js"></script>
+  <script type="module" src="js/messages/chat.js"></script>
+  <script type="module" src="js/messages/emoji.js"></script>
+  <script type="module" src="js/messages/input.js"></script>
+  <script type="module" src="js/messages/chat-controls.js"></script>
+  <script type="module" src="js/messages/uploads.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => window.lucide?.createIcons());
+  </script>
+</body>
+</html>

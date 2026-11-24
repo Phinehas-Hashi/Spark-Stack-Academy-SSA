@@ -1,366 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Notifications | Spark Stack Academy
-    </title>
-
-
-    <link
-        rel="stylesheet"
-        href="css/student-core.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/components.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/notifications.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/responsive.css"
-    >
-
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <script
-        src="https://unpkg.com/lucide@latest">
-    </script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#21064F">
+  <title>Notifications | Spark Stack Academy</title>
+  <link rel="stylesheet" href="css/student-core.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/notifications.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-
-
 <body>
-
-
-<div class="student-layout">
-
-
-    <!-- SIDEBAR -->
-
-    <aside
-        id="sidebarContainer"
-        class="sidebar-container">
-    </aside>
-
-
-    <div
-        id="sidebarOverlay"
-        class="sidebar-overlay">
-    </div>
-
-
-    <!-- MAIN -->
+  <div class="student-layout">
+    <aside id="sidebarContainer" class="sidebar-container" aria-label="Student navigation"></aside>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
     <main class="student-main">
-
-
-        <!-- TOPBAR -->
-
-        <div
-            id="topbarContainer"
-            class="topbar-container">
-        </div>
-
-
-        <!-- PAGE -->
-
-        <section class="dashboard-content notifications-page">
-
-
-            <!-- PAGE HEADER -->
-
-            <div class="notifications-header">
-
-
-                <div class="notifications-heading">
-
-                    <span class="page-eyebrow">
-                        Student Center
-                    </span>
-
-                    <h1>
-                        Notifications
-                    </h1>
-
-                    <p>
-                        Stay updated with everything
-                        happening at Spark Stack Academy.
-                    </p>
-
-                </div>
-
-
-                <button
-                    id="markAllReadBtn"
-                    class="mark-all-btn"
-                    type="button"
-                >
-
-                    <i data-lucide="check-check"></i>
-
-                    Mark all as read
-
-                </button>
-
-
-            </div>
-
-
-            <!-- TOOLBAR -->
-
-            <div class="notifications-toolbar">
-
-
-                <!-- FILTERS -->
-
-                <div class="notification-filters">
-
-
-                    <button
-                        class="notification-filter active"
-                        data-filter="all"
-                        type="button"
-                    >
-                        All
-                    </button>
-
-
-                    <button
-                        class="notification-filter"
-                        data-filter="unread"
-                        type="button"
-                    >
-                        Unread
-                    </button>
-
-
-                    <button
-                        class="notification-filter"
-                        data-filter="announcement"
-                        type="button"
-                    >
-                        Announcements
-                    </button>
-
-
-                    <button
-                        class="notification-filter"
-                        data-filter="course"
-                        type="button"
-                    >
-                        Courses
-                    </button>
-
-
-                    <button
-                        class="notification-filter"
-                        data-filter="payment"
-                        type="button"
-                    >
-                        Payments
-                    </button>
-
-
-                    <button
-                        class="notification-filter"
-                        data-filter="premium"
-                        type="button"
-                    >
-                        Premium
-                    </button>
-
-
-                    <button
-                        class="notification-filter"
-                        data-filter="achievement"
-                        type="button"
-                    >
-                        Achievements
-                    </button>
-
-
-                </div>
-
-
-                <!-- SORT -->
-
-                <div class="notification-sort">
-
-                    <i data-lucide="arrow-down-up"></i>
-
-
-                    <select
-                        id="notificationSort"
-                    >
-
-                        <option value="newest">
-                            Newest first
-                        </option>
-
-                        <option value="oldest">
-                            Oldest first
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- NOTIFICATION STATS -->
-
-            <div class="notification-stats">
-
-
-                <div class="notification-stat">
-
-                    <span>
-                        Total
-                    </span>
-
-                    <strong id="totalNotifications">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div class="notification-stat unread-stat">
-
-                    <span>
-                        Unread
-                    </span>
-
-                    <strong id="unreadNotifications">
-                        0
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- NOTIFICATION LIST -->
-
-            <div
-                id="notificationsList"
-                class="notifications-list"
-            >
-
-
-                <!-- LOADING -->
-
-                <div class="notifications-loading">
-
-                    <i data-lucide="loader"></i>
-
-                    <h3>
-                        Loading notifications...
-                    </h3>
-
-                    <p>
-                        Fetching your latest updates.
-                    </p>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- EMPTY STATE -->
-
-            <div
-                id="notificationsEmpty"
-                class="notifications-empty"
-                style="display:none;"
-            >
-
-                <div class="empty-icon">
-
-                    <i data-lucide="bell-off"></i>
-
-                </div>
-
-
-                <h3>
-                    You're all caught up
-                </h3>
-
-
-                <p>
-                    No notifications match your
-                    current filter.
-                </p>
-
-            </div>
-
-
+      <div id="topbarContainer" class="topbar-container"></div>
+
+      <section class="dashboard-content notifications-page" aria-labelledby="notificationsTitle">
+        <header class="notifications-header">
+          <div class="notifications-heading">
+            <span class="page-eyebrow">Student Center</span>
+            <h1 id="notificationsTitle">Notifications</h1>
+            <p>Your latest course, account and academy updates in one place.</p>
+          </div>
+          <button id="markAllReadBtn" class="mark-all-btn" type="button">
+            <i data-lucide="check-check" aria-hidden="true"></i>
+            <span>Mark all as read</span>
+          </button>
+        </header>
+
+        <section class="notifications-toolbar" aria-label="Notification controls">
+          <div class="notification-filters" role="group" aria-label="Filter notifications">
+            <button class="notification-filter active" data-filter="all" type="button" aria-pressed="true">All</button>
+            <button class="notification-filter" data-filter="unread" type="button" aria-pressed="false">Unread</button>
+            <button class="notification-filter" data-filter="announcement" type="button" aria-pressed="false">Announcements</button>
+            <button class="notification-filter" data-filter="course" type="button" aria-pressed="false">Courses</button>
+            <button class="notification-filter" data-filter="payment" type="button" aria-pressed="false">Payments</button>
+            <button class="notification-filter" data-filter="premium" type="button" aria-pressed="false">Premium</button>
+            <button class="notification-filter" data-filter="achievement" type="button" aria-pressed="false">Achievements</button>
+          </div>
+
+          <label class="notification-sort" for="notificationSort">
+            <i data-lucide="arrow-down-up" aria-hidden="true"></i>
+            <span class="sr-only">Sort notifications</span>
+            <select id="notificationSort">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </label>
         </section>
 
+        <section class="notification-stats" aria-label="Notification summary">
+          <article class="notification-stat">
+            <span>Total notifications</span>
+            <strong id="totalNotifications" aria-live="polite">0</strong>
+          </article>
+          <article class="notification-stat unread-stat">
+            <span>Unread notifications</span>
+            <strong id="unreadNotifications" aria-live="polite">0</strong>
+          </article>
+        </section>
 
+        <div id="notificationsStatus" class="notifications-status" role="status" aria-live="polite">
+          Loading your notifications…
+        </div>
+
+        <div id="notificationsList" class="notifications-list" aria-label="Your notifications" aria-busy="true">
+          <div class="notifications-loading">
+            <i data-lucide="loader-circle" aria-hidden="true"></i>
+            <h3>Loading notifications</h3>
+            <p>Fetching your latest updates.</p>
+          </div>
+        </div>
+
+        <div id="notificationsEmpty" class="notifications-empty" hidden>
+          <div class="empty-icon"><i data-lucide="bell-off" aria-hidden="true"></i></div>
+          <h3>You're all caught up</h3>
+          <p>No notifications match your current filter.</p>
+        </div>
+      </section>
     </main>
+  </div>
 
-</div>
-
-
-<!-- STUDENT APP -->
-
-<script
-    type="module"
-    src="js/student-app.js">
-</script>
-
-
-<!-- NOTIFICATIONS -->
-
-<script
-    type="module"
-    src="js/notifications.js">
-</script>
-
-
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        if (window.lucide) {
-
-            lucide.createIcons();
-
-        }
-
-    }
-);
-
-</script>
-
-
+  <script type="module" src="js/student-app.js"></script>
+  <script type="module" src="js/notifications.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) window.lucide.createIcons();
+    });
+  </script>
 </body>
-
 </html>

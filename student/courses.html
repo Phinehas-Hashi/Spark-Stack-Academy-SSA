@@ -1,401 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#351078">
+    <meta name="description" content="View your enrolled Spark Stack Academy courses, continue lessons and track your learning progress.">
+    <title>My Courses | Spark Stack Academy</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <title>
-        My Courses | Spark Stack Academy
-    </title>
+    <link rel="stylesheet" href="css/student-core.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/courses.css">
+    <link rel="stylesheet" href="css/responsive.css">
 
-
-    <!-- =========================
-         CORE
-    ========================== -->
-
-    <link
-        rel="stylesheet"
-        href="css/student-core.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/components.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/courses.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/responsive.css"
-    >
-
-
-    <!-- =========================
-         FONT
-    ========================== -->
-
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <!-- =========================
-         ICONS
-    ========================== -->
-
-    <script
-        src="https://unpkg.com/lucide@latest">
-    </script>
-
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-
 <body>
+    <div class="student-layout">
+        <aside id="sidebarContainer" class="sidebar-container" aria-label="Student navigation"></aside>
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
+        <main class="student-main">
+            <div id="topbarContainer" class="topbar-container"></div>
 
-<div class="student-layout">
-
-
-    <!-- =========================
-         SIDEBAR
-    ========================== -->
-
-    <aside
-        id="sidebarContainer"
-        class="sidebar-container"
-    ></aside>
-
-
-    <div
-        id="sidebarOverlay"
-        class="sidebar-overlay"
-    ></div>
-
-
-    <!-- =========================
-         MAIN
-    ========================== -->
-
-    <main class="student-main">
-
-
-        <!-- =========================
-             TOPBAR
-        ========================== -->
-
-        <div
-            id="topbarContainer"
-            class="topbar-container"
-        ></div>
-
-
-        <!-- =========================
-             PAGE
-        ========================== -->
-
-        <section class="dashboard-content courses-page">
-
-
-            <!-- =========================
-                 HEADER
-            ========================== -->
-
-            <header class="courses-hero">
-
-
-                <div class="courses-hero-content">
-
-
-                    <span class="page-badge">
-
-                        <i data-lucide="graduation-cap"></i>
-
-                        Learning Hub
-
-                    </span>
-
-
-                    <h1>
-
-                        My Courses
-
-                    </h1>
-
-
-                    <p>
-
-                        Continue learning, track your progress,
-                        and build your future.
-
-                    </p>
-
-
-                </div>
-
-
-                <a
-                    href="marketplace.html"
-                    class="primary-btn"
-                    id="exploreCoursesBtn"
-                >
-
-                    <i data-lucide="compass"></i>
-
-                    Explore Marketplace
-
-                </a>
-
-
-            </header>
-
-
-            <!-- =========================
-                 STATS
-            ========================== -->
-
-            <section
-                class="course-stats"
-                aria-label="Course statistics"
-            >
-
-
-                <article class="course-stat-card">
-
-                    <div class="stat-icon">
-
-                        <i data-lucide="book-open"></i>
-
-                    </div>
-
-                    <div>
-
-                        <span>
-                            Enrolled
+            <section class="dashboard-content courses-page" aria-labelledby="coursesPageTitle">
+                <header class="courses-hero">
+                    <div class="courses-hero-content">
+                        <span class="page-badge">
+                            <i data-lucide="graduation-cap" aria-hidden="true"></i>
+                            Learning Hub
                         </span>
 
-                        <strong id="enrolledCount">
-                            0
-                        </strong>
-
+                        <p class="courses-hero-kicker">YOUR NEXT CHAPTER STARTS HERE</p>
+                        <h1 id="coursesPageTitle">My Courses</h1>
+                        <p class="courses-hero-description">
+                            Pick up where you left off, keep building your skills,
+                            and make steady progress toward your goals.
+                        </p>
                     </div>
 
-                </article>
-
-
-                <article class="course-stat-card">
-
-                    <div class="stat-icon">
-
-                        <i data-lucide="play-circle"></i>
-
+                    <div class="courses-hero-actions">
+                        <a href="marketplace.html" class="primary-btn" id="exploreCoursesBtn">
+                            <i data-lucide="compass" aria-hidden="true"></i>
+                            Explore Marketplace
+                        </a>
                     </div>
 
-                    <div>
-
-                        <span>
-                            In Progress
+                    <aside class="courses-hero-note" aria-label="Learning reminder">
+                        <span class="courses-hero-note-icon">
+                            <i data-lucide="book-open-check" aria-hidden="true"></i>
                         </span>
+                        <span class="courses-hero-note-label">YOUR LEARNING JOURNEY</span>
+                        <strong>Learn. Practice. Achieve.</strong>
+                        <span class="courses-hero-note-copy">Every completed lesson is progress worth building on.</span>
+                    </aside>
+                </header>
 
-                        <strong id="progressCount">
-                            0
-                        </strong>
+                <section class="course-stats" aria-label="Course statistics">
+                    <article class="course-stat-card">
+                        <div class="stat-icon"><i data-lucide="book-open" aria-hidden="true"></i></div>
+                        <div>
+                            <span>Enrolled</span>
+                            <strong id="enrolledCount">0</strong>
+                        </div>
+                    </article>
 
-                    </div>
+                    <article class="course-stat-card">
+                        <div class="stat-icon"><i data-lucide="play-circle" aria-hidden="true"></i></div>
+                        <div>
+                            <span>In Progress</span>
+                            <strong id="progressCount">0</strong>
+                        </div>
+                    </article>
 
-                </article>
+                    <article class="course-stat-card">
+                        <div class="stat-icon"><i data-lucide="check-circle" aria-hidden="true"></i></div>
+                        <div>
+                            <span>Completed</span>
+                            <strong id="completedCount">0</strong>
+                        </div>
+                    </article>
 
+                    <article class="course-stat-card">
+                        <div class="stat-icon"><i data-lucide="clock-3" aria-hidden="true"></i></div>
+                        <div>
+                            <span>Learning Hours</span>
+                            <strong id="hoursCount">0h</strong>
+                        </div>
+                    </article>
+                </section>
 
-                <article class="course-stat-card">
-
-                    <div class="stat-icon">
-
-                        <i data-lucide="check-circle"></i>
-
-                    </div>
-
-                    <div>
-
-                        <span>
-                            Completed
-                        </span>
-
-                        <strong id="completedCount">
-                            0
-                        </strong>
-
-                    </div>
-
-                </article>
-
-
-                <article class="course-stat-card">
-
-                    <div class="stat-icon">
-
-                        <i data-lucide="clock-3"></i>
-
-                    </div>
-
-                    <div>
-
-                        <span>
-                            Learning Hours
-                        </span>
-
-                        <strong id="hoursCount">
-                            0h
-                        </strong>
-
-                    </div>
-
-                </article>
-
-
-            </section>
-
-
-            <!-- =========================
-                 COURSES SECTION
-            ========================== -->
-
-            <section class="my-courses-section">
-
-
-                <div class="section-header">
-
-
-                    <div>
-
-                        <span class="section-eyebrow">
-                            YOUR CLASSROOM
-                        </span>
-
-                        <h2>
-                            Continue Learning
-                        </h2>
-
-                    </div>
-
-
-                    <span
-                        id="myCoursesCount"
-                        class="course-count"
-                    >
-                        0 courses
-                    </span>
-
-
-                </div>
-
-
-                <!-- =========================
-                     COURSE GRID
-                ========================== -->
-
-                <div
-                    id="coursesContainer"
-                    class="courses-grid"
-                >
-
-
-                    <div class="courses-state loading-state">
-
-
-                        <div class="state-icon">
-
-                            <i data-lucide="loader-circle"></i>
-
+                <section class="my-courses-section" aria-labelledby="continueLearningTitle">
+                    <div class="section-header">
+                        <div>
+                            <span class="section-eyebrow">YOUR CLASSROOM</span>
+                            <h2 id="continueLearningTitle">Continue Learning</h2>
+                            <p class="courses-section-description">Your enrolled courses, all in one place.</p>
                         </div>
 
-
-                        <h3>
-                            Loading your courses...
-                        </h3>
-
-
-                        <p>
-                            Preparing your learning dashboard.
-                        </p>
-
-
+                        <span id="myCoursesCount" class="course-count" aria-live="polite">0 courses</span>
                     </div>
 
-
-                </div>
-
-
+                    <div id="coursesContainer" class="courses-grid" aria-live="polite" aria-busy="true">
+                        <div class="courses-state loading-state" role="status">
+                            <div class="state-icon"><i data-lucide="loader-circle" aria-hidden="true"></i></div>
+                            <h3>Loading your courses...</h3>
+                            <p>Preparing your learning dashboard.</p>
+                        </div>
+                    </div>
+                </section>
             </section>
+        </main>
+    </div>
 
+    <script type="module" src="js/student-app.js"></script>
+    <script type="module" src="js/courses.js"></script>
 
-        </section>
-
-
-    </main>
-
-
-</div>
-
-
-<!-- =========================
-     SCRIPTS
-========================== -->
-
-<script
-    type="module"
-    src="js/student-app.js"
-></script>
-
-
-<script
-    type="module"
-    src="js/courses.js"
-></script>
-
-
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        if (
-            window.lucide &&
-            typeof window.lucide.createIcons ===
-                "function"
-        ) {
-
-            window.lucide.createIcons();
-
-        }
-
-    }
-);
-
-</script>
-
-
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.lucide && typeof window.lucide.createIcons === "function") {
+                window.lucide.createIcons();
+            }
+        });
+    </script>
 </body>
-
 </html>

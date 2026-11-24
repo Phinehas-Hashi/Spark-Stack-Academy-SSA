@@ -47,9 +47,9 @@
     background:
         linear-gradient(
             135deg,
-            #081C3A 0%,
-            #102D58 55%,
-            #174A8B 100%
+            #21064F 0%,
+            #351078 55%,
+            #612BB5 100%
         );
 
     box-shadow:
@@ -84,7 +84,7 @@
 
     border-radius: 50%;
 
-    background: rgba(41, 121, 255, .12);
+    background: rgba(112, 73, 169, .12);
 
     right: -70px;
     bottom: -100px;
@@ -112,7 +112,7 @@
 
     border: 1px solid rgba(255, 193, 7, .3);
 
-    color: #FFC107;
+    color: #D4AF37;
 
     font-size: 12px;
 
@@ -142,7 +142,7 @@
 
 
 .premium-hero h1 span {
-    color: #FFC107;
+    color: #D4AF37;
 }
 
 
@@ -178,7 +178,7 @@
 
     border: 1px solid rgba(255, 255, 255, .12);
 
-    color: #FFC107;
+    color: #D4AF37;
 
     backdrop-filter: blur(12px);
 }
@@ -238,7 +238,7 @@
 .current-plan-card h2 {
     margin: 0 0 5px;
 
-    color: #081C3A;
+    color: #21064F;
 
     font-size: 21px;
 
@@ -265,9 +265,9 @@
 
     border-radius: 16px;
 
-    background: #eff6ff;
+    background: #F3F0FF;
 
-    color: #2979FF;
+    color: #7049A9;
 }
 
 
@@ -287,7 +287,7 @@
 
 
 .section-heading span {
-    color: #2979FF;
+    color: #7049A9;
 
     font-size: 11px;
 
@@ -300,7 +300,7 @@
 .section-heading h2 {
     margin: 6px 0 5px;
 
-    color: #081C3A;
+    color: #21064F;
 
     font-size: 25px;
 
@@ -362,10 +362,10 @@
 
 
 .premium-plan-card.featured {
-    border: 2px solid #2979FF;
+    border: 2px solid #7049A9;
 
     box-shadow:
-        0 15px 45px rgba(41, 121, 255, .12);
+        0 15px 45px rgba(112, 73, 169, .12);
 }
 
 
@@ -379,7 +379,7 @@
 
     border-radius: 20px;
 
-    background: #2979FF;
+    background: #7049A9;
 
     color: #fff;
 
@@ -405,7 +405,7 @@
 
 
 .plan-name {
-    color: #081C3A;
+    color: #21064F;
 
     font-size: 17px;
 
@@ -417,14 +417,14 @@
     width: 22px;
     height: 22px;
 
-    color: #FFC107;
+    color: #D4AF37;
 }
 
 
 /* PRICE */
 
 .plan-price {
-    color: #081C3A;
+    color: #21064F;
 
     font-size: 35px;
 
@@ -510,7 +510,7 @@
 
     border-radius: 14px;
 
-    background: #081C3A;
+    background: #21064F;
 
     color: #fff;
 
@@ -527,19 +527,19 @@
 
 
 .premium-plan-btn:hover {
-    background: #2979FF;
+    background: #7049A9;
 
     transform: translateY(-2px);
 }
 
 
 .featured .premium-plan-btn {
-    background: #2979FF;
+    background: #7049A9;
 }
 
 
 .featured .premium-plan-btn:hover {
-    background: #081C3A;
+    background: #21064F;
 }
 
 
@@ -595,9 +595,9 @@
 
     border-radius: 14px;
 
-    background: #eff6ff;
+    background: #F3F0FF;
 
-    color: #2979FF;
+    color: #7049A9;
 
     margin-bottom: 17px;
 }
@@ -612,7 +612,7 @@
 .benefit-card h3 {
     margin: 0 0 7px;
 
-    color: #081C3A;
+    color: #21064F;
 
     font-size: 15px;
 
@@ -656,7 +656,7 @@
 
     border-radius: 14px;
 
-    background: #081C3A;
+    background: #21064F;
 
     color: #fff;
 
@@ -789,4 +789,44 @@
         font-size: 31px;
     }
 
+}
+
+/* Founder-published membership pricing */
+.premium-plans-status {
+  margin: 0 0 24px;
+  padding: 18px 20px;
+  border: 1px solid #e7e0f2;
+  border-radius: 16px;
+  background: #fbf9ff;
+  color: #5b4a78;
+  line-height: 1.6;
+}
+.premium-plan-periods {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+.premium-plan-period {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #eee8f7;
+  border-radius: 12px;
+  background: #fbf9ff;
+  color: #5b4a78;
+  font-size: 13px;
+}
+.premium-plan-period strong {
+  color: #21064F;
+  font-size: 16px;
+}
+.premium-purchase-note {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #eee8f7;
+  color: #7b718c;
+  font-size: 12px;
+  line-height: 1.5;
 }

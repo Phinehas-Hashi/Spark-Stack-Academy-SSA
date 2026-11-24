@@ -1,581 +1,169 @@
-// =====================================
-// SPARK STACK ACADEMY
-// STUDENT CERTIFICATES
-// certificates.js
-// =====================================
+// Spark Stack Academy — Student Certificates
+import { auth, db } from "../../js/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-    auth,
-    db
-} from "../../js/firebase.js";
+const container = document.getElementById("certificatesContainer");
+const certificateCount = document.getElementById("certificateCount");
+const completedCourses = document.getElementById("completedCourses");
+let activeUid = null;
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-    collection,
-    query,
-    where,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-console.log("🎓 Certificates Module Loaded");
-
-
-// =====================================
-// DOM
-// =====================================
-
-const certificatesContainer =
-    document.getElementById("certificatesContainer");
-
-const certificateCount =
-    document.getElementById("certificateCount");
-
-const completedCourses =
-    document.getElementById("completedCourses");
-
-
-// =====================================
-// AUTH
-// =====================================
-
-onAuthStateChanged(
-    auth,
-    async (user) => {
-
-        if (!user) {
-
-            window.location.href =
-                "../login.html";
-
-            return;
-        }
-
-        console.log(
-            "👨‍🎓 Certificate Student:",
-            user.email
-        );
-
-        await loadCertificates(
-            user.uid
-        );
-
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.replace("../login.html");
+        return;
     }
-);
+    activeUid = user.uid;
+    await loadCertificates();
+});
 
+container?.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button || button.disabled) return;
+    const certificateId = button.dataset.certificateId;
+    if (!certificateId) return;
+    openCertificate(certificateId, button.dataset.action === "download");
+});
 
-// =====================================
-// LOAD CERTIFICATES
-// =====================================
-
-async function loadCertificates(uid) {
-
+async function loadCertificates() {
+    if (!container || !activeUid) return;
+    setLoading();
     try {
-
-        showLoading();
-
-
-        const certificatesRef =
-            collection(
-                db,
-                "certificates"
-            );
-
-
-        const certificatesQuery =
-            query(
-                certificatesRef,
-                where(
-                    "studentId",
-                    "==",
-                    uid
-                )
-            );
-
-
-        const snapshot =
-            await getDocs(
-                certificatesQuery
-            );
-
-
-        console.log(
-            "📜 Certificates Found:",
-            snapshot.size
+        const certificatesQuery = query(
+            collection(db, "certificates"),
+            where("studentId", "==", activeUid)
         );
-
-
-        const certificates = [];
-
-
-        snapshot.forEach(
-            docSnap => {
-
-                certificates.push({
-
-                    id: docSnap.id,
-
-                    ...docSnap.data()
-
-                });
-
-            }
-        );
-
-
-        renderCertificates(
-            certificates
-        );
-
-
-        updateStats(
-            certificates
-        );
-
+        const snapshot = await getDocs(certificatesQuery);
+        const certificates = snapshot.docs
+            .map((item) => ({ id: item.id, ...item.data() }))
+            .sort((a, b) => timestampValue(b.issuedAt) - timestampValue(a.issuedAt));
+        updateStats(certificates);
+        renderCertificates(certificates);
+    } catch (error) {
+        console.error("Certificate loading failed:", error);
+        setError();
     }
-
-    catch (error) {
-
-        console.error(
-            "❌ Certificate loading failed:",
-            error
-        );
-
-        showError();
-
-    }
-
 }
 
-
-// =====================================
-// RENDER CERTIFICATES
-// =====================================
-
-function renderCertificates(
-    certificates
-) {
-
-    if (!certificatesContainer)
-        return;
-
-
-    certificatesContainer.innerHTML =
-        "";
-
-
+function renderCertificates(certificates) {
+    container.replaceChildren();
+    container.setAttribute("aria-busy", "false");
     if (!certificates.length) {
-
-        certificatesContainer.innerHTML = `
-
-            <div class="certificate-empty">
-
-                <i data-lucide="award"></i>
-
-                <h3>
-                    No Certificates Yet
-                </h3>
-
-                <p>
-                    Complete your courses to earn
-                    verified certificates.
-                </p>
-
-            </div>
-
-        `;
-
+        const empty = document.createElement("section");
+        empty.className = "certificate-empty";
+        empty.innerHTML = '<span class="empty-icon" aria-hidden="true"><i data-lucide="award"></i></span>';
+        const title = document.createElement("h3");
+        title.textContent = "No certificates yet";
+        const message = document.createElement("p");
+        message.textContent = "When the Academy issues a certificate for you, it will appear here.";
+        empty.append(title, message);
+        container.append(empty);
         refreshIcons();
-
         return;
     }
 
-
-    certificates.forEach(
-        certificate => {
-
-            const card =
-                document.createElement(
-                    "article"
-                );
-
-
-            card.className =
-                "certificate-card";
-
-
-            const courseTitle =
-                certificate.courseTitle ||
-                "Spark Stack Academy Course";
-
-
-            const certificateNumber =
-                certificate.certificateNumber ||
-                certificate.id;
-
-
-            const issuedDate =
-                formatDate(
-                    certificate.issuedAt
-                );
-
-
-            card.innerHTML = `
-
-                <div class="certificate-preview">
-
-                    <div class="certificate-badge">
-
-                        <i data-lucide="award"></i>
-
-                    </div>
-
-                </div>
-
-
-                <div class="certificate-content">
-
-                    <h3>
-                        ${escapeHTML(
-                            courseTitle
-                        )}
-                    </h3>
-
-
-                    <p>
-                        Certificate of completion
-                        awarded by Spark Stack Academy.
-                    </p>
-
-
-                    <div class="certificate-meta">
-
-                        <span>
-                            Certificate:
-                            ${escapeHTML(
-                                certificateNumber
-                            )}
-                        </span>
-
-                        <span>
-                            Issued:
-                            ${issuedDate}
-                        </span>
-
-                    </div>
-
-
-                    <div class="certificate-actions">
-
-                        <button
-                            class="certificate-btn primary"
-                            data-action="view"
-                        >
-
-                            <i data-lucide="eye"></i>
-
-                            View Certificate
-
-                        </button>
-
-
-                        <button
-                            class="certificate-btn secondary"
-                            data-action="download"
-                        >
-
-                            <i data-lucide="download"></i>
-
-                            Download
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `;
-
-
-            const viewButton =
-                card.querySelector(
-                    '[data-action="view"]'
-                );
-
-
-            const downloadButton =
-                card.querySelector(
-                    '[data-action="download"]'
-                );
-
-
-            viewButton?.addEventListener(
-                "click",
-                () => {
-
-                    openCertificate(
-                        certificate
-                    );
-
-                }
-            );
-
-
-            downloadButton?.addEventListener(
-                "click",
-                () => {
-
-                    downloadCertificate(
-                        certificate
-                    );
-
-                }
-            );
-
-
-            certificatesContainer
-                .appendChild(card);
-
-        }
-    );
-
-
-    refreshIcons();
-
-}
-
-
-// =====================================
-// STATS
-// =====================================
-
-function updateStats(
-    certificates
-) {
-
-    if (certificateCount) {
-
-        certificateCount.textContent =
-            certificates.length;
-
-    }
-
-
-    if (completedCourses) {
-
-        completedCourses.textContent =
-            certificates.length;
-
-    }
-
-}
-
-
-// =====================================
-// OPEN CERTIFICATE
-// =====================================
-
-function openCertificate(
-    certificate
-) {
-
-    const certificateData =
-        encodeURIComponent(
-            JSON.stringify(
-                certificate
-            )
+    certificates.forEach((certificate) => {
+        const card = document.createElement("article");
+        card.className = "certificate-card";
+
+        const preview = document.createElement("div");
+        preview.className = "certificate-preview";
+        preview.setAttribute("aria-hidden", "true");
+        preview.innerHTML = '<span class="preview-frame"><i data-lucide="award"></i><small>SPARK STACK ACADEMY</small><strong>CERTIFICATE</strong><span>OF COMPLETION</span></span>';
+
+        const content = document.createElement("div");
+        content.className = "certificate-content";
+        const title = document.createElement("h3");
+        title.textContent = certificate.courseTitle || "Spark Stack Academy Course";
+        const description = document.createElement("p");
+        description.className = "certificate-description";
+        description.textContent = "Certificate of completion";
+
+        const meta = document.createElement("div");
+        meta.className = "certificate-meta";
+        const number = document.createElement("span");
+        number.textContent = "No. " + (certificate.certificateNumber || certificate.id);
+        const issued = document.createElement("span");
+        issued.textContent = "Issued " + formatDate(certificate.issuedAt);
+        meta.append(number, issued);
+
+        const actions = document.createElement("div");
+        actions.className = "certificate-actions";
+        actions.append(
+            createActionButton("View certificate", "eye", "view", certificate.id),
+            createActionButton("Save PDF", "download", "download", certificate.id)
         );
-
-
-    window.open(
-        `certificate-view.html?data=${certificateData}`,
-        "_blank"
-    );
-
-}
-
-
-// =====================================
-// DOWNLOAD CERTIFICATE
-// =====================================
-
-function downloadCertificate(
-    certificate
-) {
-
-    const certificateData =
-        encodeURIComponent(
-            JSON.stringify(
-                certificate
-            )
-        );
-
-
-    window.open(
-        `certificate-view.html?data=${certificateData}&download=true`,
-        "_blank"
-    );
-
-}
-
-
-// =====================================
-// LOADING
-// =====================================
-
-function showLoading() {
-
-    if (!certificatesContainer)
-        return;
-
-
-    certificatesContainer.innerHTML = `
-
-        <div class="certificate-loading">
-
-            <i data-lucide="loader"></i>
-
-            <h3>
-                Loading certificates...
-            </h3>
-
-            <p>
-                Fetching your achievements.
-            </p>
-
-        </div>
-
-    `;
-
-
+        content.append(title, description, meta, actions);
+        card.append(preview, content);
+        container.append(card);
+    });
     refreshIcons();
-
 }
 
+function createActionButton(label, icon, action, certificateId) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = action === "view" ? "certificate-btn primary" : "certificate-btn secondary";
+    button.dataset.action = action;
+    button.dataset.certificateId = certificateId;
+    button.innerHTML = '<i data-lucide="' + icon + '" aria-hidden="true"></i><span>' + label + '</span>';
+    return button;
+}
 
-// =====================================
-// ERROR
-// =====================================
+function updateStats(certificates) {
+    if (certificateCount) certificateCount.textContent = String(certificates.length);
+    const uniqueCourses = new Set(certificates.map((item) => item.courseId || item.id));
+    if (completedCourses) completedCourses.textContent = String(uniqueCourses.size);
+}
 
-function showError() {
+function openCertificate(certificateId, download) {
+    const url = new URL("certificate-view.html", window.location.href);
+    url.searchParams.set("id", certificateId);
+    if (download) url.searchParams.set("download", "true");
+    window.open(url.toString(), "_blank", "noopener,noreferrer");
+}
 
-    if (!certificatesContainer)
-        return;
-
-
-    certificatesContainer.innerHTML = `
-
-        <div class="certificate-empty">
-
-            <i data-lucide="alert-circle"></i>
-
-            <h3>
-                Unable to load certificates
-            </h3>
-
-            <p>
-                Please refresh the page and try again.
-            </p>
-
-        </div>
-
-    `;
-
-
+function setLoading() {
+    container.setAttribute("aria-busy", "true");
+    container.innerHTML = '<div class="certificate-loading" role="status"><i data-lucide="loader-circle" aria-hidden="true"></i><h3>Loading certificates</h3><p>Retrieving your verified achievements.</p></div>';
     refreshIcons();
-
 }
 
-
-// =====================================
-// FORMAT DATE
-// =====================================
-
-function formatDate(
-    value
-) {
-
-    if (!value)
-        return "—";
-
-
-    try {
-
-        let date;
-
-
-        if (
-            typeof value.toDate ===
-            "function"
-        ) {
-
-            date =
-                value.toDate();
-
-        }
-
-        else {
-
-            date =
-                new Date(value);
-
-        }
-
-
-        return date.toLocaleDateString(
-            "en-KE",
-            {
-                day: "numeric",
-                month: "short",
-                year: "numeric"
-            }
-        );
-
-    }
-
-    catch {
-
-        return "—";
-
-    }
-
+function setError() {
+    container.setAttribute("aria-busy", "false");
+    container.replaceChildren();
+    const panel = document.createElement("section");
+    panel.className = "certificate-empty certificate-error";
+    panel.innerHTML = '<span class="empty-icon" aria-hidden="true"><i data-lucide="alert-circle"></i></span>';
+    const title = document.createElement("h3");
+    title.textContent = "Unable to load certificates";
+    const message = document.createElement("p");
+    message.textContent = "Check your connection and try again.";
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.className = "certificate-btn primary retry-button";
+    retry.textContent = "Try again";
+    retry.addEventListener("click", loadCertificates);
+    panel.append(title, message, retry);
+    container.append(panel);
+    refreshIcons();
 }
 
-
-// =====================================
-// SECURITY
-// =====================================
-
-function escapeHTML(
-    value
-) {
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-
+function timestampValue(value) {
+    if (value && typeof value.toMillis === "function") return value.toMillis();
+    if (value && typeof value.toDate === "function") return value.toDate().getTime();
+    const parsed = value ? new Date(value).getTime() : 0;
+    return Number.isFinite(parsed) ? parsed : 0;
 }
 
-
-// =====================================
-// LUCIDE
-// =====================================
+function formatDate(value) {
+    const time = timestampValue(value);
+    if (!time) return "Date not recorded";
+    return new Date(time).toLocaleDateString("en-KE", {
+        day: "numeric", month: "short", year: "numeric"
+    });
+}
 
 function refreshIcons() {
-
-    if (
-        typeof lucide !==
-        "undefined"
-    ) {
-
-        lucide.createIcons();
-
-    }
-
+    if (window.lucide?.createIcons) window.lucide.createIcons();
 }

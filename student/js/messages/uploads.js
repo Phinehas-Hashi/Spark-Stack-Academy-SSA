@@ -8,7 +8,6 @@
 import {
 
 auth,
-db,
 storage
 
 } from "../../js/firebase.js";
@@ -21,23 +20,7 @@ onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
-import {
-
-doc,
-collection,
-addDoc,
-serverTimestamp
-
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-import {
-
-ref,
-uploadBytes,
-getDownloadURL
-
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 
 console.log("📎 Uploads Loaded");
@@ -195,8 +178,8 @@ showPreview();
 function showPreview(){
 
 
-uploadPreview.style.display =
-"flex";
+uploadPreview.classList.remove("hidden");
+uploadPreview.style.display = "flex";
 
 
 fileName.textContent =
@@ -225,8 +208,8 @@ selectedFile = null;
 fileInput.value = "";
 
 
-uploadPreview.style.display =
-"none";
+uploadPreview.classList.add("hidden");
+uploadPreview.style.display = "none";
 
 
 }
@@ -244,7 +227,7 @@ export async function uploadFile(){
 
 if(
 !selectedFile ||
-!currentUser ||
+!auth.currentUser ||
 !chatId
 ){
 
@@ -260,7 +243,7 @@ const fileRef = ref(
 
 storage,
 
-`chatFiles/${chatId}/${Date.now()}_${selectedFile.name}`
+`chatFiles/${chatId}/${Date.now()}_${selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`
 
 );
 
@@ -276,19 +259,15 @@ selectedFile
 
 
 
-const url = await getDownloadURL(
-fileRef
-);
-
-
-
 const fileData = {
 
-url:url,
+path: fileRef.fullPath,
 
-name:selectedFile.name,
+name: selectedFile.name,
 
-type:selectedFile.type
+type: selectedFile.type,
+
+size: selectedFile.size
 
 };
 
@@ -298,7 +277,8 @@ selectedFile = null;
 
 fileInput.value = "";
 
-uploadPreview.style.display="none";
+uploadPreview.classList.add("hidden");
+uploadPreview.style.display = "none";
 
 
 return fileData;

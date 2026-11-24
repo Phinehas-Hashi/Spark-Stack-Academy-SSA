@@ -1,375 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        My Profile | Spark Stack Academy
-    </title>
-
-
-    <link
-        rel="stylesheet"
-        href="css/student-core.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/components.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/profile.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="css/responsive.css"
-    >
-
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <script
-        src="https://unpkg.com/lucide@latest">
-    </script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#21064F">
+<title>My Profile | Spark Stack Academy</title>
+<link rel="stylesheet" href="css/student-core.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/profile.css">
+<link rel="stylesheet" href="css/responsive.css">
 </head>
-
-
 <body>
-
-
 <div class="student-layout">
-
-
-    <!-- SIDEBAR -->
-
-    <aside
-        id="sidebarContainer"
-        class="sidebar-container">
-    </aside>
-
-
-    <!-- OVERLAY -->
-
-    <div
-        id="sidebarOverlay"
-        class="sidebar-overlay">
-    </div>
-
-
-    <!-- MAIN -->
-
-    <main class="student-main">
-
-
-        <!-- TOPBAR -->
-
-        <div
-            id="topbarContainer"
-            class="topbar-container">
-        </div>
-
-
-        <!-- PAGE -->
-
-        <section
-            class="dashboard-content profile-page"
-        >
-
-
-            <!-- HEADER -->
-
-            <div class="profile-header">
-
-                <div>
-
-                    <span class="page-badge">
-
-                        <i data-lucide="user"></i>
-
-                        Student Profile
-
-                    </span>
-
-
-                    <h1>
-                        My Profile
-                    </h1>
-
-
-                    <p>
-                        Manage your student identity
-                        and academy information.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- PROFILE CARD -->
-
-            <div class="profile-grid">
-
-
-                <!-- PERSONAL INFO -->
-
-                <div class="profile-card profile-main-card">
-
-
-                    <div class="profile-avatar-section">
-
-                        <div
-                            class="profile-avatar"
-                            id="profileAvatar"
-                        >
-                            S
-                        </div>
-
-
-                        <div>
-
-                            <h2 id="profileName">
-                                Student
-                            </h2>
-
-                            <p id="profileEmail">
-                                Loading email...
-                            </p>
-
-
-                            <span
-                                class="student-badge"
-                                id="studentBadge"
-                            >
-                                Student
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="profile-divider"></div>
-
-
-                    <div class="profile-info-grid">
-
-
-                        <div class="profile-info">
-
-                            <span>
-                                Full Name
-                            </span>
-
-                            <strong id="fullName">
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="profile-info">
-
-                            <span>
-                                Email
-                            </span>
-
-                            <strong id="email">
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="profile-info">
-
-                            <span>
-                                Admission Number
-                            </span>
-
-                            <strong id="admissionNumber">
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="profile-info">
-
-                            <span>
-                                Phone
-                            </span>
-
-                            <strong id="phone">
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="profile-info">
-
-                            <span>
-                                Joined
-                            </span>
-
-                            <strong id="joinedDate">
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="profile-info">
-
-                            <span>
-                                Account Status
-                            </span>
-
-                            <strong class="status-active">
-                                Active
-                            </strong>
-
-                        </div>
-
-
-                    </div>
-
-                </div>
-
-
-                <!-- QUICK STATS -->
-
-                <div class="profile-card">
-
-
-                    <div class="card-heading">
-
-                        <i data-lucide="bar-chart-3"></i>
-
-                        <h3>
-                            Learning Overview
-                        </h3>
-
-                    </div>
-
-
-                    <div class="profile-stats">
-
-
-                        <div class="profile-stat">
-
-                            <strong id="coursesCount">
-                                0
-                            </strong>
-
-                            <span>
-                                Courses
-                            </span>
-
-                        </div>
-
-
-                        <div class="profile-stat">
-
-                            <strong id="completedCount">
-                                0
-                            </strong>
-
-                            <span>
-                                Completed
-                            </span>
-
-                        </div>
-
-
-                        <div class="profile-stat">
-
-                            <strong id="xpCount">
-                                0
-                            </strong>
-
-                            <span>
-                                XP
-                            </span>
-
-                        </div>
-
-
-                        <div class="profile-stat">
-
-                            <strong id="levelCount">
-                                1
-                            </strong>
-
-                            <span>
-                                Level
-                            </span>
-
-                        </div>
-
-
-                    </div>
-
-
-                </div>
-
-
-            </div>
-
-
-        </section>
-
-
-    </main>
-
-
+<aside id="sidebarContainer" class="sidebar-container"></aside>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="student-main">
+<div id="topbarContainer" class="topbar-container"></div>
+<section class="dashboard-content profile-page" aria-labelledby="profileTitle">
+<header class="profile-header">
+<div>
+<span class="page-badge"><i data-lucide="user-round"></i> STUDENT ACCOUNT</span>
+<h1 id="profileTitle">My Profile</h1>
+<p>Your student identity, learning activity and Academy records in one place.</p>
+</div>
+<a class="profile-edit-link" href="settings.html"><i data-lucide="pencil"></i> Edit profile</a>
+</header>
+
+<section class="profile-identity-card" aria-label="Student identity">
+<div class="profile-avatar" id="profileAvatar" aria-hidden="true">S</div>
+<div class="profile-identity-copy">
+<h2 id="profileName">Loading profile…</h2>
+<p id="profileEmail">Loading email…</p>
+<div class="profile-badges">
+<span id="studentBadge" class="student-badge">Student</span>
+<span id="accountStatus" class="account-status">Checking account</span>
+</div>
+</div>
+<div class="identity-reference">
+<span>ADMISSION NUMBER</span>
+<strong id="admissionNumber">—</strong>
+</div>
+</section>
+
+<section class="profile-stats" aria-label="Learning summary">
+<article class="profile-stat-card"><span class="profile-stat-icon"><i data-lucide="book-open"></i></span><div><span>Enrolled courses</span><strong id="coursesCount">—</strong></div></article>
+<article class="profile-stat-card"><span class="profile-stat-icon"><i data-lucide="badge-check"></i></span><div><span>Completed courses</span><strong id="completedCount">—</strong></div></article>
+<article class="profile-stat-card"><span class="profile-stat-icon"><i data-lucide="zap"></i></span><div><span>Total XP</span><strong id="xpCount">—</strong></div></article>
+<article class="profile-stat-card"><span class="profile-stat-icon"><i data-lucide="flame"></i></span><div><span>Current streak</span><strong id="streakCount">—</strong></div></article>
+</section>
+
+<div class="profile-content-grid">
+<section class="profile-panel">
+<div class="profile-panel-heading"><div><span class="panel-kicker">STUDENT RECORD</span><h2>Personal information</h2></div><i data-lucide="contact-round"></i></div>
+<div class="profile-details-grid">
+<div class="profile-detail"><span>Full name</span><strong id="fullName">—</strong></div>
+<div class="profile-detail"><span>Email address</span><strong id="email">—</strong></div>
+<div class="profile-detail"><span>Phone number</span><strong id="phone">—</strong></div>
+<div class="profile-detail"><span>Admission number</span><strong id="admissionDetail">—</strong></div>
+<div class="profile-detail"><span>Joined Academy</span><strong id="joinedDate">—</strong></div>
+<div class="profile-detail"><span>Onboarding status</span><strong id="onboardingStatus">—</strong></div>
+<div class="profile-detail"><span>Account verification</span><strong id="verificationStatus">—</strong></div>
+<div class="profile-detail"><span>Current level</span><strong id="levelCount">—</strong></div>
+</div>
+<p class="profile-note">Your admission number and account email are managed by the Academy. Contact support if either record needs correction.</p>
+</section>
+
+<section class="profile-panel">
+<div class="profile-panel-heading"><div><span class="panel-kicker">KEEP MOVING</span><h2>Student shortcuts</h2></div><i data-lucide="arrow-up-right"></i></div>
+<nav class="profile-shortcuts" aria-label="Student account shortcuts">
+<a href="learning-progress.html"><span><i data-lucide="chart-no-axes-combined"></i></span><div><strong>Learning progress</strong><small>Review course progress and activity</small></div><i data-lucide="chevron-right"></i></a>
+<a href="achievements.html"><span><i data-lucide="trophy"></i></span><div><strong>Achievements</strong><small>View XP, levels and earned badges</small></div><i data-lucide="chevron-right"></i></a>
+<a href="certificates.html"><span><i data-lucide="award"></i></span><div><strong>Certificates</strong><small>Open your verified certificates</small></div><i data-lucide="chevron-right"></i></a>
+<a href="settings.html"><span><i data-lucide="sliders-horizontal"></i></span><div><strong>Account settings</strong><small>Update contact details and preferences</small></div><i data-lucide="chevron-right"></i></a>
+</nav>
+</section>
 </div>
 
-
-<script
-    type="module"
-    src="js/student-app.js">
-</script>
-
-
-<script
-    type="module"
-    src="js/profile.js">
-</script>
-
-
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-
-    }
-);
-
-</script>
-
-
+<section class="profile-panel enrolled-panel">
+<div class="profile-panel-heading"><div><span class="panel-kicker">YOUR LEARNING</span><h2>Course activity</h2><p>Your current enrolments and recorded progress.</p></div><a href="courses.html">View courses <i data-lucide="arrow-up-right"></i></a></div>
+<div id="profileCourses" class="profile-course-list" aria-live="polite" aria-busy="true">
+<div class="profile-state" role="status">Loading your course activity…</div>
+</div>
+</section>
+<p id="profileStatus" class="profile-status" role="status" aria-live="polite"></p>
+</section>
+</main>
+</div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script type="module" src="js/student-app.js"></script>
+<script type="module" src="js/profile.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>window.lucide?.createIcons());</script>
 </body>
-
 </html>

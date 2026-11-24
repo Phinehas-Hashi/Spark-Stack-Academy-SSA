@@ -156,12 +156,14 @@ service cloud.firestore {
       // messaging directory useful without exposing arbitrary
       // user records to the browser.
       allow list:
-        if activePortalUser()
-        && (
-          (isStudent() && resource.data.get('role', '') == 'instructor')
-          || (isInstructor() && resource.data.get('role', '') in ['student', 'admin'])
-          || (isAdmin() && resource.data.get('role', '') in ['instructor', 'founder'])
-          || isFounder()
+        if isFounder()
+        || (
+          activePortalUser()
+          && (
+            (isStudent() && resource.data.get('role', '') == 'instructor')
+            || (isInstructor() && resource.data.get('role', '') in ['student', 'admin'])
+            || (isAdmin() && resource.data.get('role', '') in ['instructor', 'founder'])
+          )
         );
 
       // ----------------------------------------------------------
@@ -680,6 +682,29 @@ service cloud.firestore {
         if isFounder();
     }
 
+    // ============================================================
+    // FOUNDER-CONTROLLED STUDENT MEMBERSHIP PRICING
+    // Students can read only the published global price catalogue.
+    // Only the verified Founder can create or change pricing.
+    // ============================================================
+    match /premiumPricing/{pricingId} {
+      allow get:
+        if pricingId == 'global'
+        && (
+          isFounder()
+          || (isStudent() && studentPortalOpen())
+        );
+
+      allow list:
+        if false;
+
+      allow create, update:
+        if pricingId == 'global' && isFounder();
+
+      allow delete:
+        if false;
+    }
+
 
     // ============================================================
     // REPORTS
@@ -689,7 +714,37 @@ service cloud.firestore {
 
       allow create:
         if signedIn()
-        && request.resource.data.reporterId == uid();
+        && request.resource.data.reporterId == uid()
+        && (
+          request.resource.data.get('type', '') != 'support'
+          || (
+            isStudent()
+            && studentPortalOpen()
+            && request.resource.data.get('status', '') == 'pending'
+            && request.resource.data.get('reportId', '') is string
+            && request.resource.data.reportId.size() >= 12
+            && request.resource.data.get('title', '') is string
+            && request.resource.data.title.size() >= 3
+            && request.resource.data.title.size() <= 120
+            && request.resource.data.get('description', '') is string
+            && request.resource.data.description.size() >= 10
+            && request.resource.data.description.size() <= 5000
+            && request.resource.data.get('category', '') in [
+              'technical', 'account', 'payments', 'course',
+              'assignments', 'certificates', 'privacy', 'feedback', 'other'
+            ]
+            && request.resource.data.get('priority', '') in [
+              'low', 'medium', 'high', 'critical'
+            ]
+            && request.resource.data.keys().hasOnly([
+              'reportId', 'title', 'description', 'category', 'type',
+              'priority', 'status', 'reporterId', 'reporterName',
+              'reporterEmail', 'reporterRole', 'reportedUserId',
+              'courseId', 'metadata', 'founderVisible', 'adminVisible',
+              'createdAt', 'updatedAt'
+            ])
+          )
+        );
 
       allow get:
         if signedIn()
@@ -699,14 +754,72 @@ service cloud.firestore {
           || isFounder()
         );
 
+      // Students can query only their own tickets using reporterId == uid().
       allow list:
-        if staff();
+        if staff()
+        || (
+          signedIn()
+          && resource.data.reporterId == uid()
+        );
 
+      // Students may only confirm a resolved ticket or reopen a closed one.
+      // Staff retain the existing full review workflow.
       allow update:
-        if staff();
+        if staff()
+        || (
+          signedIn()
+          && resource.data.reporterId == uid()
+          && request.resource.data.reporterId == resource.data.reporterId
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'studentStatusUpdatedAt', 'updatedAt'])
+          && request.resource.data.studentStatusUpdatedAt == request.time
+          && request.resource.data.updatedAt == request.time
+          && (
+            (
+              resource.data.get('status', '') == 'resolved'
+              && request.resource.data.status in ['closed', 'pending']
+            )
+            || (
+              resource.data.get('status', '') in ['dismissed', 'closed']
+              && request.resource.data.status == 'pending'
+            )
+          )
+        );
 
       allow delete:
         if isFounder();
+
+      // Public-facing conversation thread for the ticket owner and staff.
+      match /responses/{responseId} {
+        allow get, list:
+          if staff()
+          || (
+            signedIn()
+            && get(/databases/$(database)/documents/reports/$(reportId))
+                 .data.reporterId == uid()
+          );
+
+        allow create:
+          if staff()
+          || (
+            signedIn()
+            && get(/databases/$(database)/documents/reports/$(reportId))
+                 .data.reporterId == uid()
+            && getAfter(/databases/$(database)/documents/reports/$(reportId))
+                 .data.get('status', '') in ['pending', 'reviewing', 'resolved']
+            && request.resource.data.senderId == uid()
+            && request.resource.data.senderRole == 'student'
+            && request.resource.data.message is string
+            && request.resource.data.message.size() > 0
+            && request.resource.data.message.size() <= 5000
+            && request.resource.data.keys().hasOnly([
+              'message', 'senderId', 'senderName', 'senderRole', 'createdAt'
+            ])
+          );
+
+        allow update, delete:
+          if false;
+      }
     }
 
 
@@ -834,8 +947,8 @@ service cloud.firestore {
           isStudent()
           && studentPortalOpen()
           && (
-            resource.data.studentId == uid()
-            || resource.data.userId == uid()
+            resource.data.get('studentId', '') == uid()
+            || resource.data.get('userId', '') == uid()
           )
         )
         || (
@@ -870,19 +983,16 @@ service cloud.firestore {
           isStudent()
           && studentPortalOpen()
           && (
-            resource.data.studentId == uid()
-            || resource.data.userId == uid()
+            resource.data.get('studentId', '') == uid()
+            || resource.data.get('userId', '') == uid()
           )
-          && request.resource.data.studentId
-               == resource.data.studentId
-          && request.resource.data.userId
-               == resource.data.userId
-          && request.resource.data.courseId
-               == resource.data.courseId
-          && request.resource.data.paymentStatus
-               == resource.data.paymentStatus
-          && request.resource.data.status
-               == resource.data.status
+          // Preserve ownership and entitlement fields, including legacy records
+          // where one optional identity field is absent.
+          && request.resource.data.get('studentId', '') == resource.data.get('studentId', '')
+          && request.resource.data.get('userId', '') == resource.data.get('userId', '')
+          && request.resource.data.get('courseId', '') == resource.data.get('courseId', '')
+          && request.resource.data.get('paymentStatus', '') == resource.data.get('paymentStatus', '')
+          && request.resource.data.get('status', '') == resource.data.get('status', '')
           && request.resource.data.diff(resource.data)
                .affectedKeys()
                .hasOnly([

@@ -159,10 +159,10 @@ function renderLevel(student) {
     // XP BAR
 
     if ($("xpProgress")) {
-
-        $("xpProgress").style.width =
-            `${data.progress}%`;
-
+        const progress = Math.min(100, Math.max(0, Number(data.progress) || 0));
+        $("xpProgress").style.width = `${progress}%`;
+        const progressTrack = $("xpProgress").closest('[role="progressbar"]');
+        progressTrack?.setAttribute("aria-valuenow", String(Math.round(progress)));
     }
 
 
@@ -931,6 +931,7 @@ function renderBadges(student) {
 
 
     container.innerHTML = "";
+    container.setAttribute("aria-busy", "false");
 
 
     Object.entries(BADGES)
@@ -1009,10 +1010,7 @@ function renderBadges(student) {
 
 
     if ($("statBadges")) {
-
-        $("statBadges").textContent =
-            unlocked.length;
-
+        $("statBadges").textContent = String(unlocked.length);
     }
 
 }
@@ -1091,170 +1089,20 @@ function renderStreak(student) {
 // ============================================================
 
 async function loadLeaderboard() {
-
-    try {
-
-        const studentsRef =
-            collection(
-                db,
-                "students"
-            );
-
-
-        const leaderboardQuery =
-            query(
-                studentsRef,
-                orderBy(
-                    "xp",
-                    "desc"
-                ),
-                limit(10)
-            );
-
-
-        const snapshot =
-            await getDocs(
-                leaderboardQuery
-            );
-
-
-        const leaders =
-            snapshot.docs.map(
-                (item, index) => ({
-
-                    id:
-                        item.id,
-
-                    rank:
-                        index + 1,
-
-                    ...item.data()
-
-                })
-            );
-
-
-        renderLeaderboard(
-            leaders
-        );
-
-
-        await renderCurrentUserRank();
-
+    // Firestore rules intentionally restrict listing student profiles to staff.
+    // Do not attempt a client-side collection read or expose other students' data.
+    const container = document.querySelector(".leaderboard");
+    if (container) {
+        container.innerHTML = `
+            <div class="empty-state" role="status">
+                Academy rankings are currently private. Your personal XP and level remain available above.
+            </div>
+        `;
+        container.setAttribute("aria-busy", "false");
     }
 
-    catch(error) {
-
-        console.error(
-            "❌ Leaderboard error:",
-            error
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// CURRENT USER RANK
-// ============================================================
-
-async function renderCurrentUserRank() {
-
-    const user =
-        auth.currentUser;
-
-
-    if (!user)
-        return;
-
-
-    const currentStudentRef =
-        doc(
-            db,
-            "students",
-            user.uid
-        );
-
-
-    const currentSnapshot =
-        await getDoc(
-            currentStudentRef
-        );
-
-
-    if (!currentSnapshot.exists())
-        return;
-
-
-    const currentXP =
-        Number(
-            currentSnapshot.data().xp || 0
-        );
-
-
-    const studentsRef =
-        collection(
-            db,
-            "students"
-        );
-
-
-    const snapshot =
-        await getDocs(
-            studentsRef
-        );
-
-
-    let rank = 1;
-
-
-    snapshot.forEach(
-        studentDoc => {
-
-            if (
-                studentDoc.id ===
-                user.uid
-            ) {
-
-                return;
-
-            }
-
-
-            const xp =
-                Number(
-                    studentDoc.data().xp || 0
-                );
-
-
-            if (
-                xp > currentXP
-            ) {
-
-                rank++;
-
-            }
-
-        }
-    );
-
-
-    if ($("rankPosition")) {
-
-        $("rankPosition").textContent =
-            `#${rank}`;
-
-    }
-
-
-    if ($("rankNumber")) {
-
-        $("rankNumber").textContent =
-            `#${rank}`;
-
-    }
-
+    if ($("rankPosition")) $("rankPosition").textContent = "Private";
+    if ($("rankNumber")) $("rankNumber").textContent = "Private";
 }
 
 
@@ -1556,16 +1404,48 @@ async function loadRecentActivity(
     }
 
     catch(error) {
-
-        console.error(
-            "❌ Recent activity error:",
-            error
-        );
-
+        console.error("Recent activity error:", error);
+        container.innerHTML = `
+            <div class="empty-state" role="status">
+                Recent activity is temporarily unavailable.
+            </div>
+        `;
+        container.setAttribute("aria-busy", "false");
     }
 
 }
 
+
+
+function showAchievementProfileUnavailable() {
+    const messages = {
+        badgeContainer: "Your achievement record is not available yet.",
+        recentUnlocks: "Your activity will appear here when your student profile is ready."
+    };
+
+    Object.entries(messages).forEach(([id, message]) => {
+        const container = $(id);
+        if (!container) return;
+        container.textContent = message;
+        container.setAttribute("aria-busy", "false");
+    });
+
+    const leaderboard = document.querySelector(".leaderboard");
+    if (leaderboard) {
+        leaderboard.textContent = "Academy rankings are currently private.";
+        leaderboard.setAttribute("aria-busy", "false");
+    }
+
+    ["studentLevel", "studentXP", "statXP", "statBadges", "streakDays"].forEach(id => {
+        const element = $(id);
+        if (element) element.textContent = "—";
+    });
+
+    if ($("studentRank")) $("studentRank").textContent = "Profile unavailable";
+    if ($("featuredBadgeName")) $("featuredBadgeName").textContent = "No achievement record";
+    if ($("rankPosition")) $("rankPosition").textContent = "Private";
+    if ($("rankNumber")) $("rankNumber").textContent = "Private";
+}
 
 // ============================================================
 // LOAD ACHIEVEMENT OS
@@ -1597,13 +1477,9 @@ async function loadAchievementOS(
 
 
         if (!snapshot.exists()) {
-
-            console.warn(
-                "Student profile not found."
-            );
-
+            console.warn("Student profile not found.");
+            showAchievementProfileUnavailable();
             return;
-
         }
 
 
@@ -1646,6 +1522,9 @@ async function loadAchievementOS(
             user.uid
         );
 
+        ["badgeContainer", "recentUnlocks"].forEach(id => {
+            $(id)?.setAttribute("aria-busy", "false");
+        });
 
         console.log(
             "🚀 Achievement OS ready"

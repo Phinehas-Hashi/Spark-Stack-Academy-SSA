@@ -1,7 +1,184 @@
-import {auth,db} from "../js/firebase.js";import{onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";import{collection,doc,getDoc,getDocs,setDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";import"../js/ssa-ui.js";
-const root=document.getElementById("premiumUsers");
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
-async function founderOnly(user){const [u,f]=await Promise.all([getDoc(doc(db,"users",user.uid)),getDoc(doc(db,"founder",user.uid))]);const role=String(u.data()?.role||f.data()?.role||"").toLowerCase();if(!u.exists()||!f.exists()||role!=="founder")throw Error("Founder authorization required.")}
-async function load(){const snap=await getDocs(collection(db,"users"));const users=snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>["student","instructor"].includes(String(u.role||"").toLowerCase()));root.innerHTML=users.length?users.map(u=>{const p=u.premiumSubscription||{};const active=p.status==="active";return `<article class="pm-user"><strong>${esc(u.name||u.displayName||u.email||"User")}</strong><span>${esc(u.role)} · ${active?`Premium ${esc(p.plan||"")}`:"Free"}</span><button data-id="${u.id}" data-action="${active?"revoke":"activate"}" class="${active?"danger":""}">${active?"Revoke Premium":"Activate Premium"}</button></article>`}).join(""):"<p>No student or instructor accounts found.";root.querySelectorAll("button").forEach(b=>b.onclick=()=>toggle(b.dataset.id,b.dataset.action));}
-async function toggle(uid,action){try{await setDoc(doc(db,"users",uid),{premium:action==="activate",premiumSubscription:action==="activate"?{status:"active",plan:"founder_granted",grantedBy:auth.currentUser.uid,grantedAt:serverTimestamp() }:{status:"inactive",revokedBy:auth.currentUser.uid,revokedAt:serverTimestamp()}},{merge:true});await setDoc(doc(db,"premiumSubscriptions",uid),{status:action==="activate"?"active":"inactive",plan:action==="activate"?"founder_granted":"none",managedBy:auth.currentUser.uid,updatedAt:serverTimestamp()},{merge:true});window.ssaToast?.(action==="activate"?"Premium activated.":"Premium revoked.","success","Premium");await load()}catch(e){window.ssaToast?.(window.ssaFriendlyError?.(e,"Premium could not be changed.")||"Premium could not be changed.","error","Premium")}}
-onAuthStateChanged(auth,async user=>{if(!user){location.href="../login.html";return}try{await founderOnly(user);await load()}catch(e){root.innerHTML=`<p>${esc(e.message)}</p>`;window.ssaToast?.(e.message,"error","Access denied")}});
+import { auth, db } from "../js/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  collection, doc, getDoc, getDocs, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import "../js/ssa-ui.js";
+
+const usersRoot = document.getElementById("premiumUsers");
+const statusRoot = document.getElementById("premiumManagerStatus");
+const pricingForm = document.getElementById("premiumPricingForm");
+const savePricingButton = document.getElementById("savePremiumPricing");
+const pricingRef = doc(db, "premiumPricing", "global");
+
+const fields = {
+  learner_plus: { monthly: "learnerPlusMonthly", quarterly: "learnerPlusQuarterly", benefits: "learnerPlusBenefits", enabled: "learnerPlusEnabled" },
+  pro_learner: { monthly: "proLearnerMonthly", quarterly: "proLearnerQuarterly", benefits: "proLearnerBenefits", enabled: "proLearnerEnabled" },
+  career_accelerator: { monthly: "careerAcceleratorMonthly", quarterly: "careerAcceleratorQuarterly", benefits: "careerAcceleratorBenefits", enabled: "careerAcceleratorEnabled" }
+};
+const labels = {
+  learner_plus: "Learner Plus",
+  pro_learner: "Pro Learner",
+  career_accelerator: "Career Accelerator"
+};
+
+function setStatus(message, isError = false) {
+  if (!statusRoot) return;
+  statusRoot.textContent = message;
+  statusRoot.style.background = isError ? "#fff1f0" : "#f5f1fb";
+  statusRoot.style.color = isError ? "#9f1c13" : "#4c3470";
+}
+function escapeHtml(value) {
+  return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+function setInput(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.value = Number.isSafeInteger(Number(value)) && Number(value) > 0 ? String(value) : "";
+}
+function populatePricing(data = {}) {
+  for (const [key, ids] of Object.entries(fields)) {
+    const plan = data.plans?.[key] || {};
+    setInput(ids.monthly, plan.monthlyPrice);
+    setInput(ids.quarterly, plan.quarterlyPrice);
+    const benefits = document.getElementById(ids.benefits);
+    if (benefits) benefits.value = Array.isArray(plan.benefits) ? plan.benefits.join("\n") : "";
+    const enabled = document.getElementById(ids.enabled);
+    if (enabled) enabled.checked = plan.enabled !== false;
+  }
+  const published = document.getElementById("premiumPricingPublished");
+  if (published) published.checked = data.published === true;
+}
+function readPrice(id) {
+  const raw = document.getElementById(id)?.value.trim() ?? "";
+  if (!raw) return null;
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value) || value < 1) {
+    throw new Error("Prices must be whole KSh amounts greater than zero.");
+  }
+  return value;
+}
+async function loadPricing() {
+  const snap = await getDoc(pricingRef);
+  populatePricing(snap.exists() ? snap.data() : {});
+}
+async function savePricing(event) {
+  event.preventDefault();
+  savePricingButton.disabled = true;
+  try {
+    const plans = {};
+    let configuredCount = 0;
+    for (const [key, ids] of Object.entries(fields)) {
+      const monthlyPrice = readPrice(ids.monthly);
+      const quarterlyPrice = readPrice(ids.quarterly);
+      const enabled = document.getElementById(ids.enabled).checked;
+      const benefits = document.getElementById(ids.benefits).value
+        .split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 8);
+      if (enabled && (monthlyPrice || quarterlyPrice)) configuredCount++;
+      plans[key] = { name: labels[key], monthlyPrice, quarterlyPrice, benefits, enabled };
+    }
+    const published = document.getElementById("premiumPricingPublished").checked;
+    if (published && configuredCount === 0) {
+      throw new Error("Configure at least one enabled membership price before publishing.");
+    }
+    await setDoc(pricingRef, {
+      currency: "KSh",
+      published,
+      plans,
+      updatedBy: auth.currentUser.uid,
+      updatedAt: serverTimestamp()
+    });
+    setStatus(published
+      ? "Founder pricing saved and published to the Student Portal."
+      : "Founder pricing saved as unpublished. Students will not see prices.");
+    window.ssaToast?.("Membership pricing saved.", "success", "Founder Pricing");
+  } catch (error) {
+    setStatus(error.message || "Pricing could not be saved.", true);
+    window.ssaToast?.(error.message || "Pricing could not be saved.", "error", "Founder Pricing");
+  } finally {
+    savePricingButton.disabled = false;
+  }
+}
+async function loadUsers() {
+  const [usersSnap, premiumSnap] = await Promise.all([
+    getDocs(collection(db, "users")),
+    getDocs(collection(db, "premiumSubscriptions"))
+  ]);
+  const premiumByUid = new Map(premiumSnap.docs.map(item => [item.id, item.data()]));
+  const users = usersSnap.docs.map(item => ({ id: item.id, ...item.data() }))
+    .filter(user => {
+      const role = String(user.role || "").toLowerCase();
+      if (role === "student") return user.status === "active" && user.active !== false;
+      if (role === "instructor") return user.status === "active" && user.active === true && user.verified === true;
+      return false;
+    });
+
+  if (!users.length) {
+    usersRoot.textContent = "No active student or verified instructor accounts found.";
+    return;
+  }
+  usersRoot.innerHTML = users.map(user => {
+    const subscription = premiumByUid.get(user.id) || {};
+    const active = subscription.status === "active";
+    const name = user.name || user.displayName || user.fullName || user.email || "Account";
+    return `<article class="pm-user">
+      <strong>${escapeHtml(name)}</strong>
+      <span>${escapeHtml(user.role)} · ${active ? `Premium ${escapeHtml(labels[subscription.plan] || subscription.plan || "")}` : "Free"}</span>
+      <button type="button" data-uid="${escapeHtml(user.id)}" data-action="${active ? "revoke" : "activate"}" class="${active ? "danger" : ""}">${active ? "Revoke Premium" : "Grant Premium"}</button>
+    </article>`;
+  }).join("");
+  usersRoot.querySelectorAll("button[data-uid]").forEach(button => {
+    button.addEventListener("click", () => changePremium(button.dataset.uid, button.dataset.action, button));
+  });
+}
+async function changePremium(uid, action, button) {
+  if (!uid || !["activate", "revoke"].includes(action)) return;
+  button.disabled = true;
+  try {
+    const active = action === "activate";
+    await setDoc(doc(db, "premiumSubscriptions", uid), active ? {
+      status: "active",
+      plan: "founder_granted",
+      source: "founder",
+      managedBy: auth.currentUser.uid,
+      grantedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    } : {
+      status: "inactive",
+      plan: "none",
+      source: "founder",
+      managedBy: auth.currentUser.uid,
+      revokedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    window.ssaToast?.(active ? "Premium access granted." : "Premium access revoked.", "success", "Premium");
+    await loadUsers();
+  } catch (error) {
+    button.disabled = false;
+    window.ssaToast?.(window.ssaFriendlyError?.(error, "Premium access could not be changed.") || "Premium access could not be changed.", "error", "Premium");
+  }
+}
+async function verifyFounder(user) {
+  const founderSnap = await getDoc(doc(db, "founder", user.uid));
+  const founder = founderSnap.exists() ? founderSnap.data() : {};
+  if (founder.role !== "founder" || founder.status !== "active" ||
+      founder.active === false || founder.verified === false) {
+    throw new Error("Founder authorization required.");
+  }
+}
+pricingForm?.addEventListener("submit", savePricing);
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    location.href = "../login.html";
+    return;
+  }
+  try {
+    await verifyFounder(user);
+    setStatus("Founder access verified. You control the published membership prices.");
+    await Promise.all([loadPricing(), loadUsers()]);
+  } catch (error) {
+    setStatus(error.message || "Access denied.", true);
+    if (usersRoot) usersRoot.textContent = error.message || "Access denied.";
+    if (pricingForm) pricingForm.hidden = true;
+  }
+});
