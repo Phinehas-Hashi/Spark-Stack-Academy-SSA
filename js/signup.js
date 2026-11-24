@@ -1,6 +1,20 @@
 import { auth, db } from "./firebase.js";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, setDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+    createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    updateProfile,
+    signOut,
+    deleteUser,
+    getAdditionalUserInfo
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+    doc,
+    setDoc,
+    collection,
+    serverTimestamp,
+    writeBatch
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const signupForm = $("signupForm");
@@ -28,35 +42,94 @@ function showLoader(message) {
     loader?.classList.add("active");
     if (loaderText) loaderText.textContent = message;
 }
-function hideLoader() { loader?.classList.remove("active"); }
+
+function hideLoader() {
+    loader?.classList.remove("active");
+}
+
 function showToast(message, type = "success") {
     if (!toastContainer) return;
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
+    toast.setAttribute("role", "status");
     toast.textContent = message;
     toastContainer.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateX(40px)"; setTimeout(() => toast.remove(), 300); }, 3500);
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(40px)";
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
 }
-function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-function strongPassword(v) { return v.length >= 8 && /[A-Z]/.test(v) && /[a-z]/.test(v) && /\d/.test(v); }
-function setButtons(disabled) { if (signupBtn) signupBtn.disabled = disabled; if (googleSignupBtn) googleSignupBtn.disabled = disabled; }
+
+function validEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function strongPassword(value) {
+    return value.length >= 8
+        && /[A-Z]/.test(value)
+        && /[a-z]/.test(value)
+        && /\d/.test(value);
+}
+
+function setButtons(disabled) {
+    if (signupBtn) signupBtn.disabled = disabled;
+    if (googleSignupBtn) googleSignupBtn.disabled = disabled;
+}
+
+function validateCommonFields() {
+    if (!termsCheckbox?.checked) {
+        showToast("Please accept the Terms & Conditions and Privacy Policy.", "warning");
+        return false;
+    }
+    return true;
+}
 
 async function createStudentApplication({ uid, fullName, email, providerName = "email" }) {
-    await setDoc(doc(db, "users", uid), {
-        uid, fullName, email, role: "student", bio: "", expertise: "", profilePhoto: "",
-        active: true, verified: false, status: "pending_admission", provider: providerName,
-        createdAt: serverTimestamp(), lastLogin: serverTimestamp()
-    }, { merge: true });
+    const batch = writeBatch(db);
+    const userRef = doc(db, "users", uid);
+    const studentRef = doc(db, "students", uid);
+    const applicationRef = doc(collection(db, "applications"));
+    const now = serverTimestamp();
 
-    await setDoc(doc(db, "students", uid), {
-        uid, name: fullName, email, role: "student", status: "Pending",
-        onboardingStatus: "awaiting_admission", admissionNumber: "Pending",
-        level: 1, xp: 0, streak: 0, badges: [],
-        stats: { coursesEnrolled: 0, lessonsCompleted: 0, progress: 0, certificates: 0 },
-        createdAt: serverTimestamp()
-    }, { merge: true });
+    batch.set(userRef, {
+        uid,
+        fullName,
+        email,
+        role: "student",
+        bio: "",
+        expertise: "",
+        profilePhoto: "",
+        active: true,
+        verified: false,
+        status: "pending_admission",
+        provider: providerName,
+        createdAt: now,
+        lastLogin: now
+    });
 
-    await addDoc(collection(db, "applications"), {
+    batch.set(studentRef, {
+        uid,
+        name: fullName,
+        email,
+        role: "student",
+        status: "Pending",
+        onboardingStatus: "awaiting_admission",
+        admissionNumber: "Pending",
+        level: 1,
+        xp: 0,
+        streak: 0,
+        badges: [],
+        stats: {
+            coursesEnrolled: 0,
+            lessonsCompleted: 0,
+            progress: 0,
+            certificates: 0
+        },
+        createdAt: now
+    });
+
+    batch.set(applicationRef, {
         studentUid: uid,
         name: fullName,
         email,
@@ -65,19 +138,59 @@ async function createStudentApplication({ uid, fullName, email, providerName = "
         role: "student",
         status: "Pending",
         source: "signup",
-        createdAt: serverTimestamp()
+        createdAt: now
     });
+
+    await batch.commit();
 }
 
 async function createInstructorProfile({ uid, fullName, email, bio, expertise }) {
     await setDoc(doc(db, "users", uid), {
-        uid, fullName, email, role: "instructor", bio, expertise, profilePhoto: "",
-        active: true, verified: false, status: "pending_review", createdAt: serverTimestamp(), lastLogin: serverTimestamp()
-    }, { merge: true });
+        uid,
+        fullName,
+        email,
+        role: "instructor",
+        bio,
+        expertise,
+        profilePhoto: "",
+        active: true,
+        verified: false,
+        status: "pending_review",
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp()
+    });
 }
 
-signupForm?.addEventListener("submit", async e => {
-    e.preventDefault();
+async function rollbackNewAuthUser(user) {
+    if (!user) return false;
+    try {
+        await deleteUser(user);
+        return true;
+    } catch (error) {
+        console.error("Signup rollback failed:", error.code || error.message);
+        return false;
+    }
+}
+
+function finishPendingApplication(message) {
+    try {
+        signOut(auth).catch(error => {
+            console.warn("Post-signup sign-out failed:", error.code || error.message);
+        });
+    } catch (error) {
+        console.warn("Post-signup sign-out failed:", error);
+    }
+    hideLoader();
+    setButtons(false);
+    showToast(message, "success");
+    setTimeout(() => {
+        window.location.href = "login.html";
+    }, 1800);
+}
+
+signupForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+
     const fullName = nameInput?.value.trim() || "";
     const email = emailInput?.value.trim() || "";
     const password = passwordInput?.value || "";
@@ -86,83 +199,207 @@ signupForm?.addEventListener("submit", async e => {
     const bio = bioInput?.value.trim() || "";
     const expertise = expertiseInput?.value.trim() || "";
 
-    if (!fullName) return showToast("Enter your full name", "error");
-    if (!validEmail(email)) return showToast("Enter a valid email", "error");
-    if (!strongPassword(password)) return showToast("Password must contain uppercase, lowercase, number and 8 characters", "error");
-    if (password !== confirmPassword) return showToast("Passwords do not match", "error");
-    if (!role) return showToast("Select account type", "error");
-    if (!termsCheckbox?.checked) return showToast("Accept Terms & Conditions", "warning");
+    if (!fullName) return showToast("Enter your full name.", "error");
+    if (!validEmail(email)) return showToast("Enter a valid email address.", "error");
+    if (!strongPassword(password)) {
+        return showToast("Use at least 8 characters with uppercase, lowercase and a number.", "error");
+    }
+    if (password !== confirmPassword) return showToast("Passwords do not match.", "error");
+    if (!["student", "instructor"].includes(role)) return showToast("Select a valid account type.", "error");
+    if (!validateCommonFields()) return;
+
+    let createdUser = null;
+    let applicationCreated = false;
 
     try {
         setButtons(true);
-        showLoader(role === "student" ? "Creating your application..." : "Creating account...");
+        showLoader(role === "student" ? "Submitting your student application..." : "Creating your instructor application...");
+
         const credential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = credential.user;
-        await updateProfile(user, { displayName: fullName });
+        createdUser = credential.user;
+        await updateProfile(createdUser, { displayName: fullName });
 
         if (role === "student") {
-            await createStudentApplication({ uid: user.uid, fullName, email });
-            await signOut(auth);
-            hideLoader();
-            showToast("Application submitted! Wait for Founder approval before accessing your student portal.", "success");
-            setTimeout(() => { window.location.href = "login.html"; }, 1800);
+            await createStudentApplication({
+                uid: createdUser.uid,
+                fullName,
+                email
+            });
+            applicationCreated = true;
+            finishPendingApplication(
+                "Student application submitted. Portal access begins after admission approval."
+            );
             return;
         }
 
-        await createInstructorProfile({ uid: user.uid, fullName, email, bio, expertise });
-        await signOut(auth);
-        hideLoader();
-        showToast("Instructor application created. Please wait for review.", "success");
-        setTimeout(() => { window.location.href = "login.html"; }, 1800);
+        await createInstructorProfile({
+            uid: createdUser.uid,
+            fullName,
+            email,
+            bio,
+            expertise
+        });
+        applicationCreated = true;
+        finishPendingApplication(
+            "Instructor application submitted. Portal access begins after review and verification."
+        );
     } catch (error) {
-        console.error("Signup Error:", error);
+        console.error("Signup failed:", error.code || error.message);
+
+        if (createdUser && !applicationCreated) {
+            const rolledBack = await rollbackNewAuthUser(createdUser);
+            if (!rolledBack) {
+                try { await signOut(auth); } catch (_) {}
+                hideLoader();
+                setButtons(false);
+                showToast(
+                    "Your account was created but profile setup did not finish. Contact Academy support before trying again.",
+                    "error"
+                );
+                return;
+            }
+        }
+
         hideLoader();
         setButtons(false);
-        showToast(error.code === "auth/email-already-in-use" ? "An account already exists with this email." : (error.message || "Unable to create account."), "error");
+        showToast(
+            error.code === "auth/email-already-in-use"
+                ? "An account already exists with this email. Please log in instead."
+                : error.code === "auth/weak-password"
+                    ? "Choose a stronger password."
+                    : error.message || "Unable to complete signup. Please try again.",
+            "error"
+        );
     }
 });
 
 googleSignupBtn?.addEventListener("click", async () => {
+    if (roleSelect?.value !== "student") {
+        showToast("Google signup is currently available for Student accounts only. Select Student or use the Instructor form.", "warning");
+        return;
+    }
+    if (!validateCommonFields()) return;
+
+    let newGoogleUser = null;
+    let applicationCreated = false;
+
     try {
         setButtons(true);
         showLoader("Connecting your Google account...");
+
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
+        const accountInfo = getAdditionalUserInfo(result);
+
+        if (!accountInfo?.isNewUser) {
+            await signOut(auth);
+            hideLoader();
+            setButtons(false);
+            showToast("A Google account already exists. Please use Login instead.", "warning");
+            return;
+        }
+
+        newGoogleUser = user;
         const fullName = user.displayName || "Student";
         const email = user.email || "";
-        await createStudentApplication({ uid: user.uid, fullName, email, providerName: "google" });
-        await signOut(auth);
-        hideLoader();
-        showToast("Application submitted! Your account is waiting for Founder approval.", "success");
-        setTimeout(() => { window.location.href = "login.html"; }, 1800);
+
+        await createStudentApplication({
+            uid: user.uid,
+            fullName,
+            email,
+            providerName: "google"
+        });
+        applicationCreated = true;
+
+        finishPendingApplication(
+            "Student application submitted. Portal access begins after admission approval."
+        );
     } catch (error) {
-        console.error("Google Signup Error:", error);
+        console.error("Google signup failed:", error.code || error.message);
+
+        if (newGoogleUser && !applicationCreated) {
+            const rolledBack = await rollbackNewAuthUser(newGoogleUser);
+            if (!rolledBack) {
+                try { await signOut(auth); } catch (_) {}
+                hideLoader();
+                setButtons(false);
+                showToast(
+                    "Google authentication succeeded but profile setup did not finish. Contact Academy support before trying again.",
+                    "error"
+                );
+                return;
+            }
+        }
+
         hideLoader();
         setButtons(false);
-        showToast(error.message || "Google signup failed.", "error");
+        showToast(
+            error.code === "auth/popup-closed-by-user"
+                ? "Google signup was cancelled."
+                : error.message || "Google signup failed. Please try again.",
+            "error"
+        );
     }
 });
 
-document.querySelectorAll(".toggle-password").forEach(toggle => toggle.addEventListener("click", () => {
-    const target = $(toggle.dataset.target);
-    if (!target) return;
-    target.type = target.type === "password" ? "text" : "password";
-    toggle.classList.toggle("fa-eye");
-    toggle.classList.toggle("fa-eye-slash");
-}));
+document.querySelectorAll(".toggle-password").forEach(toggle => {
+    const reveal = () => {
+        const target = $(toggle.dataset.target);
+        if (!target) return;
+        const visible = target.type === "password";
+        target.type = visible ? "text" : "password";
+        toggle.classList.toggle("fa-eye", !visible);
+        toggle.classList.toggle("fa-eye-slash", visible);
+        toggle.setAttribute("aria-label", visible ? "Hide password" : "Show password");
+    };
+
+    toggle.addEventListener("click", reveal);
+    toggle.setAttribute("role", "button");
+    toggle.setAttribute("tabindex", "0");
+    toggle.setAttribute("aria-label", "Show password");
+    toggle.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            reveal();
+        }
+    });
+});
 
 roleSelect?.addEventListener("change", () => {
     const instructor = roleSelect.value === "instructor";
-    if (instructorFields) instructorFields.style.display = instructor ? "block" : "none";
-    if (!instructor) { if (bioInput) bioInput.value = ""; if (expertiseInput) expertiseInput.value = ""; }
+    if (instructorFields) {
+        instructorFields.style.display = instructor ? "block" : "none";
+        instructorFields.setAttribute("aria-hidden", String(!instructor));
+    }
+    if (!instructor) {
+        if (bioInput) bioInput.value = "";
+        if (expertiseInput) expertiseInput.value = "";
+    }
 });
 
 passwordInput?.addEventListener("input", () => {
     const value = passwordInput.value;
-    const score = [value.length >= 8, /[A-Z]/.test(value), /[a-z]/.test(value), /\d/.test(value)].filter(Boolean).length;
-    if (strengthBar) strengthBar.style.width = `${score * 25}%`;
-    if (strengthText) strengthText.textContent = ["Enter password", "Weak", "Fair", "Good", "Strong"][score];
+    const score = [
+        value.length >= 8,
+        /[A-Z]/.test(value),
+        /[a-z]/.test(value),
+        /\d/.test(value)
+    ].filter(Boolean).length;
+
+    if (strengthBar) {
+        strengthBar.style.width = `${score * 25}%`;
+        strengthBar.setAttribute("aria-valuenow", String(score * 25));
+    }
+    if (strengthText) {
+        strengthText.textContent = ["Enter password", "Weak", "Fair", "Good", "Strong"][score];
+    }
 });
 
-window.addEventListener("load", () => { hideLoader(); nameInput?.focus(); });
-console.log("🚀 Spark Stack Academy Signup — Admission Flow Ready");
+roleSelect?.dispatchEvent(new Event("change"));
+
+window.addEventListener("load", () => {
+    hideLoader();
+    nameInput?.focus();
+});
+
+console.log("Spark Stack Academy signup flow ready.");
