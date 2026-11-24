@@ -941,7 +941,7 @@ service cloud.firestore {
           'userId', 'audience', 'createdAt'
         ]);
 
-      allow update, delete:
+      allow update:
         if staff()
         || (
           isInstructor()
@@ -953,6 +953,14 @@ service cloud.firestore {
             'courseId', 'courseName', 'meetingProvider', 'meetingUrl',
             'audience', 'updatedAt'
           ])
+        );
+
+      allow delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.userId == uid()
         );
     }
 
