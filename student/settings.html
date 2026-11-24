@@ -1,824 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>
-Settings | Spark Stack Academy
-</title>
-
-
-<link
-    rel="stylesheet"
-    href="css/student-core.css"
->
-
-<link
-    rel="stylesheet"
-    href="css/components.css"
->
-
-<link
-    rel="stylesheet"
-    href="css/settings.css"
->
-
-<link
-    rel="stylesheet"
-    href="css/responsive.css"
->
-
-
-<link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
->
-
-
-<script
-    src="https://unpkg.com/lucide@latest">
-</script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#21064F">
+<title>Student Settings | Spark Stack Academy</title>
+<link rel="stylesheet" href="css/student-core.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/settings.css">
+<link rel="stylesheet" href="css/responsive.css">
 </head>
-
-
 <body>
-
-
 <div class="student-layout">
-
-
-    <!-- SIDEBAR -->
-
-    <aside
-        id="sidebarContainer"
-        class="sidebar-container">
-    </aside>
-
-
-    <!-- SIDEBAR OVERLAY -->
-
-    <div
-        id="sidebarOverlay"
-        class="sidebar-overlay">
-    </div>
-
-
-    <!-- MAIN -->
-
-    <main class="student-main">
-
-
-        <!-- TOPBAR -->
-
-        <div
-            id="topbarContainer"
-            class="topbar-container">
-        </div>
-
-
-        <!-- PAGE -->
-
-        <section class="dashboard-content settings-page">
-
-
-            <!-- HEADER -->
-
-            <div class="settings-header">
-
-                <div>
-
-                    <span class="page-badge">
-
-                        <i data-lucide="settings"></i>
-
-                        Student Settings
-
-                    </span>
-
-
-                    <h1>
-                        Settings
-                    </h1>
-
-
-                    <p>
-                        Manage your account, learning,
-                        notifications and preferences.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- ACCOUNT -->
-
-            <div class="settings-card">
-
-                <div class="settings-card-header">
-
-                    <div class="settings-icon">
-                        <i data-lucide="user"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Account
-                        </h2>
-
-                        <p>
-                            Manage your personal information.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="settings-grid">
-
-
-                    <label class="setting-field">
-
-                        <span>
-                            Full Name
-                        </span>
-
-                        <input
-                            id="settingName"
-                            type="text"
-                            placeholder="Your full name"
-                        >
-
-                    </label>
-
-
-                    <label class="setting-field">
-
-                        <span>
-                            Email
-                        </span>
-
-                        <input
-                            id="settingEmail"
-                            type="email"
-                            disabled
-                        >
-
-                    </label>
-
-
-                    <label class="setting-field">
-
-                        <span>
-                            Phone Number
-                        </span>
-
-                        <input
-                            id="settingPhone"
-                            type="tel"
-                            placeholder="+254..."
-                        >
-
-                    </label>
-
-
-                    <label class="setting-field">
-
-                        <span>
-                            Admission Number
-                        </span>
-
-                        <input
-                            id="settingAdmission"
-                            type="text"
-                            disabled
-                        >
-
-                    </label>
-
-
-                </div>
-
-
-                <button
-                    id="saveAccountBtn"
-                    class="primary-setting-btn"
-                >
-                    Save Changes
-                </button>
-
-            </div>
-
-
-            <!-- SECURITY -->
-
-            <div class="settings-card">
-
-                <div class="settings-card-header">
-
-                    <div class="settings-icon">
-                        <i data-lucide="shield-check"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Security
-                        </h2>
-
-                        <p>
-                            Keep your account protected.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="settings-actions">
-
-
-                    <button
-                        id="changePasswordBtn"
-                        class="setting-action"
-                    >
-
-                        <span>
-
-                            <i data-lucide="key-round"></i>
-
-                            <strong>
-                                Change Password
-                            </strong>
-
-                        </span>
-
-                        <i data-lucide="chevron-right"></i>
-
-                    </button>
-
-
-                    <button
-                        id="signOutBtn"
-                        class="setting-action"
-                    >
-
-                        <span>
-
-                            <i data-lucide="log-out"></i>
-
-                            <strong>
-                                Sign Out
-                            </strong>
-
-                        </span>
-
-                        <i data-lucide="chevron-right"></i>
-
-                    </button>
-
-
-                </div>
-
-            </div>
-
-
-            <!-- NOTIFICATIONS -->
-
-            <div class="settings-card">
-
-                <div class="settings-card-header">
-
-                    <div class="settings-icon">
-                        <i data-lucide="bell"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Notifications
-                        </h2>
-
-                        <p>
-                            Choose what you want to be notified about.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="toggle-list">
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Academy Announcements
-                            </strong>
-
-                            <small>
-                                Important academy news and notices.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="notifyAnnouncements"
-                            checked
-                        >
-
-                    </label>
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Course Updates
-                            </strong>
-
-                            <small>
-                                New lessons and course changes.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="notifyCourses"
-                            checked
-                        >
-
-                    </label>
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Assignment Reminders
-                            </strong>
-
-                            <small>
-                                Reminders about pending assignments.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="notifyAssignments"
-                            checked
-                        >
-
-                    </label>
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Payment Notifications
-                            </strong>
-
-                            <small>
-                                Payment confirmations and receipts.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="notifyPayments"
-                            checked
-                        >
-
-                    </label>
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Messages
-                            </strong>
-
-                            <small>
-                                New messages and chat activity.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="notifyMessages"
-                            checked
-                        >
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            <!-- LEARNING -->
-
-            <div class="settings-card">
-
-                <div class="settings-card-header">
-
-                    <div class="settings-icon">
-                        <i data-lucide="graduation-cap"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Learning Preferences
-                        </h2>
-
-                        <p>
-                            Customize your learning experience.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="toggle-list">
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Remember Last Lesson
-                            </strong>
-
-                            <small>
-                                Resume courses from where you stopped.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="rememberLesson"
-                            checked
-                        >
-
-                    </label>
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Learning Reminders
-                            </strong>
-
-                            <small>
-                                Get reminders to keep learning.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="learningReminders"
-                            checked
-                        >
-
-                    </label>
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Captions
-                            </strong>
-
-                            <small>
-                                Show subtitles when available.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="captions"
-                        >
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            <!-- PRIVACY -->
-
-            <div class="settings-card">
-
-                <div class="settings-card-header">
-
-                    <div class="settings-icon">
-                        <i data-lucide="lock"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Privacy
-                        </h2>
-
-                        <p>
-                            Control how your learning activity is displayed.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="toggle-list">
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Show Achievements
-                            </strong>
-
-                            <small>
-                                Allow other students to see your achievements.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="showAchievements"
-                            checked
-                        >
-
-                    </label>
-
-
-                    <label class="toggle-row">
-
-                        <span>
-
-                            <strong>
-                                Show Certificates
-                            </strong>
-
-                            <small>
-                                Display earned certificates on your profile.
-                            </small>
-
-                        </span>
-
-                        <input
-                            type="checkbox"
-                            id="showCertificates"
-                            checked
-                        >
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            <!-- PREMIUM -->
-
-            <div class="settings-card premium-settings-card">
-
-                <div class="settings-card-header">
-
-                    <div class="settings-icon premium-icon">
-                        <i data-lucide="crown"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Premium Subscription
-                        </h2>
-
-                        <p>
-                            Manage your premium student benefits.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="premium-status">
-
-                    <div>
-
-                        <span>
-                            Current Plan
-                        </span>
-
-                        <strong id="premiumPlan">
-                            Free Student
-                        </strong>
-
-                    </div>
-
-
-                    <button
-                        id="managePremiumBtn"
-                        class="premium-btn"
-                    >
-                        Manage Premium
-                    </button>
-
-                </div>
-
-            </div>
-
-
-<!-- SUPPORT -->
-
-<div class="settings-card">
-
-    <div class="settings-card-header">
-
-        <div class="settings-icon">
-            <i data-lucide="help-circle"></i>
-        </div>
-
-        <div>
-            <h2>
-                Support
-            </h2>
-
-            <p>
-                Need help? We're here for you.
-            </p>
-        </div>
-
-    </div>
-
-
-    <div class="settings-actions">
-
-
-        <!-- HELP CENTER -->
-
-        <a
-            href="help-center.html"
-            class="setting-action"
-        >
-
-            <span>
-
-                <i data-lucide="life-buoy"></i>
-
-                <strong>
-                    Help Center
-                </strong>
-
-            </span>
-
-            <i data-lucide="chevron-right"></i>
-
-        </a>
-
-
-        <!-- REPORT A PROBLEM -->
-
-        <a
-            href="help-center.html"
-            class="setting-action"
-        >
-
-            <span>
-
-                <i data-lucide="flag"></i>
-
-                <strong>
-                    Report a Problem
-                </strong>
-
-            </span>
-
-            <i data-lucide="chevron-right"></i>
-
-        </a>
-
-
-    </div>
-
+<aside id="sidebarContainer" class="sidebar-container"></aside>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="student-main">
+<div id="topbarContainer" class="topbar-container"></div>
+<section class="dashboard-content settings-page" aria-labelledby="settingsTitle">
+<header class="settings-header">
+<div><span class="page-badge"><i data-lucide="sliders-horizontal"></i> ACCOUNT CONTROL</span><h1 id="settingsTitle">Settings</h1><p>Manage your student account, security and learning preferences.</p></div>
+<a href="profile.html" class="settings-profile-link"><i data-lucide="user-round"></i> View profile</a>
+</header>
+
+<section class="settings-card" aria-labelledby="accountHeading">
+<div class="settings-card-header"><span class="settings-icon"><i data-lucide="user-round"></i></span><div><h2 id="accountHeading">Personal details</h2><p>Keep your contact information up to date.</p></div></div>
+<form id="accountSettingsForm">
+<div class="settings-grid">
+<label class="setting-field"><span>Full name</span><input id="settingName" name="name" type="text" autocomplete="name" maxlength="100" required></label>
+<label class="setting-field"><span>Email address <small>Managed by your sign-in provider</small></span><input id="settingEmail" type="email" autocomplete="email" disabled></label>
+<label class="setting-field"><span>Phone number</span><input id="settingPhone" name="phone" type="tel" autocomplete="tel" maxlength="30" placeholder="+254…"></label>
+<label class="setting-field"><span>Admission number <small>Academy-managed record</small></span><input id="settingAdmission" type="text" disabled></label>
 </div>
+<div class="settings-form-footer"><p id="accountSaveStatus" class="settings-status" role="status" aria-live="polite">Changes to your name and phone number are saved to your student record.</p><button id="saveAccountBtn" class="primary-setting-btn" type="submit">Save changes</button></div>
+</form>
+</section>
 
-
-            <!-- DANGER ZONE -->
-
-            <div class="settings-card danger-card">
-
-                <div class="settings-card-header">
-
-                    <div class="settings-icon danger-icon">
-                        <i data-lucide="alert-triangle"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Danger Zone
-                        </h2>
-
-                        <p>
-                            Actions here may affect your account permanently.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    id="deleteAccountBtn"
-                    class="danger-btn"
-                >
-                    Request Account Deletion
-                </button>
-
-            </div>
-
-
-        </section>
-
-
-    </main>
-
-
+<section class="settings-card" aria-labelledby="securityHeading">
+<div class="settings-card-header"><span class="settings-icon"><i data-lucide="shield-check"></i></span><div><h2 id="securityHeading">Account security</h2><p>Check your email verification and manage access.</p></div></div>
+<div class="security-status-row"><div><strong>Email verification</strong><span id="emailVerificationStatus">Checking verification status…</span></div><button id="verifyEmailBtn" class="outline-setting-btn" type="button">Send verification email</button></div>
+<div class="settings-actions">
+<button id="changePasswordBtn" class="setting-action" type="button"><span><i data-lucide="key-round"></i><strong>Change password</strong></span><i data-lucide="chevron-right"></i></button>
+<button id="signOutBtn" class="setting-action" type="button"><span><i data-lucide="log-out"></i><strong>Sign out of this device</strong></span><i data-lucide="chevron-right"></i></button>
 </div>
+<p id="securityStatus" class="settings-status" role="status" aria-live="polite"></p>
+</section>
 
+<section class="settings-card" aria-labelledby="notificationsHeading">
+<div class="settings-card-header"><span class="settings-icon"><i data-lucide="bell"></i></span><div><h2 id="notificationsHeading">Notification preferences</h2><p>Choose the types of updates you prefer to receive.</p></div></div>
+<div class="toggle-list">
+<label class="toggle-row"><span><strong>Academy announcements</strong><small>News, notices and important Academy updates.</small></span><input type="checkbox" id="notifyAnnouncements" checked></label>
+<label class="toggle-row"><span><strong>Course updates</strong><small>New lessons and course changes.</small></span><input type="checkbox" id="notifyCourses" checked></label>
+<label class="toggle-row"><span><strong>Assignment reminders</strong><small>Updates about pending assignments.</small></span><input type="checkbox" id="notifyAssignments" checked></label>
+<label class="toggle-row"><span><strong>Payment notifications</strong><small>Payment confirmations and receipts.</small></span><input type="checkbox" id="notifyPayments" checked></label>
+<label class="toggle-row"><span><strong>Messages</strong><small>New private messages and chat activity.</small></span><input type="checkbox" id="notifyMessages" checked></label>
+</div>
+<p id="notificationSaveStatus" class="settings-status" role="status" aria-live="polite">Preferences are saved to your student settings.</p>
+</section>
 
-<script
-    type="module"
-    src="js/student-app.js">
-</script>
+<section class="settings-card" aria-labelledby="learningHeading">
+<div class="settings-card-header"><span class="settings-icon"><i data-lucide="graduation-cap"></i></span><div><h2 id="learningHeading">Learning preferences</h2><p>Set defaults for your learning experience.</p></div></div>
+<div class="toggle-list">
+<label class="toggle-row"><span><strong>Remember my last lesson</strong><small>Keep your place when you return to a course.</small></span><input type="checkbox" id="rememberLesson" checked></label>
+<label class="toggle-row"><span><strong>Learning reminders</strong><small>Save your preference for learning reminders.</small></span><input type="checkbox" id="learningReminders" checked></label>
+<label class="toggle-row"><span><strong>Captions</strong><small>Prefer subtitles when course media provides them.</small></span><input type="checkbox" id="captions"></label>
+</div>
+<p id="learningSaveStatus" class="settings-status" role="status" aria-live="polite">Preferences are saved to your student settings.</p>
+</section>
 
+<section class="settings-card premium-settings-card" aria-labelledby="premiumHeading">
+<div class="settings-card-header"><span class="settings-icon premium-icon"><i data-lucide="crown"></i></span><div><h2 id="premiumHeading">Membership</h2><p>Review your Academy membership options.</p></div></div>
+<div class="premium-status"><div><span>Current plan</span><strong id="premiumPlan">Checking plan…</strong></div><a id="managePremiumBtn" class="premium-btn" href="premium.html">View membership</a></div>
+</section>
 
-<script
-    type="module"
-    src="js/settings.js">
-</script>
+<section class="settings-card" aria-labelledby="supportHeading">
+<div class="settings-card-header"><span class="settings-icon"><i data-lucide="life-buoy"></i></span><div><h2 id="supportHeading">Help and support</h2><p>Find answers or ask the Academy team for assistance.</p></div></div>
+<div class="settings-actions">
+<a href="help-center.html" class="setting-action"><span><i data-lucide="book-open-text"></i><strong>Open help center</strong></span><i data-lucide="chevron-right"></i></a>
+<a href="help-center.html" class="setting-action"><span><i data-lucide="flag"></i><strong>Report a problem</strong></span><i data-lucide="chevron-right"></i></a>
+</div>
+</section>
 
-
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        if (window.lucide) {
-
-            lucide.createIcons();
-
-        }
-
-    }
-);
-
-</script>
-
-
+<section class="settings-card danger-card" aria-labelledby="dangerHeading">
+<div class="settings-card-header"><span class="settings-icon danger-icon"><i data-lucide="alert-triangle"></i></span><div><h2 id="dangerHeading">Account deletion</h2><p>Request a review of your account deletion. This does not immediately erase your account.</p></div></div>
+<button id="deleteAccountBtn" class="danger-btn" type="button">Request account deletion</button>
+<p id="deletionStatus" class="settings-status" role="status" aria-live="polite"></p>
+</section>
+</section>
+</main>
+</div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script type="module" src="js/student-app.js"></script>
+<script type="module" src="js/settings.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>window.lucide?.createIcons());</script>
 </body>
-
 </html>
