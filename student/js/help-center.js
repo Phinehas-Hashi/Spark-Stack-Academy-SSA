@@ -784,7 +784,7 @@ function closeSupportModal() {
 async function submitSupportRequest(event) {
     event.preventDefault();
     if (!currentUser) {
-        alert("Please sign in again before contacting support.");
+        window.ssaToast?.("Please sign in again before contacting support.", "error", "Spark Support");
         return;
     }
     const subject = document.getElementById("supportSubject")?.value.trim();
@@ -792,7 +792,7 @@ async function submitSupportRequest(event) {
     const category = document.getElementById("supportCategory")?.value || "other";
     const priority = document.getElementById("supportPriority")?.value || "medium";
     if (!subject || !message) {
-        alert("Please complete the subject and description.");
+        window.ssaToast?.("Please complete the subject and description.", "error", "Spark Support");
         return;
     }
     const button = document.querySelector(".submit-support");
