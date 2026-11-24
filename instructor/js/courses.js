@@ -5,8 +5,14 @@
 // ============================================================
 
 import {
+    app,
     db
 } from "../../js/firebase.js";
+
+import {
+    getFunctions,
+    httpsCallable
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 import {
     collection,
@@ -30,6 +36,12 @@ let courses = [];
 let currentFilter = "all";
 let editingCourseId = null;
 let courseStudentCounts = {};
+
+const functions = getFunctions(app);
+const getInstructorCourseEnrollmentStats = httpsCallable(
+    functions,
+    "getInstructorCourseEnrollmentStats"
+);
 
 
 // ============================================================
@@ -467,111 +479,25 @@ function updateStats() {
 // STUDENTS
 // ============================================================
 async function loadStudentCount() {
-
     try {
+        const response = await getInstructorCourseEnrollmentStats();
+        const data = response.data || {};
 
-        courseStudentCounts = {};
-
-        const ref = collection(
-            db,
-            "enrollments"
+        courseStudentCounts = Object.fromEntries(
+            Object.entries(data.courseStudentCounts || {}).map(([courseId, count]) => [
+                courseId,
+                Math.max(0, Number(count) || 0)
+            ])
         );
 
-        const q = query(
-            ref,
-            where(
-                "instructorId",
-                "==",
-                instructor.uid
-            )
-        );
-
-        const snapshot = await getDocs(q);
-
-        snapshot.forEach(item => {
-
-            const data = item.data();
-
-            const courseId = data.courseId;
-
-            const studentId =
-                data.studentId ||
-                data.userId;
-
-            if (!courseId || !studentId) {
-                return;
-            }
-
-            if (!courseStudentCounts[courseId]) {
-
-                courseStudentCounts[courseId] =
-                    new Set();
-
-            }
-
-            courseStudentCounts[courseId].add(
-                studentId
-            );
-
-        });
-
-        // Convert Sets to numbers
-        Object.keys(courseStudentCounts).forEach(
-            courseId => {
-
-                courseStudentCounts[courseId] =
-                    courseStudentCounts[courseId].size;
-
-            }
-        );
-
-        // Overall unique students
-        const allStudents = new Set();
-
-        snapshot.forEach(item => {
-
-            const data = item.data();
-
-            const studentId =
-                data.studentId ||
-                data.userId;
-
-            if (studentId) {
-                allStudents.add(studentId);
-            }
-
-        });
-
-        setText(
-            "totalStudents",
-            allStudents.size
-        );
-
+        setText("totalStudents", Math.max(0, Number(data.totalStudents) || 0));
         renderCourses();
-
-        console.log(
-            "👨‍🎓 COURSE STUDENT COUNTS:",
-            courseStudentCounts
-        );
-
-    }
-
-    catch (error) {
-
-        console.warn(
-            "⚠ Student count unavailable:",
-            error
-        );
-
+    } catch (error) {
+        console.warn("Instructor enrolment statistics unavailable:", error);
         courseStudentCounts = {};
-
-        setText(
-            "totalStudents",
-            0
-        );
-
+        setText("totalStudents", "—");
+        renderCourses();
     }
-
 }
 
 // ============================================================
@@ -647,23 +573,43 @@ function renderCourses() {
 
 
     if (!filtered.length) {
-
         grid.innerHTML = "";
 
-        empty?.classList.remove(
-            "hidden"
-        );
+        if (empty) {
+            const title = empty.querySelector("h3");
+            const description = empty.querySelector("p");
+            const createButton = $("emptyCreateCourseBtn");
+
+            if (search) {
+                if (title) title.textContent = "No matching courses";
+                if (description) description.textContent = "Try a different search term or clear your search.";
+                if (createButton) createButton.hidden = true;
+            } else if (courses.length && currentFilter !== "all") {
+                if (title) title.textContent = currentFilter === "published"
+                    ? "No published courses yet"
+                    : "No draft courses";
+                if (description) description.textContent = "Create a course or switch to another filter.";
+                if (createButton) createButton.hidden = false;
+            } else {
+                if (title) title.textContent = "No courses yet";
+                if (description) description.textContent = "Create your first course and start teaching.";
+                if (createButton) createButton.hidden = false;
+            }
+
+            empty.classList.remove("hidden");
+        }
 
         refreshIcons();
-
         return;
-
     }
 
 
     empty?.classList.add(
         "hidden"
     );
+
+    const emptyCreateButton = $("emptyCreateCourseBtn");
+    if (emptyCreateButton) emptyCreateButton.hidden = false;
 
 
     grid.innerHTML =
