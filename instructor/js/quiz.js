@@ -373,7 +373,6 @@ async function loadQuestions() {
     const q =
         query(
             ref,
-            where("quizId", "==", quizId),
             where("instructorId", "==", instructor.uid)
         );
 
@@ -385,6 +384,7 @@ async function loadQuestions() {
                 id: item.id,
                 ...item.data()
             }))
+            .filter(question => question.quizId === quizId)
             .sort(
                 (a, b) =>
                     Number(a.order || 0) -
