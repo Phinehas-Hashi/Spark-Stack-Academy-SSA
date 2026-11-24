@@ -752,9 +752,28 @@ function setupEvents() {
     });
 
     document.addEventListener("keydown", event => {
-        if (event.key === "Escape" && !$("withdrawalModal")?.classList.contains("hidden")) {
+        const modal = $("withdrawalModal");
+        if (!modal || modal.classList.contains("hidden")) return;
+
+        if (event.key === "Escape") {
             event.preventDefault();
             closeWithdrawalWindow();
+            return;
+        }
+
+        if (event.key !== "Tab") return;
+        const focusable = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')]
+            .filter(element => element.getClientRects().length);
+        if (!focusable.length) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
         }
     });
 }
