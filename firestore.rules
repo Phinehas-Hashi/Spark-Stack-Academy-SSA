@@ -1074,7 +1074,7 @@ service cloud.firestore {
       allow get:
         if isStudent()
         && studentPortalOpen()
-        && resource.data.userId == uid();
+        && (resource == null || resource.data.userId == uid());
 
       allow list:
         if false;
