@@ -1202,3 +1202,50 @@
         padding-top: 7px;
     }
 }
+
+
+/* ============================================================
+   MOBILE SIDEBAR OPEN STATE — RELIABLE STACKING
+============================================================ */
+@media (max-width: 900px) {
+    #sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        z-index: 1201 !important;
+        max-height: 100vh;
+        max-height: 100dvh;
+        transform: translate3d(-110%, 0, 0);
+        visibility: hidden;
+        pointer-events: none;
+        will-change: transform;
+    }
+
+    #sidebar.open {
+        transform: translate3d(0, 0, 0) !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transition: transform .22s ease, visibility 0s !important;
+    }
+
+    #sidebarOverlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1200 !important;
+    }
+
+    body.ssa-sidebar-open {
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
+    #mobileMenuBtn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 901;
+        touch-action: manipulation;
+    }
+}
