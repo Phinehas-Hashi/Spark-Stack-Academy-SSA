@@ -48,17 +48,19 @@ exports.requestInstructorWithdrawal = onCall(async request => {
   const userRef = db.doc("users/" + uid);
   const settingsRef = db.doc("platformSettings/earnings");
   const monetizationRef = db.doc("settings/monetization");
+  const financeSecurityRef = db.doc("finance/security");
   const walletRef = db.doc("withdrawalLocks/" + uid);
   const earningsQuery = db.collection("instructorEarnings").where("instructorId", "==", uid);
   const withdrawalsQuery = db.collection("withdrawalRequests").where("instructorId", "==", uid);
   const requestRef = db.collection("withdrawalRequests").doc();
 
   return db.runTransaction(async transaction => {
-    const [userSnap, controlsSnap, settingsSnap, monetizationSnap, earningsSnap, withdrawalsSnap, walletSnap] = await Promise.all([
+    const [userSnap, controlsSnap, settingsSnap, monetizationSnap, financeSecuritySnap, earningsSnap, withdrawalsSnap, walletSnap] = await Promise.all([
       transaction.get(userRef),
       transaction.get(platformRef),
       transaction.get(settingsRef),
       transaction.get(monetizationRef),
+      transaction.get(financeSecurityRef),
       transaction.get(earningsQuery),
       transaction.get(withdrawalsQuery),
       transaction.get(walletRef)
@@ -94,6 +96,8 @@ exports.requestInstructorWithdrawal = onCall(async request => {
       throw new HttpsError("failed-precondition", "Manual Founder approval is required. Automatic payouts are not enabled for this workflow.");
     }
     const minimum = Number(monetization.minimumWithdrawal ?? settings.minimumWithdrawal ?? 1000);
+    const financeSecurity = financeSecuritySnap.exists ? financeSecuritySnap.data() || {} : {};
+    const withdrawalLimit = Number(financeSecurity.withdrawalLimit ?? 50000);
     const taxRate = Number(settings.platformTaxPercent ?? 0);
     const feeRate = Number(monetization.withdrawalFeePercent ?? settings.withdrawalFeePercent ?? 0);
     if (!Number.isFinite(minimum) || minimum < 0
@@ -116,8 +120,14 @@ exports.requestInstructorWithdrawal = onCall(async request => {
     }, 0);
     const available = Math.max(0, Math.round((earningsTotal - reservedTotal) * 100) / 100);
 
+    if (!Number.isFinite(withdrawalLimit) || withdrawalLimit <= 0) {
+      throw new HttpsError("failed-precondition", "The Founder withdrawal limit is not configured correctly.");
+    }
     if (amount < minimum) {
       throw new HttpsError("failed-precondition", "The minimum withdrawal is KES " + minimum.toLocaleString("en-KE") + ".");
+    }
+    if (amount > withdrawalLimit) {
+      throw new HttpsError("failed-precondition", "The maximum withdrawal request is KES " + withdrawalLimit.toLocaleString("en-KE") + ".");
     }
     if (amount > available) {
       throw new HttpsError("failed-precondition", "Insufficient available balance. Current available balance: KES " + available.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ".");
