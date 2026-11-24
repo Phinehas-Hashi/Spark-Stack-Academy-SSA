@@ -1222,6 +1222,9 @@ service cloud.firestore {
 
     match /submissions/{submissionId} {
 
+      // Instructors access submissions only through an assignment they own.
+      // The assignmentId equality in instructor queries lets Firestore prove
+      // that every returned submission belongs to this instructor's assignment.
       allow get, list:
         if staff()
         || (
@@ -1232,13 +1235,29 @@ service cloud.firestore {
         || (
           isInstructor()
           && instructorPortalOpen()
-          && resource.data.instructorId == uid()
+          && resource.data.assignmentId is string
+          && exists(/databases/$(database)/documents/assignments/$(resource.data.assignmentId))
+          && get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.instructorId == uid()
         );
 
+      // Students may submit only against an existing published assignment.
+      // Grade fields and instructor ownership fields cannot be supplied by clients.
       allow create:
         if isStudent()
         && studentPortalOpen()
-        && request.resource.data.studentId == uid();
+        && request.resource.data.studentId == uid()
+        && request.resource.data.assignmentId is string
+        && exists(/databases/$(database)/documents/assignments/$(request.resource.data.assignmentId))
+        && get(/databases/$(database)/documents/assignments/$(request.resource.data.assignmentId)).data.get('status', 'published') in ['published', 'pending']
+        && request.resource.data.status in ['submitted', 'resubmitted']
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 20000
+        && request.resource.data.keys().hasOnly([
+          'assignmentId', 'userId', 'studentId', 'studentName',
+          'studentEmail', 'content', 'notes', 'status',
+          'submittedAt', 'updatedAt'
+        ]);
 
       allow update:
         if staff()
@@ -1247,11 +1266,32 @@ service cloud.firestore {
           && studentPortalOpen()
           && resource.data.studentId == uid()
           && request.resource.data.studentId == uid()
+          && request.resource.data.assignmentId == resource.data.assignmentId
+          && resource.data.get('status', '') not in ['graded', 'reviewed', 'returned']
+          && request.resource.data.status in ['submitted', 'resubmitted']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'content', 'notes', 'status', 'submittedAt', 'updatedAt'
+          ])
+          && request.resource.data.content is string
+          && request.resource.data.content.size() > 0
+          && request.resource.data.content.size() <= 20000
         )
         || (
           isInstructor()
           && instructorPortalOpen()
-          && resource.data.instructorId == uid()
+          && resource.data.assignmentId is string
+          && exists(/databases/$(database)/documents/assignments/$(resource.data.assignmentId))
+          && get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.instructorId == uid()
+          && request.resource.data.assignmentId == resource.data.assignmentId
+          && request.resource.data.studentId == resource.data.studentId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'score', 'grade', 'maxScore', 'feedback', 'instructorFeedback',
+            'status', 'gradedAt', 'reviewedAt', 'updatedAt'
+          ])
+          && request.resource.data.status in ['graded', 'reviewed']
+          && request.resource.data.score is number
+          && request.resource.data.grade is number
+          && request.resource.data.maxScore is number
         );
 
       allow delete:
