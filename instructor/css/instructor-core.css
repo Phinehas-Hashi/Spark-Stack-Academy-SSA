@@ -169,7 +169,8 @@ svg {
     transition: .25s ease;
 }
 
-.sidebar-overlay.overlay-visible {
+.sidebar-overlay.overlay-visible,
+.sidebar-overlay.active {
     opacity: 1;
     visibility: visible;
 
@@ -192,7 +193,8 @@ a:focus-visible {
    BODY LOCK
 ========================================= */
 
-body.sidebar-active {
+body.sidebar-active,
+body.sidebar-open {
     overflow: hidden;
 }
 
@@ -215,7 +217,8 @@ body.sidebar-active {
         box-shadow: 15px 0 45px rgba(0,0,0,.15);
     }
 
-    .instructor-sidebar.sidebar-open {
+    .instructor-sidebar.sidebar-open,
+    .instructor-sidebar.open {
         transform: translateX(0);
     }
 
