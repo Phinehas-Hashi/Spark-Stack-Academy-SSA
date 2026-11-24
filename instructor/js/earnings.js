@@ -710,61 +710,24 @@ async function submitWithdrawal(event) {
 // ============================================================
 
 function setupPremiumInstructor() {
-
-    const button =
-        $("premiumInstructorBtn");
-
+    const button = $("premiumInstructorBtn");
     if (!button) return;
 
+    const instructor = currentInstructor || {};
+    const premium = instructor.instructorPremium === true || instructor.premiumInstructor === true;
 
-    const instructor =
-        currentInstructor || {};
-
-
-    const premium =
-        instructor.instructorPremium === true ||
-        instructor.premiumInstructor === true;
-
+    updateMoney("premiumPrice", earningsSettings.premiumMonthlyPrice);
 
     if (premium) {
-
-        button.textContent =
-            "Premium Active";
-
+        button.textContent = "Premium Active";
         button.disabled = true;
-
-        button.classList.add(
-            "premium-active"
-        );
-
+        button.classList.add("premium-active");
         return;
-
     }
 
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            const price =
-                formatMoney(
-                    earningsSettings.premiumMonthlyPrice
-                );
-
-
-            button.addEventListener(
-    "click",
-    () => {
-
-        window.location.href =
-            "payments.html?upgrade=premium";
-
-    }
-);
-
-        }
-    );
-
+    button.addEventListener("click", () => {
+        window.location.href = "payments.html?upgrade=premium";
+    });
 }
 
 
