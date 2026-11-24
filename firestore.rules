@@ -870,19 +870,16 @@ service cloud.firestore {
           isStudent()
           && studentPortalOpen()
           && (
-            resource.data.studentId == uid()
-            || resource.data.userId == uid()
+            resource.data.get('studentId', '') == uid()
+            || resource.data.get('userId', '') == uid()
           )
-          && request.resource.data.studentId
-               == resource.data.studentId
-          && request.resource.data.userId
-               == resource.data.userId
-          && request.resource.data.courseId
-               == resource.data.courseId
-          && request.resource.data.paymentStatus
-               == resource.data.paymentStatus
-          && request.resource.data.status
-               == resource.data.status
+          // Preserve ownership and entitlement fields, including legacy records
+          // where one optional identity field is absent.
+          && request.resource.data.get('studentId', '') == resource.data.get('studentId', '')
+          && request.resource.data.get('userId', '') == resource.data.get('userId', '')
+          && request.resource.data.get('courseId', '') == resource.data.get('courseId', '')
+          && request.resource.data.get('paymentStatus', '') == resource.data.get('paymentStatus', '')
+          && request.resource.data.get('status', '') == resource.data.get('status', '')
           && request.resource.data.diff(resource.data)
                .affectedKeys()
                .hasOnly([
