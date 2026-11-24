@@ -234,7 +234,7 @@ async function loadLearningData(uid, student) {
     );
 
     const xp = Math.max(0, Number(student.xp) || 0);
-    const level = Math.max(1, Number(student.level) || Math.floor(xp / 250) + 1);
+    const level = Math.floor(xp / 100) + 1;
     const streak = Math.max(0, Number(student.streak) || 0);
     const badges = Array.isArray(student.badges) ? student.badges : [];
 
@@ -285,7 +285,7 @@ function renderStudent(student, learning) {
 
     const xpProgress = $("xpProgress");
     if (xpProgress) {
-        const progress = (learning.xp % 250) / 250 * 100;
+        const progress = (learning.xp % 100) / 100 * 100;
         xpProgress.style.width = `${progress}%`;
         xpProgress.parentElement?.setAttribute("aria-valuenow", String(Math.round(progress)));
     }
