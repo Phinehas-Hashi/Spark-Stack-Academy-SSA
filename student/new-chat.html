@@ -1,201 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#21064F">
+  <meta name="description" content="Find an active Spark Stack Academy instructor and start a private conversation.">
+  <title>New Conversation | Spark Stack Academy</title>
 
-<meta charset="UTF-8">
+  <link rel="stylesheet" href="css/student-core.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/new-chat.css">
+  <link rel="stylesheet" href="css/responsive.css">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-
-<title>
-New Chat | Spark Stack Academy
-</title>
-
-
-<link rel="stylesheet" href="css/student-core.css">
-
-<link rel="stylesheet" href="css/components.css">
-
-<link rel="stylesheet" href="css/new-chat.css">
-
-<link rel="stylesheet" href="css/responsive.css">
-
-
-
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
-
-
-<link rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
-
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-rel="stylesheet">
-
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-
-
 <body>
-
-
-
-<!-- FULL SCREEN PAGE -->
-
-
-<div class="new-chat-page">
-
-
-
-<header class="new-chat-header">
-
-
-<button
-id="backBtn"
-class="back-btn">
-
-
-<i data-lucide="arrow-left"></i>
-
-
-</button>
-
-
-
-<div>
-
-
-<h1>
-
-New Chat
-
-</h1>
-
-
-<p>
-
-Find students, instructors and staff
-
-</p>
-
-
-</div>
-
-
-
-</header>
-
-
-
-
-
-<!-- SEARCH -->
-
-
-<div class="user-search">
-
-
-<i data-lucide="search"></i>
-
-
-<input
-
-id="searchUsers"
-
-type="search"
-
-placeholder="Search users...">
-
-
-</div>
-
-
-
-
-
-
-<!-- USERS -->
-
-
-<section
-
-id="userList"
-
-class="user-list">
-
-
-</section>
-
-
-
-
-
-
-<!-- EMPTY -->
-
-<div
-id="noUsers"
-class="no-users">
-
-
-<i data-lucide="users"></i>
-
-
-<h2>
-
-No users found
-
-</h2>
-
-
-<p>
-
-Search for someone to start chatting.
-
-</p>
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-<script
-type="module"
-src="js/student-app.js">
-</script>
-
-
-<script
-type="module"
-src="js/messages/new-chat.js">
-</script>
-
-
-
-<script>
-
-lucide.createIcons();
-
-</script>
-
-
-
+  <main class="new-chat-page">
+    <header class="new-chat-header">
+      <button id="backBtn" class="back-btn" type="button" aria-label="Back to messages">
+        <i data-lucide="arrow-left" aria-hidden="true"></i>
+      </button>
+
+      <div class="new-chat-heading">
+        <span class="new-chat-eyebrow">STUDENT SUPPORT</span>
+        <h1>Start a conversation</h1>
+        <p>Connect directly with an active Academy instructor.</p>
+      </div>
+
+      <div class="header-mark" aria-hidden="true">
+        <i data-lucide="messages-square"></i>
+      </div>
+    </header>
+
+    <section class="directory-panel" aria-labelledby="directoryTitle">
+      <div class="directory-intro">
+        <div>
+          <h2 id="directoryTitle">Instructor directory</h2>
+          <p>Choose an instructor to open a private conversation.</p>
+        </div>
+        <span class="directory-tag">
+          <i data-lucide="shield-check" aria-hidden="true"></i>
+          Verified staff
+        </span>
+      </div>
+
+      <label class="user-search" for="searchUsers">
+        <i data-lucide="search" aria-hidden="true"></i>
+        <input
+          id="searchUsers"
+          type="search"
+          placeholder="Search by instructor name or email"
+          autocomplete="off"
+          aria-label="Search active instructors">
+        <span class="search-hint">SEARCH</span>
+      </label>
+
+      <div class="directory-caption">
+        <span>AVAILABLE INSTRUCTORS</span>
+        <span>Private · One-to-one</span>
+      </div>
+
+      <section
+        id="userList"
+        class="user-list"
+        aria-label="Active instructors"
+        aria-live="polite"
+        aria-busy="true">
+      </section>
+
+      <div id="noUsers" class="no-users" role="status" aria-live="polite">
+        <div class="empty-directory-icon" aria-hidden="true">
+          <i data-lucide="users"></i>
+        </div>
+        <h2>Finding your instructors</h2>
+        <p>Active, verified instructors will appear here.</p>
+      </div>
+    </section>
+
+    <p class="directory-footnote">
+      <i data-lucide="lock" aria-hidden="true"></i>
+      Conversations are private to their participants.
+    </p>
+  </main>
+
+  <script type="module" src="js/student-app.js"></script>
+  <script type="module" src="js/messages/new-chat.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => window.lucide?.createIcons());
+  </script>
 </body>
-
 </html>
