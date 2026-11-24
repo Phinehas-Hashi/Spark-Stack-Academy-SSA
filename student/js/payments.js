@@ -6,7 +6,7 @@
 import { app, auth, db, storage } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, doc, onSnapshot, orderBy, query, where, limit
+  collection, doc, onSnapshot, query, where, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 import { ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
@@ -305,7 +305,6 @@ function loadPaymentHistory(user) {
   const q = query(
     collection(db, "payments"),
     where("userId", "==", user.uid),
-    orderBy("createdAt", "desc"),
     limit(25)
   );
   return onSnapshot(q, snapshot => {
@@ -316,7 +315,12 @@ function loadPaymentHistory(user) {
       if (totalPaid) totalPaid.textContent = money(0);
       return;
     }
-    snapshot.forEach(item => {
+    const orderedPayments = [...snapshot.docs].sort((a, b) => {
+      const aTime = a.data().createdAt?.toMillis?.() || 0;
+      const bTime = b.data().createdAt?.toMillis?.() || 0;
+      return bTime - aTime;
+    });
+    orderedPayments.forEach(item => {
       const payment = item.data();
       if (["paid", "completed"].includes(String(payment.status || "").toLowerCase())) {
         paid += Number(payment.amount || 0);
