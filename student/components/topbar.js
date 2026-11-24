@@ -3,7 +3,14 @@
 // Behavior-only shell controller. Styling lives in components.css.
 // ============================================================
 
-const CACHE_KEY = "ssa_student_topbar_html_v3";
+const CACHE_KEY = "ssa_student_topbar_html_v4";
+
+function readCache() {
+    try { return sessionStorage.getItem(CACHE_KEY); } catch (_) { return null; }
+}
+function writeCache(value) {
+    try { sessionStorage.setItem(CACHE_KEY, value); } catch (_) { /* cache is optional */ }
+}
 
 function paint(html, container) {
     if (!container || !html) return false;
@@ -17,7 +24,7 @@ export async function loadTopbar() {
     const container = document.getElementById("topbarContainer");
     if (!container) return;
 
-    const cached = sessionStorage.getItem(CACHE_KEY);
+    const cached = readCache();
     if (cached) paint(cached, container);
 
     try {
@@ -29,7 +36,7 @@ export async function loadTopbar() {
         }
 
         const html = await response.text();
-        sessionStorage.setItem(CACHE_KEY, html);
+        writeCache(html);
 
         if (!cached || cached !== html) {
             paint(html, container);
@@ -49,8 +56,8 @@ function initializeTopbar() {
     // interaction time rather than capturing a possibly-not-yet-injected node.
     const closeSidebar = () => {
         document.getElementById("sidebar")?.classList.remove("open");
-        overlay?.classList.remove("show");
-        overlay?.setAttribute("aria-hidden", "true");
+        document.getElementById("sidebarOverlay")?.classList.remove("show");
+        document.getElementById("sidebarOverlay")?.setAttribute("aria-hidden", "true");
         menuBtn?.setAttribute("aria-expanded", "false");
         menuBtn?.setAttribute("aria-label", "Open menu");
         document.body.classList.remove("ssa-sidebar-open");
@@ -61,14 +68,17 @@ function initializeTopbar() {
         menuBtn.setAttribute("aria-expanded", "false");
         menuBtn.addEventListener("click", () => {
             const sidebar = document.getElementById("sidebar");
+            const activeOverlay = document.getElementById("sidebarOverlay");
             if (!sidebar) {
-                console.warn("Student sidebar is not available yet.");
+                // The sidebar fragment may still be loading; retry after its loader settles.
+                window.dispatchEvent(new CustomEvent("ssa:student-sidebar-toggle-request"));
                 return;
             }
 
-            const open = sidebar.classList.toggle("open");
-            overlay?.classList.toggle("show", open);
-            overlay?.setAttribute("aria-hidden", String(!open));
+            const open = !sidebar.classList.contains("open");
+            sidebar.classList.toggle("open", open);
+            activeOverlay?.classList.toggle("show", open);
+            activeOverlay?.setAttribute("aria-hidden", String(!open));
             menuBtn.setAttribute("aria-expanded", String(open));
             menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
             document.body.classList.toggle("ssa-sidebar-open", open);
@@ -105,7 +115,9 @@ function initializeTopbar() {
         }
     };
 
-    applyTheme(localStorage.getItem("ssa-theme") || "light");
+    let savedTheme = "light";
+    try { savedTheme = localStorage.getItem("ssa-theme") || "light"; } catch (_) { /* use default theme */ }
+    applyTheme(savedTheme);
 
     if (themeBtn && !themeBtn.dataset.bound) {
         themeBtn.dataset.bound = "true";
