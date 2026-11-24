@@ -55,6 +55,11 @@ onAuthStateChanged(auth, async user => {
         }
 
         assignmentData = assignmentSnapshot.data();
+        const assignmentStatus = String(assignmentData.status || "published").toLowerCase();
+        if (!["published", "pending", "active"].includes(assignmentStatus) || assignmentData.published === false) {
+            showPageError("Assignment not available", "This assignment is still a draft or is no longer published. Return to your assignments.");
+            return;
+        }
         renderAssignment();
 
         await loadSubmission(user.uid);
@@ -82,7 +87,7 @@ function renderAssignment() {
     if (meta) {
         const dueDate = toDate(assignmentData.dueDate);
         const dueLabel = dueDate ? formatDate(dueDate) : "No deadline specified";
-        const points = Number(assignmentData.totalMarks ?? assignmentData.maxMarks ?? assignmentData.points);
+        const points = Number(assignmentData.totalMarks ?? assignmentData.maxMarks ?? assignmentData.maxScore ?? assignmentData.points);
         const pointsLabel = Number.isFinite(points) && points > 0 ? `${points} marks` : "";
 
         meta.replaceChildren(
