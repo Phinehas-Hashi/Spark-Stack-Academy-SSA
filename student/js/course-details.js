@@ -228,74 +228,44 @@ async function loadCourse() {
 // ============================================
 
 async function loadLessons() {
+    const lessonQueries = [
+        query(
+            collection(db, "courseLessons"),
+            where("courseId", "==", courseId)
+        ),
+        query(
+            collection(db, "courseLessons"),
+            where("courseID", "==", courseId)
+        )
+    ];
 
-    lessons = [];
+    const results = await Promise.allSettled(
+        lessonQueries.map(lessonQuery => getDocs(lessonQuery))
+    );
 
-    try {
-
-        const lessonsQuery =
-            query(
-                collection(
-                    db,
-                    "courseLessons"
-                ),
-                where(
-                    "courseId",
-                    "==",
-                    courseId
-                )
-            );
-
-        const snapshot =
-            await getDocs(
-                lessonsQuery
-            );
-
-
-        lessons =
-            snapshot.docs.map(
-                lessonDoc => ({
-
-                    id:
-                        lessonDoc.id,
-
+    const byId = new Map();
+    for (const result of results) {
+        if (result.status !== "fulfilled") {
+            console.warn("A course curriculum lookup was unavailable:", result.reason);
+            continue;
+        }
+        result.value.docs.forEach(lessonDoc => {
+            if (!byId.has(lessonDoc.id)) {
+                byId.set(lessonDoc.id, {
+                    id: lessonDoc.id,
                     ...lessonDoc.data()
-
-                })
-            );
-
-
-        lessons.sort(
-            (a, b) =>
-                Number(
-                    a.order || 0
-                ) -
-                Number(
-                    b.order || 0
-                )
-        );
-
-
-        console.log(
-            "🎥 COURSE LESSONS:",
-            lessons.length
-        );
-
+                });
+            }
+        });
     }
 
-    catch (error) {
+    lessons = [...byId.values()];
+    lessons.sort((a, b) =>
+        Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0)
+    );
 
-        console.error(
-            "❌ LESSON LOAD FAILED:",
-            error
-        );
-
-        lessons = [];
-
-    }
-
+    console.log("COURSE LESSONS:", lessons.length);
 }
-
 
 // ============================================
 // RENDER COURSE
