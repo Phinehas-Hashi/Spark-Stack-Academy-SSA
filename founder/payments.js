@@ -5,7 +5,7 @@
 
 import "./js/founder-app.js";
 
-import { app, db, auth }
+import { app, db, auth, storage }
 
 from "../js/firebase.js";
 
@@ -26,6 +26,7 @@ setDoc
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const paymentFunctions = getFunctions(app, "us-central1");
+import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 const reviewManualPayment = httpsCallable(paymentFunctions, "reviewStudentManualPayment");
 
 
@@ -506,6 +507,7 @@ function renderTransactions(data) {
       <td>${safe(created)}</td>
       <td><div class="table-actions">
         <button class="table-action" type="button" data-preview-payment="${safe(payment.id)}">View</button>
+        ${payment.proofStoragePath ? `<button class="table-action" type="button" data-proof-path="${safe(payment.proofStoragePath)}">Proof</button>` : ""}
         ${needsReview ? `
           <button class="table-action" type="button" data-review-payment="${safe(payment.id)}" data-decision="approve">Approve</button>
           <button class="table-action" type="button" data-review-payment="${safe(payment.id)}" data-decision="reject">Reject</button>
@@ -517,9 +519,26 @@ function renderTransactions(data) {
   transactionTable.querySelectorAll("[data-preview-payment]").forEach(button => {
     button.addEventListener("click", () => previewReceipt(button.dataset.previewPayment));
   });
+  transactionTable.querySelectorAll("[data-proof-path]").forEach(button => {
+    button.addEventListener("click", () => openManualPaymentProof(button.dataset.proofPath, button));
+  });
   transactionTable.querySelectorAll("[data-review-payment]").forEach(button => {
     button.addEventListener("click", () => reviewManualStudentPayment(button.dataset.reviewPayment, button.dataset.decision, button));
   });
+}
+
+async function openManualPaymentProof(path, button) {
+  if (!path || !path.startsWith("student-payment-proofs/")) return;
+  button.disabled = true;
+  try {
+    const url = await getDownloadURL(storageRef(storage, path));
+    window.open(url, "_blank", "noopener,noreferrer");
+  } catch (error) {
+    console.error("Manual payment proof could not be opened:", error);
+    window.ssaToast?.("Payment proof could not be opened.", "error", "Payment Review");
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function reviewManualStudentPayment(paymentId, decision, button) {
