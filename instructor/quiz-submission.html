@@ -474,8 +474,14 @@
                 <textarea
                     id="instructorFeedback"
                     rows="6"
+                    maxlength="5000"
+                    aria-describedby="feedbackCounter"
                     placeholder="Write feedback for the student..."
                 ></textarea>
+
+                <small class="feedback-counter" id="feedbackCounter">
+                    0 / 5,000 characters
+                </small>
 
             </div>
 
