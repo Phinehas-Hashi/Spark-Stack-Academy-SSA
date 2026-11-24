@@ -127,7 +127,7 @@ async function resolveUserProfile(user) {
                 email: founderData.email || user.email || userData?.email || "",
                 role: "founder",
                 active: founderData.active !== false && founderData.status === "active",
-                verified: founderData.verified !== false && user.emailVerified
+                verified: founderData.verified !== false
             }
         };
     }
