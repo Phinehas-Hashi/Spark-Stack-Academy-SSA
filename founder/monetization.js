@@ -90,6 +90,7 @@ async function save() {
       minimumWithdrawal: data.minimumWithdrawal,
       withdrawalFeePercent: data.withdrawalFeePercent,
       withdrawalsEnabled: data.enableWithdrawals,
+      mpesaWithdrawalsEnabled: data.enableMpesa,
       withdrawalApproval: data.withdrawalApproval,
       withdrawalProcessingTime: data.withdrawalTime,
       updatedAt: serverTimestamp()
