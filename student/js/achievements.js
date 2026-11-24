@@ -317,58 +317,6 @@ async function updateDocSafe(
 // LEVEL UP
 // ============================================================
 
-async function handleLevelUp(
-    userId,
-    oldLevel,
-    newLevel
-) {
-
-    const studentRef =
-        doc(
-            db,
-            "students",
-            userId
-        );
-
-
-    await updateDoc(
-        studentRef,
-        {
-
-            lastLevelUp:
-                newLevel,
-
-            lastLevelUpAt:
-                serverTimestamp()
-
-        }
-    );
-
-
-    await createActivity(
-        userId,
-        {
-
-            type:
-                "level_up",
-
-            from:
-                oldLevel,
-
-            to:
-                newLevel
-
-        }
-    );
-
-
-    console.log(
-        `🎉 LEVEL UP: ${oldLevel} → ${newLevel}`
-    );
-
-}
-
-
 // ============================================================
 // LEARNING STREAK
 // ============================================================
