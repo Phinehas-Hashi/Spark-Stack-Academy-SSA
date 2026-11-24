@@ -477,6 +477,7 @@ function openWithdrawalWindow(event) {
     withdrawalTrigger = event?.currentTarget || document.activeElement;
     previousBodyOverflow = document.body.style.overflow;
     $("modalAvailableBalance").textContent = formatMoney(currentBalance);
+    $("withdrawalAmount").min = String(Number(earningsSettings.minimumWithdrawal || 100));
     $("withdrawalAmount").max = String(currentBalance);
     $("withdrawalAmount").value = "";
     $("withdrawalAccount").value = "";
@@ -571,6 +572,10 @@ async function submitWithdrawal(event) {
             earningsSettings.minimumWithdrawal || 100
         );
 
+    if (!Number.isSafeInteger(amount) || amount <= 0) {
+        alert("Enter a valid whole KSh withdrawal amount.");
+        return;
+    }
 
     if (amount < minimum) {
 
