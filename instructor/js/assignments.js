@@ -232,21 +232,12 @@ function setupEvents() {
 
 
                     document
-                        .querySelectorAll(
-                            ".assignment-filter"
-                        )
+                        .querySelectorAll(".assignment-filter")
                         .forEach(btn => {
-
-                            btn.classList.remove(
-                                "active"
-                            );
-
+                            const active = btn === button;
+                            btn.classList.toggle("active", active);
+                            btn.setAttribute("aria-pressed", String(active));
                         });
-
-
-                    button.classList.add(
-                        "active"
-                    );
 
 
                     renderAssignments();
@@ -424,24 +415,6 @@ function calculateStats() {
         assignments.length;
 
 
-    const published =
-        assignments.filter(
-            assignment =>
-                getAssignmentStatus(
-                    assignment
-                ) === "published"
-        ).length;
-
-
-    const drafts =
-        assignments.filter(
-            assignment =>
-                getAssignmentStatus(
-                    assignment
-                ) === "draft"
-        ).length;
-
-
     const pendingReviews =
         assignments.reduce(
             (total, assignment) =>
@@ -509,24 +482,13 @@ function getAssignmentStatus(assignment) {
         ).toLowerCase();
 
 
-    if (status === "published") {
+    if (["published", "pending", "active"].includes(status)) {
         return "published";
     }
 
-
-    if (status === "draft") {
-        return "draft";
+    if (["closed", "archived", "scheduled"].includes(status)) {
+        return status;
     }
-
-
-    // Legacy assignments created with
-    // the old "pending" status are treated
-    // as published.
-
-    if (status === "pending") {
-        return "published";
-    }
-
 
     return "draft";
 
@@ -548,6 +510,7 @@ function renderAssignments() {
 
     if (!list || !empty) return;
 
+    list.setAttribute("aria-busy", "false");
 
     const search =
         ($("assignmentSearch")?.value || "")
@@ -583,11 +546,18 @@ function renderAssignments() {
                         ""
                     ).toLowerCase();
 
+                const description =
+                    String(
+                        assignment.description ||
+                        assignment.instructions ||
+                        ""
+                    ).toLowerCase();
 
                 const matchesSearch =
                     !search ||
                     title.includes(search) ||
-                    course.includes(search);
+                    course.includes(search) ||
+                    description.includes(search);
 
 
                 return (
@@ -659,135 +629,46 @@ function renderAssignments() {
 // ASSIGNMENT CARD
 // ============================================================
 
-function createAssignmentHTML(
-    assignment
-) {
+function createAssignmentHTML(assignment) {
+    const status = getAssignmentStatus(assignment);
+    const title = escapeHTML(assignment.title || "Untitled Assignment");
+    const course = escapeHTML(assignment.courseName || assignment.courseTitle || "Course");
+    const submissions = Number(assignment.submissionCount || 0);
+    const pending = Number(assignment.pendingReviewCount || 0);
+    const dueDate = formatDate(assignment.dueDate);
 
-    const status =
-        getAssignmentStatus(
-            assignment
-        );
-
-
-    const title =
-        escapeHTML(
-            assignment.title ||
-            "Untitled Assignment"
-        );
-
-
-    const course =
-        escapeHTML(
-            assignment.courseName ||
-            assignment.courseTitle ||
-            "Course"
-        );
-
-
-    const submissions =
-        Number(
-            assignment.submissionCount || 0
-        );
-
-
-    const pending =
-        Number(
-            assignment.pendingReviewCount || 0
-        );
-
-
-    const dueDate =
-        formatDate(
-            assignment.dueDate
-        );
-
-
-    const statusLabel =
-        status === "published"
-            ? "Published"
-            : "Draft";
-
-
-    let submissionText =
-        `${submissions} submission${submissions === 1 ? "" : "s"}`;
-
-
-    if (pending > 0) {
-
-        submissionText +=
-            ` • ${pending} pending review`;
-
-    }
-
+    const statusLabels = {
+        published: "Published",
+        draft: "Draft",
+        closed: "Closed",
+        archived: "Archived",
+        scheduled: "Scheduled"
+    };
+    const statusLabel = statusLabels[status] || "Draft";
+    const submissionText = `${submissions} submission${submissions === 1 ? "" : "s"}${pending ? ` · ${pending} pending review` : ""}`;
 
     return `
-
-        <div
-            class="assignment-item"
-            data-assignment-id="${escapeHTML(
-                assignment.id
-            )}"
-            style="cursor:pointer"
-        >
-
+        <article class="assignment-item">
             <div class="assignment-main">
-
-                <div class="assignment-icon">
-
+                <div class="assignment-icon" aria-hidden="true">
                     <i data-lucide="clipboard-list"></i>
-
                 </div>
-
-
                 <div class="assignment-info">
-
-                    <h3>
-                        ${title}
-                    </h3>
-
-
-                    <p>
-
-                        ${course}
-
-                        •
-                        
-                        ${submissionText}
-
-                        ${
-                            dueDate
-                                ? ` • Due ${dueDate}`
-                                : ""
-                        }
-
-                    </p>
-
+                    <h3>${title}</h3>
+                    <p class="assignment-course">${course}</p>
+                    <p class="assignment-summary">${submissionText}${dueDate ? ` · Due ${escapeHTML(dueDate)}` : ""}</p>
                 </div>
-
             </div>
-
-
             <div class="assignment-meta">
-
-                <span
-                    class="assignment-status ${status}"
-                >
-
-                    ${statusLabel}
-
-                </span>
-
-
-                <i data-lucide="chevron-right"></i>
-
+                <span class="assignment-status ${status}">${statusLabel}</span>
+                <a class="assignment-open" href="assignment.html?id=${encodeURIComponent(assignment.id)}" aria-label="Review submissions for ${title}">
+                    Review submissions
+                    <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                </a>
             </div>
-
-        </div>
-
+        </article>
     `;
-
 }
-
 
 // ============================================================
 // CREATE ASSIGNMENT
