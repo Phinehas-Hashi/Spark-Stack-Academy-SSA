@@ -3,17 +3,19 @@
 // Supports server-priced STK Push and manual M-Pesa receipt review.
 // ============================================================
 
-import { app, auth, db } from "../../js/firebase.js";
+import { app, auth, db, storage } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, doc, onSnapshot, orderBy, query, where, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+import { ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const functions = getFunctions(app, "us-central1");
 const getQuote = httpsCallable(functions, "getStudentPaymentQuote");
 const initiateStk = httpsCallable(functions, "initiateStudentStkPayment");
 const submitManual = httpsCallable(functions, "submitStudentManualPayment");
+const attachProof = httpsCallable(functions, "attachStudentPaymentProof");
 
 const params = new URLSearchParams(location.search);
 const purchaseType = params.get("purchaseType") || (params.get("courseId") ? "course" : "");
@@ -32,6 +34,7 @@ const backBtn = $("backBtn");
 let currentUser = null;
 let purchase = null;
 let activePaymentUnsubscribe = null;
+let pendingProofPaymentId = "";
 
 backBtn?.addEventListener("click", () => {
   location.href = purchaseType === "premium" ? "premium.html" : "courses.html";
@@ -121,7 +124,10 @@ function renderCheckout() {
         <input id="manualPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XXXXXXXX" maxlength="16">
         <label for="manualReceipt">M-Pesa transaction code</label>
         <input id="manualReceipt" type="text" autocomplete="off" placeholder="e.g. QGH7ABC123" maxlength="16">
-        <button type="button" class="pay-btn manual-submit-btn" id="submitManualPayment">Submit for Verification</button>
+        <label for="manualProof">M-Pesa confirmation screenshot (JPG, PNG or WebP, max 5 MB)</label>
+        <input id="manualProof" type="file" accept="image/jpeg,image/png,image/webp">
+        <button type="button" class="pay-btn manual-submit-btn" id="submitManualPayment">Submit Receipt and Proof</button>
+        <button type="button" class="pay-btn manual-submit-btn" id="retryProofUpload" hidden>Retry Proof Upload</button>
       </section>
 
       <p id="checkoutMessage" class="checkout-message" role="status" aria-live="polite" hidden></p>
@@ -133,6 +139,7 @@ function renderCheckout() {
   $("manualAmount").textContent = money(purchase.amount);
   $("payWithStk")?.addEventListener("click", startStkPayment);
   $("submitManualPayment")?.addEventListener("click", submitManualPayment);
+  $("retryProofUpload")?.addEventListener("click", retryManualProofUpload);
   if (balance) balance.textContent = money(purchase.amount);
   if (paymentStatus) paymentStatus.textContent = "Awaiting payment";
 }
@@ -161,20 +168,65 @@ async function submitManualPayment() {
   if (!window.SSAOnlineActionGuard?.requireOnline("Submitting manual M-Pesa payment")) return;
   const phoneNumber = $("manualPhone")?.value.trim() || "";
   const receiptCode = $("manualReceipt")?.value.trim().toUpperCase() || "";
-  if (!phoneNumber || !receiptCode) return message("Enter the phone number used to pay and the M-Pesa transaction code.", true);
+  const file = $("manualProof")?.files?.[0];
+  if (!phoneNumber || !receiptCode || !file) {
+    return message("Enter the payer phone number, M-Pesa transaction code, and attach the confirmation screenshot.", true);
+  }
+  if (!/^image\\/(jpeg|png|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
+    return message("Use a JPG, PNG or WebP screenshot no larger than 5 MB.", true);
+  }
   setBusy("submitManualPayment", true, "Submitting…");
   try {
     const payload = purchase.purchaseType === "course"
       ? { purchaseType: "course", courseId: purchase.courseId, phoneNumber, receiptCode }
       : { purchaseType: "premium", plan: purchase.plan, billingPeriod: purchase.billingPeriod, phoneNumber, receiptCode };
     const result = await submitManual(payload);
-    message("Your M-Pesa receipt has been submitted. Payment status: Pending administrator verification. Course or Premium access will activate after approval.");
-    watchPayment(result.data.paymentId);
+    pendingProofPaymentId = result.data.paymentId;
+    await uploadManualProof(file);
   } catch (error) {
     console.error("Manual M-Pesa submission failed:", error);
     message(error.message || "Your payment details could not be submitted.", true);
+    if (pendingProofPaymentId) $("retryProofUpload").hidden = false;
   } finally {
-    setBusy("submitManualPayment", false, "Submit for Verification");
+    setBusy("submitManualPayment", false, "Submit Receipt and Proof");
+  }
+}
+
+async function uploadManualProof(file) {
+  if (!currentUser || !pendingProofPaymentId || !file) return;
+  const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  const path = `student-payment-proofs/${currentUser.uid}/${pendingProofPaymentId}/receipt.${extension}`;
+  try {
+    await uploadBytes(storageRef(storage, path), file, {
+      contentType: file.type,
+      customMetadata: { paymentId: pendingProofPaymentId }
+    });
+    await attachProof({ paymentId: pendingProofPaymentId, storagePath: path });
+    $("retryProofUpload").hidden = true;
+    $("manualProof").value = "";
+    message("Your M-Pesa receipt and screenshot have been submitted. Payment status: Pending administrator verification. Access activates only after approval.");
+    watchPayment(pendingProofPaymentId);
+  } catch (error) {
+    console.error("Manual payment proof upload failed:", error);
+    $("retryProofUpload").hidden = false;
+    message("Your receipt code was recorded, but the screenshot did not upload. Tap Retry Proof Upload to complete your submission.", true);
+    throw error;
+  }
+}
+
+async function retryManualProofUpload() {
+  const file = $("manualProof")?.files?.[0];
+  if (!file || !pendingProofPaymentId) {
+    return message("Select the payment screenshot again, then retry.", true);
+  }
+  if (!/^image\\/(jpeg|png|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
+    return message("Use a JPG, PNG or WebP screenshot no larger than 5 MB.", true);
+  }
+  setBusy("retryProofUpload", true, "Uploading…");
+  try {
+    await uploadManualProof(file);
+  } finally {
+    setBusy("retryProofUpload", false, "Retry Proof Upload");
   }
 }
 
