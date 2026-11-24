@@ -1048,6 +1048,16 @@ async function sendReportResponse() {
         );
 
 
+        // Keep the parent ticket's activity timestamp current for student tracking.
+        await updateDoc(
+            doc(db, "reports", currentReport.id),
+            {
+                lastResponseAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            }
+        );
+
+
         // Optional notification
 
         if (
