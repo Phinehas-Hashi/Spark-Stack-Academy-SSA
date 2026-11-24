@@ -221,6 +221,7 @@ export async function awardXP(userId, amount, reason = "Learning activity", sour
     const result = response.data || {};
 
     if (result.duplicate) {
+        if (result.student) await processBadges(userId, result.student);
         return {
             duplicate: true,
             xp: Number(result.student?.xp || result.xp || 0),
