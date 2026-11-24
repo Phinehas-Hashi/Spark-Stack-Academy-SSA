@@ -1,3 +1,4 @@
+const { createHash } = require("crypto");
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
@@ -94,7 +95,7 @@ exports.awardStudentXP = onCall(async request => {
 
   const userRef = db.doc("users/" + uid);
   const studentRef = db.doc("students/" + uid);
-  const eventId = "xp_" + encodeURIComponent(source).replaceAll("%", "_").slice(0, 140);
+  const eventId = "xp_" + createHash("sha256").update(source).digest("hex").slice(0, 48);
   const eventRef = db.doc("students/" + uid + "/activity/" + eventId);
 
   return db.runTransaction(async transaction => {
