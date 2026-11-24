@@ -939,7 +939,7 @@ async function setInstructorTicketStatus(id, status) {
     try {
         await updateDoc(doc(db, "reports", id), {
             status,
-            instructorStatusUpdatedAt: serverTimestamp(),
+            studentStatusUpdatedAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
         window.ssaToast?.(status === "closed" ? "Ticket marked as resolved." : "Ticket reopened. Support can continue assisting you.", "success", "Spark Support");
