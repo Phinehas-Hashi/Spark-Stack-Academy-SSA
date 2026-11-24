@@ -221,7 +221,7 @@ export async function awardXP(userId, amount, reason = "Learning activity", sour
     const result = response.data || {};
 
     if (result.duplicate) {
-        if (result.student) await processBadges(userId, result.student);
+        if (result.student) { try { await processBadges(userId, result.student); } catch (error) { console.warn("XP was already awarded; badge reconciliation will retry later.", error); } }
         return {
             duplicate: true,
             xp: Number(result.student?.xp || result.xp || 0),
@@ -230,7 +230,8 @@ export async function awardXP(userId, amount, reason = "Learning activity", sour
     }
 
     if (result.student) {
-        await processBadges(userId, result.student);
+        try { await processBadges(userId, result.student); }
+        catch (error) { console.warn("XP was awarded; badge reconciliation will retry later.", error); }
     }
     return result;
 }
@@ -1364,8 +1365,14 @@ async function loadAchievementOS(
         }
 
 
-        const student =
-            snapshot.data();
+        let student = snapshot.data();
+        try {
+            await processBadges(user.uid, student);
+            const refreshed = await getDoc(studentRef);
+            if (refreshed.exists()) student = refreshed.data();
+        } catch (badgeError) {
+            console.warn("Achievement badges could not be reconciled on page load:", badgeError);
+        }
 
         const displayName = student.displayName || student.name || student.fullName || user.displayName || "Builder";
         if ($("achievementStudentName")) $("achievementStudentName").textContent = displayName;
