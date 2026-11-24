@@ -143,7 +143,7 @@ async function action(id, type) {
   const status = type === "approve" ? "approved" : type === "reject" ? "rejected" : "paid";
   const treasuryRef = doc(db, "finance", "treasury");
   if (!request.instructorId) throw new Error("Payout request is missing its instructor ID.");
-  const walletRef = doc(db, "instructorWallets", request.instructorId);
+  const walletRef = doc(db, "withdrawalLocks", request.instructorId);
   let paymentReference = "";
 
   if (status === "paid") {
