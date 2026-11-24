@@ -305,7 +305,7 @@ input?.addEventListener("input", () => setTyping(Boolean(input.value.trim())));
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
-    window.location.replace("../../login.html");
+    window.location.replace("../login.html");
     return;
   }
   if (currentUser) return;
