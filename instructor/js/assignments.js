@@ -317,6 +317,7 @@ async function loadAssignments() {
 
         if (list) {
 
+            list.setAttribute("aria-busy", "false");
             list.innerHTML = `
 
                 <div class="assignment-loading">
@@ -345,40 +346,38 @@ async function loadAssignments() {
 // ============================================================
 
 async function loadSubmissionStats() {
+    const results = [];
 
-    // Student submissions are keyed by assignmentId + studentId and do
-    // not carry a client-supplied instructorId. Query each owned assignment
-    // separately; Firestore rules verify ownership through the parent assignment.
-    const results = await Promise.allSettled(
-        assignments.map(async assignment => {
-            const snapshot = await getDocs(query(
-                collection(db, "submissions"),
-                where("assignmentId", "==", assignment.id)
-            ));
+    // Bound concurrency for instructors with larger assignment libraries.
+    for (let start = 0; start < assignments.length; start += 10) {
+        const batch = assignments.slice(start, start + 10);
+        const batchResults = await Promise.allSettled(
+            batch.map(async assignment => {
+                const snapshot = await getDocs(query(
+                    collection(db, "submissions"),
+                    where("assignmentId", "==", assignment.id)
+                ));
 
-            let pending = 0;
-            let graded = 0;
+                let pending = 0;
+                let graded = 0;
 
-            snapshot.forEach(submissionDoc => {
-                const data = submissionDoc.data();
-                const status = String(data.status || "").toLowerCase();
-                const hasGrade = data.grade != null || data.score != null;
+                snapshot.forEach(submissionDoc => {
+                    const data = submissionDoc.data();
+                    const status = String(data.status || "").toLowerCase();
+                    const hasGrade = data.grade != null || data.score != null;
 
-                if (hasGrade || ["graded", "reviewed", "returned"].includes(status)) {
-                    graded++;
-                } else if (["submitted", "resubmitted", "pending_review", "under_review"].includes(status)) {
-                    pending++;
-                }
-            });
+                    if (hasGrade || ["graded", "reviewed", "returned"].includes(status)) {
+                        graded++;
+                    } else if (["submitted", "resubmitted", "pending_review", "under_review"].includes(status)) {
+                        pending++;
+                    }
+                });
 
-            return {
-                id: assignment.id,
-                total: snapshot.size,
-                pending,
-                graded
-            };
-        })
-    );
+                return { id: assignment.id, total: snapshot.size, pending, graded };
+            })
+        );
+        results.push(...batchResults);
+    }
 
     const stats = new Map();
     results.forEach((result, index) => {
@@ -403,7 +402,6 @@ async function loadSubmissionStats() {
         };
     });
 }
-
 
 // ============================================================
 // STATS
@@ -500,130 +498,52 @@ function getAssignmentStatus(assignment) {
 // ============================================================
 
 function renderAssignments() {
-
-    const list =
-        $("assignmentList");
-
-    const empty =
-        $("assignmentEmpty");
-
-
+    const list = $("assignmentList");
+    const empty = $("assignmentEmpty");
     if (!list || !empty) return;
 
     list.setAttribute("aria-busy", "false");
 
-    const search =
-        ($("assignmentSearch")?.value || "")
-            .trim()
-            .toLowerCase();
-
-
-    const filtered =
-        assignments.filter(
-            assignment => {
-
-                const status =
-                    getAssignmentStatus(
-                        assignment
-                    );
-
-
-                const matchesFilter =
-                    activeFilter === "all" ||
-                    status === activeFilter;
-
-
-                const title =
-                    String(
-                        assignment.title || ""
-                    ).toLowerCase();
-
-
-                const course =
-                    String(
-                        assignment.courseName ||
-                        assignment.courseTitle ||
-                        ""
-                    ).toLowerCase();
-
-                const description =
-                    String(
-                        assignment.description ||
-                        assignment.instructions ||
-                        ""
-                    ).toLowerCase();
-
-                const matchesSearch =
-                    !search ||
-                    title.includes(search) ||
-                    course.includes(search) ||
-                    description.includes(search);
-
-
-                return (
-                    matchesFilter &&
-                    matchesSearch
-                );
-
-            }
-        );
-
+    const search = ($("assignmentSearch")?.value || "").trim().toLowerCase();
+    const filtered = assignments.filter(assignment => {
+        const status = getAssignmentStatus(assignment);
+        const matchesFilter = activeFilter === "all" || status === activeFilter;
+        const searchable = [
+            assignment.title,
+            assignment.courseName,
+            assignment.courseTitle,
+            assignment.description,
+            assignment.instructions
+        ].map(value => String(value || "").toLowerCase()).join(" ");
+        return matchesFilter && searchable.includes(search);
+    });
 
     if (!filtered.length) {
-
         list.innerHTML = "";
+        empty.classList.remove("hidden");
 
-        empty.classList.remove(
-            "hidden"
-        );
+        const heading = empty.querySelector("h3");
+        const message = empty.querySelector("p");
+        const createButton = $("emptyCreateAssignmentBtn");
+
+        if (assignments.length) {
+            if (heading) heading.textContent = "No matching assignments";
+            if (message) message.textContent = "Try another search term or change the status filter.";
+            if (createButton) createButton.hidden = true;
+        } else {
+            if (heading) heading.textContent = "No assignments yet";
+            if (message) message.textContent = "Create your first assignment for students in one of your courses.";
+            if (createButton) createButton.hidden = false;
+        }
 
         refreshIcons();
-
         return;
-
     }
 
-
-    empty.classList.add(
-        "hidden"
-    );
-
-
-    list.innerHTML =
-        filtered
-            .map(
-                createAssignmentHTML
-            )
-            .join("");
-
-
+    empty.classList.add("hidden");
+    list.innerHTML = filtered.map(createAssignmentHTML).join("");
     refreshIcons();
-
-
-    list
-        .querySelectorAll(
-            "[data-assignment-id]"
-        )
-        .forEach(item => {
-
-            item.addEventListener(
-                "click",
-                () => {
-
-                    const id =
-                        item.dataset.assignmentId;
-
-
-                    window.location.href =
-                        `assignment.html?id=${encodeURIComponent(id)}`;
-
-                }
-            );
-
-        });
-
 }
-
 
 // ============================================================
 // ASSIGNMENT CARD
@@ -636,15 +556,14 @@ function createAssignmentHTML(assignment) {
     const submissions = Number(assignment.submissionCount || 0);
     const pending = Number(assignment.pendingReviewCount || 0);
     const dueDate = formatDate(assignment.dueDate);
-
-    const statusLabels = {
+    const labels = {
         published: "Published",
         draft: "Draft",
         closed: "Closed",
         archived: "Archived",
         scheduled: "Scheduled"
     };
-    const statusLabel = statusLabels[status] || "Draft";
+    const statusLabel = labels[status] || "Draft";
     const submissionText = `${submissions} submission${submissions === 1 ? "" : "s"}${pending ? ` · ${pending} pending review` : ""}`;
 
     return `
