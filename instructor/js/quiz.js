@@ -417,31 +417,30 @@ async function loadSubmissions() {
         );
 
 
+    // The Firestore read rule requires instructorId == current UID.
+    // Query that authorized scope first, then keep this quiz's attempts.
     const q =
         query(
             ref,
             where(
-                "quizId",
+                "instructorId",
                 "==",
-                quizId
+                instructor.uid
             )
         );
-
 
     const snapshot =
         await getDocs(q);
 
-
     submissions =
         snapshot.docs
             .map(item => ({
-
-                id:
-                    item.id,
-
+                id: item.id,
                 ...item.data()
-
-            }));
+            }))
+            .filter(submission =>
+                submission.quizId === quizId
+            );
 
 
     submissions.sort(
