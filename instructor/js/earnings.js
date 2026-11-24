@@ -34,9 +34,11 @@ function renderEarnings(){
   setText("withdrawalFee",`${Number(data.settings.withdrawalFeePercent||0)}%`);
   setText("platformTax",`${Number(data.settings.platformTaxPercent||0)}% (ledger setting)`);
   setText("premiumPrice", "See Instructor Pro");
-  const canWithdraw=Number(wallet.available)>=Number(data.settings.minimumWithdrawal||100);
-  setText("withdrawalStatus",canWithdraw?"Withdrawal available":"Building your withdrawable balance");
-  setText("withdrawalMessage",canWithdraw?"Your available ledger balance meets the minimum withdrawal threshold.":"Withdrawals unlock when verified instructor earnings reach the minimum. Pending requests are reserved.");
+  const walletStatus=String(wallet.walletStatus||"not_created").toLowerCase();
+  const walletReady=walletStatus==="active";
+  const canWithdraw=walletReady && Number(wallet.available)>=Number(data.settings.minimumWithdrawal||100);
+  setText("withdrawalStatus",!walletReady?(walletStatus==="frozen"?"Wallet temporarily restricted":"Wallet setup required"):(canWithdraw?"Withdrawal available":"Building your withdrawable balance"));
+  setText("withdrawalMessage",!walletReady?(walletStatus==="frozen"?"Your wallet is restricted by Academy Finance. Contact support for review.":"Your instructor wallet has not yet been provisioned by Academy Finance."):(canWithdraw?"Your available wallet balance meets the minimum withdrawal threshold.":"Withdrawals unlock when your wallet balance reaches the minimum. Pending requests are reserved."));
   $("withdrawBtn") && ($("withdrawBtn").disabled=!canWithdraw);
   $("heroWithdrawBtn") && ($("heroWithdrawBtn").disabled=!canWithdraw);
   renderEarningRows(earnings);
