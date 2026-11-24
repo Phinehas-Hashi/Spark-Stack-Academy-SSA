@@ -259,6 +259,7 @@
                             type="search"
                             id="assignmentSearch"
                             placeholder="Search assignments..."
+                            aria-label="Search assignments by title, course or instructions"
                             autocomplete="off"
                         >
 
@@ -269,28 +270,13 @@
 
                 <!-- FILTERS -->
 
-                <div class="assignment-filters">
+                <div class="assignment-filters" role="group" aria-label="Filter assignments">
 
-                    <button
-    class="assignment-filter active"
-    data-filter="all"
->
-    All
-</button>
-
-<button
-    class="assignment-filter"
-    data-filter="published"
->
-    Published
-</button>
-
-<button
-    class="assignment-filter"
-    data-filter="draft"
->
-    Drafts
-</button>
+                    <button type="button" class="assignment-filter active" data-filter="all" aria-pressed="true">All</button>
+                    <button type="button" class="assignment-filter" data-filter="published" aria-pressed="false">Published</button>
+                    <button type="button" class="assignment-filter" data-filter="draft" aria-pressed="false">Drafts</button>
+                    <button type="button" class="assignment-filter" data-filter="closed" aria-pressed="false">Closed</button>
+                    <button type="button" class="assignment-filter" data-filter="archived" aria-pressed="false">Archived</button>
 
                 </div>
 
@@ -300,6 +286,8 @@
                 <div
                     id="assignmentList"
                     class="assignment-list"
+                    aria-live="polite"
+                    aria-busy="true"
                 >
 
                     <div class="assignment-loading">
@@ -320,6 +308,7 @@
                 <div
                     id="assignmentEmpty"
                     class="assignment-empty hidden"
+                    role="status"
                 >
 
                     <div class="empty-icon">
