@@ -147,6 +147,7 @@ async function action(id, type) {
 
       const treasuryBalance = Number(treasurySnap.data().balance || 0);
       const walletBalance = Number(walletSnap.data().balance || 0);
+      if (String(walletSnap.data().status || "active").toLowerCase() !== "active") throw new Error("This instructor wallet is restricted and cannot be paid.");
       if (treasuryBalance < amount) throw new Error(`Insufficient treasury funds. Available: ${money(treasuryBalance)}.`);
       if (walletBalance < amount) throw new Error(`Insufficient instructor wallet balance. Available: ${money(walletBalance)}.`);
 
