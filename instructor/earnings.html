@@ -649,13 +649,14 @@
 <div
     id="withdrawalModal"
     class="modal hidden"
+    aria-hidden="true"
 >
 
 
     <div class="modal-backdrop"></div>
 
 
-    <div class="withdrawal-modal">
+    <form id="withdrawForm" class="withdrawal-modal">
 
 
         <button
@@ -704,7 +705,9 @@
                 <input
                     id="withdrawalAmount"
                     type="number"
-                    min="0"
+                    min="100"
+                    step="1"
+                    required
                     placeholder="0"
                 >
 
@@ -728,19 +731,8 @@
                 Withdrawal Method
             </label>
 
-            <select
-                id="withdrawalMethod"
-            >
-
-                <option value="mpesa">
-                    M-Pesa
-                </option>
-
-                <option value="bank">
-                    Bank Account
-                </option>
-
-            </select>
+            <input type="hidden" id="withdrawalMethod" value="mpesa">
+            <div class="withdrawal-method-fixed" aria-label="Withdrawal method">M-Pesa</div>
 
         </div>
 
@@ -755,8 +747,12 @@
 
             <input
                 id="withdrawalAccount"
-                type="text"
-                placeholder="Enter payout details"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                maxlength="16"
+                required
+                placeholder="07XXXXXXXX or 2547XXXXXXXX"
             >
 
         </div>
@@ -824,7 +820,7 @@
         <button
             id="confirmWithdrawalBtn"
             class="primary-btn withdrawal-submit"
-            type="button"
+            type="submit"
         >
 
             <i data-lucide="shield-check"></i>
@@ -833,7 +829,7 @@
 
         </button>
 
-    </div>
+    </form>
 
 </div>
 
