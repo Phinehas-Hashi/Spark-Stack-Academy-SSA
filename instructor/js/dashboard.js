@@ -64,7 +64,9 @@ async function initDashboard() {
 
             loadEarnings(),
 
-            loadRecentActivity()
+            loadRecentActivity(),
+
+            loadSubmissionMetrics()
 
         ]);
 
@@ -171,80 +173,30 @@ function setInstructorName() {
 // ============================================================
 
 async function loadCourses() {
-
     try {
+        const snapshot = await getDocs(query(
+            collection(db, "courses"),
+            where("instructorId", "==", instructor.uid)
+        ));
 
-        const coursesRef =
-            collection(
-                db,
-                "courses"
-            );
+        const courses = snapshot.docs.map(courseDoc => ({
+            id: courseDoc.id,
+            ...courseDoc.data()
+        }));
 
-
-        const q =
-            query(
-                coursesRef,
-                where(
-                    "instructorId",
-                    "==",
-                    instructor.uid
-                )
-            );
-
-
-        const snapshot =
-            await getDocs(q);
-
-
-        const courses =
-            snapshot.docs.map(course => ({
-
-                id: course.id,
-
-                ...course.data()
-
-            }));
-
-
-        const publishedCourses =
-            courses.filter(course =>
-
-                course.status === "published" ||
-                course.published === true
-
-            );
-
-
-        // CURRENT HTML ID
-
-        setText(
-            "statCourses",
-            publishedCourses.length
+        courses.sort((a, b) =>
+            getDateValue(b.updatedAt || b.createdAt) -
+            getDateValue(a.updatedAt || a.createdAt)
         );
 
-
-        renderCourses(
-            courses
-        );
-
-
+        setText("statCourses", courses.length);
+        renderCourses(courses);
     } catch (error) {
-
-        console.error(
-            "Failed to load courses:",
-            error
-        );
-
-
-        setText(
-            "statCourses",
-            "0"
-        );
-
+        console.error("Failed to load courses:", error);
+        setText("statCourses", "—");
+        renderCourses([]);
     }
-
 }
-
 
 // ============================================================
 // COURSE LIST
@@ -306,7 +258,7 @@ function renderCourses(courses) {
             () => {
 
                 window.location.href =
-                    "course-builder.html";
+                    "courses.html";
 
             }
         );
@@ -403,86 +355,101 @@ function renderCourses(courses) {
 // ============================================================
 
 async function loadStudents() {
-
     try {
+        const snapshot = await getDocs(query(
+            collection(db, "enrollments"),
+            where("instructorId", "==", instructor.uid)
+        ));
 
-        const enrollmentRef =
-            collection(
-                db,
-                "enrollments"
-            );
+        const enrollments = snapshot.docs.map(enrollmentDoc => ({
+            id: enrollmentDoc.id,
+            ...enrollmentDoc.data()
+        }));
 
-
-        const q =
-            query(
-                enrollmentRef,
-                where(
-                    "instructorId",
-                    "==",
-                    instructor.uid
-                )
-            );
-
-
-        const snapshot =
-            await getDocs(q);
-
-
-        const enrollments =
-            snapshot.docs.map(enrollment => ({
-
-                id: enrollment.id,
-
-                ...enrollment.data()
-
-            }));
-
-
-        const uniqueStudents =
-            new Set();
-
-
-        enrollments.forEach(enrollment => {
-
-            if (enrollment.studentId) {
-
-                uniqueStudents.add(
-                    enrollment.studentId
-                );
-
-            }
-
-        });
-
-
-        setText(
-            "statStudents",
-            uniqueStudents.size
+        const activeEnrollments = enrollments.filter(isActiveEnrollment);
+        const uniqueStudents = new Set(
+            activeEnrollments
+                .map(enrollment => enrollment.studentId || enrollment.userId)
+                .filter(Boolean)
         );
 
-
+        setText("statStudents", uniqueStudents.size);
+        updateEnrollmentMetrics(activeEnrollments);
         renderStudentActivity(
-            enrollments
+            [...activeEnrollments].sort((a, b) =>
+                getDateValue(b.lastAccessedAt || b.updatedAt || b.createdAt) -
+                getDateValue(a.lastAccessedAt || a.updatedAt || a.createdAt)
+            )
         );
-
-
     } catch (error) {
-
-        console.error(
-            "Failed to load students:",
-            error
-        );
-
-
-        setText(
-            "statStudents",
-            "0"
-        );
-
+        console.error("Failed to load students:", error);
+        setText("statStudents", "—");
+        updateEnrollmentMetrics([]);
+        renderStudentActivity([]);
     }
-
 }
 
+function isActiveEnrollment(enrollment) {
+    const status = String(enrollment.status || "").trim().toLowerCase();
+    const paymentStatus = String(enrollment.paymentStatus || "").trim().toLowerCase();
+    const activeStatuses = ["active", "approved", "completed"];
+
+    if (["revoked", "suspended", "cancelled", "canceled", "rejected", "pending"].includes(status)) {
+        return false;
+    }
+    if (enrollment.institutionId && activeStatuses.includes(status)) return true;
+    if (activeStatuses.includes(status) && ["paid", "free"].includes(paymentStatus)) return true;
+    return status === "paid" && (!paymentStatus || paymentStatus === "paid");
+}
+
+function updateEnrollmentMetrics(enrollments) {
+    const total = enrollments.length;
+    const progressValues = enrollments.map(item => {
+        const value = Number(item.progress);
+        return Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;
+    });
+    const averageProgress = total
+        ? Math.round(progressValues.reduce((sum, value) => sum + value, 0) / total)
+        : 0;
+
+    const completed = enrollments.filter(item =>
+        item.completed === true ||
+        String(item.status || "").toLowerCase() === "completed" ||
+        Number(item.progress) >= 100
+    ).length;
+
+    const cutoff = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const recentlyActive = enrollments.filter(item =>
+        getDateValue(item.lastAccessedAt) >= cutoff
+    ).length;
+
+    const completionRate = total ? Math.round((completed / total) * 100) : 0;
+    const engagementRate = total ? Math.round((recentlyActive / total) * 100) : 0;
+
+    setText("statProgress", `${averageProgress}%`);
+    setText("statCompletions", completed);
+    setText("completionPercent", `${completionRate}%`);
+    setText("engagementPercent", `${engagementRate}%`);
+    setProgressBar("completionBar", completionRate);
+    setProgressBar("engagementBar", engagementRate);
+}
+
+function setProgressBar(id, value) {
+    const bar = $(id);
+    if (!bar) return;
+    const percent = Math.min(100, Math.max(0, Number(value) || 0));
+    bar.style.width = `${percent}%`;
+    bar.setAttribute("aria-valuenow", String(percent));
+}
+
+function getDateValue(value) {
+    if (!value) return 0;
+    let date = null;
+    if (typeof value.toDate === "function") date = value.toDate();
+    else if (value instanceof Date) date = value;
+    else if (typeof value === "string" || typeof value === "number") date = new Date(value);
+    return date && Number.isFinite(date.getTime()) ? date.getTime() : 0;
+}
 
 // ============================================================
 // STUDENT ACTIVITY
@@ -578,149 +545,125 @@ function renderStudentActivity(
 // ============================================================
 
 async function loadAssignments() {
-
+    const container = $("upcomingTasks");
     try {
+        const snapshot = await getDocs(query(
+            collection(db, "assignments"),
+            where("instructorId", "==", instructor.uid)
+        ));
 
-        const assignmentRef =
-            collection(
-                db,
-                "assignments"
-            );
+        const now = Date.now();
+        const upcoming = snapshot.docs
+            .map(item => ({ id: item.id, ...item.data() }))
+            .filter(item => item.status === "published" || item.published === true)
+            .map(item => ({ ...item, dueAt: parseDueDate(item.dueDate) }))
+            .filter(item => item.dueAt && item.dueAt.getTime() >= now)
+            .sort((a, b) => a.dueAt - b.dueAt)
+            .slice(0, 5);
 
-
-        const q =
-            query(
-                assignmentRef,
-                where(
-                    "instructorId",
-                    "==",
-                    instructor.uid
-                )
-            );
-
-
-        const snapshot =
-            await getDocs(q);
-
-
-        let completions = 0;
-
-
-        snapshot.forEach(doc => {
-
-            const data =
-                doc.data();
-
-
-            if (
-                data.status === "completed" ||
-                data.status === "graded" ||
-                data.completed === true
-            ) {
-
-                completions++;
-
-            }
-
-        });
-
-
-        setText(
-            "statCompletions",
-            completions
-        );
-
-
+        renderUpcomingTasks(upcoming);
     } catch (error) {
-
-        console.error(
-            "Failed to load completions:",
-            error
-        );
-
-
-        setText(
-            "statCompletions",
-            "0"
-        );
-
+        console.error("Failed to load upcoming tasks:", error);
+        if (container) {
+            container.innerHTML = '<div class="empty-state small"><p>Upcoming tasks are temporarily unavailable.</p></div>';
+        }
     }
-
 }
 
+function parseDueDate(value) {
+    if (!value) return null;
+    let date = null;
+    if (typeof value.toDate === "function") date = value.toDate();
+    else if (value instanceof Date) date = new Date(value.getTime());
+    else if (typeof value === "string") {
+        date = /^\d{4}-\d{2}-\d{2}$/.test(value)
+            ? new Date(`${value}T23:59:59`)
+            : new Date(value);
+    } else if (typeof value === "number") {
+        date = new Date(value);
+    }
+    return date && Number.isFinite(date.getTime()) ? date : null;
+}
+
+function renderUpcomingTasks(tasks) {
+    const container = $("upcomingTasks");
+    if (!container) return;
+
+    if (!tasks.length) {
+        container.innerHTML = '<div class="empty-state small"><div class="empty-icon"><i data-lucide="check-circle"></i></div><p>No upcoming assignment deadlines.</p></div>';
+        refreshIcons();
+        return;
+    }
+
+    container.innerHTML = tasks.map(task => {
+        const title = escapeHTML(task.title || "Untitled assignment");
+        const course = escapeHTML(task.courseName || "Course assignment");
+        const due = task.dueAt.toLocaleDateString("en-KE", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        });
+        return `
+            <a class="task-item" href="assignments.html">
+                <div class="activity-icon"><i data-lucide="clipboard-list"></i></div>
+                <div>
+                    <h4>${title}</h4>
+                    <p>${course} · Due ${escapeHTML(due)}</p>
+                </div>
+            </a>
+        `;
+    }).join("");
+
+    refreshIcons();
+}
+
+async function loadSubmissionMetrics() {
+    try {
+        const snapshot = await getDocs(query(
+            collection(db, "submissions"),
+            where("instructorId", "==", instructor.uid)
+        ));
+        const submissions = snapshot.docs.map(item => item.data());
+        const graded = submissions.filter(item =>
+            ["graded", "reviewed"].includes(String(item.status || "").toLowerCase()) ||
+            item.graded === true ||
+            item.score !== undefined
+        ).length;
+        const percent = submissions.length
+            ? Math.round((graded / submissions.length) * 100)
+            : 0;
+
+        setText("gradingPercent", submissions.length ? `${percent}%` : "—");
+        setProgressBar("gradingBar", percent);
+    } catch (error) {
+        console.warn("Assignment grading metric unavailable:", error);
+        setText("gradingPercent", "—");
+        setProgressBar("gradingBar", 0);
+    }
+}
 
 // ============================================================
 // EARNINGS
 // ============================================================
 
 async function loadEarnings() {
-
     try {
+        const snapshot = await getDocs(query(
+            collection(db, "instructorEarnings"),
+            where("instructorId", "==", instructor.uid)
+        ));
 
-        const earningsRef =
-            collection(
-                db,
-                "instructorEarnings"
-            );
+        const total = snapshot.docs.reduce((sum, item) => {
+            const amount = Number(item.data().netAmount || 0);
+            return sum + (Number.isFinite(amount) ? amount : 0);
+        }, 0);
 
-
-        const q =
-            query(
-                earningsRef,
-                where(
-                    "instructorId",
-                    "==",
-                    instructor.uid
-                )
-            );
-
-
-        const snapshot =
-            await getDocs(q);
-
-
-        let total = 0;
-
-
-        snapshot.forEach(doc => {
-
-            const data =
-                doc.data();
-
-
-            total += Number(
-                data.amount ||
-                data.total ||
-                data.earnings ||
-                0
-            );
-
-        });
-
-
-        setText(
-            "statEarnings",
-            formatCurrency(total)
-        );
-
-
+        setText("statEarnings", formatCurrency(total));
     } catch (error) {
-
-        console.error(
-            "Failed to load earnings:",
-            error
-        );
-
-
-        setText(
-            "statEarnings",
-            "KSh 0"
-        );
-
+        console.error("Failed to load earnings:", error);
+        setText("statEarnings", "—");
     }
-
 }
-
 
 // ============================================================
 // RECENT ACTIVITY
@@ -858,7 +801,7 @@ function setupDashboardActions() {
         () => {
 
             window.location.href =
-                "course-builder.html";
+                "courses.html";
 
         }
     );
@@ -902,11 +845,14 @@ function setupDashboardActions() {
 
                     const routes = {
 
+                        course:
+                            "courses.html",
+
                         lesson:
-                            "lessons.html",
+                            "courses.html",
 
                         assignment:
-                            "assignments.html",
+                            "create-assignment.html",
 
                         quiz:
                             "quizzes.html",
