@@ -851,3 +851,424 @@
     }
 
 }
+
+/* ============================================================
+   INSTRUCTOR DASHBOARD — SIGNATURE VISUAL REFINEMENT
+   Scoped presentation only. Dashboard data and interactions remain
+   in dashboard.js; this section does not change behavior.
+============================================================ */
+
+.dashboard-page {
+    --dash-night: #080522;
+    --dash-navy: #100b3e;
+    --dash-violet: #762cff;
+    --dash-violet-bright: #a12bff;
+    --dash-cyan: #20d8f2;
+    --dash-gold: #ffc857;
+    --dash-ink: #171338;
+    --dash-muted: #77738f;
+    --dash-line: #e7e0f7;
+    --dash-lavender: #f6f3ff;
+
+    color: var(--dash-ink);
+    background:
+        radial-gradient(ellipse at 92% 2%, rgba(154, 91, 255, .10), transparent 32%),
+        radial-gradient(ellipse at 2% 42%, rgba(32, 216, 242, .06), transparent 28%);
+}
+
+.dashboard-page .dashboard-hero {
+    isolation: isolate;
+    min-height: 218px;
+    padding: clamp(24px, 3vw, 38px);
+    border: 1px solid rgba(183, 139, 255, .55);
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 88% 18%, rgba(32, 216, 242, .22), transparent 26%),
+        radial-gradient(circle at 72% 110%, rgba(161, 43, 255, .34), transparent 42%),
+        linear-gradient(118deg, #080522 0%, #15104b 54%, #28116c 100%);
+    box-shadow: 0 18px 44px rgba(24, 8, 76, .19), 0 0 26px rgba(134, 53, 255, .12);
+}
+
+.dashboard-page .dashboard-hero::after {
+    width: 290px;
+    height: 290px;
+    right: -95px;
+    top: -135px;
+    border: 1px solid rgba(32, 216, 242, .16);
+    background: radial-gradient(circle, rgba(32, 216, 242, .13), rgba(118, 44, 255, .08) 48%, transparent 70%);
+    pointer-events: none;
+}
+
+.dashboard-page .dashboard-hero::before {
+    width: 180px;
+    height: 180px;
+    right: 28%;
+    bottom: -135px;
+    border: 1px solid rgba(255, 200, 87, .16);
+    background: rgba(255, 200, 87, .055);
+    pointer-events: none;
+}
+
+.dashboard-page .dashboard-eyebrow {
+    color: #7deaff;
+    letter-spacing: .18em;
+}
+
+.dashboard-page .dashboard-hero h1 {
+    color: #fff;
+    font-size: clamp(25px, 3vw, 34px);
+    letter-spacing: -.045em;
+}
+
+.dashboard-page .dashboard-hero h1 span {
+    color: #d2b3ff;
+}
+
+.dashboard-page .dashboard-hero p {
+    max-width: 560px;
+    color: rgba(245, 242, 255, .76);
+    font-size: 13px;
+}
+
+.dashboard-page .dashboard-btn {
+    min-height: 46px;
+    border-radius: 12px;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.dashboard-page .dashboard-btn.primary,
+.dashboard-page .empty-action {
+    color: #fff;
+    background: linear-gradient(105deg, #7024f5 0%, #a12bff 58%, #23cbe8 150%);
+    border: 1px solid rgba(255, 255, 255, .18);
+    box-shadow: 0 8px 22px rgba(117, 39, 239, .24);
+}
+
+.dashboard-page .dashboard-btn.primary:hover,
+.dashboard-page .empty-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(117, 39, 239, .32);
+}
+
+.dashboard-page .dashboard-btn.secondary {
+    color: #f8f5ff;
+    background: rgba(255, 255, 255, .09);
+    border: 1px solid rgba(218, 198, 255, .25);
+    backdrop-filter: blur(10px);
+}
+
+.dashboard-page .dashboard-btn.secondary:hover {
+    background: rgba(255, 255, 255, .15);
+}
+
+.dashboard-page .dashboard-stat {
+    min-width: 0;
+    min-height: 112px;
+    padding: 18px;
+    border: 1px solid var(--dash-line);
+    border-radius: 18px;
+    background: linear-gradient(145deg, #fff 0%, #faf8ff 100%);
+    box-shadow: 0 12px 30px rgba(31, 15, 83, .075);
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+
+.dashboard-page .dashboard-stat:hover {
+    transform: translateY(-4px);
+    border-color: rgba(133, 59, 255, .38);
+    box-shadow: 0 16px 34px rgba(76, 37, 150, .13);
+}
+
+.dashboard-page .stat-icon {
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(130, 60, 255, .10);
+    border-radius: 14px;
+}
+
+.dashboard-page .stat-icon.blue,
+.dashboard-page .stat-icon.purple {
+    color: #823cff;
+    background: linear-gradient(145deg, #f0e8ff, #e4faff);
+}
+
+.dashboard-page .stat-icon.gold {
+    color: #a96b00;
+    background: linear-gradient(145deg, #fff5d9, #fff0e8);
+}
+
+.dashboard-page .stat-icon.green {
+    color: #087f75;
+    background: linear-gradient(145deg, #e3fbf5, #e4faff);
+}
+
+.dashboard-page .stat-icon.navy {
+    color: #fff;
+    background: linear-gradient(145deg, #21145f, #7024c8);
+}
+
+.dashboard-page .stat-info span {
+    color: var(--dash-muted);
+    font-size: 10px;
+    letter-spacing: .015em;
+}
+
+.dashboard-page .stat-info strong {
+    color: var(--dash-ink);
+    font-size: clamp(19px, 1.8vw, 23px);
+    letter-spacing: -.035em;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-page .dashboard-card {
+    padding: 23px;
+    border: 1px solid var(--dash-line);
+    border-radius: 20px;
+    background: linear-gradient(145deg, #fff 0%, #fbfaff 100%);
+    box-shadow: 0 13px 34px rgba(31, 15, 83, .075);
+}
+
+.dashboard-page .card-header {
+    padding-bottom: 15px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #f0ebfa;
+}
+
+.dashboard-page .card-header span {
+    color: #873cff;
+    font-size: 9px;
+    letter-spacing: .16em;
+}
+
+.dashboard-page .card-header h2 {
+    color: var(--dash-ink);
+    font-size: 17px;
+    letter-spacing: -.025em;
+}
+
+.dashboard-page .card-link {
+    color: #7834e8;
+    transition: color .18s ease, gap .18s ease;
+}
+
+.dashboard-page .card-link:hover {
+    color: #1aafc8;
+}
+
+.dashboard-page .course-item {
+    border-color: #eee9f8;
+    background: #fff;
+}
+
+.dashboard-page .course-item:hover {
+    border-color: rgba(133, 59, 255, .32);
+    background: #fbf9ff;
+}
+
+.dashboard-page .course-thumbnail,
+.dashboard-page .empty-icon,
+.dashboard-page .activity-icon {
+    color: #823cff;
+    border: 1px solid #e7dcff;
+    background: linear-gradient(145deg, #f0e8ff, #e4faff);
+}
+
+.dashboard-page .course-info h3,
+.dashboard-page .quick-action strong,
+.dashboard-page .activity-item h4,
+.dashboard-page .task-item h4,
+.dashboard-page .empty-state h3 {
+    color: var(--dash-ink);
+}
+
+.dashboard-page .course-info p,
+.dashboard-page .quick-action span,
+.dashboard-page .activity-item p,
+.dashboard-page .task-item p,
+.dashboard-page .empty-state p {
+    color: var(--dash-muted);
+}
+
+.dashboard-page .course-status {
+    color: #087f75;
+    background: #e6faf4;
+}
+
+.dashboard-page .quick-action {
+    min-height: 62px;
+    border-color: #eee9f8;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.dashboard-page .quick-action:hover {
+    border-color: rgba(133, 59, 255, .30);
+    background: #fbf9ff;
+    transform: translateY(-2px);
+}
+
+.dashboard-page .quick-icon.blue,
+.dashboard-page .quick-icon.purple {
+    color: #823cff;
+    background: linear-gradient(145deg, #f0e8ff, #e4faff);
+}
+
+.dashboard-page .quick-icon.gold {
+    color: #a96b00;
+    background: #fff5d9;
+}
+
+.dashboard-page .quick-icon.green {
+    color: #087f75;
+    background: #e3fbf5;
+}
+
+.dashboard-page .quick-icon.red {
+    color: #a13f78;
+    background: #fff0f7;
+}
+
+.dashboard-page .empty-state {
+    border-color: #ded5f0;
+    background: linear-gradient(145deg, #fdfcff, #f8f5ff);
+}
+
+.dashboard-page .empty-action {
+    border-radius: 10px;
+}
+
+.dashboard-page .activity-item,
+.dashboard-page .task-item {
+    border: 1px solid #eee9f8;
+    background: #faf8ff;
+}
+
+.dashboard-page .task-item {
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.dashboard-page .task-item:hover {
+    border-color: rgba(133, 59, 255, .30);
+    background: #f5f0ff;
+    transform: translateX(2px);
+}
+
+.dashboard-page .performance-card {
+    background:
+        radial-gradient(ellipse at 100% 0%, rgba(32, 216, 242, .07), transparent 35%),
+        linear-gradient(145deg, #fff 0%, #fbfaff 100%);
+}
+
+.dashboard-page .performance-item {
+    padding: 19px;
+    border: 1px solid #eee8fa;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #faf8ff, #f4faff);
+}
+
+.dashboard-page .performance-item > span {
+    color: var(--dash-muted);
+}
+
+.dashboard-page .performance-item strong {
+    color: var(--dash-ink);
+    font-size: 24px;
+}
+
+.dashboard-page .progress-track {
+    height: 8px;
+    background: #e8e0fa;
+}
+
+.dashboard-page .progress-fill {
+    background: linear-gradient(90deg, #772cff, #bd42ff 58%, #22d6ee);
+    box-shadow: 0 0 12px rgba(139, 55, 255, .18);
+}
+
+@media (max-width: 950px) {
+    .dashboard-page .dashboard-grid,
+    .dashboard-page .lower-grid {
+        gap: 16px;
+    }
+
+    .dashboard-page .performance-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .dashboard-page .dashboard-hero {
+        min-height: 0;
+        gap: 20px;
+        padding: 24px 20px;
+        border-radius: 19px;
+    }
+
+    .dashboard-page .dashboard-hero p {
+        font-size: 12px;
+    }
+
+    .dashboard-page .stats-grid {
+        gap: 10px;
+    }
+
+    .dashboard-page .dashboard-stat {
+        min-height: 88px;
+        padding: 13px;
+        gap: 10px;
+        border-radius: 15px;
+    }
+
+    .dashboard-page .stat-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+    }
+
+    .dashboard-page .dashboard-card {
+        padding: 17px;
+        border-radius: 17px;
+    }
+
+    .dashboard-page .performance-grid {
+        grid-template-columns: 1fr;
+        gap: 11px;
+    }
+}
+
+@media (max-width: 430px) {
+    .dashboard-page .dashboard-hero {
+        padding: 21px 17px;
+    }
+
+    .dashboard-page .dashboard-hero h1 {
+        font-size: 23px;
+    }
+
+    .dashboard-page .card-header {
+        gap: 9px;
+    }
+
+    .dashboard-page .card-header h2 {
+        font-size: 16px;
+    }
+
+    .dashboard-page .course-item {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .dashboard-page .course-status {
+        margin-left: 67px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-page .dashboard-stat,
+    .dashboard-page .quick-action,
+    .dashboard-page .task-item,
+    .dashboard-page .dashboard-btn {
+        transition: none;
+    }
+}
