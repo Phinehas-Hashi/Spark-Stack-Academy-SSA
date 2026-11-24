@@ -1,8 +1,36 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#17152f"><title>Critical Reports | Founder OS</title><link rel="stylesheet" href="../css/design-tokens.css?v=20261123-foundation1">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#17152f">
+<title>Critical Reports | Founder OS</title>
+<link rel="stylesheet" href="../css/design-tokens.css?v=20261123-foundation1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="reports.css?v=20261123-page1">
+<link rel="stylesheet" href="components/sidebar.css?v=20261123-shell1">
+<link rel="stylesheet" href="components/topbar.css?v=20261123-shell1">
 <link rel="stylesheet" href="founder-unified.css?v=20261123-tokens1">
-</head><body class="founder-portal-page"><main class="page"><section class="card"><small>FOUNDER INTELLIGENCE</small><h1>Critical & System Reports</h1><p>Only critical safety/security reports and system-level reports appear here.</p><div id="reports">Loading…</div></section></main><script type="module" src="reports.js"></script></body></html>
+</head>
+<body class="founder-portal-page">
+<div class="founder-app">
+  <aside id="sidebarContainer" class="founder-sidebar"></aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <main class="founder-main">
+    <header id="topbarContainer" class="founder-topbar"></header>
+    <section class="founder-page page">
+      <section class="card">
+        <small class="eyebrow">FOUNDER INTELLIGENCE</small>
+        <h1>Critical &amp; System Reports</h1>
+        <p class="intro">Only critical safety/security reports and system-level reports appear here.</p>
+        <div id="reports" class="reports-list" aria-live="polite">Loading…</div>
+      </section>
+    </section>
+  </main>
+</div>
+<script type="module" src="js/founder-app.js?v=20261124-shell2"></script>
+<script type="module" src="reports.js"></script>
+</body>
+</html>
