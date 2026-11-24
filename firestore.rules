@@ -1292,6 +1292,13 @@ service cloud.firestore {
           && request.resource.data.score is number
           && request.resource.data.grade is number
           && request.resource.data.maxScore is number
+          && request.resource.data.maxScore == get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.get('maxScore', 100)
+          && request.resource.data.score >= 0
+          && request.resource.data.score <= request.resource.data.maxScore
+          && request.resource.data.grade == request.resource.data.score
+          && request.resource.data.feedback is string
+          && request.resource.data.feedback.size() <= 5000
+          && request.resource.data.instructorFeedback == request.resource.data.feedback
         );
 
       allow delete:
