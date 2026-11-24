@@ -716,7 +716,7 @@ function getEligibleBadges(student) {
 // PROCESS BADGES
 // ============================================================
 
-async async function processBadges(
+async function processBadges(
     userId,
     student
 ) {
