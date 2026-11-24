@@ -172,11 +172,12 @@ exports.requestInstructorWithdrawal = onCall(async request => {
 exports.getInstructorEarningsSettings = onCall(async request => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Sign in to load instructor earnings settings.");
-  const [userSnap, controlsSnap, settingsSnap, monetizationSnap] = await Promise.all([
+  const [userSnap, controlsSnap, settingsSnap, monetizationSnap, financeSecuritySnap] = await Promise.all([
     db.doc("users/" + uid).get(),
     platformRef.get(),
     db.doc("platformSettings/earnings").get(),
-    db.doc("settings/monetization").get()
+    db.doc("settings/monetization").get(),
+    db.doc("finance/security").get()
   ]);
   if (!userSnap.exists) throw new HttpsError("permission-denied", "Instructor profile not found.");
   const user = userSnap.data() || {};
@@ -199,6 +200,7 @@ exports.getInstructorEarningsSettings = onCall(async request => {
   const monetization = monetizationSnap.exists ? monetizationSnap.data() || {} : {};
   return {
     minimumWithdrawal: Number(monetization.minimumWithdrawal ?? settings.minimumWithdrawal ?? 1000),
+    withdrawalLimit: Number((financeSecuritySnap.exists ? financeSecuritySnap.data()?.withdrawalLimit : 50000) ?? 50000),
     withdrawalFeePercent: Number(monetization.withdrawalFeePercent ?? settings.withdrawalFeePercent ?? 0),
     platformTaxPercent: Number(settings.platformTaxPercent ?? 0),
     premiumMonthlyPrice: Number(settings.premiumMonthlyPrice ?? monetization.premiumMonthly ?? 999),
