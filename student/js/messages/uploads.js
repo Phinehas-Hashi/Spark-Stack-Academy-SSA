@@ -8,7 +8,6 @@
 import {
 
 auth,
-db,
 storage
 
 } from "../../js/firebase.js";
@@ -228,7 +227,7 @@ export async function uploadFile(){
 
 if(
 !selectedFile ||
-!currentUser ||
+!auth.currentUser ||
 !chatId
 ){
 
