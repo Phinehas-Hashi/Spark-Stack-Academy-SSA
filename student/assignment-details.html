@@ -1,230 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#351078">
+    <meta name="description" content="Review assignment instructions, resources, submission status and feedback.">
+    <title>Assignment Details | Spark Stack Academy</title>
 
-<meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/student-core.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/assignment-details.css">
+    <link rel="stylesheet" href="css/responsive.css">
 
-<title>
-Assignment Details | Spark Stack Academy
-</title>
-
-<link rel="stylesheet"
-href="css/student-core.css">
-
-<link rel="stylesheet"
-href="css/components.css">
-
-<link rel="stylesheet"
-href="css/assignment-details.css">
-
-<link rel="stylesheet"
-href="css/responsive.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-rel="stylesheet">
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
+    <script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
-
 <body>
-
-<div class="student-layout">
-
-<!-- SIDEBAR -->
-
-<aside
-id="sidebarContainer"
-class="sidebar-container">
-
-</aside>
-
-<div
-id="sidebarOverlay"
-class="sidebar-overlay">
-
-</div>
-
-<main class="student-main">
-
-<!-- TOPBAR -->
-
-<div
-id="topbarContainer"
-class="topbar-container">
-
-</div>
-
-<section class="dashboard-content assignment-details-page">
-
-<!-- HERO -->
-
-<div class="assignment-hero">
-
-<div>
-
-<span class="page-badge">
-
-<i data-lucide="clipboard-check"></i>
-
-Assignment
-
-</span>
-
-<h1 id="assignmentTitle">
-
-Assignment Title
-
-</h1>
-
-<p id="assignmentCourse">
-
-Course Name
-
-</p>
-
-</div>
-
-<div class="assignment-status">
-
-<span
-id="assignmentStatus"
-class="status pending">
-
-Pending
-
-</span>
-
-</div>
-
-</div>
-
-<!-- MAIN GRID -->
-
-<div class="assignment-layout">
-
-<!-- LEFT -->
-
-<div>
-
-<div class="details-card">
-
-<h2>
-
-Instructions
-
-</h2>
-
-<p id="assignmentInstructions">
-
-Assignment instructions will appear here.
-
-</p>
-
-</div>
-
-<div class="details-card">
-
-<h2>
-
-Resources
-
-</h2>
-
-<div id="assignmentResources">
-
-<p>
-
-No resources attached.
-
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- RIGHT -->
-
-<div>
-
-<div class="details-card">
-
-<h2>
-
-Submission
-
-</h2>
-
-<input
-type="file"
-id="submissionFile"
-accept=".pdf,.doc,.docx,.zip">
-
-<textarea
-id="submissionNotes"
-placeholder="Write a short note for your instructor..."
-rows="6">
-
-</textarea>
-
-<button
-id="submitAssignmentBtn"
-class="primary-btn">
-
-Submit Assignment
-
-</button>
-
-</div>
-
-<div class="details-card">
-
-<h2>
-
-Results
-
-</h2>
-
-<div id="gradeBox">
-
-<p>
-
-Not graded yet.
-
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-</main>
-
-</div>
-
-<script type="module"
-src="js/student-app.js"></script>
-
-<script type="module"
-src="js/assignment-detail.js?v=20261120-smart-connectivity2"></script>
-
-<script>
-
-lucide.createIcons();
-
-</script>
-
+    <div class="student-layout">
+        <aside id="sidebarContainer" class="sidebar-container" aria-label="Student navigation"></aside>
+        <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+        <main class="student-main">
+            <div id="topbarContainer" class="topbar-container"></div>
+
+            <section class="dashboard-content assignment-details-page" aria-labelledby="assignmentTitle">
+                <a class="assignment-back-link" href="assignments.html">
+                    <i data-lucide="arrow-left" aria-hidden="true"></i>
+                    Back to assignments
+                </a>
+
+                <header class="assignment-hero">
+                    <div class="assignment-hero-copy">
+                        <div class="assignment-eyebrow">
+                            <span class="assignment-eyebrow-icon"><i data-lucide="clipboard-check" aria-hidden="true"></i></span>
+                            <span>STUDENT WORKSPACE</span>
+                            <span class="assignment-eyebrow-line"></span>
+                            <span>ASSIGNMENT DETAILS</span>
+                        </div>
+                        <span class="assignment-course-label" id="assignmentCourse">Course details loading</span>
+                        <h1 id="assignmentTitle">Loading assignment…</h1>
+                        <p>Review the task carefully, prepare your response and keep track of your submission.</p>
+                    </div>
+
+                    <div class="assignment-hero-status">
+                        <span class="assignment-status-caption">YOUR STATUS</span>
+                        <span id="assignmentStatus" class="status status-pending">Pending</span>
+                    </div>
+                </header>
+
+                <div class="assignment-detail-grid">
+                    <div class="assignment-detail-main">
+                        <article class="details-card instructions-card">
+                            <div class="details-card-heading">
+                                <span class="details-card-icon"><i data-lucide="book-open-check" aria-hidden="true"></i></span>
+                                <div>
+                                    <span class="assignment-section-kicker">READ FIRST</span>
+                                    <h2>Instructions</h2>
+                                </div>
+                            </div>
+                            <div id="assignmentInstructions" class="assignment-instructions" aria-live="polite">
+                                <p>Assignment instructions will appear here.</p>
+                            </div>
+                        </article>
+
+                        <article class="details-card resources-card">
+                            <div class="details-card-heading">
+                                <span class="details-card-icon"><i data-lucide="folder-open" aria-hidden="true"></i></span>
+                                <div>
+                                    <span class="assignment-section-kicker">HELPFUL MATERIAL</span>
+                                    <h2>Resources</h2>
+                                </div>
+                            </div>
+                            <div id="assignmentResources" class="assignment-resources">
+                                <p class="assignment-muted">Checking for attached resources…</p>
+                            </div>
+                        </article>
+
+                        <article class="details-card results-card">
+                            <div class="details-card-heading">
+                                <span class="details-card-icon"><i data-lucide="graduation-cap" aria-hidden="true"></i></span>
+                                <div>
+                                    <span class="assignment-section-kicker">INSTRUCTOR REVIEW</span>
+                                    <h2>Results & feedback</h2>
+                                </div>
+                            </div>
+                            <div id="gradeBox" class="grade-box" aria-live="polite">
+                                <div class="grade-empty-icon"><i data-lucide="hourglass" aria-hidden="true"></i></div>
+                                <h3>Not graded yet</h3>
+                                <p>Your instructor's grade and feedback will appear here after review.</p>
+                            </div>
+                        </article>
+                    </div>
+
+                    <aside class="assignment-detail-side" aria-label="Submission panel">
+                        <article class="details-card submission-card">
+                            <div class="details-card-heading">
+                                <span class="details-card-icon"><i data-lucide="send" aria-hidden="true"></i></span>
+                                <div>
+                                    <span class="assignment-section-kicker">YOUR RESPONSE</span>
+                                    <h2>Submission</h2>
+                                </div>
+                            </div>
+
+                            <div class="submission-guidance">
+                                <i data-lucide="info" aria-hidden="true"></i>
+                                <p>Submit your written response below. File attachments are not available yet.</p>
+                            </div>
+
+                            <label class="submission-label" for="submissionNotes">Your written response</label>
+                            <textarea
+                                id="submissionNotes"
+                                placeholder="Write your answer here. Include the key points requested in the instructions…"
+                                rows="10"
+                                maxlength="20000"
+                                spellcheck="true"
+                            ></textarea>
+                            <div class="submission-editor-footer">
+                                <span>Written response</span>
+                                <span id="submissionCharCount">0 / 20,000</span>
+                            </div>
+
+                            <input type="file" id="submissionFile" accept=".pdf,.doc,.docx,.zip" hidden disabled aria-hidden="true">
+
+                            <button id="submitAssignmentBtn" class="assignment-submit-button" type="button" disabled>
+                                <i data-lucide="send" aria-hidden="true"></i>
+                                Submit assignment
+                            </button>
+                            <p class="submission-footnote">Make sure your response is complete before submitting. You can return to this page to review your saved submission.</p>
+                        </article>
+
+                        <article class="submission-checklist">
+                            <span class="checklist-icon"><i data-lucide="shield-check" aria-hidden="true"></i></span>
+                            <div>
+                                <h3>Submission checklist</h3>
+                                <p>Read the instructions, check your response and submit while connected to the internet.</p>
+                            </div>
+                        </article>
+                    </aside>
+                </div>
+
+                <div id="assignmentPageStatus" class="assignment-page-status" role="status" aria-live="polite"></div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="js/student-app.js"></script>
+    <script type="module" src="js/assignment-detail.js?v=20261124-assignment-details"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.lucide) window.lucide.createIcons();
+        });
+    </script>
 </body>
-
 </html>
