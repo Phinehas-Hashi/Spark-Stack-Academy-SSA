@@ -840,3 +840,55 @@
     }
 
 }
+
+/* ============================================================
+   OBSIDIAN LUXURY — INSTRUCTOR PRO
+============================================================ */
+.pro-page { color: #f4f1ff; }
+.pro-hero h1 { color: #f4f1ff; }
+.pro-hero h1 span { color: #e0c17c; }
+.pro-hero p { color: #aaa6bd; }
+.pro-badge { border: 1px solid rgba(224,193,124,.2); background: rgba(224,193,124,.10); color: #e0c17c; }
+.current-plan-card,
+.pricing-card,
+.benefit-card {
+    border-color: rgba(190,183,225,.15);
+    background: linear-gradient(145deg,#211f2d,#191824);
+    box-shadow: 0 14px 36px rgba(0,0,0,.18);
+}
+.plan-status strong,
+.pricing-card .price strong,
+.benefit-card h3 { color: #f4f1ff; }
+.plan-status span,
+.pricing-description,
+.benefit-card p { color: #aaa6bd; }
+.plan-icon { background: rgba(167,139,250,.13); color: #c4b5fd; }
+.plan-status-badge { background: rgba(190,183,225,.10); color: #aaa6bd; }
+.plan-status-badge.active { background: rgba(103,217,232,.11); color: #83e2ed; }
+.pricing-card::before { background: linear-gradient(90deg,#7654c8,#67d9e8,#e0c17c); }
+.pricing-label { color: #c4b5fd; }
+.pricing-icon { background: rgba(224,193,124,.12); color: #e0c17c; }
+.price span { color: #aaa6bd; }
+.price small { color: #8f8aa3; }
+.pro-feature { color: #d5d1e2; }
+.pro-feature svg { background: rgba(103,217,232,.11); color: #83e2ed; }
+.pro-upgrade-btn { background: linear-gradient(110deg,#7654c8,#4c78a8); }
+.secure-note { color: #aaa6bd; }
+.section-heading h2 { color: #f4f1ff; }
+.benefit-icon { background: rgba(167,139,250,.13); color: #c4b5fd; }
+.pro-payment-notice {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border: 1px solid rgba(224,193,124,.2);
+    border-radius: 12px;
+    background: rgba(224,193,124,.08);
+    color: #e0c17c;
+    font-size: 12px;
+    line-height: 1.6;
+}
+.pro-upgrade-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+@media (max-width: 760px) {
+    .pro-page { padding: 24px 16px 50px; }
+    .pricing-card { padding: 24px 18px; }
+    .current-plan-card { align-items: flex-start; flex-direction: column; }
+}
