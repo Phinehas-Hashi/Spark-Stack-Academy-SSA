@@ -21,7 +21,8 @@ async function load(user){
     if(!assignmentSnap.exists()||!submissionSnap.exists()){renderError("This submission could not be found.");return;}
     const assignment={id:assignmentSnap.id,...assignmentSnap.data()};
     const submission={id:submissionSnap.id,...submissionSnap.data()};
-    if(assignment.instructorId && assignment.instructorId!==user.uid){renderError("You do not have access to this submission.");return;}
+    if(assignment.instructorId!==user.uid){renderError("You do not have access to this assignment.");return;}
+    if(submission.assignmentId!==assignmentId || !submission.studentId){renderError("This submission does not belong to the selected assignment.");return;}
     render(assignment,submission);
   }catch(error){console.error(error);renderError("We couldn't load this submission. Please try again.")}
 }
@@ -30,9 +31,9 @@ function render(assignment,submission){
   const studentName=submission.studentName||submission.fullName||submission.name||"Student";
   const work=submission.content||submission.answer||submission.text||submission.body||submission.submission||submission.description||"No written response was provided.";
   const max=Number(assignment.maxScore??submission.maxScore??100);
-  const score=submission.score??"";
+  const score=submission.score??submission.grade??"";
   const feedback=submission.feedback||submission.instructorFeedback||"";
-  const graded=["graded","reviewed"].includes(String(submission.status||"").toLowerCase())||submission.score!=null;
+  const graded=["graded","reviewed","returned"].includes(String(submission.status||"").toLowerCase())||submission.score!=null||submission.grade!=null;
   $("#submissionState").innerHTML=`
     <div class="notice">Marks and feedback are saved directly to this submission. Students will see the updated result when they return to their assignment.</div>
     <div class="review-grid">
@@ -62,6 +63,7 @@ async function saveGrade(submission,max){
   try{
     await updateDoc(doc(db,"submissions",submission.id),{
       score,
+      grade:score,
       maxScore:max,
       feedback,
       instructorFeedback:feedback,
