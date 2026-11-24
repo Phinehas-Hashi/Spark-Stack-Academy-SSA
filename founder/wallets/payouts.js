@@ -94,7 +94,7 @@ function render() {
     return `<tr>
       <td><div class="person-cell"><span class="person-avatar">${esc(name.slice(0,1).toUpperCase())}</span><div><strong>${esc(name)}</strong><small>${esc(x.instructorId || "—")}</small></div></div></td>
       <td><strong>${money(x.amount)}</strong><small class="sub-value">Net ${money(x.netAmount ?? Math.max(Number(x.amount || 0) - Number(x.withdrawalFee || 0) - Number(x.platformTax || 0), 0))}</small></td>
-      <td><strong>${esc(x.method || "M-PESA")}</strong><small class="sub-value">${esc(x.account || "—")}</small></td>
+      <td><strong>${esc(String(x.method || "").toLowerCase() === "mpesa" ? "M-Pesa" : x.method || "Unknown")}</strong><small class="sub-value">${esc(x.account || "—")}</small></td>
       <td>${date(x.createdAt || x.requestedAt)}</td>
       <td><span class="status ${esc(status)}">${esc(status)}</span></td>
       <td><div class="actions">${actions}</div></td>
