@@ -1,8 +1,38 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#17152f"><title>Premium Management | Founder OS</title><link rel="stylesheet" href="../css/design-tokens.css?v=20261123-foundation1">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#17152f">
+<title>Premium Management | Founder OS</title>
+<link rel="stylesheet" href="../css/design-tokens.css?v=20261123-foundation1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="premium-management.css?v=20261123-page1">
+<link rel="stylesheet" href="components/sidebar.css?v=20261123-shell1">
+<link rel="stylesheet" href="components/topbar.css?v=20261123-shell1">
 <link rel="stylesheet" href="founder-unified.css?v=20261123-tokens1">
-</head><body class="founder-portal-page"><main class="pm-page"><section class="pm-card"><small>FOUNDER CONTROL</small><h1>Premium Subscription Manager</h1><p>Only the Founder can activate, extend or revoke Premium across Student and Instructor portals.</p></section><section class="pm-card"><div class="pm-grid" id="premiumUsers"><p>Loading premium accounts…</p></div></section></main><script type="module" src="premium-management.js"></script></body></html>
+</head>
+<body class="founder-portal-page">
+<div class="founder-app">
+  <aside id="sidebarContainer" class="founder-sidebar"></aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <main class="founder-main">
+    <header id="topbarContainer" class="founder-topbar"></header>
+    <section class="founder-page pm-page">
+      <section class="pm-card">
+        <small class="founder-eyebrow">FOUNDER CONTROL</small>
+        <h1>Premium Subscription Manager</h1>
+        <p>Only the Founder can activate, extend or revoke Premium across Student and Instructor portals.</p>
+      </section>
+      <section class="pm-card">
+        <div class="pm-grid" id="premiumUsers"><p>Loading premium accounts…</p></div>
+      </section>
+    </section>
+  </main>
+</div>
+<script type="module" src="js/founder-app.js?v=20261124-shell2"></script>
+<script type="module" src="premium-management.js"></script>
+</body>
+</html>
