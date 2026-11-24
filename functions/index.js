@@ -93,7 +93,7 @@ exports.requestInstructorWithdrawal = onCall(async request => {
     if (settings.withdrawalApproval === false || monetization.withdrawalApproval === false || monetization.automaticPayouts === true) {
       throw new HttpsError("failed-precondition", "Manual Founder approval is required. Automatic payouts are not enabled for this workflow.");
     }
-    const minimum = Number(monetization.minimumWithdrawal ?? settings.minimumWithdrawal ?? 100);
+    const minimum = Number(monetization.minimumWithdrawal ?? settings.minimumWithdrawal ?? 1000);
     const taxRate = Number(settings.platformTaxPercent ?? 0);
     const feeRate = Number(monetization.withdrawalFeePercent ?? settings.withdrawalFeePercent ?? 0);
     if (!Number.isFinite(minimum) || minimum < 0
