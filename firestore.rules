@@ -986,7 +986,25 @@ service cloud.firestore {
     // ============================================================
 
     match /courses/{courseId} {
-      allow get, list:
+      // A marketplace course's public details must remain readable even
+      // when a student's account is awaiting admission or a guest is browsing.
+      // Only the public course metadata is exposed; write access remains restricted.
+      allow get:
+        if staff()
+        || (isStudent() && studentPortalOpen())
+        || (isInstructor() && instructorPortalOpen())
+        || (resource.data.get('institutionId', '') != ''
+          && institutionMember(resource.data.institutionId))
+        || (
+          resource.data.get('published', false) == true
+          && resource.data.get('status', '') == 'published'
+          && resource.data.get('reviewStatus', '') == 'approved'
+          && resource.data.get('marketplaceVisibility', 'public') != 'hidden'
+          && resource.data.get('deletedAt', null) == null
+        );
+
+      // Keep collection queries limited to authenticated portal roles/staff.
+      allow list:
         if staff()
         || (isStudent() && studentPortalOpen())
         || (isInstructor() && instructorPortalOpen())

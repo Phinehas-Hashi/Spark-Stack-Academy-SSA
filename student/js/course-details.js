@@ -214,13 +214,18 @@ async function loadCourse() {
 
     catch (error) {
 
-        console.error(
-            "❌ COURSE LOAD FAILED:",
+        console.error("COURSE DETAILS LOAD FAILED", {
+            courseId,
+            code: error?.code || "unknown",
+            message: error?.message || String(error),
             error
-        );
+        });
 
+        const permissionDenied = error?.code === "permission-denied";
         showError(
-            "Unable to load this course right now."
+            permissionDenied
+                ? "We couldn't access this course. Refresh the page and try again. If the problem continues, contact support."
+                : "Unable to load this course right now. Please check your connection and try again."
         );
 
     }
