@@ -53,7 +53,7 @@ function renderIdentity(user, student) {
     setText("verificationStatus", user.emailVerified ? "Email verified" : "Email not verified");
     setText("accountStatus", student.status ? humanize(student.status) : "Status not recorded");
     setText("studentBadge", "Student");
-    setText("levelCount", String(Number(student.level) || Math.floor((Number(student.xp) || 0) / 100) + 1));
+    setText("levelCount", String(Math.floor((Math.max(0, Number(student.xp) || 0)) / 100) + 1));
     const avatar = $("profileAvatar");
     if (avatar) avatar.textContent = name.trim().charAt(0).toUpperCase() || "S";
 }
@@ -74,10 +74,13 @@ async function loadLearning(uid, student) {
             const status = String(data.status || "active").toLowerCase();
             if (["pending", "rejected", "revoked", "cancelled", "suspended"].includes(status)) return;
             const payment = String(data.paymentStatus || data.payment_status || "").toLowerCase();
-            const entitled = data.institutionId || data.institution_id ||
-                ["paid", "free", "completed"].includes(payment) ||
+            const institutionEntitlement = Boolean(data.institutionId || data.institution_id) &&
                 ["active", "approved", "completed"].includes(status);
-            if (!entitled) return;
+            const academyEntitlement = (
+                ["active", "approved", "completed"].includes(status) &&
+                ["paid", "free"].includes(payment)
+            ) || (status === "paid" && ["", "paid"].includes(payment));
+            if (!institutionEntitlement && !academyEntitlement) return;
             const current = byId.get(courseId);
             const candidate = { id: item.id, courseId, ...data };
             if (!current || Number(candidate.progress || 0) > Number(current.progress || 0)) {
