@@ -220,6 +220,13 @@ service cloud.firestore {
                'profilePhoto',
                'photoURL',
                'phone',
+               'phoneNumber',
+               'location',
+               'headline',
+               'notifications',
+               'teaching',
+               'instructorStatus',
+               'instructorDisabledAt',
                'lastLogin',
                'updatedAt'
              ])
