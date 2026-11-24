@@ -1577,3 +1577,6 @@
     .ticket-actions { display: grid; grid-template-columns: 1fr; }
     .support-panel { margin-left: 16px; margin-right: 16px; }
 }
+
+.ticket-message.instructor-message { margin-left: auto; border-color: rgba(167,139,250,.25); background: rgba(167,139,250,.10); }
+.ticket-message.support-message { margin-right: auto; border-color: rgba(103,217,232,.2); }
