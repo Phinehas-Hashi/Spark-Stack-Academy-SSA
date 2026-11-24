@@ -457,7 +457,7 @@ async function completeCurrentLesson() {
         toast(`Lesson completed! ⚡ +${XP_REWARDS.lesson || 20} XP`);
 
         if (completedLessons.length === lessons.length) {
-            await awardXP(currentUser.uid, XP_REWARDS.course || 50, `Completed course: ${course.title || "Course"}`, `course_${courseId}`);
+            await awardXP(currentUser.uid, XP_REWARDS.course || 50, `Completed course: ${course.title || "Course"}`, `course:${courseId}`);
             const certificate = await issueCertificate(currentUser.uid, course);
             toast(certificate?.alreadyExists ? "Course completed! 🎓" : "Course completed! 🎓 Certificate earned!");
         } else if (currentLessonIndex < lessons.length - 1) {
