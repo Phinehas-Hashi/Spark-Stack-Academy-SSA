@@ -1,5 +1,5 @@
 // Boot the authenticated Admin shell before handling institution applications.
-import "./admin-app.js";
+import "./admin-app.js?v=20261124-modalstate1";
 import { db } from "../../js/firebase.js";
 import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
