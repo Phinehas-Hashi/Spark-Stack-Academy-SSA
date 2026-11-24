@@ -714,7 +714,35 @@ service cloud.firestore {
 
       allow create:
         if signedIn()
-        && request.resource.data.reporterId == uid();
+        && request.resource.data.reporterId == uid()
+        && (
+          request.resource.data.get('type', '') != 'support'
+          || (
+            request.resource.data.get('status', '') == 'pending'
+            && request.resource.data.get('reportId', '') is string
+            && request.resource.data.reportId.size() >= 12
+            && request.resource.data.get('title', '') is string
+            && request.resource.data.title.size() >= 3
+            && request.resource.data.title.size() <= 120
+            && request.resource.data.get('description', '') is string
+            && request.resource.data.description.size() >= 10
+            && request.resource.data.description.size() <= 5000
+            && request.resource.data.get('category', '') in [
+              'technical', 'account', 'payments', 'course',
+              'assignments', 'certificates', 'privacy', 'feedback', 'other'
+            ]
+            && request.resource.data.get('priority', '') in [
+              'low', 'medium', 'high', 'critical'
+            ]
+            && request.resource.data.keys().hasOnly([
+              'reportId', 'title', 'description', 'category', 'type',
+              'priority', 'status', 'reporterId', 'reporterName',
+              'reporterEmail', 'reporterRole', 'reportedUserId',
+              'courseId', 'metadata', 'founderVisible', 'adminVisible',
+              'createdAt', 'updatedAt'
+            ])
+          )
+        );
 
       allow get:
         if signedIn()
@@ -775,6 +803,8 @@ service cloud.firestore {
             signedIn()
             && get(/databases/$(database)/documents/reports/$(reportId))
                  .data.reporterId == uid()
+            && get(/databases/$(database)/documents/reports/$(reportId))
+                 .data.get('status', '') in ['pending', 'reviewing', 'resolved']
             && request.resource.data.senderId == uid()
             && request.resource.data.senderRole == 'student'
             && request.resource.data.message is string
