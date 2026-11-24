@@ -33,6 +33,13 @@ let course = null;
 let modules = [];
 let lessons = [];
 
+function isCourseFree(courseData) {
+    if (!courseData) return false;
+    if (courseData.isFree === true) return true;
+    if (!Object.prototype.hasOwnProperty.call(courseData, "price")) return true;
+    return typeof courseData.price === "number" && courseData.price <= 0;
+}
+
 const params = new URLSearchParams(
     window.location.search
 );
@@ -450,9 +457,7 @@ function renderPricing() {
             course.discountPrice || 0
         );
 
-    const isFree =
-        course.isFree === true ||
-        price <= 0;
+    const isFree = isCourseFree(course);
 
 
     const priceElement =
@@ -793,9 +798,7 @@ enrollBtn?.addEventListener(
             );
 
 
-        const isFree =
-            course.isFree === true ||
-            price <= 0;
+        const isFree = isCourseFree(course);
 
 
         enrollBtn.disabled =
@@ -862,9 +865,37 @@ enrollBtn?.addEventListener(
 
 async function enrollFree() {
 
-    if (!currentUser || !course)
-        return;
+    if (!currentUser || !course) return;
 
+    const enrollmentRef = doc(
+        db,
+        "enrollments",
+        `${currentUser.uid}_${courseId}`
+    );
+
+    // A merge write to an existing document is an UPDATE in Firestore.
+    // Students cannot rewrite entitlement fields, so reuse a valid existing record.
+    const existingSnapshot = await getDoc(enrollmentRef);
+    if (existingSnapshot.exists()) {
+        const existing = existingSnapshot.data();
+        const ownerId = existing.userId || existing.studentId;
+        if (
+            ownerId === currentUser.uid &&
+            existing.courseId === courseId &&
+            ["active", "approved", "completed"].includes(String(existing.status || "").toLowerCase()) &&
+            ["free", "paid"].includes(String(existing.paymentStatus || "").toLowerCase())
+        ) {
+            setEnrolledState(existing);
+            showToast("You already have access to this course. Continue learning.", "success");
+            window.location.href = `course-player.html?id=${encodeURIComponent(courseId)}`;
+            return;
+        }
+        throw new Error("An enrollment record already exists but does not grant active access. Contact Academy support to review it.");
+    }
+
+    if (!isCourseFree(course)) {
+        throw new Error("This course is not marked as free in the course record. Refresh the page and try again.");
+    }
 
     const enrollmentData = {
 
@@ -910,14 +941,6 @@ async function enrollFree() {
     // ========================================
     // SAVE MAIN ENROLLMENT
     // ========================================
-
-    const enrollmentRef =
-        doc(
-            db,
-            "enrollments",
-            `${currentUser.uid}_${courseId}`
-        );
-
 
     await setDoc(
         enrollmentRef,
@@ -984,9 +1007,7 @@ function setAvailableState() {
         );
 
 
-    const isFree =
-        course?.isFree === true ||
-        price <= 0;
+    const isFree = isCourseFree(course);
 
 
     enrollBtn.disabled =
