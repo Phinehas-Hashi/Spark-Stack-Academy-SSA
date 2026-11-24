@@ -14,12 +14,6 @@ const planLabels = {
   career_accelerator: "Career Accelerator"
 };
 
-const benefitSets = {
-  learner_plus: ["Premium student badge", "Access to eligible premium learning content", "Enhanced learning resources"],
-  pro_learner: ["Everything in Learner Plus", "Expanded learning tools", "Priority learning features"],
-  career_accelerator: ["Everything in Pro Learner", "Career-focused learning support", "Advanced development resources"]
-};
-
 function showMessage(message) {
   if (!premiumMessage) return;
   premiumMessage.style.display = "flex";
@@ -133,7 +127,7 @@ function renderPlans(data) {
     card.append(periods);
 
     const list = document.createElement("ul");
-    for (const benefit of (Array.isArray(plan.benefits) ? plan.benefits : benefitSets[key])) {
+    for (const benefit of (Array.isArray(plan.benefits) ? plan.benefits : [])) {
       if (typeof benefit !== "string" || !benefit.trim()) continue;
       const item = document.createElement("li");
       const check = document.createElement("i");
@@ -143,7 +137,14 @@ function renderPlans(data) {
       item.append(check, text);
       list.append(item);
     }
-    card.append(list);
+    if (list.children.length) {
+      card.append(list);
+    } else {
+      const benefitsNote = document.createElement("p");
+      benefitsNote.className = "premium-purchase-note";
+      benefitsNote.textContent = "Included benefits will be published by Academy management.";
+      card.append(benefitsNote);
+    }
 
     const note = document.createElement("p");
     note.className = "premium-purchase-note";
