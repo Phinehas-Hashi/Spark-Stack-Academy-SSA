@@ -827,7 +827,13 @@ function openModal(course) {
 
 
     const syncButton = $("syncCourseMarketplaceBtn");
-    if (syncButton) syncButton.hidden = status !== "published";
+    if (syncButton) {
+        const canSync = status === "published"
+            && course.reviewStatus === "approved"
+            && course.marketplaceVisibility !== "hidden";
+        syncButton.hidden = !canSync;
+        syncButton.style.display = canSync ? "" : "none";
+    }
 
     const toggleButton =
         $("toggleCourseStatusBtn");
