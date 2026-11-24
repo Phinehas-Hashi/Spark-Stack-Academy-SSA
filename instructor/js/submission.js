@@ -214,7 +214,11 @@ function renderReview() {
 async function saveGrade() {
     if (saving || !activeAssignment || !activeSubmission) return;
 
-    if (!window.SSAOnlineActionGuard?.requireOnline("Saving a grade and feedback")) {
+    const onlineGuard = window.SSAOnlineActionGuard;
+    if (onlineGuard?.requireOnline) {
+        if (!onlineGuard.requireOnline("Saving a grade and feedback")) return;
+    } else if (navigator.onLine === false) {
+        $("#gradeMessage").textContent = "An internet connection is required. Nothing has been saved.";
         return;
     }
 
