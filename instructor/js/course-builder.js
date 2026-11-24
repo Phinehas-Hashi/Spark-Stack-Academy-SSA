@@ -18,7 +18,8 @@ import {
     doc,
     getDoc,
     serverTimestamp,
-    orderBy
+    orderBy,
+    writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -1468,12 +1469,14 @@ async function reorderContent(kind, id, direction) {
 
     try {
         const collectionName = kind === "module" ? "courseModules" : "courseLessons";
-        await Promise.all(reordered.map((entry, position) =>
-            updateDoc(doc(db, collectionName, entry.id), {
+        const batch = writeBatch(db);
+        reordered.forEach((entry, position) => {
+            batch.update(doc(db, collectionName, entry.id), {
                 order: position,
                 updatedAt: serverTimestamp()
-            })
-        ));
+            });
+        });
+        await batch.commit();
         await reloadBuilder();
         showToast(kind === "module" ? "Module order updated." : "Lesson order updated.");
     } catch (error) {
