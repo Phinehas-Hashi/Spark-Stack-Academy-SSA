@@ -560,8 +560,11 @@ service cloud.firestore {
         && request.resource.data.status == 'pending'
         && request.resource.data.amount is number
         && request.resource.data.amount > 0
-        && request.resource.data.method is string
-        && request.resource.data.account is string;
+        && request.resource.data.method == 'mpesa'
+        && request.resource.data.account is string
+        && request.resource.data.account.size() > 0
+        && request.resource.data.netAmount is number
+        && request.resource.data.netAmount >= 0;
 
       allow update, delete:
         if isFounder();
