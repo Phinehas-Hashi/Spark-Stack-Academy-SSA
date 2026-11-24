@@ -517,6 +517,108 @@ function instructorEnrollmentIsActive(enrollment) {
   return status === "paid" && (!paymentStatus || paymentStatus === "paid");
 }
 
+exports.getInstructorFinanceData = onCall(async request => {
+  const { uid } = await requireActiveInstructor(request);
+  const [coursesSnap, earningsSnap, withdrawalsSnap, settingsSnap] = await Promise.all([
+    db.collection("courses").where("instructorId", "==", uid).get(),
+    db.collection("instructorEarnings").where("instructorId", "==", uid).get(),
+    db.collection("withdrawalRequests").where("instructorId", "==", uid).get(),
+    db.doc("platformSettings/earnings").get()
+  ]);
+  const courses = new Map(coursesSnap.docs.map(item => [item.id, item.data()]));
+  const ids = [...courses.keys()];
+  const paymentDocs = [];
+  for (let i = 0; i < ids.length; i += 8) {
+    const batch = ids.slice(i, i + 8);
+    const snapshots = await Promise.all(batch.map(courseId =>
+      db.collection("payments").where("courseId", "==", courseId).get()
+    ));
+    snapshots.forEach(snapshot => paymentDocs.push(...snapshot.docs));
+  }
+  const payments = paymentDocs.map(item => {
+    const p = item.data();
+    const course = courses.get(safeText(p.courseId)) || {};
+    return {
+      id: item.id, courseName: safeText(p.courseName || p.course || course.title, "Course payment"),
+      studentName: safeText(p.studentName || p.name || p.studentEmail, "Student"),
+      studentEmail: safeText(p.studentEmail || p.email),
+      amount: Number(p.amount || p.total || 0), currency: safeText(p.currency, "KES"),
+      status: safeText(p.status || p.paymentStatus, "pending").toLowerCase(),
+      reference: safeText(p.mpesaReceiptNumber || p.manualReceiptCode || p.reference || p.transactionId || item.id),
+      createdAt: p.createdAt?.toMillis ? p.createdAt.toMillis() : null
+    };
+  }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0,500);
+  const earnings = earningsSnap.docs.map(item => {
+    const e = item.data();
+    return { id:item.id, description:safeText(e.description,"Instructor earning"),
+      netAmount:Number(e.netAmount || 0), status:safeText(e.status,"earned").toLowerCase(),
+      createdAt:e.createdAt?.toMillis ? e.createdAt.toMillis() : null };
+  }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const withdrawals = withdrawalsSnap.docs.map(item => {
+    const w = item.data();
+    return { id:item.id, amount:Number(w.amount || 0), withdrawalFee:Number(w.withdrawalFee || 0),
+      netAmount:Number(w.netAmount || 0), method:safeText(w.method),
+      status:safeText(w.status,"pending").toLowerCase(),
+      createdAt:w.createdAt?.toMillis ? w.createdAt.toMillis() : null };
+  }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const earned = earnings.filter(e => !["reversed","void","voided","refunded"].includes(e.status))
+    .reduce((sum,e) => sum + e.netAmount,0);
+  const reserved = withdrawals.filter(w => ["pending","approved","processing"].includes(w.status))
+    .reduce((sum,w) => sum + w.amount,0);
+  const paidOut = withdrawals.filter(w => ["paid","completed","successful"].includes(w.status))
+    .reduce((sum,w) => sum + w.amount,0);
+  const settings = settingsSnap.exists ? settingsSnap.data() : {};
+  const stats = payments.reduce((out,p) => {
+    if (["paid","success","successful","completed"].includes(p.status)) out.successful += p.amount;
+    else if (["pending","pending_review","verification_pending","initiating"].includes(p.status)) out.pending += p.amount;
+    else if (["failed","initiation_failed","cancelled","canceled"].includes(p.status)) out.failed += p.amount;
+    return out;
+  }, {successful:0,pending:0,failed:0});
+  return { payments, earnings, withdrawals, wallet:{
+    earned, reserved, paidOut, available:Math.max(0,earned-reserved-paidOut),
+    pending:reserved, lifetime:earned
+  }, settings:{
+    minimumWithdrawal:Number(settings.minimumWithdrawal || 100),
+    withdrawalFeePercent:Number(settings.withdrawalFeePercent || 0),
+    platformTaxPercent:Number(settings.platformTaxPercent || 0)
+  }, paymentStats:stats };
+});
+
+exports.requestInstructorWithdrawal = onCall(async request => {
+  const { uid } = await requireActiveInstructor(request);
+  const amount = Number(request.data?.amount);
+  const method = safeText(request.data?.method).toLowerCase();
+  const account = safeText(request.data?.account).slice(0,120);
+  if (!Number.isSafeInteger(amount) || amount <= 0) throw new HttpsError("invalid-argument","Enter a whole-number withdrawal amount.");
+  if (!["mpesa","bank"].includes(method) || account.length < 5) throw new HttpsError("invalid-argument","Enter valid payout details.");
+  const settingsSnap = await db.doc("platformSettings/earnings").get();
+  const settings = settingsSnap.exists ? settingsSnap.data() : {};
+  const minimum = Number(settings.minimumWithdrawal || 100);
+  const feePercent = Number(settings.withdrawalFeePercent || 0);
+  if (amount < minimum) throw new HttpsError("failed-precondition","The amount is below the minimum withdrawal.");
+  if (!Number.isFinite(feePercent) || feePercent < 0 || feePercent > 100) throw new HttpsError("failed-precondition","Withdrawal fee settings are invalid.");
+  const fee = Math.round(amount * feePercent) / 100;
+  const requestRef = db.collection("withdrawalRequests").doc();
+  await db.runTransaction(async transaction => {
+    const [earnedSnap, requestsSnap] = await Promise.all([
+      transaction.get(db.collection("instructorEarnings").where("instructorId","==",uid)),
+      transaction.get(db.collection("withdrawalRequests").where("instructorId","==",uid))
+    ]);
+    const earned = earnedSnap.docs.reduce((sum,item) => {
+      const e=item.data();
+      return ["reversed","void","voided","refunded"].includes(safeText(e.status).toLowerCase()) ? sum : sum+Number(e.netAmount||0);
+    },0);
+    const committed = requestsSnap.docs.reduce((sum,item) => {
+      const w=item.data(), status=safeText(w.status).toLowerCase();
+      return ["pending","approved","processing","paid","completed","successful"].includes(status) ? sum+Number(w.amount||0) : sum;
+    },0);
+    if (amount > Math.max(0,earned-committed)) throw new HttpsError("failed-precondition","Your available balance changed. Refresh the wallet and try again.");
+    transaction.create(requestRef,{instructorId:uid,amount,withdrawalFee:fee,netAmount:Math.max(0,amount-fee),
+      method,account,status:"pending",createdAt:Timestamp.now(),updatedAt:Timestamp.now()});
+  });
+  return {success:true,requestId:requestRef.id,status:"pending"};
+});
+
 exports.getInstructorCourseEnrollmentStats = onCall(async request => {
   const { uid } = await requireActiveInstructor(request);
 
