@@ -20,6 +20,7 @@ const chatId = params.get("chatId") || params.get("conversation");
 const messagesBox = document.getElementById("chatMessages");
 const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
+const chatComposer = document.getElementById("chatComposer");
 const chatName = document.getElementById("chatName");
 const chatStatus = document.getElementById("chatStatus");
 const chatAvatar = document.getElementById("chatAvatar");
@@ -300,7 +301,10 @@ async function send() {
   }
 }
 
-sendBtn?.addEventListener("click", send);
+chatComposer?.addEventListener("submit", event => {
+  event.preventDefault();
+  send();
+});
 input?.addEventListener("input", () => setTyping(Boolean(input.value.trim())));
 
 onAuthStateChanged(auth, async user => {
