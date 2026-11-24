@@ -51,6 +51,7 @@ let earningsSettings = {
 };
 
 let currentBalance = 0;
+let earningsSettingsLoaded = false;
 
 
 // ============================================================
@@ -110,10 +111,17 @@ async function loadEarningsSettings() {
             ...DEFAULT_SETTINGS,
             ...(result.data || {})
         };
+        earningsSettingsLoaded = true;
         console.log("Instructor earnings settings loaded", earningsSettings);
     } catch (error) {
         console.error("Failed loading instructor earnings settings:", error);
-        earningsSettings = { ...DEFAULT_SETTINGS };
+        earningsSettings = {
+            ...DEFAULT_SETTINGS,
+            withdrawalsEnabled: false,
+            mpesaWithdrawalsEnabled: false,
+            withdrawalApproval: false
+        };
+        earningsSettingsLoaded = false;
     }
 }
 
@@ -213,7 +221,8 @@ async function loadEarnings() {
 
         const status = $("withdrawalStatus");
         const message = $("withdrawalMessage");
-        const withdrawalsEnabled = earningsSettings.withdrawalsEnabled !== false
+        const withdrawalsEnabled = earningsSettingsLoaded
+            && earningsSettings.withdrawalsEnabled !== false
             && earningsSettings.mpesaWithdrawalsEnabled !== false
             && earningsSettings.withdrawalApproval !== false;
         const canWithdraw = withdrawalsEnabled && currentBalance >= Number(earningsSettings.minimumWithdrawal || 100);
@@ -414,6 +423,10 @@ let previousBodyOverflow = "";
 function openWithdrawalWindow() {
     const modal = $("withdrawalModal");
     if (!modal) return;
+    if (!earningsSettingsLoaded) {
+        alert("Withdrawal settings are unavailable. Refresh the page and try again.");
+        return;
+    }
     if (earningsSettings.withdrawalsEnabled === false || earningsSettings.mpesaWithdrawalsEnabled === false || earningsSettings.withdrawalApproval === false) {
         alert("M-Pesa withdrawals are currently disabled by the Founder.");
         return;
@@ -465,7 +478,7 @@ function normalizeMpesaPhone(value) {
 }
 
 async function submitWithdrawal() {
-    if (!currentInstructor) return;
+    if (!currentInstructor || !earningsSettingsLoaded) return;
     const amount = Number($("withdrawalAmount")?.value || 0);
     const phone = normalizeMpesaPhone($("withdrawalAccount")?.value);
     const minimum = Number(earningsSettings.minimumWithdrawal || 100);
