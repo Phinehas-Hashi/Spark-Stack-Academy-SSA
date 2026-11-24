@@ -83,7 +83,8 @@ async function loadPurchase() {
     plan: data.plan || "",
     billingPeriod: data.billingPeriod || "",
     title: data.title || "Academy Purchase",
-    amount: Number(data.amount)
+    amount: Number(data.amount),
+    manualMpesa: data.manualMpesa || { enabled: false }
   };
   if (!Number.isSafeInteger(purchase.amount) || purchase.amount < 1) {
     throw new Error("The Academy returned an invalid payment amount.");
@@ -118,18 +119,25 @@ function renderCheckout() {
 
       <section class="student-payment-method manual-payment-method">
         <h3>Option 2 — Manual M-Pesa Payment</h3>
-        <p>Pay using the Academy instructions below, then submit the receipt code for administrator verification.</p>
-        <div class="payment-detail"><span>Paybill / Till</span><strong>400200</strong></div>
-        <div class="payment-detail"><span>Account Number</span><strong>1078687</strong></div>
-        <div class="payment-detail"><span>Exact amount</span><strong id="manualAmount"></strong></div>
-        <label for="manualPhone">Phone number used to pay</label>
-        <input id="manualPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XXXXXXXX" maxlength="16">
-        <label for="manualReceipt">M-Pesa transaction code</label>
-        <input id="manualReceipt" type="text" autocomplete="off" placeholder="e.g. QGH7ABC123" maxlength="16">
-        <label for="manualProof">M-Pesa confirmation screenshot (JPG, PNG or WebP, max 5 MB)</label>
-        <input id="manualProof" type="file" accept="image/jpeg,image/png,image/webp">
-        <button type="button" class="pay-btn manual-submit-btn" id="submitManualPayment">Submit Receipt and Proof</button>
-        <button type="button" class="pay-btn manual-submit-btn" id="retryProofUpload" hidden>Retry Proof Upload</button>
+        ${purchase.manualMpesa.enabled ? `
+          <p>Follow the Academy's current payment instructions, then submit your receipt and confirmation screenshot for administrator verification.</p>
+          <div class="payment-detail"><span>Payment type</span><strong id="manualMethod"></strong></div>
+          <div class="payment-detail"><span>Business / account</span><strong id="manualBusinessName"></strong></div>
+          <div class="payment-detail"><span>Paybill / Till number</span><strong id="manualNumber"></strong></div>
+          <div class="payment-detail"><span>Account / reference</span><strong id="manualAccount"></strong></div>
+          <div class="payment-detail"><span>Exact amount</span><strong id="manualAmount"></strong></div>
+          <p id="manualInstructions" class="manual-instructions"></p>
+          <label for="manualPhone">Phone number used to pay</label>
+          <input id="manualPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XXXXXXXX" maxlength="16">
+          <label for="manualReceipt">M-Pesa transaction code</label>
+          <input id="manualReceipt" type="text" autocomplete="off" placeholder="e.g. QGH7ABC123" maxlength="16">
+          <label for="manualProof">M-Pesa confirmation screenshot (JPG, PNG or WebP, max 5 MB)</label>
+          <input id="manualProof" type="file" accept="image/jpeg,image/png,image/webp">
+          <button type="button" class="pay-btn manual-submit-btn" id="submitManualPayment">Submit Receipt and Proof</button>
+          <button type="button" class="pay-btn manual-submit-btn" id="retryProofUpload" hidden>Retry Proof Upload</button>
+        ` : `
+          <p>Manual M-Pesa payment is not configured at the moment. Use STK Push or contact Academy support for payment assistance.</p>
+        `}
       </section>
 
       <p id="checkoutMessage" class="checkout-message" role="status" aria-live="polite" hidden></p>
@@ -138,7 +146,12 @@ function renderCheckout() {
 
   $("checkoutTitle").textContent = purchase.title;
   $("checkoutAmount").textContent = money(purchase.amount);
-  $("manualAmount").textContent = money(purchase.amount);
+  if ($("manualAmount")) $("manualAmount").textContent = money(purchase.amount);
+  if ($("manualMethod")) $("manualMethod").textContent = purchase.manualMpesa.method === "till" ? "Buy Goods Till" : purchase.manualMpesa.method === "paybill" ? "Paybill" : "Other";
+  if ($("manualBusinessName")) $("manualBusinessName").textContent = purchase.manualMpesa.businessName || "—";
+  if ($("manualNumber")) $("manualNumber").textContent = purchase.manualMpesa.number || "—";
+  if ($("manualAccount")) $("manualAccount").textContent = purchase.manualMpesa.account || "—";
+  if ($("manualInstructions")) $("manualInstructions").textContent = purchase.manualMpesa.instructions || "";
   $("payWithStk")?.addEventListener("click", startStkPayment);
   $("submitManualPayment")?.addEventListener("click", submitManualPayment);
   $("retryProofUpload")?.addEventListener("click", retryManualProofUpload);
