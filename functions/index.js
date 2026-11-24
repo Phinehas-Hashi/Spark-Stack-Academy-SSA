@@ -148,7 +148,7 @@ function normalizeKenyanPhone(value) {
   if (phone.startsWith("0")) phone = "254" + phone.slice(1);
   if (phone.startsWith("7") || phone.startsWith("1")) phone = "254" + phone;
   if (!/^254[17]\d{8}$/.test(phone)) {
-    throw new HttpsError("invalid-argument", "The institution contact number must be a valid Kenyan M-Pesa number, for example 0712345678 or 254712345678.");
+    throw new HttpsError("invalid-argument", "Enter a valid Kenyan M-Pesa number, for example 0712345678 or 254712345678.");
   }
   return phone;
 }
@@ -458,7 +458,7 @@ async function requireActiveStudent(request) {
   const snap = await db.doc("users/" + uid).get();
   const user = snap.exists ? snap.data() : {};
   if (safeText(user.role).toLowerCase() !== "student"
-      || user.status !== "active" || user.active !== true) {
+      || user.status !== "active" || user.active === false) {
     throw new HttpsError("permission-denied", "An active student account is required.");
   }
   return { uid, user };
