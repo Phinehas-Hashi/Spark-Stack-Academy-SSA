@@ -35,23 +35,18 @@ document.addEventListener(
 
             await waitForInstructor();
 
-            instructor =
-                window.currentInstructor;
-
-            if (!instructor) {
-
-                console.error(
-                    "❌ Instructor authentication unavailable."
-                );
-
-                return;
-
-            }
+            instructor = await waitForInstructor();
 
 
             await loadCourses();
 
             setupForm();
+            const dueDateField = $("dueDate");
+            if (dueDateField) {
+                const localNow = new Date();
+                localNow.setMinutes(localNow.getMinutes() - localNow.getTimezoneOffset());
+                dueDateField.min = localNow.toISOString().slice(0, 16);
+            }
 
             refreshIcons();
 
@@ -79,46 +74,24 @@ document.addEventListener(
 // ============================================================
 
 function waitForInstructor() {
-
-    return new Promise(resolve => {
-
+    return new Promise((resolve, reject) => {
         let attempts = 0;
+        const timer = setInterval(() => {
+            attempts++;
 
-        const timer =
-            setInterval(() => {
+            if (window.currentInstructor) {
+                clearInterval(timer);
+                resolve(window.currentInstructor);
+                return;
+            }
 
-                attempts++;
-
-
-                if (
-                    window.currentInstructor
-                ) {
-
-                    clearInterval(timer);
-
-                    resolve();
-
-                    return;
-
-                }
-
-
-                if (
-                    attempts >= 100
-                ) {
-
-                    clearInterval(timer);
-
-                    resolve();
-
-                }
-
-            }, 100);
-
+            if (attempts >= 100) {
+                clearInterval(timer);
+                reject(new Error("Instructor session was not ready. Refresh and sign in again."));
+            }
+        }, 100);
     });
-
 }
-
 
 // ============================================================
 // LOAD INSTRUCTOR COURSES
@@ -287,275 +260,124 @@ function setupForm() {
 // CREATE ASSIGNMENT
 // ============================================================
 
-async function createAssignment(
-    event
-) {
-
+async function createAssignment(event) {
     event.preventDefault();
-
-
-    const title =
-        $("assignmentTitle")
-            ?.value
-            .trim();
-
-
-    const description =
-        $("assignmentDescription")
-            ?.value
-            .trim();
-
-
-    const courseSelect =
-        $("courseSelect");
-
-
-    const courseId =
-        courseSelect?.value;
-
-
-    const selectedCourse =
-        courseSelect
-            ?.selectedOptions[0];
-
-
-    const courseName =
-        selectedCourse
-            ?.dataset.courseName ||
-        selectedCourse
-            ?.textContent ||
-        "";
-
-
-    const dueDate =
-        $("dueDate")
-            ?.value || null;
-
-
-    const maxScore =
-        Number(
-            $("maxScore")
-                ?.value || 100
-        );
-
-
-    // ========================================================
-    // VALIDATION
-    // ========================================================
-
-    if (!title) {
-
-        showMessage(
-            "Please enter an assignment title.",
-            "error"
-        );
-
+    if (!instructor?.uid) {
+        showMessage("Your instructor session is unavailable. Refresh and sign in again.", "error");
         return;
-
     }
 
+    const title = $("assignmentTitle")?.value.trim() || "";
+    const description = $("assignmentDescription")?.value.trim() || "";
+    const courseSelect = $("courseSelect");
+    const courseId = courseSelect?.value || "";
+    const selectedCourse = courseSelect?.selectedOptions?.[0];
+    const courseName = selectedCourse?.dataset.courseName || selectedCourse?.textContent || "";
+    const dueDateInput = $("dueDate")?.value || "";
+    const maxScore = Number($("maxScore")?.value);
+    const status = $("assignmentStatus")?.value === "draft" ? "draft" : "published";
 
-    if (!description) {
-
-        showMessage(
-            "Please enter assignment instructions.",
-            "error"
-        );
-
+    if (title.length < 3 || title.length > 160) {
+        showMessage("Use an assignment title between 3 and 160 characters.", "error");
+        $("assignmentTitle")?.focus();
         return;
-
     }
 
-
-    if (!courseId) {
-
-        showMessage(
-            "Please select a course.",
-            "error"
-        );
-
+    if (!description || description.length > 20000) {
+        showMessage("Add instructions (up to 20,000 characters) before continuing.", "error");
+        $("assignmentDescription")?.focus();
         return;
-
     }
 
-
-    if (
-        !Number.isFinite(maxScore) ||
-        maxScore <= 0
-    ) {
-
-        showMessage(
-            "Maximum score must be greater than 0.",
-            "error"
-        );
-
+    if (!courseId || !selectedCourse || selectedCourse.disabled) {
+        showMessage("Select one of your available courses.", "error");
+        courseSelect?.focus();
         return;
-
     }
 
+    if (!Number.isFinite(maxScore) || maxScore <= 0 || maxScore > 10000) {
+        showMessage("Maximum score must be greater than 0 and no more than 10,000.", "error");
+        $("maxScore")?.focus();
+        return;
+    }
 
-    const button =
-        $("saveAssignmentBtn");
+    let dueDate = null;
+    if (dueDateInput) {
+        const parsedDueDate = new Date(dueDateInput);
+        if (Number.isNaN(parsedDueDate.getTime())) {
+            showMessage("Enter a valid due date and time.", "error");
+            $("dueDate")?.focus();
+            return;
+        }
+        if (parsedDueDate.getTime() <= Date.now()) {
+            showMessage("The due date must be in the future. Leave it blank if there is no deadline.", "error");
+            $("dueDate")?.focus();
+            return;
+        }
+        dueDate = parsedDueDate.toISOString();
+    }
 
+    const button = $("saveAssignmentBtn");
+    const originalButton = button?.innerHTML || "";
+    if (button) {
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        button.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span> Saving…';
+    }
 
     try {
-
-        if (button) {
-
-            button.disabled = true;
-
-            button.innerHTML = `
-                <span class="loading-spinner"></span>
-                Creating...
-            `;
-
-        }
-
-
-        // ====================================================
-        // ASSIGNMENT DOCUMENT
-        // ====================================================
-
+        const now = serverTimestamp();
         const assignmentData = {
-
-            // OWNERSHIP
-
-            instructorId:
-                instructor.uid,
-
-            instructorName:
-                instructor.displayName ||
-                instructor.name ||
-                "Instructor",
-
-
-            // COURSE RELATIONSHIP
-
+            instructorId: instructor.uid,
+            instructorName: instructor.displayName || instructor.name || "Instructor",
             courseId,
-
             courseName,
-
-
-            // CONTENT
-
             title,
-
             description,
-
-
-            // ASSESSMENT
-
+            instructions: description,
             maxScore,
-
-
-            // DEADLINE
-
+            totalMarks: maxScore,
             dueDate,
-
-
-            // PUBLICATION STATE
-
-            status:
-                "published",
-
-            published:
-                true,
-
-
-            // SUBMISSION TRACKING
-
-            submissionCount:
-                0,
-
-            submissionStatus:
-                "none",
-
-
-            // GRADING
-
-            gradedCount:
-                0,
-
-            averageScore:
-                0,
-
-
-            // TIMESTAMPS
-
-            createdAt:
-                serverTimestamp(),
-
-            updatedAt:
-                serverTimestamp()
-
+            status,
+            published: status === "published",
+            ...(status === "published" ? { publishedAt: now } : {}),
+            submissionCount: 0,
+            submissionStatus: "none",
+            gradedCount: 0,
+            averageScore: 0,
+            createdAt: now,
+            updatedAt: now
         };
 
-
-        const assignmentRef =
-            await addDoc(
-                collection(
-                    db,
-                    "assignments"
-                ),
-                assignmentData
-            );
-
-
-        console.log(
-            "✓ Assignment created:",
-            assignmentRef.id
-        );
-
-
+        const assignmentRef = await addDoc(collection(db, "assignments"), assignmentData);
+        console.log("Assignment created:", assignmentRef.id);
         showMessage(
-            "Assignment created successfully.",
+            status === "published"
+                ? "Assignment published. It will appear for eligible students enrolled in this course."
+                : "Draft saved. Students cannot see it until you publish it.",
             "success"
         );
 
-
-        // ====================================================
-        // REDIRECT
-        // ====================================================
-
-        setTimeout(() => {
-
-            window.location.href =
-                "assignments.html";
-
-        }, 700);
-
-
+        if (button) button.textContent = "Saved";
+        window.setTimeout(() => {
+            window.location.href = "assignments.html";
+        }, 900);
     } catch (error) {
-
-        console.error(
-            "❌ Failed to create assignment:",
-            error
-        );
-
-
+        console.error("Failed to save assignment:", error);
         showMessage(
-            "Unable to create assignment. Please try again.",
+            error?.code === "permission-denied"
+                ? "Permission denied. Confirm your instructor account is active and verified."
+                : "Unable to save the assignment. Check your connection and try again.",
             "error"
         );
-
-
         if (button) {
-
             button.disabled = false;
-
-            button.innerHTML = `
-                <i data-lucide="save"></i>
-                Create Assignment
-            `;
-
+            button.removeAttribute("aria-busy");
+            button.innerHTML = originalButton || '<i data-lucide="save"></i> Save Assignment';
             refreshIcons();
-
         }
-
     }
-
 }
-
 
 // ============================================================
 // MESSAGE
