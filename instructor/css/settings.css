@@ -858,3 +858,17 @@
     .settings-page .page-header { align-items: stretch; }
     .settings-page #saveSettingsBtn { width: 100%; }
 }
+
+.settings-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+.settings-header-actions .secondary-btn,
+.settings-header-actions .primary-btn { white-space: nowrap; }
+@media (max-width: 760px) {
+    .settings-header-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+    .settings-header-actions #saveSettingsBtn { grid-column: 1 / -1; }
+}
