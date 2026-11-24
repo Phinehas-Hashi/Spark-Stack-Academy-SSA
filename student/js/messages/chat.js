@@ -70,6 +70,8 @@ function renderMessage(message, peerLastReadAt) {
   const row = document.createElement("article");
   row.className = mine ? "message sent" : "message received";
   row.dataset.messageId = message.id;
+  const sentAt = toDate(message.timestamp);
+  row.dataset.createdAt = sentAt ? sentAt.toISOString() : "";
 
   if (message.text) {
     const body = document.createElement("div");
@@ -170,11 +172,11 @@ function startChatListeners() {
     peer.lastReadAt = peerReadAt || null;
 
     messagesBox.querySelectorAll(".message.sent").forEach(row => {
-      const message = snapshotMessageCache.get(row.dataset.messageId);
-      if (!message) return;
       const indicator = row.querySelector(".message-read");
       if (!indicator) return;
-      const read = peerReadMessage(message, peerReadAt);
+      const sentAt = toDate(row.dataset.createdAt);
+      const readAt = toDate(peerReadAt);
+      const read = Boolean(sentAt && readAt && readAt >= sentAt);
       indicator.textContent = read ? "✓✓" : "✓";
       indicator.classList.toggle("is-read", read);
       indicator.setAttribute("aria-label", read ? "Read" : "Sent");
@@ -191,7 +193,6 @@ function startChatListeners() {
   }, error => console.warn("Conversation status listener failed:", error));
 }
 
-const snapshotMessageCache = new Map();
 
 async function loadChat() {
   if (!chatId) throw new Error("Conversation link is missing.");
