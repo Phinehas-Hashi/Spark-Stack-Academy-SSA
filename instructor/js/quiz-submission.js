@@ -1063,7 +1063,8 @@ async function saveGrade() {
 
         const result =
             getResult(
-                percentage
+                percentage,
+                true
             );
 
 
@@ -1107,9 +1108,6 @@ async function saveGrade() {
 
                 instructorFeedback:
                     feedback,
-
-                gradedBy:
-                    instructor.uid,
 
                 gradedBy:
                     instructor.uid,
@@ -1370,7 +1368,8 @@ function calculatePercentage() {
 // ============================================================
 
 function getResult(
-    percentage
+    percentage,
+    isGraded = submission?.status === "graded"
 ) {
 
     const passMark =
@@ -1381,10 +1380,7 @@ function getResult(
         );
 
 
-    if (
-        submission?.status !==
-        "graded"
-    ) {
+    if (!isGraded) {
 
         return {
 
