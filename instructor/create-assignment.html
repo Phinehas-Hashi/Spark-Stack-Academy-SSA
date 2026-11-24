@@ -182,6 +182,7 @@
 
                             <textarea
                                 id="assignmentDescription"
+                                maxlength="20000"
                                 rows="7"
                                 placeholder="Explain what students need to do..."
                                 required
@@ -234,12 +235,23 @@
                                 type="number"
                                 id="maxScore"
                                 min="1"
+                                max="10000"
+                                step="0.5"
                                 value="100"
                                 required
                             >
 
                         </div>
 
+
+                                                <div class="form-group">
+                            <label for="assignmentStatus">Publication</label>
+                            <select id="assignmentStatus" required>
+                                <option value="published" selected>Publish now — visible to enrolled students</option>
+                                <option value="draft">Save as draft — visible only in your instructor portal</option>
+                            </select>
+                            <small class="field-help">Drafts can be reviewed before you publish them.</small>
+                        </div>
 
                     </div>
 
