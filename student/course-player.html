@@ -30,7 +30,7 @@
 
     <link
         rel="stylesheet"
-        href="css/course-player.css?v=20261121-liveclass1"
+        href="css/course-player.css?v=20261124-playerfix2"
     >
 
     <link
@@ -296,6 +296,8 @@
                     id="mobileLessonsBtn"
                     class="mobile-lessons-btn"
                     type="button"
+                    aria-expanded="false"
+                    aria-controls="lessonSidebar"
                 >
 
                     <i data-lucide="list-video"></i>
@@ -697,6 +699,7 @@
                             <textarea
                                 id="lessonNotes"
                                 class="lesson-notes"
+                                maxlength="10000"
                                 placeholder="Write your notes for this lesson..."
                             ></textarea>
 
@@ -770,7 +773,7 @@
 
                                 <i data-lucide="message-circle"></i>
 
-                                Join Discussion
+                                Message Instructor
 
                             </button>
 
@@ -861,13 +864,13 @@
 
 <script
     type="module"
-    src="js/student-app.js"
+    src="js/student-app.js?v=20261124-sidebarfix1"
 ></script>
 
 
 <script
     type="module"
-    src="js/course-player.js?v=20261121-liveclass1"
+    src="js/course-player.js?v=20261124-playerfix2"
 ></script>
 
 

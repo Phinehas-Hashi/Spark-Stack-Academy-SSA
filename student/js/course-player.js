@@ -112,7 +112,7 @@ async function initializeClassroom() {
         else showNoLessons();
     } catch (error) {
         console.error("COURSE PLAYER ERROR:", error);
-        showError("We couldn't load this course. Please refresh and try again.");
+        showError(error?.message || "We could not load this course. Please refresh and try again.");
     }
 }
 
@@ -124,8 +124,9 @@ async function loadCourse() {
 
     if (courseTitle) courseTitle.textContent = course.title || "Course";
     if (courseDescription) courseDescription.textContent = course.description || "Welcome to your classroom.";
-    if (instructorName) instructorName.textContent = course.instructorName || "SSA Instructor";
-    if (instructorAvatar) instructorAvatar.textContent = (course.instructorName || "S").charAt(0).toUpperCase();
+    const teacherName = course.instructorName || course.instructor || course.teacherName || "SSA Instructor";
+    if (instructorName) instructorName.textContent = typeof teacherName === "string" ? teacherName : (teacherName.name || "SSA Instructor");
+    if (instructorAvatar) instructorAvatar.textContent = (typeof teacherName === "string" ? teacherName : teacherName.name || "S").charAt(0).toUpperCase();
     if (classAnnouncement) classAnnouncement.textContent = course.announcement || "No announcements yet.";
 }
 
@@ -159,7 +160,38 @@ async function checkCourseAccess() {
         console.warn("Canonical enrolment check failed:", error);
     }
 
-    // Institution and legacy enrolments live under the student's record.
+    // Some older/imported enrolments are keyed by studentId rather than
+    // userId and do not use the canonical document ID. Query both supported
+    // owner fields so the player matches the Student Courses page.
+    const enrollmentQueries = [
+        query(
+            collection(db, "enrollments"),
+            where("userId", "==", currentUser.uid),
+            where("courseId", "==", courseId)
+        ),
+        query(
+            collection(db, "enrollments"),
+            where("studentId", "==", currentUser.uid),
+            where("courseId", "==", courseId)
+        )
+    ];
+
+    const enrollmentResults = await Promise.allSettled(
+        enrollmentQueries.map(enrollmentQuery => getDocs(enrollmentQuery))
+    );
+
+    for (const result of enrollmentResults) {
+        if (result.status !== "fulfilled") {
+            console.warn("An enrolment lookup was unavailable:", result.reason);
+            continue;
+        }
+
+        if (result.value.docs.some(item => hasEntitlement(item.data()))) {
+            return true;
+        }
+    }
+
+    // Institution and legacy enrolments may also live under the student's record.
     try {
         const nested = await getDoc(doc(db, "students", currentUser.uid, "enrollments", courseId));
         if (nested.exists() && hasEntitlement(nested.data())) return true;
@@ -173,19 +205,39 @@ async function checkCourseAccess() {
 async function loadLessons() {
     lessons = [];
 
-    // courseLessons is the canonical lesson collection.
-    const q = query(
-        collection(db, "courseLessons"),
-        where("courseId", "==", courseId)
+    // New lessons use courseId. Older imported records may use courseID.
+    // Query both supported fields and merge by document ID.
+    const lessonQueries = [
+        query(collection(db, "courseLessons"), where("courseId", "==", courseId)),
+        query(collection(db, "courseLessons"), where("courseID", "==", courseId))
+    ];
+
+    const results = await Promise.allSettled(
+        lessonQueries.map(lessonQuery => getDocs(lessonQuery))
     );
 
-    const snap = await getDocs(q);
+    const byId = new Map();
+    let successfulQueries = 0;
 
-    snap.forEach(item => {
-        const data = item.data() || {};
-        lessons.push({ id: item.id, ...data });
-    });
+    for (const result of results) {
+        if (result.status !== "fulfilled") {
+            console.warn("A course lesson lookup was unavailable:", result.reason);
+            continue;
+        }
 
+        successfulQueries++;
+        result.value.docs.forEach(item => {
+            if (!byId.has(item.id)) {
+                byId.set(item.id, { id: item.id, ...(item.data() || {}) });
+            }
+        });
+    }
+
+    if (!successfulQueries) {
+        throw new Error("Course lessons could not be read. Check student access and Firestore rules.");
+    }
+
+    lessons = [...byId.values()];
     lessons.sort((a, b) => {
         const orderDiff = Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0);
         return orderDiff || String(a.title || "").localeCompare(String(b.title || ""));
@@ -299,7 +351,10 @@ function renderLessons() {
                 <small>${escapeHTML(lesson.duration ? `${lesson.duration} min` : lesson.type || "Lesson")}</small>
             </span>
             <i data-lucide="${completed ? "check-circle" : "play-circle"}"></i>`;
-        button.addEventListener("click", () => showLesson(index));
+        button.addEventListener("click", async () => {
+            await showLesson(index);
+            closeLessonDrawer();
+        });
         lessonList.appendChild(button);
     });
 
@@ -443,6 +498,61 @@ function updateNavigation() {
     }
     refreshIcons();
 }
+
+function openLessonDrawer() {
+    if (window.matchMedia("(max-width: 820px)").matches) {
+        $("lessonSidebar")?.classList.add("open");
+        $("lessonDrawerOverlay")?.classList.add("open");
+        document.body.classList.add("ssa-lesson-drawer-open");
+        $("mobileLessonsBtn")?.setAttribute("aria-expanded", "true");
+    }
+}
+
+function closeLessonDrawer() {
+    $("lessonSidebar")?.classList.remove("open");
+    $("lessonDrawerOverlay")?.classList.remove("open");
+    document.body.classList.remove("ssa-lesson-drawer-open");
+    $("mobileLessonsBtn")?.setAttribute("aria-expanded", "false");
+}
+
+$("mobileLessonsBtn")?.addEventListener("click", openLessonDrawer);
+$("closeLessonsBtn")?.addEventListener("click", closeLessonDrawer);
+$("lessonDrawerOverlay")?.addEventListener("click", closeLessonDrawer);
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeLessonDrawer();
+});
+
+$("fullscreenBtn")?.addEventListener("click", async () => {
+    const target = videoBox || $("lessonPlayerCard");
+    try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else if (target?.requestFullscreen) await target.requestFullscreen();
+        else toast("Fullscreen is not supported by this browser.");
+    } catch (error) {
+        console.warn("Fullscreen request failed:", error);
+        toast("Fullscreen could not be started on this device.");
+    }
+});
+
+$("orientationBtn")?.addEventListener("click", async () => {
+    try {
+        if (!document.fullscreenElement && videoBox?.requestFullscreen) await videoBox.requestFullscreen();
+        if (screen.orientation?.lock) {
+            await screen.orientation.lock("landscape");
+            toast("Landscape orientation enabled.");
+        } else {
+            toast("Use your device rotation setting to switch to landscape.");
+        }
+    } catch (error) {
+        console.warn("Orientation lock unavailable:", error);
+        toast("Allow fullscreen first, then rotate your device to landscape.");
+    }
+});
+
+$("discussionBtn")?.addEventListener("click", () => {
+    toast("Class discussion is not enabled yet. Opening Messages instead.");
+    window.setTimeout(() => { window.location.href = "messages.html"; }, 700);
+});
 
 previousLessonBtn?.addEventListener("click", () => showLesson(currentLessonIndex - 1));
 nextLessonBtn?.addEventListener("click", () => showLesson(currentLessonIndex + 1));

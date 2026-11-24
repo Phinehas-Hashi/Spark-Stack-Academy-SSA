@@ -5,7 +5,7 @@
 
 import "./js/founder-app.js";
 
-import { db, auth }
+import { app, db, auth, storage }
 
 from "../js/firebase.js";
 
@@ -22,6 +22,15 @@ onSnapshot,
 setDoc
 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const paymentFunctions = getFunctions(app, "us-central1");
+import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+const reviewManualPayment = httpsCallable(paymentFunctions, "reviewStudentManualPayment");
+const getManualSettings = httpsCallable(paymentFunctions, "getManualMpesaSettings");
+const saveManualSettings = httpsCallable(paymentFunctions, "saveManualMpesaSettings");
+
 
 import {
 
@@ -123,16 +132,62 @@ doc(db,"system","payment_settings");
    INITIALIZER
 =================================== */
 
-async function initializePayments(){
+async function initializePayments() {
+  await Promise.allSettled([loadGatewaySettings(), loadManualMpesaSettings()]);
+  listenForTransactions();
+  attachEvents();
+}
 
-loadGatewaySettings();
+async function loadManualMpesaSettings() {
+  const status = document.getElementById("manualMpesaSettingsStatus");
+  try {
+    const result = await getManualSettings();
+    const data = result.data || {};
+    const fields = {
+      manualMpesaEnabled: data.enabled === true,
+      manualMpesaMethod: data.method || "paybill",
+      manualMpesaBusinessName: data.businessName || "",
+      manualMpesaNumber: data.number || "",
+      manualMpesaAccount: data.account || "",
+      manualMpesaInstructions: data.instructions || ""
+    };
+    for (const [id, value] of Object.entries(fields)) {
+      const node = document.getElementById(id);
+      if (!node) continue;
+      if (node.type === "checkbox") node.checked = value;
+      else node.value = value;
+    }
+    if (status) status.textContent = data.enabled ? "Manual M-Pesa is enabled." : "Manual M-Pesa is currently disabled.";
+  } catch (error) {
+    console.error("Manual M-Pesa settings load failed:", error);
+    if (status) status.textContent = "Could not load manual M-Pesa settings. Check Founder access.";
+  }
+}
 
-listenForTransactions();
-
-loadPaymentSettings();
-
-attachEvents();
-
+async function saveManualMpesaSettings() {
+  const button = document.getElementById("saveManualMpesaSettings");
+  const status = document.getElementById("manualMpesaSettingsStatus");
+  if (!button) return;
+  button.disabled = true;
+  button.textContent = "Saving…";
+  try {
+    await saveManualSettings({
+      enabled: document.getElementById("manualMpesaEnabled")?.checked === true,
+      method: document.getElementById("manualMpesaMethod")?.value || "paybill",
+      businessName: document.getElementById("manualMpesaBusinessName")?.value.trim() || "",
+      number: document.getElementById("manualMpesaNumber")?.value.trim() || "",
+      account: document.getElementById("manualMpesaAccount")?.value.trim() || "",
+      instructions: document.getElementById("manualMpesaInstructions")?.value.trim() || ""
+    });
+    if (status) status.textContent = "Manual M-Pesa instructions saved.";
+    showToast("Manual M-Pesa instructions saved.", "success");
+  } catch (error) {
+    console.error("Manual M-Pesa settings save failed:", error);
+    if (status) status.textContent = error.message || "Could not save manual M-Pesa settings.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Save Manual M-Pesa Instructions";
+  }
 }
 
 
@@ -141,6 +196,7 @@ attachEvents();
 =================================== */
 
 function attachEvents(){
+  document.getElementById("saveManualMpesaSettings")?.addEventListener("click", saveManualMpesaSettings);
 
 refreshBtn?.addEventListener(
 
@@ -150,7 +206,7 @@ refreshBtn?.addEventListener(
 
 loadGatewaySettings();
 
-loadPaymentSettings();
+loadManualMpesaSettings();
 
 listenForTransactions();
 
@@ -475,106 +531,86 @@ error
    RENDER TRANSACTIONS
 =================================== */
 
-function renderTransactions(data){
+function renderTransactions(data) {
+  transactionTable.innerHTML = "";
+  if (!data.length) {
+    transactionTable.innerHTML = '<tr><td colspan="10" class="empty-table">No transactions found.</td></tr>';
+    return;
+  }
 
-transactionTable.innerHTML = "";
+  data.forEach(payment => {
+    const row = document.createElement("tr");
+    const created = payment.createdAt?.toDate ? formatDate(payment.createdAt.toDate()) : "-";
+    const safe = value => String(value ?? "-").replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+    const needsReview = payment.method === "manual_mpesa" && payment.status === "pending_review";
+    row.innerHTML = `
+      <td>${safe(payment.receiptNumber || payment.manualReceiptCode || "-")}</td>
+      <td>${safe(payment.studentName || payment.studentEmail || "-")}</td>
+      <td>${safe(payment.admissionNumber || "-")}</td>
+      <td>${safe(payment.paymentType || payment.purchaseType || "-")}</td>
+      <td>${safe(payment.method || "-")}</td>
+      <td>KES ${Number(payment.amount || 0).toLocaleString()}</td>
+      <td>${safe(payment.transactionId || payment.mpesaReceiptNumber || "-")}</td>
+      <td><span class="status ${safe(payment.status)}">${safe(payment.status)}</span></td>
+      <td>${safe(created)}</td>
+      <td><div class="table-actions">
+        <button class="table-action" type="button" data-preview-payment="${safe(payment.id)}">View</button>
+        ${payment.proofStoragePath ? `<button class="table-action" type="button" data-proof-path="${safe(payment.proofStoragePath)}">Proof</button>` : ""}
+        ${needsReview ? `
+          <button class="table-action" type="button" data-review-payment="${safe(payment.id)}" data-decision="approve">Approve</button>
+          <button class="table-action" type="button" data-review-payment="${safe(payment.id)}" data-decision="reject">Reject</button>
+        ` : ""}
+      </div></td>`;
+    transactionTable.appendChild(row);
+  });
 
-if(data.length===0){
-
-transactionTable.innerHTML = `
-
-<tr>
-
-<td colspan="10"
-class="empty-table">
-
-No transactions found.
-
-</td>
-
-</tr>
-
-`;
-
-return;
-
+  transactionTable.querySelectorAll("[data-preview-payment]").forEach(button => {
+    button.addEventListener("click", () => previewReceipt(button.dataset.previewPayment));
+  });
+  transactionTable.querySelectorAll("[data-proof-path]").forEach(button => {
+    button.addEventListener("click", () => openManualPaymentProof(button.dataset.proofPath, button));
+  });
+  transactionTable.querySelectorAll("[data-review-payment]").forEach(button => {
+    button.addEventListener("click", () => reviewManualStudentPayment(button.dataset.reviewPayment, button.dataset.decision, button));
+  });
 }
 
-data.forEach((payment)=>{
-
-const row = document.createElement("tr");
-
-row.innerHTML = `
-
-<td>${payment.receiptNumber || "-"}</td>
-
-<td>${payment.studentName || "-"}</td>
-
-<td>${payment.admissionNumber || "-"}</td>
-
-<td>${payment.paymentType || "-"}</td>
-
-<td>${payment.method || "-"}</td>
-
-<td>KES ${Number(payment.amount || 0).toLocaleString()}</td>
-
-<td>${payment.transactionId || "-"}</td>
-
-<td>
-
-<span class="status ${payment.status}">
-
-${payment.status}
-
-</span>
-
-</td>
-
-<td>
-
-${payment.createdAt
-
-?
-
-formatDate(
-
-payment.createdAt.toDate()
-
-)
-
-:
-
-"-"
-
+async function openManualPaymentProof(path, button) {
+  if (!path || !path.startsWith("student-payment-proofs/")) return;
+  button.disabled = true;
+  try {
+    const url = await getDownloadURL(storageRef(storage, path));
+    window.open(url, "_blank", "noopener,noreferrer");
+  } catch (error) {
+    console.error("Manual payment proof could not be opened:", error);
+    window.ssaToast?.("Payment proof could not be opened.", "error", "Payment Review");
+  } finally {
+    button.disabled = false;
+  }
 }
 
-</td>
-
-<td>
-
-<div class="table-actions">
-
-<button
-class="table-action"
-
-onclick="previewReceipt('${payment.id}')">
-
-View
-
-</button>
-
-</div>
-
-</td>
-
-`;
-
-transactionTable.appendChild(row);
-
-});
-
+async function reviewManualStudentPayment(paymentId, decision, button) {
+  if (!paymentId || !["approve", "reject"].includes(decision)) return;
+  const promptText = decision === "approve"
+    ? "Optional review note (confirm the receipt against the M-Pesa statement before approving):"
+    : "Reason for rejecting this M-Pesa receipt:";
+  const note = window.prompt(promptText, "");
+  if (note === null) return;
+  if (decision === "reject" && !note.trim()) {
+    window.ssaToast?.("Add a reason before rejecting a payment.", "error", "Payment Review");
+    return;
+  }
+  button.disabled = true;
+  try {
+    await reviewManualPayment({ paymentId, decision, note: note.trim() });
+    window.ssaToast?.(decision === "approve" ? "Payment verified and access activated." : "Payment rejected.", "success", "Payment Review");
+  } catch (error) {
+    console.error("Manual student payment review failed:", error);
+    window.ssaToast?.(error.message || "Payment review failed.", "error", "Payment Review");
+    button.disabled = false;
+  }
 }
-
 
 /* ===================================
    PAYMENT KPIs
@@ -606,13 +642,13 @@ todayCount++;
 
 }
 
-if(payment.status==="pending"){
+if(["pending","pending_review","verification_pending"].includes(payment.status)){
 
 pending++;
 
 }
 
-if(payment.status==="completed"){
+if(["completed","paid"].includes(payment.status)){
 
 successful++;
 
@@ -685,7 +721,7 @@ const matchesSearch =
 
 ||
 
-(payment.receiptNumber || "")
+(payment.receiptNumber || payment.manualReceiptCode || "")
 
 .toLowerCase()
 
@@ -693,7 +729,7 @@ const matchesSearch =
 
 ||
 
-(payment.transactionId || "")
+(payment.transactionId || payment.mpesaReceiptNumber || "" )
 
 .toLowerCase()
 
@@ -737,7 +773,7 @@ const payment =
 paymentDoc.data();
 
 document.getElementById("receiptNumber").textContent =
-payment.receiptNumber || "-";
+payment.receiptNumber || payment.manualReceiptCode || "-";
 
 document.getElementById("receiptDate").textContent =
 payment.createdAt
@@ -757,7 +793,7 @@ document.getElementById("receiptMethod").textContent =
 payment.method || "-";
 
 document.getElementById("receiptTransaction").textContent =
-payment.transactionId || "-";
+payment.transactionId || payment.mpesaReceiptNumber || payment.manualReceiptCode || "-";
 
 document.getElementById("receiptAmount").textContent =
 `KES ${Number(payment.amount || 0).toLocaleString()}`;
@@ -914,4 +950,3 @@ function showToast(message, type="success") {
     console.log(`[SSA Payments:${type}] ${message}`);
 }
 
-initPayments();

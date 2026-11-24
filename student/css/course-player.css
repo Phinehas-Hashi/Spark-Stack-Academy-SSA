@@ -973,3 +973,40 @@ RESPONSIVE
 .live-class-join{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;padding:10px 14px;border-radius:9px;background:var(--cp-blue);color:#fff;text-decoration:none;font-size:12px;font-weight:700}
 .live-class-join:hover{background:var(--cp-blue-dark)}
 @media(max-width:600px){.live-class-session{align-items:flex-start;flex-direction:column}.live-class-join{width:100%;justify-content:center}}
+
+@media (max-width: 820px) {
+  .lesson-sidebar {
+    z-index: 10001;
+    left: 0;
+    transform: translateX(-105%);
+    transition: transform .25s ease;
+    visibility: hidden;
+    pointer-events: none;
+    max-height: 100dvh;
+    overflow-y: auto;
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
+  .lesson-sidebar.open {
+    left: 0;
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .lesson-drawer-overlay {
+    z-index: 10000;
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .2s ease, visibility .2s ease;
+  }
+  .lesson-drawer-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  body.ssa-lesson-drawer-open {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}

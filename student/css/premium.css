@@ -830,3 +830,18 @@
   font-size: 12px;
   line-height: 1.5;
 }
+
+.premium-checkout-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #351078;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.premium-checkout-link:hover { background: #21064f; }

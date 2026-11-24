@@ -49,6 +49,36 @@ service firebase.storage {
         && request.resource.size < 10 * 1024 * 1024;
     }
 
+    function isActiveStudent(studentId) {
+      return signedIn()
+        && request.auth.uid == studentId
+        && firestore.exists(/databases/(default)/documents/users/$(studentId))
+        && firestore.get(/databases/(default)/documents/users/$(studentId)).data.get('role', '') == 'student'
+        && firestore.get(/databases/(default)/documents/users/$(studentId)).data.get('status', '') == 'active'
+        && firestore.get(/databases/(default)/documents/users/$(studentId)).data.get('active', true) == true;
+    }
+
+    function isPaymentReviewer() {
+      return isFounder()
+        || (
+          signedIn()
+          && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+          && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.get('role', '') in ['admin', 'administrator', 'moderator']
+          && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.get('status', '') == 'active'
+          && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.get('active', false) == true
+        );
+    }
+
+    match /student-payment-proofs/{studentId}/{paymentId}/{fileName} {
+      allow create: if isActiveStudent(studentId)
+        && resource == null
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)')
+        && fileName.matches('.*\\.(jpg|jpeg|png|webp)');
+      allow get: if isActiveStudent(studentId) || isPaymentReviewer();
+      allow list, update, delete: if false;
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

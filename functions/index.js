@@ -9,6 +9,8 @@ const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 initializeApp();
 const db = getFirestore();
 const adminAuth = getAuth();
+const { getStorage } = require("firebase-admin/storage");
+const adminStorage = getStorage();
 const platformRef = db.doc("platform_controls/global");
 
 // Safaricom Daraja credentials are managed in Firebase Secret Manager.
@@ -148,7 +150,7 @@ function normalizeKenyanPhone(value) {
   if (phone.startsWith("0")) phone = "254" + phone.slice(1);
   if (phone.startsWith("7") || phone.startsWith("1")) phone = "254" + phone;
   if (!/^254[17]\d{8}$/.test(phone)) {
-    throw new HttpsError("invalid-argument", "The institution contact number must be a valid Kenyan M-Pesa number, for example 0712345678 or 254712345678.");
+    throw new HttpsError("invalid-argument", "Enter a valid Kenyan M-Pesa number, for example 0712345678 or 254712345678.");
   }
   return phone;
 }
@@ -444,6 +446,529 @@ exports.reconcileInstitutionOnboardingPayments = onSchedule({
   }
 });
 
+
+
+// ============================================================
+// STUDENT PAYMENTS — COURSE + PREMIUM
+// Both M-Pesa STK Push and manual receipt review use the same
+// server-owned payment ledger and entitlement activation path.
+// ============================================================
+
+async function requireActiveStudent(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in with your student account.");
+  const snap = await db.doc("users/" + uid).get();
+  const user = snap.exists ? snap.data() : {};
+  if (safeText(user.role).toLowerCase() !== "student"
+      || user.status !== "active" || user.active === false) {
+    throw new HttpsError("permission-denied", "An active student account is required.");
+  }
+  return { uid, user };
+}
+
+async function resolveStudentPurchase(uid, data) {
+  const purchaseType = safeText(data.purchaseType).toLowerCase();
+  if (purchaseType === "course") {
+    const courseId = safeText(data.courseId);
+    if (!courseId) throw new HttpsError("invalid-argument", "Course ID is required.");
+    const courseSnap = await db.doc("courses/" + courseId).get();
+    if (!courseSnap.exists) throw new HttpsError("not-found", "Course not found.");
+    const course = courseSnap.data();
+    if (course.published !== true && safeText(course.status).toLowerCase() !== "published") {
+      throw new HttpsError("failed-precondition", "This course is not currently available for purchase.");
+    }
+    const amount = Number(course.price);
+    if (!Number.isSafeInteger(amount) || amount < 1 || safeText(course.currency, "KES").toUpperCase() !== "KES") {
+      throw new HttpsError("failed-precondition", "This course does not have a valid KES payment price.");
+    }
+    const enrollmentRef = db.doc("enrollments/" + uid + "_" + courseId);
+    const enrollmentSnap = await enrollmentRef.get();
+    if (enrollmentSnap.exists) {
+      const enrollment = enrollmentSnap.data();
+      if (["active", "approved", "completed", "paid"].includes(safeText(enrollment.status).toLowerCase())
+          && ["paid", "free"].includes(safeText(enrollment.paymentStatus).toLowerCase())) {
+        throw new HttpsError("already-exists", "You already have access to this course.");
+      }
+    }
+    return {
+      purchaseType, courseId, courseTitle: safeText(course.title, "Academy Course"),
+      amount, currency: "KES", plan: "", billingPeriod: ""
+    };
+  }
+
+  if (purchaseType === "premium") {
+    const plan = safeText(data.plan).toLowerCase();
+    const billingPeriod = safeText(data.billingPeriod).toLowerCase();
+    if (!["learner_plus", "pro_learner", "career_accelerator"].includes(plan)
+        || !["monthly", "quarterly"].includes(billingPeriod)) {
+      throw new HttpsError("invalid-argument", "Choose a valid membership plan and billing period.");
+    }
+    const pricingSnap = await db.doc("premiumPricing/global").get();
+    const pricing = pricingSnap.exists ? pricingSnap.data() : {};
+    const planData = pricing.plans?.[plan] || {};
+    const priceKey = billingPeriod === "monthly" ? "monthlyPrice" : "quarterlyPrice";
+    const amount = Number(planData[priceKey]);
+    if (pricing.published !== true || planData.enabled === false
+        || !Number.isSafeInteger(amount) || amount < 1
+        || safeText(pricing.currency, "KSh") !== "KSh") {
+      throw new HttpsError("failed-precondition", "This membership price is not currently published by the Founder.");
+    }
+    return {
+      purchaseType, courseId: "", courseTitle: "Premium — " + safeText(planData.name, plan),
+      amount, currency: "KES", plan, billingPeriod
+    };
+  }
+
+  throw new HttpsError("invalid-argument", "Unsupported student payment type.");
+}
+
+async function createStudentPaymentRecord({ uid, user, purchase, method, phoneNumber, status }) {
+  const paymentRef = db.collection("payments").doc();
+  const now = Timestamp.now();
+  await paymentRef.set({
+    paymentId: paymentRef.id,
+    userId: uid,
+    studentId: uid,
+    studentName: safeText(user.name || user.displayName || user.fullName, requestNameFallback(user)),
+    studentEmail: safeText(user.email),
+    admissionNumber: safeText(user.admissionNumber),
+    purchaseType: purchase.purchaseType,
+    paymentType: purchase.purchaseType === "course" ? "course" : "premium_membership",
+    courseId: purchase.courseId || null,
+    course: purchase.courseTitle,
+    plan: purchase.plan || null,
+    billingPeriod: purchase.billingPeriod || null,
+    amount: purchase.amount,
+    currency: purchase.currency,
+    method,
+    provider: method === "mpesa_stk" ? "safaricom_daraja" : "manual_mpesa",
+    phoneNumber: phoneNumber || "",
+    status,
+    createdAt: now,
+    updatedAt: now
+  });
+  return paymentRef;
+}
+
+function requestNameFallback(user) {
+  return safeText(user.email, "Student");
+}
+
+function studentDarajaCallbackUrl() {
+  const projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
+  if (!projectId) throw new Error("Firebase project ID is unavailable for the student M-Pesa callback URL.");
+  return "https://us-central1-" + projectId + ".cloudfunctions.net/darajaStudentCallback";
+}
+
+exports.getStudentPaymentQuote = onCall(async request => {
+  const { uid } = await requireActiveStudent(request);
+  const purchase = await resolveStudentPurchase(uid, request.data || {});
+  const settingsSnap = await db.doc("system/payment_settings").get();
+  const manualMpesa = settingsSnap.exists ? (settingsSnap.data().manualMpesa || {}) : {};
+  return {
+    purchaseType: purchase.purchaseType,
+    courseId: purchase.courseId || null,
+    plan: purchase.plan || null,
+    billingPeriod: purchase.billingPeriod || null,
+    title: purchase.courseTitle,
+    amount: purchase.amount,
+    currency: purchase.currency,
+    manualMpesa: {
+      enabled: manualMpesa.enabled === true,
+      method: safeText(manualMpesa.method),
+      businessName: safeText(manualMpesa.businessName),
+      number: safeText(manualMpesa.number),
+      account: safeText(manualMpesa.account),
+      instructions: safeText(manualMpesa.instructions)
+    }
+  };
+});
+
+exports.initiateStudentStkPayment = onCall({ secrets: DARAJA_SECRETS }, async request => {
+  const { uid, user } = await requireActiveStudent(request);
+  const phoneNumber = normalizeKenyanPhone(request.data?.phoneNumber);
+  const purchase = await resolveStudentPurchase(uid, request.data || {});
+  const paymentRef = await createStudentPaymentRecord({
+    uid, user, purchase, method: "mpesa_stk", phoneNumber, status: "initiating"
+  });
+
+  try {
+    const token = await getDarajaAccessToken();
+    const shortcode = MPESA_SHORTCODE.value();
+    const passkey = MPESA_PASSKEY.value();
+    if (!shortcode || !passkey) throw new HttpsError("failed-precondition", "M-Pesa shortcode and passkey are not configured.");
+    const timestamp = darajaTimestamp();
+    const password = Buffer.from(shortcode + passkey + timestamp).toString("base64");
+    const response = await fetch(darajaBaseUrl() + "/mpesa/stkpush/v1/processrequest", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        BusinessShortCode: shortcode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: MPESA_TRANSACTION_TYPE.value() || "CustomerPayBillOnline",
+        Amount: purchase.amount,
+        PartyA: phoneNumber,
+        PartyB: shortcode,
+        PhoneNumber: phoneNumber,
+        CallBackURL: studentDarajaCallbackUrl(),
+        AccountReference: ("SSA" + paymentRef.id.replace(/[^a-zA-Z0-9]/g, "").slice(-9)).slice(0, 12),
+        TransactionDesc: purchase.purchaseType === "course" ? "SSA Course Fee" : "SSA Premium"
+      })
+    });
+    const result = await response.json();
+    if (!response.ok || String(result.ResponseCode) !== "0" || !result.CheckoutRequestID) {
+      throw new Error("Safaricom did not accept the STK Push request.");
+    }
+    await paymentRef.set({
+      status: "pending",
+      merchantRequestId: safeText(result.MerchantRequestID),
+      checkoutRequestId: safeText(result.CheckoutRequestID),
+      customerMessage: safeText(result.CustomerMessage, "Check your phone and enter your M-Pesa PIN."),
+      updatedAt: Timestamp.now()
+    }, { merge: true });
+    return {
+      success: true, paymentId: paymentRef.id, status: "pending",
+      customerMessage: safeText(result.CustomerMessage, "Check your phone and enter your M-Pesa PIN.")
+    };
+  } catch (error) {
+    await paymentRef.set({
+      status: "initiation_failed",
+      failureMessage: "The M-Pesa prompt could not be started.",
+      updatedAt: Timestamp.now()
+    }, { merge: true });
+    if (error instanceof HttpsError) throw error;
+    console.error("Student STK initiation failed:", error.message);
+    throw new HttpsError("unavailable", "The M-Pesa prompt could not be sent. You can retry or use manual M-Pesa submission.");
+  }
+});
+
+exports.getManualMpesaSettings = onCall(async request => {
+  await requireFounder(request);
+  const snap = await db.doc("system/payment_settings").get();
+  const settings = snap.exists ? (snap.data().manualMpesa || {}) : {};
+  return {
+    enabled: settings.enabled === true,
+    method: safeText(settings.method, "paybill"),
+    businessName: safeText(settings.businessName),
+    number: safeText(settings.number),
+    account: safeText(settings.account),
+    instructions: safeText(settings.instructions)
+  };
+});
+
+exports.saveManualMpesaSettings = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data || {};
+  const enabled = input.enabled === true;
+  const method = safeText(input.method).toLowerCase();
+  const businessName = safeText(input.businessName).slice(0, 100);
+  const number = safeText(input.number).replace(/[^0-9]/g, "").slice(0, 20);
+  const account = safeText(input.account).slice(0, 80);
+  const instructions = safeText(input.instructions).slice(0, 1000);
+  if (enabled && !["paybill", "till", "other"].includes(method)) {
+    throw new HttpsError("invalid-argument", "Choose Paybill, Buy Goods Till or Other.");
+  }
+  if (enabled && (!businessName || !instructions || (method !== "other" && number.length < 5))) {
+    throw new HttpsError("invalid-argument", "Add the business name, payment number and clear payment instructions before enabling manual M-Pesa.");
+  }
+  await db.doc("system/payment_settings").set({
+    manualMpesa: { enabled, method, businessName, number, account, instructions, updatedAt: Timestamp.now(), updatedBy: founder.uid },
+    updatedAt: Timestamp.now()
+  }, { merge: true });
+  await db.collection("audit_logs").add({
+    action: "manual_mpesa_settings_updated", actorId: founder.uid,
+    enabled, method, createdAt: Timestamp.now()
+  });
+  return { success: true, enabled };
+});
+
+exports.submitStudentManualPayment = onCall(async request => {
+  const { uid, user } = await requireActiveStudent(request);
+  const settingsSnap = await db.doc("system/payment_settings").get();
+  const manualMpesa = settingsSnap.exists ? (settingsSnap.data().manualMpesa || {}) : {};
+  if (manualMpesa.enabled !== true) {
+    throw new HttpsError("failed-precondition", "Manual M-Pesa submission is not currently configured by the Founder.");
+  }
+  const purchase = await resolveStudentPurchase(uid, request.data || {});
+  const receiptCode = safeText(request.data?.receiptCode).toUpperCase().replace(/\s+/g, "");
+  const payerPhone = normalizeKenyanPhone(request.data?.phoneNumber);
+  if (!/^[A-Z0-9]{8,16}$/.test(receiptCode)) {
+    throw new HttpsError("invalid-argument", "Enter the M-Pesa receipt code exactly as shown in your confirmation message.");
+  }
+  const receiptRef = db.doc("manualMpesaReceipts/" + receiptCode);
+  const paymentRef = db.collection("payments").doc();
+  const now = Timestamp.now();
+  await db.runTransaction(async transaction => {
+    const existing = await transaction.get(receiptRef);
+    if (existing.exists) throw new HttpsError("already-exists", "This M-Pesa receipt code has already been submitted.");
+    transaction.create(receiptRef, {
+      receiptCode, paymentId: paymentRef.id, userId: uid,
+      status: "pending_review", createdAt: now
+    });
+    transaction.create(paymentRef, {
+      paymentId: paymentRef.id,
+      userId: uid, studentId: uid,
+      studentName: safeText(user.name || user.displayName || user.fullName, requestNameFallback(user)),
+      studentEmail: safeText(user.email),
+      admissionNumber: safeText(user.admissionNumber),
+      purchaseType: purchase.purchaseType,
+      paymentType: purchase.purchaseType === "course" ? "course" : "premium_membership",
+      courseId: purchase.courseId || null,
+      course: purchase.courseTitle,
+      plan: purchase.plan || null,
+      billingPeriod: purchase.billingPeriod || null,
+      amount: purchase.amount, currency: purchase.currency,
+      method: "manual_mpesa", provider: "manual_mpesa",
+      phoneNumber: payerPhone, manualReceiptCode: receiptCode,
+      status: "pending_review",
+      createdAt: now, updatedAt: now
+    });
+  });
+  return { success: true, paymentId: paymentRef.id, status: "pending_review" };
+});
+
+async function activateStudentPayment(paymentRef, payment, verification) {
+  const now = Timestamp.now();
+  const courseRef = payment.purchaseType === "course"
+    ? db.doc("enrollments/" + payment.userId + "_" + payment.courseId) : null;
+  const subscriptionRef = payment.purchaseType === "premium"
+    ? db.doc("premiumSubscriptions/" + payment.userId) : null;
+
+  await db.runTransaction(async transaction => {
+    const paymentSnap = await transaction.get(paymentRef);
+    if (!paymentSnap.exists) throw new Error("Student payment record was not found.");
+    if (paymentSnap.data().status === "paid" || paymentSnap.data().status === "completed") return;
+    if (courseRef) {
+      const enrollmentSnap = await transaction.get(courseRef);
+      if (!enrollmentSnap.exists) {
+        transaction.create(courseRef, {
+          userId: payment.userId, studentId: payment.userId,
+          courseId: payment.courseId, courseName: payment.course,
+          status: "active", paymentStatus: "paid", source: "student_payment",
+          paymentId: paymentRef.id, amountPaid: payment.amount,
+          currency: payment.currency, enrolledAt: now, createdAt: now, updatedAt: now
+        });
+      } else {
+        const existing = enrollmentSnap.data();
+        if (safeText(existing.paymentStatus).toLowerCase() !== "paid"
+            && !["active", "approved", "completed"].includes(safeText(existing.status).toLowerCase())) {
+          transaction.set(courseRef, {
+            userId: payment.userId, studentId: payment.userId,
+            courseId: payment.courseId, courseName: payment.course,
+            status: "active", paymentStatus: "paid", source: "student_payment",
+            paymentId: paymentRef.id, amountPaid: payment.amount,
+            currency: payment.currency, enrolledAt: now, updatedAt: now
+          }, { merge: true });
+        }
+      }
+    }
+    if (subscriptionRef) {
+      const subscriptionSnap = await transaction.get(subscriptionRef);
+      const current = subscriptionSnap.exists ? subscriptionSnap.data() : {};
+      const nowMillis = now.toMillis();
+      const existingExpiry = current.expiresAt?.toMillis ? current.expiresAt.toMillis() : 0;
+      const startMillis = Math.max(nowMillis, existingExpiry);
+      const durationDays = payment.billingPeriod === "quarterly" ? 90 : 30;
+      transaction.set(subscriptionRef, {
+        status: "active", plan: payment.plan, source: "payment",
+        billingPeriod: payment.billingPeriod,
+        startsAt: current.status === "active" && existingExpiry > nowMillis ? current.startsAt || now : now,
+        expiresAt: Timestamp.fromMillis(startMillis + durationDays * 86400000),
+        lastPaymentId: paymentRef.id, updatedAt: now
+      }, { merge: true });
+    }
+    transaction.set(paymentRef, {
+      status: "paid", verificationMethod: verification.method,
+      mpesaReceiptNumber: verification.receiptCode || null,
+      transactionDate: verification.transactionDate || null,
+      verifiedAt: now, updatedAt: now
+    }, { merge: true });
+  });
+}
+
+exports.attachStudentPaymentProof = onCall(async request => {
+  const { uid } = await requireActiveStudent(request);
+  const paymentId = safeText(request.data?.paymentId);
+  const storagePath = safeText(request.data?.storagePath);
+  const expectedPrefix = "student-payment-proofs/" + uid + "/" + paymentId + "/";
+  if (!paymentId || !storagePath.startsWith(expectedPrefix)
+      || !/\.(jpg|jpeg|png|webp)$/i.test(storagePath)) {
+    throw new HttpsError("invalid-argument", "The payment proof path is invalid.");
+  }
+  const paymentRef = db.doc("payments/" + paymentId);
+  const paymentSnap = await paymentRef.get();
+  if (!paymentSnap.exists) throw new HttpsError("not-found", "Payment record not found.");
+  const payment = paymentSnap.data();
+  let proofMetadata;
+  try {
+    const [metadata] = await adminStorage.bucket().file(storagePath).getMetadata();
+    proofMetadata = metadata;
+  } catch (_) {
+    throw new HttpsError("failed-precondition", "Upload the M-Pesa confirmation screenshot before submitting proof.");
+  }
+  const proofSize = Number(proofMetadata.size || 0);
+  if (!/^image\/(jpeg|png|webp)$/.test(safeText(proofMetadata.contentType))
+      || proofSize < 1 || proofSize > 5 * 1024 * 1024) {
+    throw new HttpsError("failed-precondition", "The uploaded proof must be a valid image no larger than 5 MB.");
+  }
+  if (payment.userId !== uid || payment.method !== "manual_mpesa" || payment.status !== "pending_review") {
+    throw new HttpsError("permission-denied", "This payment cannot accept proof from this account.");
+  }
+  await paymentRef.set({
+    proofStoragePath: storagePath,
+    proofUploadedAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
+  }, { merge: true });
+  return { success: true };
+});
+
+exports.reviewStudentManualPayment = onCall(async request => {
+  const reviewer = await requireInstitutionReviewer(request);
+  const paymentId = safeText(request.data?.paymentId);
+  const decision = safeText(request.data?.decision).toLowerCase();
+  const note = safeText(request.data?.note).slice(0, 500);
+  if (!paymentId || !["approve", "reject"].includes(decision)) {
+    throw new HttpsError("invalid-argument", "Choose a payment and an approve or reject decision.");
+  }
+  const paymentRef = db.doc("payments/" + paymentId);
+  const paymentSnap = await paymentRef.get();
+  if (!paymentSnap.exists) throw new HttpsError("not-found", "Payment record not found.");
+  const payment = paymentSnap.data();
+  if (payment.method !== "manual_mpesa" || payment.status !== "pending_review") {
+    throw new HttpsError("failed-precondition", "This payment is not awaiting manual M-Pesa review.");
+  }
+  if (decision === "approve" && !safeText(payment.proofStoragePath)) {
+    throw new HttpsError("failed-precondition", "A payment proof image must be uploaded before approval.");
+  }
+  if (decision === "reject") {
+    await paymentRef.set({
+      status: "rejected", reviewNote: note, reviewedBy: reviewer.uid,
+      reviewedAt: Timestamp.now(), updatedAt: Timestamp.now()
+    }, { merge: true });
+    if (payment.manualReceiptCode) {
+      await db.doc("manualMpesaReceipts/" + payment.manualReceiptCode).set({
+        status: "rejected", reviewedBy: reviewer.uid, reviewedAt: Timestamp.now()
+      }, { merge: true });
+    }
+    await db.collection("audit_logs").add({
+      action: "student_manual_mpesa_payment_rejected", actorId: reviewer.uid,
+      targetId: payment.userId, paymentId, receiptCode: payment.manualReceiptCode || "",
+      amount: payment.amount, currency: payment.currency, reviewNote: note,
+      createdAt: Timestamp.now()
+    });
+    return { success: true, status: "rejected" };
+  }
+  await activateStudentPayment(paymentRef, payment, {
+    method: "manual_admin_verification",
+    receiptCode: payment.manualReceiptCode
+  });
+  await paymentRef.set({
+    reviewedBy: reviewer.uid, reviewedAt: Timestamp.now(),
+    reviewNote: note, status: "paid", updatedAt: Timestamp.now()
+  }, { merge: true });
+  if (payment.manualReceiptCode) {
+    await db.doc("manualMpesaReceipts/" + payment.manualReceiptCode).set({
+      status: "verified", reviewedBy: reviewer.uid, reviewedAt: Timestamp.now()
+    }, { merge: true });
+  }
+  await db.collection("audit_logs").add({
+    action: "student_manual_mpesa_payment_verified", actorId: reviewer.uid,
+    targetId: payment.userId, paymentId, amount: payment.amount,
+    currency: payment.currency, receiptCode: payment.manualReceiptCode || "",
+    createdAt: Timestamp.now()
+  });
+  return { success: true, status: "paid" };
+});
+
+exports.darajaStudentCallback = onRequest({ secrets: DARAJA_SECRETS, invoker: "public" }, async (req, res) => {
+  try {
+    const callback = req.body?.Body?.stkCallback;
+    const checkoutRequestId = safeText(callback?.CheckoutRequestID);
+    if (!checkoutRequestId) { res.status(400).json({ received: false }); return; }
+    const matches = await db.collection("payments")
+      .where("checkoutRequestId", "==", checkoutRequestId).limit(1).get();
+    if (matches.empty) { res.status(200).json({ ResultCode: 0, ResultDesc: "Callback acknowledged." }); return; }
+    const paymentDoc = matches.docs[0];
+    const payment = paymentDoc.data();
+    if (payment.status === "paid") { res.status(200).json({ ResultCode: 0, ResultDesc: "Already processed." }); return; }
+    if (Number(callback.ResultCode) !== 0) {
+      await paymentDoc.ref.set({
+        status: "failed", resultCode: Number(callback.ResultCode),
+        resultDescription: safeText(callback.ResultDesc).slice(0, 250),
+        updatedAt: Timestamp.now()
+      }, { merge: true });
+      res.status(200).json({ ResultCode: 0, ResultDesc: "Callback acknowledged." });
+      return;
+    }
+    const metadataItems = callback.CallbackMetadata?.Item || [];
+    const metadata = Object.fromEntries(metadataItems.map(item => [item.Name, item.Value]));
+    await paymentDoc.ref.set({
+      status: "verification_pending", callbackMetadata: metadata,
+      callbackReceivedAt: Timestamp.now(), updatedAt: Timestamp.now()
+    }, { merge: true });
+    const verified = await verifyDarajaStkCheckout(checkoutRequestId);
+    if (!verified) {
+      res.status(200).json({ ResultCode: 0, ResultDesc: "Payment verification is pending." });
+      return;
+    }
+    if (Number(metadata.Amount) !== Number(payment.amount)
+        || String(metadata.PhoneNumber || "") !== String(payment.phoneNumber || "")
+        || !safeText(metadata.MpesaReceiptNumber)) {
+      throw new Error("Student payment callback metadata did not match the payment record.");
+    }
+    await activateStudentPayment(paymentDoc.ref, payment, {
+      method: "daraja_stk_query",
+      receiptCode: safeText(metadata.MpesaReceiptNumber),
+      transactionDate: metadata.TransactionDate || null
+    });
+    await db.collection("audit_logs").add({
+      action: "student_mpesa_stk_payment_verified", actorId: "daraja_callback",
+      targetId: payment.userId, paymentId: paymentDoc.id,
+      receiptCode: safeText(metadata.MpesaReceiptNumber), amount: payment.amount,
+      currency: payment.currency, createdAt: Timestamp.now()
+    });
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Payment processed." });
+  } catch (error) {
+    console.error("Student Daraja callback processing failed:", error.message);
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Callback received for processing." });
+  }
+});
+
+
+exports.reconcileStudentStkPayments = onSchedule({
+  schedule: "every 5 minutes",
+  secrets: DARAJA_SECRETS,
+  timeZone: "Africa/Nairobi"
+}, async () => {
+  const pending = await db.collection("payments")
+    .where("status", "==", "verification_pending").limit(50).get();
+  for (const paymentDoc of pending.docs) {
+    const payment = paymentDoc.data();
+    const metadata = payment.callbackMetadata || {};
+    try {
+      if (!payment.checkoutRequestId || !safeText(metadata.MpesaReceiptNumber)) continue;
+      if (!await verifyDarajaStkCheckout(payment.checkoutRequestId)) continue;
+      if (Number(metadata.Amount) !== Number(payment.amount)
+          || String(metadata.PhoneNumber || "") !== String(payment.phoneNumber || "")) {
+        throw new Error("Pending student payment metadata did not match the payment record.");
+      }
+      await activateStudentPayment(paymentDoc.ref, payment, {
+        method: "daraja_stk_query",
+        receiptCode: safeText(metadata.MpesaReceiptNumber),
+        transactionDate: metadata.TransactionDate || null
+      });
+      await db.collection("audit_logs").add({
+        action: "student_mpesa_stk_payment_reconciled",
+        actorId: "daraja_reconciliation", targetId: payment.userId,
+        paymentId: paymentDoc.id, receiptCode: safeText(metadata.MpesaReceiptNumber),
+        amount: payment.amount, currency: payment.currency, createdAt: Timestamp.now()
+      });
+    } catch (error) {
+      console.error("Student STK reconciliation failed:", paymentDoc.id, error.message);
+    }
+  }
+});
 
 
 function requireActiveInstitutionMember(request) {

@@ -1683,3 +1683,121 @@ body.dark .header-btn,
         display: none !important;
     }
 }
+
+/* Student M-Pesa checkout methods */
+.student-payment-method {
+    margin-top: 20px;
+    padding: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+.student-payment-method h3 {
+    margin: 0 0 7px;
+    color: #081c3a;
+    font-size: 16px;
+}
+.student-payment-method p {
+    margin: 0 0 14px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.55;
+}
+.student-payment-method label {
+    display: block;
+    margin: 12px 0 6px;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+}
+.student-payment-method input {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 11px;
+    background: #fff;
+    color: #0f172a;
+    font: inherit;
+}
+.student-payment-method .pay-btn {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 12px;
+}
+.manual-payment-method .payment-detail {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px dashed #cbd5e1;
+    font-size: 13px;
+}
+.checkout-message {
+    display: block;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #eef6ff;
+    color: #12345d;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.checkout-message.error {
+    background: #fff1f0;
+    color: #9f1c13;
+}
+.checkout-message[hidden] { display: none; }
+.payment-history-status {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 8px;
+    border-radius: 99px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 11px;
+    text-transform: capitalize;
+}
+body.dark-mode .student-payment-method,
+body.dark .student-payment-method,
+.dark .student-payment-method {
+    background: #0b1a2d;
+    border-color: #263c57;
+}
+body.dark-mode .student-payment-method h3,
+body.dark .student-payment-method h3,
+.dark .student-payment-method h3 { color: #edf4ff; }
+body.dark-mode .student-payment-method p,
+body.dark .student-payment-method p,
+.dark .student-payment-method p { color: #91a5bf; }
+body.dark-mode .student-payment-method label,
+body.dark .student-payment-method label,
+.dark .student-payment-method label { color: #cbd5e1; }
+body.dark-mode .student-payment-method input,
+body.dark .student-payment-method input,
+.dark .student-payment-method input {
+    background: #102139;
+    border-color: #304966;
+    color: #edf4ff;
+}
+
+.manual-instructions {
+  margin: 12px 0 16px !important;
+  padding: 12px 14px;
+  border-left: 3px solid #d4af37;
+  border-radius: 8px;
+  background: rgba(212, 175, 55, .10);
+  color: #334155;
+  white-space: pre-wrap;
+}
+.student-payment-method textarea {
+  width: 100%;
+  min-height: 88px;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  resize: vertical;
+}

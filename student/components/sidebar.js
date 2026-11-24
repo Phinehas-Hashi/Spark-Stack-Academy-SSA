@@ -3,7 +3,14 @@
 // Behavior-only shell loader. Styling lives in components.css.
 // ============================================================
 
-const CACHE_KEY = "ssa_student_sidebar_html_v4";
+const CACHE_KEY = "ssa_student_sidebar_html_v5";
+
+function readCache() {
+    try { return sessionStorage.getItem(CACHE_KEY); } catch (_) { return null; }
+}
+function writeCache(value) {
+    try { sessionStorage.setItem(CACHE_KEY, value); } catch (_) { /* cache is optional */ }
+}
 
 function paint(html, container) {
     if (!container || !html) return false;
@@ -17,7 +24,7 @@ export async function loadSidebar() {
     const container = document.getElementById("sidebarContainer");
     if (!container) return;
 
-    const cached = sessionStorage.getItem(CACHE_KEY);
+    const cached = readCache();
     if (cached) paint(cached, container);
 
     try {
@@ -29,7 +36,7 @@ export async function loadSidebar() {
         }
 
         const html = await response.text();
-        sessionStorage.setItem(CACHE_KEY, html);
+        writeCache(html);
 
         if (!cached || cached !== html) {
             paint(html, container);
@@ -66,8 +73,10 @@ function initializeSidebar() {
         link.dataset.shellBound = "true";
         link.addEventListener("click", () => {
             sidebar?.classList.remove("open");
-            overlay?.classList.remove("show");
-            overlay?.setAttribute("aria-hidden", "true");
+            document.getElementById("sidebarOverlay")?.classList.remove("show");
+            document.getElementById("sidebarOverlay")?.setAttribute("aria-hidden", "true");
+            document.getElementById("mobileMenuBtn")?.setAttribute("aria-expanded", "false");
+            document.getElementById("mobileMenuBtn")?.setAttribute("aria-label", "Open menu");
             document.body.classList.remove("ssa-sidebar-open");
         });
     });

@@ -29,4 +29,4 @@ setPersistence(auth, browserLocalPersistence).catch(error => {
     console.error("Firebase Auth persistence:", error);
 });
 
-export { auth, db, storage };
+export { app, auth, db, storage };

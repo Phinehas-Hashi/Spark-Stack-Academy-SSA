@@ -8,11 +8,11 @@ import { watchPortalControl } from "../../js/portal-control.js";
 import {
     loadSidebar,
     updateSidebar
-} from "../components/sidebar.js";
+} from "../components/sidebar.js?v=20261124-sidebarfix3";
 import {
     loadTopbar,
     updateTopbar
-} from "../components/topbar.js";
+} from "../components/topbar.js?v=20261124-sidebarfix1";
 import "./notifications.js";
 import { updateStudentStreak } from "./streak.js";
 
