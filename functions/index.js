@@ -589,9 +589,10 @@ exports.requestInstructorWithdrawal = onCall(async request => {
   const { uid } = await requireActiveInstructor(request);
   const amount = Number(request.data?.amount);
   const method = safeText(request.data?.method).toLowerCase();
-  const account = safeText(request.data?.account).slice(0,120);
+  let account = safeText(request.data?.account).slice(0,120);
   if (!Number.isSafeInteger(amount) || amount <= 0) throw new HttpsError("invalid-argument","Enter a whole-number withdrawal amount.");
   if (!["mpesa","bank"].includes(method) || account.length < 5) throw new HttpsError("invalid-argument","Enter valid payout details.");
+  if (method === "mpesa") account = normalizeKenyanPhone(account);
   const settingsSnap = await db.doc("platformSettings/earnings").get();
   const settings = settingsSnap.exists ? settingsSnap.data() : {};
   const minimum = Number(settings.minimumWithdrawal || 100);
