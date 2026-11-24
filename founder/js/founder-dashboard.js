@@ -8,7 +8,7 @@ const $ = id => document.getElementById(id);
 const text = (id,value) => { const el=$(id); if(el) el.textContent=value; };
 const amount = p => Number(p.amount ?? p.total ?? p.price ?? 0) || 0;
 const dateOf = v => v?.toDate ? v.toDate() : (v ? new Date(v) : null);
-const completed = p => ["completed","success","successful","paid","succeeded"].includes(String(p.status ?? p.paymentStatus ?? "completed").toLowerCase());
+const completed = p => ["completed","success","successful","paid","succeeded"].includes(String(p.status ?? p.paymentStatus ?? "").trim().toLowerCase());
 
 function refresh(){
   text("totalStudents",state.students.toLocaleString());
