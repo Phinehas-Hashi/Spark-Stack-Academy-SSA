@@ -1285,3 +1285,23 @@
     color: var(--admin-muted);
     font-size: 10px;
 }
+
+/* Ticket conversation timeline markers */
+.ticket-timeline-message .timeline-dot,
+.report-activity-timeline > .timeline-item .timeline-dot {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    margin: 7px 8px;
+    border-radius: 50%;
+    background: var(--admin-blue, #2563eb);
+}
+.ticket-timeline-message.reporter .timeline-dot {
+    background: #8056b8;
+}
+.ticket-timeline-message.staff .timeline-dot {
+    background: #2563eb;
+}
+.ticket-timeline-content {
+    min-width: 0;
+}
