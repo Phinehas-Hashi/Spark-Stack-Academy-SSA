@@ -1046,6 +1046,9 @@ service cloud.firestore {
           isInstructor()
           && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
+          && request.resource.data.courseId is string
+          && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
+          && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.instructorId == uid()
         );
 
       allow update:
@@ -1055,6 +1058,9 @@ service cloud.firestore {
           && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
+          && request.resource.data.courseId is string
+          && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
+          && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.instructorId == uid()
         );
 
       allow delete:
