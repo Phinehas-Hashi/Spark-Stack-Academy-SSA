@@ -13,6 +13,8 @@ import { awardXP, XP_REWARDS, updateLearningStreak } from "./achievements.js";
 let currentUser = null;
 let course = null;
 let lessons = [];
+let modules = [];
+let assignments = [];
 let currentLessonIndex = 0;
 let completedLessons = [];
 let courseId = null;
@@ -102,9 +104,12 @@ async function initializeClassroom() {
         }
 
         showClassroom();
+        await loadModules();
         await loadLessons();
+        await loadAssignments();
         await loadStudentProgress();
         await loadLiveClassSessions();
+        renderAssignments();
         renderLessons();
         updateProgress();
 
@@ -202,6 +207,36 @@ async function checkCourseAccess() {
     return false;
 }
 
+async function loadModules() {
+    modules = [];
+    const lookups = [
+        query(collection(db, "courseModules"), where("courseId", "==", courseId)),
+        query(collection(db, "courseModules"), where("courseID", "==", courseId))
+    ];
+    const results = await Promise.allSettled(lookups.map(item => getDocs(item)));
+    const byId = new Map();
+    let successful = 0;
+    for (const result of results) {
+        if (result.status !== "fulfilled") { console.warn("A module lookup was unavailable:", result.reason); continue; }
+        successful++;
+        result.value.docs.forEach(item => { if (!byId.has(item.id)) byId.set(item.id, { id: item.id, ...(item.data() || {}) }); });
+    }
+    if (!successful) throw new Error("Course modules could not be read. Please refresh or contact support.");
+    modules = [...byId.values()].sort((a,b) => Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0));
+}
+
+async function loadAssignments() {
+    assignments = [];
+    const snapshot = await getDocs(query(collection(db, "assignments"), where("courseId", "==", courseId)));
+    assignments = snapshot.docs.map(item => ({ id: item.id, ...(item.data() || {}) }))
+        .filter(item => item.published !== false && ["published", "pending", "active"].includes(String(item.status || "published").toLowerCase()))
+        .sort((a,b) => {
+            const da = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+            const dbValue = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+            return (Number.isFinite(da) ? da : Number.MAX_SAFE_INTEGER) - (Number.isFinite(dbValue) ? dbValue : Number.MAX_SAFE_INTEGER);
+        });
+}
+
 async function loadLessons() {
     lessons = [];
 
@@ -246,6 +281,33 @@ async function loadLessons() {
     console.log(`COURSE PLAYER: loaded ${lessons.length} courseLessons for ${courseId}`);
 }
 
+
+function renderAssignments() {
+    const container = $("courseAssignments");
+    if (!container) return;
+    if (!assignments.length) {
+        container.innerHTML = '<p class="course-assignment-empty">No published assignments for this course yet.</p>';
+        return;
+    }
+    container.replaceChildren(...assignments.map(assignment => {
+        const card = document.createElement("article");
+        card.className = "course-assignment-card";
+        const title = document.createElement("h4");
+        title.textContent = assignment.title || "Assignment";
+        const description = document.createElement("p");
+        description.textContent = assignment.description || assignment.instructions || "Review the task details in your assignments area.";
+        const meta = document.createElement("small");
+        const due = assignment.dueDate ? new Date(assignment.dueDate) : null;
+        const dueLabel = due && !Number.isNaN(due.getTime()) ? due.toLocaleString() : "No deadline";
+        meta.textContent = `Maximum score: ${Number(assignment.maxScore || assignment.totalMarks || 0) || "—"} · Due: ${dueLabel}`;
+        const link = document.createElement("a");
+        link.className = "course-assignment-link";
+        link.href = "assignments.html";
+        link.textContent = "Open assignments";
+        card.append(title, description, meta, link);
+        return card;
+    }));
+}
 
 async function loadLiveClassSessions() {
     const container = $("liveClassSessions");
@@ -339,7 +401,7 @@ function renderLessons() {
         return;
     }
 
-    lessons.forEach((lesson, index) => {
+    const renderLessonButton = (lesson, index) => {
         const completed = completedLessons.includes(lesson.id);
         const button = document.createElement("button");
         button.type = "button";
@@ -356,7 +418,30 @@ function renderLessons() {
             closeLessonDrawer();
         });
         lessonList.appendChild(button);
+    };
+    const indexById = new Map(lessons.map((lesson, index) => [lesson.id, index]));
+    const groups = modules.map(module => ({
+        module,
+        items: lessons.filter(lesson => (lesson.moduleId || lesson.moduleID) === module.id)
+    })).filter(group => group.items.length);
+    const groupedIds = new Set(groups.flatMap(group => group.items.map(lesson => lesson.id)));
+    groups.forEach((group, groupIndex) => {
+        const heading = document.createElement("div");
+        heading.className = "lesson-module-heading";
+        heading.textContent = group.module.title || `Module ${groupIndex + 1}`;
+        lessonList.appendChild(heading);
+        group.items.forEach(lesson => renderLessonButton(lesson, indexById.get(lesson.id)));
     });
+    const ungrouped = lessons.filter(lesson => !groupedIds.has(lesson.id));
+    if (ungrouped.length || !groups.length) {
+        if (groups.length) {
+            const heading = document.createElement("div");
+            heading.className = "lesson-module-heading";
+            heading.textContent = "Additional lessons";
+            lessonList.appendChild(heading);
+        }
+        (ungrouped.length ? ungrouped : lessons).forEach(lesson => renderLessonButton(lesson, indexById.get(lesson.id)));
+    }
 
     if (lessonCount) lessonCount.textContent = `${lessons.length} Lesson${lessons.length === 1 ? "" : "s"}`;
     if (completedCount) completedCount.textContent = `${completedLessons.length} completed`;
