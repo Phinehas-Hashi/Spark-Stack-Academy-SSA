@@ -1780,3 +1780,24 @@ body.dark .student-payment-method input,
     border-color: #304966;
     color: #edf4ff;
 }
+
+.manual-instructions {
+  margin: 12px 0 16px !important;
+  padding: 12px 14px;
+  border-left: 3px solid #d4af37;
+  border-radius: 8px;
+  background: rgba(212, 175, 55, .10);
+  color: #334155;
+  white-space: pre-wrap;
+}
+.student-payment-method textarea {
+  width: 100%;
+  min-height: 88px;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  resize: vertical;
+}
