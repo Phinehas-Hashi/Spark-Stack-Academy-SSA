@@ -90,7 +90,9 @@ function render() {
       ? (supportedMethod ? '<button class="action approve" data-a="approve" data-id="' + esc(x.id) + '">Approve</button>' : '') + '<button class="action reject" data-a="reject" data-id="' + esc(x.id) + '">Reject</button>'
       : status === "approved" && supportedMethod
         ? '<button class="action approve" data-a="paid" data-id="' + esc(x.id) + '">Confirm M-Pesa sent</button>'
-        : '<button class="action" data-a="view" data-id="' + esc(x.id) + '">View</button>';
+        : status === "approved" && !supportedMethod
+          ? '<button class="action reject" data-a="reject" data-id="' + esc(x.id) + '">Reject unsupported method</button>'
+          : '<button class="action" data-a="view" data-id="' + esc(x.id) + '">View</button>';
     return `<tr>
       <td><div class="person-cell"><span class="person-avatar">${esc(name.slice(0,1).toUpperCase())}</span><div><strong>${esc(name)}</strong><small>${esc(x.instructorId || "—")}</small></div></div></td>
       <td><strong>${money(x.amount)}</strong><small class="sub-value">Net ${money(x.netAmount ?? Math.max(Number(x.amount || 0) - Number(x.withdrawalFee || 0) - Number(x.platformTax || 0), 0))}</small></td>
@@ -128,7 +130,7 @@ async function action(id, type) {
   if (["approve", "paid"].includes(type) && method !== "mpesa") {
     throw new Error("Only M-Pesa withdrawal requests can be approved or settled. Reject this legacy request if necessary.");
   }
-  if (["approve", "reject"].includes(type) && current !== "pending") throw new Error("Only pending requests can be reviewed.");
+  if (["approve", "reject"].includes(type) && current !== "pending" && !(type === "reject" && current === "approved" && method !== "mpesa")) throw new Error("Only pending requests can be reviewed, except unsupported legacy payouts that must be rejected.");
   if (type === "paid" && current !== "approved") throw new Error("Only approved requests can be settled.");
 
   const grossAmount = Number(request.amount || 0);
@@ -200,7 +202,8 @@ async function action(id, type) {
     await runTransaction(db, async tx => {
       const [latestSnap, walletSnap] = await Promise.all([tx.get(ref), tx.get(walletRef)]);
       if (!latestSnap.exists()) throw new Error("Payout request no longer exists.");
-      if (String(latestSnap.data().status || "pending").toLowerCase() !== "pending") {
+      if (String(latestSnap.data().status || "pending").toLowerCase() !== "pending"
+          && !(status === "rejected" && String(latestSnap.data().status || "").toLowerCase() === "approved" && String(latestSnap.data().method || "").toLowerCase() !== "mpesa")) {
         throw new Error("This payout request has already been reviewed.");
       }
       tx.update(ref, {
