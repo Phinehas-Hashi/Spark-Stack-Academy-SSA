@@ -152,6 +152,8 @@ async function action(id, type) {
       throw new Error("A valid M-Pesa receipt code is required before settlement can be recorded.");
     }
 
+    const financeTransactionRef = doc(collection(db, "financeTransactions"));
+    const transactionId = "PAY-" + Date.now() + "-" + Math.random().toString(36).slice(2,7).toUpperCase();
     await runTransaction(db, async tx => {
       const [requestSnap, treasurySnap] = await Promise.all([tx.get(ref), tx.get(treasuryRef)]);
       if (!requestSnap.exists()) throw new Error("Payout request no longer exists.");
@@ -173,20 +175,19 @@ async function action(id, type) {
         updatedAt: serverTimestamp()
       });
       tx.update(treasuryRef, { balance: treasuryBalance - payoutAmount, updatedAt: serverTimestamp() });
-    });
-
-    await addDoc(collection(db, "financeTransactions"), {
-      transactionId: "PAY-" + Date.now() + "-" + Math.random().toString(36).slice(2,7).toUpperCase(),
-      type: "withdrawal",
-      from: "Academy Treasury",
-      to: request.instructorId || "Instructor",
-      amount: payoutAmount,
-      grossAmount,
-      status: "completed",
-      payoutRequestId: id,
-      paymentReference,
-      approvedBy: me.uid,
-      createdAt: serverTimestamp()
+      tx.set(financeTransactionRef, {
+        transactionId,
+        type: "withdrawal",
+        from: "Academy Treasury",
+        to: request.instructorId || "Instructor",
+        amount: payoutAmount,
+        grossAmount,
+        status: "completed",
+        payoutRequestId: id,
+        paymentReference,
+        approvedBy: me.uid,
+        createdAt: serverTimestamp()
+      });
     });
   } else {
     await updateDoc(ref, {
