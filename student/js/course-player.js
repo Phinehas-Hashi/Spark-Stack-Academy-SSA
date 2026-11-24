@@ -452,7 +452,7 @@ async function completeCurrentLesson() {
 
     try {
         await saveProgress();
-        await awardXP(currentUser.uid, XP_REWARDS.lesson, `Completed lesson: ${lesson.title || "Lesson"}`, `lesson_${courseId}_${lesson.id}`);
+        await awardXP(currentUser.uid, XP_REWARDS.lesson, `Completed lesson: ${lesson.title || "Lesson"}`, `lesson:${courseId}:${lesson.id}`);
         await updateLearningStreak(currentUser.uid);
         toast(`Lesson completed! ⚡ +${XP_REWARDS.lesson || 20} XP`);
 
