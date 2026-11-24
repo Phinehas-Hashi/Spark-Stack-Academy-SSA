@@ -361,11 +361,3 @@ body.founder-portal-page.global-intel-page {
   background: #080522 !important;
   color: #f7f3ff !important;
 }
-
-/* Keep the main workspace full-width while the sidebar is an off-canvas drawer. */
-@media (max-width: 900px) {
-  body.founder-portal-page .founder-main {
-    width: 100% !important;
-    margin-left: 0 !important;
-  }
-}
