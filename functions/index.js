@@ -558,6 +558,20 @@ function studentDarajaCallbackUrl() {
   return "https://us-central1-" + projectId + ".cloudfunctions.net/darajaStudentCallback";
 }
 
+exports.getStudentPaymentQuote = onCall(async request => {
+  const { uid } = await requireActiveStudent(request);
+  const purchase = await resolveStudentPurchase(uid, request.data || {});
+  return {
+    purchaseType: purchase.purchaseType,
+    courseId: purchase.courseId || null,
+    plan: purchase.plan || null,
+    billingPeriod: purchase.billingPeriod || null,
+    title: purchase.courseTitle,
+    amount: purchase.amount,
+    currency: purchase.currency
+  };
+});
+
 exports.initiateStudentStkPayment = onCall({ secrets: DARAJA_SECRETS }, async request => {
   const { uid, user } = await requireActiveStudent(request);
   const phoneNumber = normalizeKenyanPhone(request.data?.phoneNumber);
