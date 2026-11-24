@@ -1231,3 +1231,69 @@ body.modal-open {
 .builder-preview-resources b { flex-basis: 100%; }
 .builder-preview-resources a { color: #70d8ef; overflow-wrap: anywhere; font-size: 12px; }
 @media (max-width: 600px) { .builder-preview-shell { padding: 13px; } .builder-preview-hero { padding: 18px; } .builder-preview-module { padding: 13px; } }
+
+
+/* Course-level pricing and duration controls */
+.builder-course-details-card .side-card-header p,
+.builder-course-field small,
+.builder-course-free-toggle small,
+.builder-course-save-note {
+    display: block;
+    margin: 6px 0 0;
+    color: #aaa6bd;
+    font-size: 11px;
+    line-height: 1.55;
+}
+.builder-course-field { margin-top: 16px; }
+.builder-course-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #d8d4e7;
+    font-size: 12px;
+    font-weight: 600;
+}
+.builder-course-field input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid rgba(190,183,225,.18);
+    border-radius: 10px;
+    outline: none;
+    background: #14131e;
+    color: #f4f1ff;
+}
+.builder-course-field input:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(167,139,250,.13);
+}
+.builder-course-field input:disabled { opacity: .55; }
+.builder-course-free-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid rgba(190,183,225,.15);
+    border-radius: 11px;
+    background: rgba(167,139,250,.07);
+    color: #f4f1ff;
+    cursor: pointer;
+}
+.builder-course-free-toggle input { margin-top: 3px; accent-color: #a78bfa; }
+.builder-course-free-toggle strong { display: block; font-size: 12px; }
+.builder-course-price-preview {
+    margin: 14px 0;
+    padding: 11px 12px;
+    border: 1px solid rgba(103,217,232,.16);
+    border-radius: 10px;
+    background: rgba(103,217,232,.06);
+    color: #83e2ed;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.builder-course-details-card .full-width { width: 100%; justify-content: center; }
+.builder-course-save-note { min-height: 18px; }
+@media (max-width: 760px) {
+    .builder-course-details-card { min-width: 0; }
+    .builder-course-field input { font-size: 16px; }
+}
