@@ -12,9 +12,9 @@ const savePricingButton = document.getElementById("savePremiumPricing");
 const pricingRef = doc(db, "premiumPricing", "global");
 
 const fields = {
-  learner_plus: { monthly: "learnerPlusMonthly", quarterly: "learnerPlusQuarterly", enabled: "learnerPlusEnabled" },
-  pro_learner: { monthly: "proLearnerMonthly", quarterly: "proLearnerQuarterly", enabled: "proLearnerEnabled" },
-  career_accelerator: { monthly: "careerAcceleratorMonthly", quarterly: "careerAcceleratorQuarterly", enabled: "careerAcceleratorEnabled" }
+  learner_plus: { monthly: "learnerPlusMonthly", quarterly: "learnerPlusQuarterly", benefits: "learnerPlusBenefits", enabled: "learnerPlusEnabled" },
+  pro_learner: { monthly: "proLearnerMonthly", quarterly: "proLearnerQuarterly", benefits: "proLearnerBenefits", enabled: "proLearnerEnabled" },
+  career_accelerator: { monthly: "careerAcceleratorMonthly", quarterly: "careerAcceleratorQuarterly", benefits: "careerAcceleratorBenefits", enabled: "careerAcceleratorEnabled" }
 };
 const labels = {
   learner_plus: "Learner Plus",
@@ -41,6 +41,8 @@ function populatePricing(data = {}) {
     const plan = data.plans?.[key] || {};
     setInput(ids.monthly, plan.monthlyPrice);
     setInput(ids.quarterly, plan.quarterlyPrice);
+    const benefits = document.getElementById(ids.benefits);
+    if (benefits) benefits.value = Array.isArray(plan.benefits) ? plan.benefits.join("\n") : "";
     const enabled = document.getElementById(ids.enabled);
     if (enabled) enabled.checked = plan.enabled !== false;
   }
@@ -68,11 +70,13 @@ async function savePricing(event) {
       const monthlyPrice = readPrice(ids.monthly);
       const quarterlyPrice = readPrice(ids.quarterly);
       const enabled = document.getElementById(ids.enabled).checked;
+      const benefits = document.getElementById(ids.benefits).value.split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 8);
       if (enabled && (monthlyPrice || quarterlyPrice)) configuredCount++;
       plans[key] = {
         name: labels[key],
         monthlyPrice,
         quarterlyPrice,
+        benefits,
         enabled
       };
     }
