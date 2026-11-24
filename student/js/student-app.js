@@ -8,7 +8,7 @@ import { watchPortalControl } from "../../js/portal-control.js";
 import {
     loadSidebar,
     updateSidebar
-} from "../components/sidebar.js?v=20261124-sidebarfix1";
+} from "../components/sidebar.js?v=20261124-sidebarfix2";
 import {
     loadTopbar,
     updateTopbar
