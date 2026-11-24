@@ -53,7 +53,9 @@ function readPrice(id) {
   const raw = document.getElementById(id)?.value.trim() ?? "";
   if (!raw) return null;
   const value = Number(raw);
-  if (!Number.isSafeInteger(value) || value < 1) throw new Error("Prices must be whole KSh amounts greater than zero.");
+  if (!Number.isSafeInteger(value) || value < 1) {
+    throw new Error("Prices must be whole KSh amounts greater than zero.");
+  }
   return value;
 }
 async function loadPricing() {
@@ -70,15 +72,10 @@ async function savePricing(event) {
       const monthlyPrice = readPrice(ids.monthly);
       const quarterlyPrice = readPrice(ids.quarterly);
       const enabled = document.getElementById(ids.enabled).checked;
-      const benefits = document.getElementById(ids.benefits).value.split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 8);
+      const benefits = document.getElementById(ids.benefits).value
+        .split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 8);
       if (enabled && (monthlyPrice || quarterlyPrice)) configuredCount++;
-      plans[key] = {
-        name: labels[key],
-        monthlyPrice,
-        quarterlyPrice,
-        benefits,
-        enabled
-      };
+      plans[key] = { name: labels[key], monthlyPrice, quarterlyPrice, benefits, enabled };
     }
     const published = document.getElementById("premiumPricingPublished").checked;
     if (published && configuredCount === 0) {
@@ -114,9 +111,10 @@ async function loadUsers() {
       if (role === "student") return user.status === "active" && user.active !== false;
       if (role === "instructor") return user.status === "active" && user.active === true && user.verified === true;
       return false;
-    });\n      if (role === "student") return user.status === "active" && user.active !== false;\n      if (role === "instructor") return user.status === "active" && user.active === true && user.verified === true;\n      return false;\n    });
+    });
+
   if (!users.length) {
-    usersRoot.textContent = "No student or instructor accounts found.";
+    usersRoot.textContent = "No active student or verified instructor accounts found.";
     return;
   }
   usersRoot.innerHTML = users.map(user => {
