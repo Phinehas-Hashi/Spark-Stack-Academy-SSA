@@ -112,7 +112,7 @@ async function initializeClassroom() {
         else showNoLessons();
     } catch (error) {
         console.error("COURSE PLAYER ERROR:", error);
-        showError("We couldn't load this course. Please refresh and try again.");
+        showError(error?.message || "We could not load this course. Please refresh and try again.");
     }
 }
 
@@ -124,8 +124,9 @@ async function loadCourse() {
 
     if (courseTitle) courseTitle.textContent = course.title || "Course";
     if (courseDescription) courseDescription.textContent = course.description || "Welcome to your classroom.";
-    if (instructorName) instructorName.textContent = course.instructorName || "SSA Instructor";
-    if (instructorAvatar) instructorAvatar.textContent = (course.instructorName || "S").charAt(0).toUpperCase();
+    const teacherName = course.instructorName || course.instructor || course.teacherName || "SSA Instructor";
+    if (instructorName) instructorName.textContent = typeof teacherName === "string" ? teacherName : (teacherName.name || "SSA Instructor");
+    if (instructorAvatar) instructorAvatar.textContent = (typeof teacherName === "string" ? teacherName : teacherName.name || "S").charAt(0).toUpperCase();
     if (classAnnouncement) classAnnouncement.textContent = course.announcement || "No announcements yet.";
 }
 
@@ -350,7 +351,10 @@ function renderLessons() {
                 <small>${escapeHTML(lesson.duration ? `${lesson.duration} min` : lesson.type || "Lesson")}</small>
             </span>
             <i data-lucide="${completed ? "check-circle" : "play-circle"}"></i>`;
-        button.addEventListener("click", () => showLesson(index));
+        button.addEventListener("click", async () => {
+            await showLesson(index);
+            closeLessonDrawer();
+        });
         lessonList.appendChild(button);
     });
 
@@ -494,6 +498,61 @@ function updateNavigation() {
     }
     refreshIcons();
 }
+
+function openLessonDrawer() {
+    if (window.matchMedia("(max-width: 820px)").matches) {
+        $("lessonSidebar")?.classList.add("open");
+        $("lessonDrawerOverlay")?.classList.add("open");
+        document.body.classList.add("ssa-lesson-drawer-open");
+        $("mobileLessonsBtn")?.setAttribute("aria-expanded", "true");
+    }
+}
+
+function closeLessonDrawer() {
+    $("lessonSidebar")?.classList.remove("open");
+    $("lessonDrawerOverlay")?.classList.remove("open");
+    document.body.classList.remove("ssa-lesson-drawer-open");
+    $("mobileLessonsBtn")?.setAttribute("aria-expanded", "false");
+}
+
+$("mobileLessonsBtn")?.addEventListener("click", openLessonDrawer);
+$("closeLessonsBtn")?.addEventListener("click", closeLessonDrawer);
+$("lessonDrawerOverlay")?.addEventListener("click", closeLessonDrawer);
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeLessonDrawer();
+});
+
+$("fullscreenBtn")?.addEventListener("click", async () => {
+    const target = videoBox || $("lessonPlayerCard");
+    try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else if (target?.requestFullscreen) await target.requestFullscreen();
+        else toast("Fullscreen is not supported by this browser.");
+    } catch (error) {
+        console.warn("Fullscreen request failed:", error);
+        toast("Fullscreen could not be started on this device.");
+    }
+});
+
+$("orientationBtn")?.addEventListener("click", async () => {
+    try {
+        if (!document.fullscreenElement && videoBox?.requestFullscreen) await videoBox.requestFullscreen();
+        if (screen.orientation?.lock) {
+            await screen.orientation.lock("landscape");
+            toast("Landscape orientation enabled.");
+        } else {
+            toast("Use your device rotation setting to switch to landscape.");
+        }
+    } catch (error) {
+        console.warn("Orientation lock unavailable:", error);
+        toast("Allow fullscreen first, then rotate your device to landscape.");
+    }
+});
+
+$("discussionBtn")?.addEventListener("click", () => {
+    toast("Class discussion is not enabled yet. Opening Messages instead.");
+    window.setTimeout(() => { window.location.href = "messages.html"; }, 700);
+});
 
 previousLessonBtn?.addEventListener("click", () => showLesson(currentLessonIndex - 1));
 nextLessonBtn?.addEventListener("click", () => showLesson(currentLessonIndex + 1));
