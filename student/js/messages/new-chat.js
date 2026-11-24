@@ -58,9 +58,11 @@ async function loadUsers() {
       .map(item => ({ id: item.id, ...item.data() }))
       .filter(person => person.id !== currentUser.uid);
 
+    userList.setAttribute("aria-busy", "false");
     renderUsers(users);
   } catch (error) {
     console.error("Loading instructors failed:", error);
+    userList.setAttribute("aria-busy", "false");
     showEmpty("Contacts are temporarily unavailable", "We couldn't load the instructor directory.");
   }
 }
