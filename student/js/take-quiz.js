@@ -1794,7 +1794,7 @@ async function submitQuiz() {
                 currentUser.uid,
                 xpEarned,
                 `Completed quiz: ${quiz.title || "Quiz"}`,
-                `quiz_${quiz.id}_${attemptNumber}`
+                `quiz:${quiz.id}:${attemptNumber}`
             );
         } catch (xpError) {
             console.warn("Quiz was submitted, but XP could not be synchronized:", xpError);
