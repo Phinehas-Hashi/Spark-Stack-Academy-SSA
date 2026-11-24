@@ -355,152 +355,62 @@ async function loadAssignments() {
 
 async function loadSubmissionStats() {
 
-    try {
+    // Student submissions are keyed by assignmentId + studentId and do
+    // not carry a client-supplied instructorId. Query each owned assignment
+    // separately; Firestore rules verify ownership through the parent assignment.
+    const results = await Promise.allSettled(
+        assignments.map(async assignment => {
+            const snapshot = await getDocs(query(
+                collection(db, "submissions"),
+                where("assignmentId", "==", assignment.id)
+            ));
 
-        const submissionsRef =
-            collection(db, "submissions");
+            let pending = 0;
+            let graded = 0;
 
+            snapshot.forEach(submissionDoc => {
+                const data = submissionDoc.data();
+                const status = String(data.status || "").toLowerCase();
+                const hasGrade = data.grade != null || data.score != null;
 
-        const q =
-            query(
-                submissionsRef,
-                where(
-                    "instructorId",
-                    "==",
-                    instructor.uid
-                )
-            );
-
-
-        const snapshot =
-            await getDocs(q);
-
-
-        const stats = {};
-
-
-        snapshot.forEach(doc => {
-
-            const data = doc.data();
-
-            const assignmentId =
-                data.assignmentId;
-
-
-            if (!assignmentId) return;
-
-
-            if (!stats[assignmentId]) {
-
-                stats[assignmentId] = {
-
-                    total: 0,
-
-                    pending: 0,
-
-                    graded: 0
-
-                };
-
-            }
-
-
-            stats[assignmentId].total++;
-
-
-            const status =
-                String(
-                    data.status || ""
-                ).toLowerCase();
-
-
-            if (
-                status === "pending_review" ||
-                status === "submitted"
-            ) {
-
-                stats[assignmentId].pending++;
-
-            }
-
-
-            if (
-                status === "graded"
-            ) {
-
-                stats[assignmentId].graded++;
-
-            }
-
-        });
-
-
-        assignments =
-            assignments.map(
-                assignment => {
-
-                    const data =
-                        stats[assignment.id] || {
-
-                            total: 0,
-
-                            pending: 0,
-
-                            graded: 0
-
-                        };
-
-
-                    return {
-
-                        ...assignment,
-
-                        submissionCount:
-                            data.total,
-
-                        pendingReviewCount:
-                            data.pending,
-
-                        gradedSubmissionCount:
-                            data.graded
-
-                    };
-
+                if (hasGrade || ["graded", "reviewed", "returned"].includes(status)) {
+                    graded++;
+                } else if (["submitted", "resubmitted", "pending_review", "under_review"].includes(status)) {
+                    pending++;
                 }
+            });
+
+            return {
+                id: assignment.id,
+                total: snapshot.size,
+                pending,
+                graded
+            };
+        })
+    );
+
+    const stats = new Map();
+    results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+            stats.set(result.value.id, result.value);
+        } else {
+            console.warn(
+                "Submission statistics unavailable for assignment:",
+                assignments[index]?.id,
+                result.reason
             );
+        }
+    });
 
-
-    } catch (error) {
-
-        console.warn(
-            "⚠ Submission statistics unavailable:",
-            error
-        );
-
-
-        assignments =
-            assignments.map(
-                assignment => ({
-
-                    ...assignment,
-
-                    submissionCount:
-                        Number(
-                            assignment.submissionCount ||
-                            0
-                        ),
-
-                    pendingReviewCount:
-                        0,
-
-                    gradedSubmissionCount:
-                        0
-
-                })
-            );
-
-    }
-
+    assignments = assignments.map(assignment => {
+        const data = stats.get(assignment.id);
+        return {
+            ...assignment,
+            submissionCount: data?.total ?? Number(assignment.submissionCount || 0),
+            pendingReviewCount: data?.pending ?? 0,
+            gradedSubmissionCount: data?.graded ?? 0
+        };
+    });
 }
 
 
