@@ -195,8 +195,8 @@ showPreview();
 function showPreview(){
 
 
-uploadPreview.style.display =
-"flex";
+uploadPreview.classList.remove("hidden");
+uploadPreview.style.display = "flex";
 
 
 fileName.textContent =
@@ -225,8 +225,8 @@ selectedFile = null;
 fileInput.value = "";
 
 
-uploadPreview.style.display =
-"none";
+uploadPreview.classList.add("hidden");
+uploadPreview.style.display = "none";
 
 
 }
@@ -260,7 +260,7 @@ const fileRef = ref(
 
 storage,
 
-`chatFiles/${chatId}/${Date.now()}_${selectedFile.name}`
+`chatFiles/${chatId}/${Date.now()}_${selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`
 
 );
 
@@ -276,19 +276,15 @@ selectedFile
 
 
 
-const url = await getDownloadURL(
-fileRef
-);
-
-
-
 const fileData = {
 
-url:url,
+path: fileRef.fullPath,
 
-name:selectedFile.name,
+name: selectedFile.name,
 
-type:selectedFile.type
+type: selectedFile.type,
+
+size: selectedFile.size
 
 };
 
