@@ -1380,3 +1380,46 @@
     }
 
 }
+
+/* =========================================================
+   LIVE STUDENT SUPPORT TICKETS
+========================================================= */
+.ticket-center { padding-bottom: 10px; }
+.ticket-summary { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+.ticket-summary span { padding:10px 14px; border:1px solid #e6def5; border-radius:12px; background:#fff; color:#55436f; font-size:12px; }
+.ticket-summary strong { color:#351078; margin-right:4px; }
+.ticket-list { display:grid; gap:14px; }
+.ticket-card { padding:20px; border:1px solid #e6def5; border-radius:18px; background:#fff; box-shadow:0 8px 24px rgba(53,16,120,.05); }
+.ticket-card-top,.ticket-meta,.ticket-actions { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.ticket-reference { color:#7049a9; font-size:11px; font-weight:800; letter-spacing:.04em; overflow-wrap:anywhere; }
+.ticket-status { padding:6px 10px; border-radius:999px; background:#f0e9fc; color:#51278a; font-size:11px; font-weight:700; }
+.ticket-status.resolved,.ticket-status.closed { background:#e8f7ef; color:#17633a; }
+.ticket-status.dismissed { background:#fff1ed; color:#9b3824; }
+.ticket-card h3 { margin:12px 0 6px; color:#251044; font-size:17px; }
+.ticket-description { color:#655b72; font-size:13px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; }
+.ticket-meta { justify-content:flex-start; margin:12px 0; color:#847a91; font-size:11px; text-transform:capitalize; }
+.ticket-feedback { margin:14px 0; padding:13px 15px; border-left:3px solid #d4af37; border-radius:8px; background:#fbf8ef; color:#5e4b20; }
+.ticket-feedback p { margin:6px 0 0; font-size:13px; line-height:1.6; white-space:pre-wrap; }
+.ticket-actions { justify-content:flex-start; margin-top:14px; }
+.ticket-actions button,.ticket-reply-form button { min-height:40px; padding:9px 14px; border:1px solid #ded2f2; border-radius:10px; background:#f6f1ff; color:#51278a; font:700 12px inherit; cursor:pointer; }
+.ticket-actions button:hover,.ticket-reply-form button:hover { background:#eae0fa; }
+.ticket-thread { margin-top:16px; padding-top:15px; border-top:1px solid #eee8f6; }
+.ticket-conversation { display:grid; gap:10px; max-height:420px; overflow:auto; padding:4px 2px 14px; }
+.ticket-message { max-width:88%; padding:12px 14px; border-radius:14px; background:#f3eff9; color:#33244b; }
+.ticket-message.student-message { justify-self:end; background:#351078; color:#fff; }
+.ticket-message strong,.ticket-message time { display:block; font-size:11px; opacity:.8; }
+.ticket-message p { margin:6px 0; font-size:13px; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+.ticket-reply-form { display:grid; gap:9px; margin-top:10px; }
+.ticket-reply-form label { color:#3d2a59; font-size:12px; font-weight:700; }
+.ticket-reply-form textarea { width:100%; min-height:95px; box-sizing:border-box; padding:12px; border:1px solid #ded2f2; border-radius:12px; color:#281a3d; background:#fff; font:13px inherit; resize:vertical; }
+.ticket-reply-form small { color:#847a91; font-size:11px; }
+.ticket-thread-empty,.ticket-thread-loading,.ticket-empty { padding:20px; border:1px dashed #ded2f2; border-radius:14px; color:#756987; text-align:center; }
+.ticket-empty p { margin-bottom:0; font-size:13px; }
+.support-submission-result { color:#3e2862; font-size:12px; }
+@media(max-width:700px) {
+ .ticket-card { padding:15px; }
+ .ticket-card-top { align-items:flex-start; }
+ .ticket-actions { display:grid; grid-template-columns:1fr; }
+ .ticket-actions button,.ticket-reply-form button { width:100%; }
+ .ticket-message { max-width:96%; }
+}
