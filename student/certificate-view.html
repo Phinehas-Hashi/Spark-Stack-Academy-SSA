@@ -1,211 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Certificate | Spark Stack Academy</title>
-
-    <link
-        rel="stylesheet"
-        href="css/certificate-view.css"
-    >
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#081C3A">
+<title>Certificate | Spark Stack Academy</title>
+<link rel="stylesheet" href="css/certificate-view.css">
 </head>
-
-
 <body>
-
-
-    <main class="certificate-page">
-
-
-        <div class="certificate-actions">
-
-            <button id="printCertificate">
-                Print / Save PDF
-            </button>
-
-            <button
-                id="closeCertificate"
-                class="secondary-btn"
-            >
-                Close
-            </button>
-
-        </div>
-
-
-        <section
-            id="certificate"
-            class="certificate"
-        >
-
-
-            <div class="certificate-border">
-
-
-                <div class="certificate-inner">
-
-
-                    <div class="academy-logo">
-
-                        <img
-                            src="../assets/images/ssa-logo.png"
-                            alt="Spark Stack Academy"
-                        >
-
-                    </div>
-
-
-                    <p class="eyebrow">
-                        CERTIFICATE OF COMPLETION
-                    </p>
-
-
-                    <h1>
-                        Spark Stack Academy
-                    </h1>
-
-
-                    <p class="motto">
-                        Learn • Build • Innovate
-                    </p>
-
-
-                    <p class="presented">
-                        This certificate is proudly presented to
-                    </p>
-
-
-                    <h2 id="studentName">
-                        Student Name
-                    </h2>
-
-
-                    <div class="gold-line"></div>
-
-
-                    <p class="completion-text">
-                        for successfully completing the course
-                    </p>
-
-
-                    <h3 id="courseTitle">
-                        Course Title
-                    </h3>
-
-
-                    <div class="certificate-details">
-
-
-                        <div>
-                            <span>Certificate No.</span>
-                            <strong id="certificateNumber">
-                                —
-                            </strong>
-                        </div>
-
-
-                        <div>
-                            <span>Admission No.</span>
-                            <strong id="admissionNumber">
-                                —
-                            </strong>
-                        </div>
-
-
-                        <div>
-                            <span>Issued</span>
-                            <strong id="issuedAt">
-                                —
-                            </strong>
-                        </div>
-
-
-                    </div>
-
-
-                    <div class="signatures">
-
-
-                        <div class="signature">
-
-                            <strong id="instructorName">
-                                Academy Instructor
-                            </strong>
-
-                            <span>
-                                Course Instructor
-                            </span>
-
-                        </div>
-
-
-                        <div class="seal">
-
-                            <div class="seal-inner">
-                                SSA
-                            </div>
-
-                        </div>
-
-
-                        <div class="signature">
-
-                            <strong>
-                                Spark Stack Academy
-                            </strong>
-
-                            <span>
-                                Authorized Academy
-                            </span>
-
-                        </div>
-
-
-                    </div>
-
-
-                    <footer>
-
-                        <span id="headquarters">
-                            Kenya
-                        </span>
-
-                        <span>
-                            •
-                        </span>
-
-                        <span id="website">
-                            sparkstackacademy.com
-                        </span>
-
-                    </footer>
-
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-    <script
-        type="module"
-        src="js/certificate-view.js"
-    ></script>
-
-
+<main class="certificate-page">
+<div class="certificate-actions">
+<button id="printCertificate" type="button" disabled>Print / Save PDF</button>
+<button id="closeCertificate" class="secondary-btn" type="button">Close</button>
+</div>
+<p id="certificateStatus" class="certificate-status" role="status" aria-live="polite">Verifying certificate record…</p>
+<section id="certificate" class="certificate" aria-label="Spark Stack Academy certificate">
+<div class="certificate-border">
+<div class="certificate-inner">
+<div class="academy-logo"><img src="../assets/images/ssa-logo.png" alt="Spark Stack Academy"></div>
+<p class="eyebrow">CERTIFICATE OF COMPLETION</p>
+<h1>Spark Stack Academy</h1>
+<p class="motto">Learn • Build • Innovate</p>
+<p class="presented">This certificate is proudly presented to</p>
+<h2 id="studentName">Verifying certificate…</h2>
+<div class="gold-line"></div>
+<p class="completion-text">for successfully completing the course</p>
+<h3 id="courseTitle">Course Title</h3>
+<div class="certificate-details">
+<div><span>Certificate No.</span><strong id="certificateNumber">—</strong></div>
+<div><span>Admission No.</span><strong id="admissionNumber">—</strong></div>
+<div><span>Issued</span><strong id="issuedAt">—</strong></div>
+</div>
+<div class="signatures">
+<div class="signature"><strong id="instructorName">Academy Instructor</strong><span>Course Instructor</span></div>
+<div class="seal"><div class="seal-inner">SSA</div></div>
+<div class="signature"><strong>Spark Stack Academy</strong><span>Authorized Academy</span></div>
+</div>
+<footer><span id="headquarters">Kenya</span><span>•</span><span id="website">sparkstackacademy.com</span></footer>
+</div>
+</div>
+</section>
+</main>
+<script type="module" src="js/certificate-view.js"></script>
 </body>
-
 </html>
