@@ -740,7 +740,7 @@ async function openReport(reportId) {
 
     setText(
         "reportModalId",
-        `#${report.id}`
+        `#${report.reportId || report.id}`
     );
 
     setText(
