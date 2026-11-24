@@ -1,440 +1,283 @@
 // ============================================================
-// SPARK STACK ACADEMY
-// STUDENT PAYMENTS — FAST PREMIUM CHECKOUT
+// SPARK STACK ACADEMY — STUDENT M-PESA PAYMENTS
+// Supports server-priced STK Push and manual M-Pesa receipt review.
 // ============================================================
 
-import { auth, db } from "../../js/firebase.js";
-
+import { app, auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 import {
-    collection,
-    query,
-    where,
-    orderBy,
-    limit,
-    onSnapshot,
-    doc,
-    getDoc
+  collection, doc, getDoc, onSnapshot, orderBy, query, where, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-console.log("⚡ Fast Payments Engine Loaded");
+const functions = getFunctions(app, "us-central1");
+const initiateStk = httpsCallable(functions, "initiateStudentStkPayment");
+const submitManual = httpsCallable(functions, "submitStudentManualPayment");
 
-const PAYMENT_API_URL =
-    window.SSA_PAYMENT_API_URL || "";
+const params = new URLSearchParams(location.search);
+const purchaseType = params.get("purchaseType") || (params.get("courseId") ? "course" : "");
+const courseId = params.get("courseId") || "";
+const plan = params.get("plan") || "";
+const billingPeriod = params.get("period") || "monthly";
 
-const params = new URLSearchParams(window.location.search);
-const selectedCourseId = params.get("courseId");
+const $ = id => document.getElementById(id);
+const courseList = $("courseList");
+const transactionList = $("transactionList");
+const totalPaid = $("totalPaid");
+const balance = $("balance");
+const paymentStatus = $("paymentStatus");
+const backBtn = $("backBtn");
 
 let currentUser = null;
-let selectedCourse = null;
-let historyStarted = false;
-
-const courseList = document.getElementById("courseList");
-const transactionList = document.getElementById("transactionList");
-const totalPaid = document.getElementById("totalPaid");
-const balanceElement = document.getElementById("balance");
-const paymentStatus = document.getElementById("paymentStatus");
-const backBtn = document.getElementById("backBtn");
+let purchase = null;
+let activePaymentUnsubscribe = null;
 
 backBtn?.addEventListener("click", () => {
-    window.location.href = "dashboard.html";
+  location.href = purchaseType === "premium" ? "premium.html" : "courses.html";
 });
 
-// ============================================================
-// BOOT
-// Checkout is the ONLY blocking operation.
-// Payment history never blocks the page.
-// ============================================================
+function money(amount) {
+  return "KSh " + Number(amount || 0).toLocaleString("en-KE", { maximumFractionDigits: 0 });
+}
+function esc(value) {
+  return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+function message(text, isError = false) {
+  const node = $("checkoutMessage");
+  if (!node) return;
+  node.textContent = text;
+  node.classList.toggle("error", isError);
+  node.hidden = false;
+}
+function setBusy(id, busy, label) {
+  const button = $(id);
+  if (!button) return;
+  button.disabled = busy;
+  if (label) button.textContent = label;
+}
 
-onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = "../login.html";
-        return;
+async function loadPurchase() {
+  if (purchaseType === "course" && courseId) {
+    const snap = await getDoc(doc(db, "courses", courseId));
+    if (!snap.exists()) throw new Error("This course could not be found.");
+    const data = snap.data();
+    if (data.published !== true && String(data.status || "").toLowerCase() !== "published") {
+      throw new Error("This course is not currently available for purchase.");
     }
-
-    currentUser = user;
-
-    if (!selectedCourseId) {
-        renderMessage("Select a course to continue with payment.");
-        startHistoryInBackground();
-        return;
+    const amount = Number(data.price);
+    if (!Number.isSafeInteger(amount) || amount < 1 || String(data.currency || "KES").toUpperCase() !== "KES") {
+      throw new Error("This course does not have a valid KES payment price.");
     }
+    purchase = { purchaseType: "course", courseId, title: data.title || "Academy Course", amount };
+    return;
+  }
 
-    await loadPremiumCourse();
+  if (purchaseType === "premium" && plan) {
+    if (!["monthly", "quarterly"].includes(billingPeriod)) throw new Error("Choose a valid membership period.");
+    const snap = await getDoc(doc(db, "premiumPricing", "global"));
+    const pricing = snap.exists() ? snap.data() : {};
+    const planData = pricing.plans?.[plan];
+    const amount = Number(planData?.[billingPeriod === "monthly" ? "monthlyPrice" : "quarterlyPrice"]);
+    if (pricing.published !== true || !planData || planData.enabled === false || !Number.isSafeInteger(amount) || amount < 1) {
+      throw new Error("This membership price is not currently published by the Founder.");
+    }
+    purchase = {
+      purchaseType: "premium", plan, billingPeriod,
+      title: planData.name || plan.replaceAll("_", " "),
+      amount
+    };
+    return;
+  }
 
-    // Start history only after checkout is rendered.
-    startHistoryInBackground();
+  throw new Error("No valid course or membership was selected.");
+}
+
+function renderCheckout() {
+  if (!courseList || !purchase) return;
+  const periodLabel = purchase.billingPeriod
+    ? purchase.billingPeriod.charAt(0).toUpperCase() + purchase.billingPeriod.slice(1)
+    : "Course access";
+
+  courseList.innerHTML = `
+    <article class="course-card payment-checkout-card">
+      <div class="checkout-course-info">
+        <span class="checkout-badge">${purchase.purchaseType === "premium" ? "STUDENT MEMBERSHIP" : "COURSE PAYMENT"}</span>
+        <h3 id="checkoutTitle"></h3>
+        <p>${esc(periodLabel)} · Payment is verified by the Academy before access is activated.</p>
+      </div>
+      <div class="checkout-price">
+        <span>Amount due</span>
+        <strong id="checkoutAmount"></strong>
+      </div>
+
+      <section class="student-payment-method">
+        <h3>Option 1 — M-Pesa STK Push</h3>
+        <p>Enter the M-Pesa number that should receive the payment prompt.</p>
+        <label for="stkPhone">M-Pesa phone number</label>
+        <input id="stkPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XXXXXXXX" maxlength="16">
+        <button type="button" class="pay-btn" id="payWithStk">Send M-Pesa Prompt</button>
+      </section>
+
+      <section class="student-payment-method manual-payment-method">
+        <h3>Option 2 — Manual M-Pesa Payment</h3>
+        <p>Pay using the Academy instructions below, then submit the receipt code for administrator verification.</p>
+        <div class="payment-detail"><span>Paybill / Till</span><strong>400200</strong></div>
+        <div class="payment-detail"><span>Account Number</span><strong>1078687</strong></div>
+        <div class="payment-detail"><span>Exact amount</span><strong id="manualAmount"></strong></div>
+        <label for="manualPhone">Phone number used to pay</label>
+        <input id="manualPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XXXXXXXX" maxlength="16">
+        <label for="manualReceipt">M-Pesa transaction code</label>
+        <input id="manualReceipt" type="text" autocomplete="off" placeholder="e.g. QGH7ABC123" maxlength="16">
+        <button type="button" class="pay-btn manual-submit-btn" id="submitManualPayment">Submit for Verification</button>
+      </section>
+
+      <p id="checkoutMessage" class="checkout-message" role="status" aria-live="polite" hidden></p>
+    </article>
+  `;
+
+  $("checkoutTitle").textContent = purchase.title;
+  $("checkoutAmount").textContent = money(purchase.amount);
+  $("manualAmount").textContent = money(purchase.amount);
+  $("payWithStk")?.addEventListener("click", startStkPayment);
+  $("submitManualPayment")?.addEventListener("click", submitManualPayment);
+  if (balance) balance.textContent = money(purchase.amount);
+  if (paymentStatus) paymentStatus.textContent = "Awaiting payment";
+}
+
+async function startStkPayment() {
+  if (!window.SSAOnlineActionGuard?.requireOnline("Starting an M-Pesa payment")) return;
+  const phoneNumber = $("stkPhone")?.value.trim() || "";
+  if (!phoneNumber) return message("Enter the M-Pesa phone number first.", true);
+  setBusy("payWithStk", true, "Sending prompt…");
+  try {
+    const payload = purchase.purchaseType === "course"
+      ? { purchaseType: "course", courseId: purchase.courseId, phoneNumber }
+      : { purchaseType: "premium", plan: purchase.plan, billingPeriod: purchase.billingPeriod, phoneNumber };
+    const result = await initiateStk(payload);
+    message(result.data.customerMessage || "M-Pesa prompt sent. Check your phone and enter your PIN.");
+    watchPayment(result.data.paymentId);
+  } catch (error) {
+    console.error("Student STK Push failed:", error);
+    message(error.message || "The M-Pesa prompt could not be sent. You can use manual payment instead.", true);
+  } finally {
+    setBusy("payWithStk", false, "Send M-Pesa Prompt");
+  }
+}
+
+async function submitManualPayment() {
+  if (!window.SSAOnlineActionGuard?.requireOnline("Submitting manual M-Pesa payment")) return;
+  const phoneNumber = $("manualPhone")?.value.trim() || "";
+  const receiptCode = $("manualReceipt")?.value.trim().toUpperCase() || "";
+  if (!phoneNumber || !receiptCode) return message("Enter the phone number used to pay and the M-Pesa transaction code.", true);
+  setBusy("submitManualPayment", true, "Submitting…");
+  try {
+    const payload = purchase.purchaseType === "course"
+      ? { purchaseType: "course", courseId: purchase.courseId, phoneNumber, receiptCode }
+      : { purchaseType: "premium", plan: purchase.plan, billingPeriod: purchase.billingPeriod, phoneNumber, receiptCode };
+    const result = await submitManual(payload);
+    message("Your M-Pesa receipt has been submitted. Payment status: Pending administrator verification. Course or Premium access will activate after approval.");
+    watchPayment(result.data.paymentId);
+  } catch (error) {
+    console.error("Manual M-Pesa submission failed:", error);
+    message(error.message || "Your payment details could not be submitted.", true);
+  } finally {
+    setBusy("submitManualPayment", false, "Submit for Verification");
+  }
+}
+
+function watchPayment(paymentId) {
+  if (!paymentId) return;
+  activePaymentUnsubscribe?.();
+  activePaymentUnsubscribe = onSnapshot(doc(db, "payments", paymentId), snap => {
+    if (!snap.exists()) return;
+    const payment = snap.data();
+    if (payment.status === "paid" || payment.status === "completed") {
+      message("Payment verified. Your access has been activated.");
+      if (purchase.purchaseType === "course") {
+        const go = document.createElement("a");
+        go.href = `course-player.html?id=${encodeURIComponent(purchase.courseId)}`;
+        go.textContent = "Open Course";
+        go.className = "pay-btn";
+        $("checkoutMessage")?.append(document.createTextNode(" "), go);
+      } else {
+        const go = document.createElement("a");
+        go.href = "premium.html";
+        go.textContent = "View Premium Membership";
+        go.className = "pay-btn";
+        $("checkoutMessage")?.append(document.createTextNode(" "), go);
+      }
+    } else if (payment.status === "pending_review") {
+      message("Receipt submitted. An administrator will review it. Your access remains pending until verification.");
+    } else if (payment.status === "failed" || payment.status === "rejected" || payment.status === "initiation_failed") {
+      message(payment.reviewNote || payment.resultDescription || "Payment was not completed. You can retry or submit manual payment.", true);
+    } else if (payment.status === "verification_pending") {
+      message("M-Pesa confirmed the request. The Academy is completing payment verification.");
+    }
+  }, error => console.warn("Payment status listener failed:", error));
+}
+
+function loadPaymentHistory(user) {
+  if (!transactionList) return;
+  const q = query(
+    collection(db, "payments"),
+    where("userId", "==", user.uid),
+    orderBy("createdAt", "desc"),
+    limit(25)
+  );
+  return onSnapshot(q, snapshot => {
+    let paid = 0;
+    transactionList.replaceChildren();
+    if (snapshot.empty) {
+      transactionList.textContent = "No transactions yet.";
+      if (totalPaid) totalPaid.textContent = money(0);
+      return;
+    }
+    snapshot.forEach(item => {
+      const payment = item.data();
+      if (["paid", "completed"].includes(String(payment.status || "").toLowerCase())) {
+        paid += Number(payment.amount || 0);
+      }
+      const row = document.createElement("article");
+      row.className = "transaction-card";
+      const details = document.createElement("div");
+      const title = document.createElement("h3");
+      title.textContent = payment.course || payment.courseName || "Academy Payment";
+      const method = document.createElement("p");
+      method.textContent = payment.method === "mpesa_stk" ? "M-Pesa STK Push" : payment.method === "manual_mpesa" ? "Manual M-Pesa" : payment.method || "M-Pesa";
+      details.append(title, method);
+      const amount = document.createElement("strong");
+      amount.textContent = money(payment.amount);
+      const status = document.createElement("span");
+      status.className = "payment-history-status";
+      status.textContent = String(payment.status || "pending").replaceAll("_", " ");
+      const right = document.createElement("div");
+      right.append(amount, status);
+      row.append(details, right);
+      transactionList.append(row);
+    });
+    if (totalPaid) totalPaid.textContent = money(paid);
+  }, error => {
+    console.error("Payment history could not be loaded:", error);
+    transactionList.textContent = "Payment history is temporarily unavailable.";
+  });
+}
+
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    location.href = "../login.html";
+    return;
+  }
+  currentUser = user;
+  try {
+    if (courseList) courseList.textContent = "Loading secure payment details…";
+    await loadPurchase();
+    renderCheckout();
+    loadPaymentHistory(user);
+  } catch (error) {
+    console.error("Payment checkout could not be loaded:", error);
+    if (courseList) courseList.textContent = error.message || "Payment details could not be loaded.";
+  }
 });
 
-// ============================================================
-// PREMIUM COURSE
-// ============================================================
-
-async function loadPremiumCourse() {
-    const cached = readCourseCache(selectedCourseId);
-
-    if (cached) {
-        selectedCourse = cached;
-        renderCheckout(cached);
-        refreshCourseSilently();
-        return;
-    }
-
-    renderLoading();
-
-    try {
-        const snapshot = await getDoc(
-            doc(db, "courses", selectedCourseId)
-        );
-
-        if (!snapshot.exists()) {
-            renderMessage("This course could not be found.");
-            return;
-        }
-
-        selectedCourse = {
-            id: snapshot.id,
-            ...snapshot.data()
-        };
-
-        writeCourseCache(selectedCourse);
-        renderCheckout(selectedCourse);
-    } catch (error) {
-        console.error("Course loading failed:", error);
-        renderMessage("Unable to load this course. Please retry.");
-    }
-}
-
-async function refreshCourseSilently() {
-    try {
-        const snapshot = await getDoc(
-            doc(db, "courses", selectedCourseId)
-        );
-
-        if (!snapshot.exists()) return;
-
-        selectedCourse = {
-            id: snapshot.id,
-            ...snapshot.data()
-        };
-
-        writeCourseCache(selectedCourse);
-        updateCheckout(selectedCourse);
-    } catch (error) {
-        console.warn("Silent course refresh failed:", error);
-    }
-}
-
-// ============================================================
-// CHECKOUT UI
-// ============================================================
-
-function renderCheckout(course) {
-    if (!courseList) return;
-
-    const title = escapeHTML(course.title || "Premium Course");
-    const price = Number(course.price || 0);
-
-    courseList.innerHTML = `
-        <div class="course-card payment-checkout-card">
-            <div class="checkout-course-info">
-                <span class="checkout-badge">PREMIUM COURSE</span>
-                <h3>${title}</h3>
-                <p>Unlock full access to this course.</p>
-            </div>
-
-            <div class="checkout-price">
-                <span>Course fee</span>
-                <strong>KSh ${price.toLocaleString()}</strong>
-            </div>
-
-            <button
-                type="button"
-                class="pay-btn"
-                id="payCourseBtn"
-                ${price <= 0 ? "disabled" : ""}
-            >
-                Pay KSh ${price.toLocaleString()}
-            </button>
-
-            <div id="checkoutMessage" class="checkout-message"></div>
-        </div>
-    `;
-
-    document
-        .getElementById("payCourseBtn")
-        ?.addEventListener("click", startPayment);
-
-    if (balanceElement) {
-        balanceElement.textContent = `KSh ${price.toLocaleString()}`;
-    }
-
-    if (paymentStatus) {
-        paymentStatus.textContent = "Ready for payment";
-    }
-}
-
-function updateCheckout(course) {
-    const title = document.querySelector(".payment-checkout-card h3");
-    const price = document.querySelector(".payment-checkout-card .checkout-price strong");
-    const button = document.getElementById("payCourseBtn");
-    const amount = Number(course.price || 0);
-
-    if (title) title.textContent = course.title || "Premium Course";
-    if (price) price.textContent = `KSh ${amount.toLocaleString()}`;
-    if (button) button.textContent = `Pay KSh ${amount.toLocaleString()}`;
-}
-
-// ============================================================
-// PAYMENT
-// ============================================================
-
-async function startPayment() {
-    if (!window.SSAOnlineActionGuard?.requireOnline("Starting a course payment")) return;
-    if (!currentUser || !selectedCourse) return;
-
-    const amount = Number(selectedCourse.price || 0);
-    const button = document.getElementById("payCourseBtn");
-
-    if (amount <= 0) {
-        showCheckoutMessage("This course has an invalid price.", true);
-        return;
-    }
-
-    if (button) {
-        button.disabled = true;
-        button.textContent = "Opening secure checkout...";
-    }
-
-    try {
-        if (!PAYMENT_API_URL) {
-            throw new Error("Secure payments are temporarily unavailable while the unified SSA payment service is being configured.");
-        }
-
-        const response = await fetch(PAYMENT_API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                userId: currentUser.uid,
-                email: currentUser.email,
-                courseId: selectedCourse.id,
-                course: selectedCourse.title || "Premium Course",
-                amount,
-                currency: "KES"
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(
-                data.message || "Payment initialization failed."
-            );
-        }
-
-        const checkoutUrl =
-            data.redirect_url ||
-            data.authorization_url ||
-            data.checkout_url;
-
-        if (!checkoutUrl) {
-            throw new Error("No checkout URL was returned.");
-        }
-
-        window.location.replace(checkoutUrl);
-    } catch (error) {
-        console.error("Payment initialization failed:", error);
-        showCheckoutMessage(
-            error.message || "Unable to start payment. Please try again.",
-            true
-        );
-
-        if (button) {
-            button.disabled = false;
-            button.textContent = `Pay KSh ${amount.toLocaleString()}`;
-        }
-    }
-}
-
-// ============================================================
-// PAYMENT HISTORY — BACKGROUND ONLY
-// ============================================================
-
-function startHistoryInBackground() {
-    if (historyStarted || !currentUser) return;
-    historyStarted = true;
-
-    const run = () => loadPaymentHistory();
-
-    if ("requestIdleCallback" in window) {
-        window.requestIdleCallback(run, { timeout: 2500 });
-    } else {
-        setTimeout(run, 800);
-    }
-}
-
-function loadPaymentHistory() {
-    if (!transactionList || !currentUser) return;
-
-    try {
-        const paymentsQuery = query(
-            collection(db, "payments"),
-            where("userId", "==", currentUser.uid),
-            orderBy("createdAt", "desc"),
-            limit(20)
-        );
-
-        onSnapshot(
-            paymentsQuery,
-            (snapshot) => {
-                let paid = 0;
-                transactionList.innerHTML = "";
-
-                if (snapshot.empty) {
-                    transactionList.innerHTML =
-                        `<div class="empty-payment">No transactions yet.</div>`;
-                    updateSummary(0);
-                    return;
-                }
-
-                snapshot.forEach((paymentDoc) => {
-                    const payment = paymentDoc.data();
-                    const status = normalizeStatus(payment.status);
-
-                    if (status === "success" || status === "completed") {
-                        paid += Number(payment.amount || 0);
-                    }
-
-                    renderTransaction(payment);
-                });
-
-                updateSummary(paid);
-            },
-            (error) => {
-                console.warn("Payment history unavailable:", error);
-            }
-        );
-    } catch (error) {
-        console.warn("Payment history setup failed:", error);
-    }
-}
-
-function updateSummary(paid) {
-    if (totalPaid) {
-        totalPaid.textContent = `KSh ${paid.toLocaleString()}`;
-    }
-
-    if (paymentStatus) {
-        paymentStatus.textContent =
-            paid > 0 ? "Payments recorded" : "No payments yet";
-    }
-}
-
-function renderTransaction(payment) {
-    const card = document.createElement("div");
-    card.className = "transaction-card";
-
-    const course = escapeHTML(
-        payment.course || payment.courseName || "Academy Payment"
-    );
-
-    const method = escapeHTML(payment.method || "PesaPal");
-    const status = normalizeStatus(payment.status);
-    const amount = Number(payment.amount || 0);
-
-    card.innerHTML = `
-        <div>
-            <h3>${course}</h3>
-            <p>${method}</p>
-        </div>
-        <div>
-            <h3>KSh ${amount.toLocaleString()}</h3>
-            <span class="${status}">${capitalize(status)}</span>
-        </div>
-    `;
-
-    transactionList.appendChild(card);
-}
-
-// ============================================================
-// UI STATES
-// ============================================================
-
-function renderLoading() {
-    if (!courseList) return;
-
-    courseList.innerHTML = `
-        <div class="payment-loading">
-            <p>Loading checkout...</p>
-        </div>
-    `;
-}
-
-function renderMessage(message) {
-    if (!courseList) return;
-    courseList.innerHTML = `
-        <div class="empty-payment">
-            ${escapeHTML(message)}
-        </div>
-    `;
-}
-
-function showCheckoutMessage(message, error = false) {
-    const element = document.getElementById("checkoutMessage");
-    if (!element) return;
-
-    element.textContent = message;
-    element.classList.toggle("error", error);
-}
-
-// ============================================================
-// CACHE
-// ============================================================
-
-function writeCourseCache(course) {
-    try {
-        sessionStorage.setItem(
-            `ssa_course_${course.id}`,
-            JSON.stringify(course)
-        );
-    } catch {}
-}
-
-function readCourseCache(courseId) {
-    try {
-        const value = sessionStorage.getItem(`ssa_course_${courseId}`);
-        return value ? JSON.parse(value) : null;
-    } catch {
-        return null;
-    }
-}
-
-// ============================================================
-// HELPERS
-// ============================================================
-
-function normalizeStatus(status) {
-    return String(status || "pending")
-        .toLowerCase()
-        .replace(/\s+/g, "");
-}
-
-function capitalize(value) {
-    return value
-        ? value.charAt(0).toUpperCase() + value.slice(1)
-        : "";
-}
-
-function escapeHTML(value) {
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-console.log("⚡ Fast Premium Checkout Ready");
+window.addEventListener("beforeunload", () => activePaymentUnsubscribe?.());
