@@ -782,6 +782,12 @@ exports.reviewStudentManualPayment = onCall(async request => {
         status: "rejected", reviewedBy: reviewer.uid, reviewedAt: Timestamp.now()
       }, { merge: true });
     }
+    await db.collection("audit_logs").add({
+      action: "student_manual_mpesa_payment_rejected", actorId: reviewer.uid,
+      targetId: payment.userId, paymentId, receiptCode: payment.manualReceiptCode || "",
+      amount: payment.amount, currency: payment.currency, reviewNote: note,
+      createdAt: Timestamp.now()
+    });
     return { success: true, status: "rejected" };
   }
   await activateStudentPayment(paymentRef, payment, {
