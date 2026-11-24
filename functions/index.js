@@ -48,7 +48,7 @@ exports.requestInstructorWithdrawal = onCall(async request => {
   const userRef = db.doc("users/" + uid);
   const settingsRef = db.doc("platformSettings/earnings");
   const monetizationRef = db.doc("settings/monetization");
-  const walletRef = db.doc("instructorWallets/" + uid);
+  const walletRef = db.doc("withdrawalLocks/" + uid);
   const earningsQuery = db.collection("instructorEarnings").where("instructorId", "==", uid);
   const withdrawalsQuery = db.collection("withdrawalRequests").where("instructorId", "==", uid);
   const requestRef = db.collection("withdrawalRequests").doc();
