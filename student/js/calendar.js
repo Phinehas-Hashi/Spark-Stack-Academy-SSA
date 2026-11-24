@@ -1020,9 +1020,45 @@ auth.onAuthStateChanged(
             return;
         }
 
-        await loadEvents(user);
+        if (elements.grid) elements.grid.setAttribute("aria-busy", "true");
 
-        renderCalendar();
+        try {
+            await loadEvents(user);
+            if (elements.grid) elements.grid.setAttribute("aria-busy", "false");
+            renderCalendar();
+        } catch (error) {
+            console.error("SSA Calendar: initial load failed.", error);
+            if (elements.grid) {
+                elements.grid.setAttribute("aria-busy", "false");
+                elements.grid.innerHTML = `
+                    <div class="calendar-loading calendar-load-error" role="alert">
+                        <strong>Calendar unavailable</strong>
+                        <span>We could not load your learning schedule.</span>
+                        <button id="calendarRetryBtn" class="calendar-retry-btn" type="button">Try again</button>
+                    </div>
+                `;
+                document.getElementById("calendarRetryBtn")?.addEventListener("click", async () => {
+                    if (elements.grid) {
+                        elements.grid.setAttribute("aria-busy", "true");
+                        elements.grid.innerHTML = `<div class="calendar-loading"><div class="calendar-loading-spinner"></div><span>Loading your calendar…</span></div>`;
+                    }
+                    try {
+                        await loadEvents(user);
+                        if (elements.grid) elements.grid.setAttribute("aria-busy", "false");
+                        renderCalendar();
+                    } catch (retryError) {
+                        console.error("SSA Calendar: retry failed.", retryError);
+                        if (elements.grid) {
+                            elements.grid.setAttribute("aria-busy", "false");
+                            elements.grid.innerHTML = `<div class="calendar-loading calendar-load-error" role="alert"><strong>Still unavailable</strong><span>Please check your connection and try again.</span></div>`;
+                        }
+                    }
+                }, { once: true });
+            }
+            if (elements.upcoming) {
+                elements.upcoming.innerHTML = `<div class="upcoming-empty" role="alert"><strong>Schedule unavailable</strong><p>We could not retrieve your upcoming items.</p></div>`;
+            }
+        }
 
     }
 );
