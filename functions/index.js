@@ -76,6 +76,171 @@ function eventKey(event, suffix) {
   return `${raw}-${suffix}`.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 140);
 }
 
+exports.awardStudentXP = onCall(async request => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in before earning XP.");
+
+  const source = safeText(request.data?.source);
+  const reason = safeText(request.data?.reason, "Learning activity").slice(0, 180);
+  const parts = source.split(":");
+  const type = parts[0];
+  if (!["lesson", "course", "assignment", "quiz"].includes(type)) {
+    throw new HttpsError("invalid-argument", "This learning activity cannot award XP.");
+  }
+
+  const userRef = db.doc("users/" + uid);
+  const studentRef = db.doc("students/" + uid);
+  const eventId = "xp_" + encodeURIComponent(source).replaceAll("%", "_").slice(0, 140);
+  const eventRef = db.doc("students/" + uid + "/activity/" + eventId);
+
+  return db.runTransaction(async transaction => {
+    const [userSnap, studentSnap, eventSnap, controlsSnap] = await Promise.all([
+      transaction.get(userRef),
+      transaction.get(studentRef),
+      transaction.get(eventRef),
+      transaction.get(platformRef)
+    ]);
+    if (!userSnap.exists || !studentSnap.exists) throw new HttpsError("permission-denied", "Student profile not found.");
+    const user = userSnap.data() || {};
+    if (user.role !== "student" || user.status !== "active" || user.active !== true) {
+      throw new HttpsError("permission-denied", "Only active students can earn XP.");
+    }
+    const controls = controlsSnap.exists ? controlsSnap.data() || {} : {};
+    const maintenance = controls.maintenance || {};
+    const nowMs = Date.now();
+    const startMs = maintenance.startAt?.toMillis ? maintenance.startAt.toMillis() : new Date(maintenance.startAt || 0).getTime();
+    const endMs = maintenance.endAt?.toMillis ? maintenance.endAt.toMillis() : new Date(maintenance.endAt || 0).getTime();
+    const maintenanceBlocked = maintenance.scheduled === true
+      && (maintenance.target === "student" || maintenance.target === "all")
+      && nowMs >= startMs && nowMs < endMs;
+    if (controls.lockdown === true || controls.student?.suspended === true || maintenanceBlocked) {
+      throw new HttpsError("failed-precondition", "Student XP awards are unavailable while the portal is restricted.");
+    }
+
+    const student = studentSnap.data() || {};
+    if (eventSnap.exists) {
+      return { duplicate: true, student, xp: Number(student.xp || 0), level: Number(student.level || 1) };
+    }
+
+    let reward = 0;
+    let counterField = "";
+    if (type === "lesson") {
+      const courseId = parts[1];
+      const lessonId = parts[2];
+      if (!courseId || !lessonId || parts.length !== 3) throw new HttpsError("invalid-argument", "Invalid lesson reward source.");
+      const progressRef = db.doc("courseProgress/" + uid + "_" + courseId);
+      const lessonRef = db.doc("courseLessons/" + lessonId);
+      const [progressSnap, lessonSnap] = await Promise.all([transaction.get(progressRef), transaction.get(lessonRef)]);
+      const completed = progressSnap.exists ? progressSnap.data()?.completedLessons || [] : [];
+      if (!lessonSnap.exists || lessonSnap.data()?.courseId !== courseId || !completed.includes(lessonId)) {
+        throw new HttpsError("failed-precondition", "Complete the published lesson before receiving XP.");
+      }
+      reward = 20;
+      counterField = "lessonsCompleted";
+    } else if (type === "course") {
+      const courseId = parts[1];
+      if (!courseId || parts.length !== 2) throw new HttpsError("invalid-argument", "Invalid course reward source.");
+      const progressRef = db.doc("courseProgress/" + uid + "_" + courseId);
+      const lessonQuery = db.collection("courseLessons").where("courseId", "==", courseId);
+      const [progressSnap, lessonSnap] = await Promise.all([transaction.get(progressRef), transaction.get(lessonQuery)]);
+      const completed = progressSnap.exists ? progressSnap.data()?.completedLessons || [] : [];
+      const lessonIds = lessonSnap.docs.map(item => item.id);
+      if (!progressSnap.exists || Number(progressSnap.data()?.progress || 0) < 100 || !lessonIds.length || !lessonIds.every(id => completed.includes(id))) {
+        throw new HttpsError("failed-precondition", "Complete every published lesson before receiving the course reward.");
+      }
+      reward = 50;
+      counterField = "coursesCompleted";
+    } else if (type === "assignment") {
+      const assignmentId = parts[1];
+      if (!assignmentId || parts.length !== 2) throw new HttpsError("invalid-argument", "Invalid assignment reward source.");
+      const assignmentRef = db.doc("assignments/" + assignmentId);
+      const submissionRef = db.doc("submissions/" + assignmentId + "_" + uid);
+      const [assignmentSnap, submissionSnap] = await Promise.all([transaction.get(assignmentRef), transaction.get(submissionRef)]);
+      const submission = submissionSnap.exists ? submissionSnap.data() || {} : {};
+      if (!assignmentSnap.exists || !submissionSnap.exists || submission.studentId !== uid || submission.status !== "submitted" || !submission.submittedAt) {
+        throw new HttpsError("failed-precondition", "Submit the assignment before receiving XP.");
+      }
+      reward = 40;
+      counterField = "assignmentsSubmitted";
+    } else if (type === "quiz") {
+      const quizId = parts[1];
+      const attemptNumber = Number(parts[2]);
+      if (!quizId || !Number.isInteger(attemptNumber) || attemptNumber < 1 || parts.length !== 3) {
+        throw new HttpsError("invalid-argument", "Invalid quiz reward source.");
+      }
+      const quizRef = db.doc("quizzes/" + quizId);
+      const submissionQuery = db.collection("quizSubmissions")
+        .where("studentId", "==", uid)
+        .where("quizId", "==", quizId)
+        .where("attemptNumber", "==", attemptNumber);
+      const [quizSnap, submissionSnap] = await Promise.all([transaction.get(quizRef), transaction.get(submissionQuery)]);
+      if (!quizSnap.exists || submissionSnap.empty) throw new HttpsError("failed-precondition", "Submit the quiz before receiving XP.");
+      const submission = submissionSnap.docs[0].data() || {};
+      if (submission.completed !== true || submission.status !== "graded") throw new HttpsError("failed-precondition", "The quiz attempt is not complete.");
+      const baseXP = Math.min(100, Math.max(1, Number(quizSnap.data().xpReward ?? quizSnap.data().xp ?? 30)));
+      const score = Math.max(0, Math.min(100, Number(submission.score || 0)));
+      reward = submission.passed === true ? Math.max(Math.floor(baseXP * score / 100), 1) : Math.floor(baseXP * 0.25);
+      if (reward <= 0) throw new HttpsError("failed-precondition", "This quiz attempt did not qualify for XP.");
+      counterField = "quizzesCompleted";
+    }
+
+    const oldXP = Math.max(0, Number(student.xp || 0));
+    const newXP = oldXP + reward;
+    const oldLevel = Math.floor(oldXP / 100) + 1;
+    const newLevel = Math.floor(newXP / 100) + 1;
+    const now = Timestamp.now();
+    const nextStudent = {
+      ...student,
+      xp: newXP,
+      level: newLevel,
+      [counterField]: Number(student[counterField] || 0) + 1
+    };
+    const updates = {
+      xp: newXP,
+      level: newLevel,
+      [counterField]: nextStudent[counterField],
+      lastXPReward: now,
+      lastXPReason: reason,
+      updatedAt: now
+    };
+    if (newLevel > oldLevel) {
+      updates.lastLevelUp = newLevel;
+      updates.lastLevelUpAt = now;
+    }
+    transaction.update(studentRef, updates);
+    transaction.create(eventRef, {
+      type: "xp_earned",
+      amount: reward,
+      reason,
+      source,
+      previousXP: oldXP,
+      newXP,
+      previousLevel: oldLevel,
+      newLevel,
+      createdAt: now
+    });
+    if (newLevel > oldLevel) {
+      const levelEventRef = db.doc("students/" + uid + "/activity/level_" + eventId);
+      transaction.create(levelEventRef, {
+        type: "level_up",
+        from: oldLevel,
+        to: newLevel,
+        createdAt: now
+      });
+    }
+    return {
+      duplicate: false,
+      student: nextStudent,
+      xpAdded: reward,
+      oldXP,
+      newXP,
+      oldLevel,
+      newLevel,
+      levelUp: newLevel > oldLevel
+    };
+  });
+});
+
 async function requireFounder(request) {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "You must be signed in as a founder.");
