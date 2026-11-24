@@ -697,3 +697,7 @@
 .library-hero p{opacity:.82}
 .library-hero .page-badge{color:#d4baff}
 .course-filters .filter-btn.active{background:linear-gradient(105deg,#7024f5,#a12bff)!important;border-color:#8a42ed!important}
+
+
+/* Institution course library cover artwork */
+.institution-course-card .course-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.institution-course-origin{z-index:2}.institution-course-card .course-cover>i[data-lucide]{position:relative;z-index:1}

@@ -1232,3 +1232,10 @@
     }
 
 }
+
+/* Published course artwork */
+.course-cover-large{position:relative;overflow:hidden}.course-cover-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}.course-cover-large #courseCoverFallback{z-index:1}
+
+
+/* Module-aware curriculum preview */
+.course-curriculum-module{margin:0 0 16px;border:1px solid #e6eaf2;border-radius:14px;background:#fff;overflow:hidden}.course-curriculum-module-header{position:relative;padding:15px 17px;background:linear-gradient(110deg,#f7f8fc,#eef2fb);border-bottom:1px solid #e6eaf2}.course-curriculum-module-header>span{display:block;margin-bottom:5px;color:#64748b;font-size:9px;font-weight:800;letter-spacing:.12em}.course-curriculum-module-header h3{margin:0;color:#0b1736;font-size:14px;font-weight:800}.course-curriculum-module-header p{margin:5px 0 0;color:#64748b;font-size:11px;line-height:1.5}.course-curriculum-module-header small{display:inline-block;margin-top:7px;color:#6d55b5;font-size:10px;font-weight:700}.course-curriculum-module-lessons{padding:5px 14px}.course-curriculum-module-lessons .curriculum-item:last-child{border-bottom:0}

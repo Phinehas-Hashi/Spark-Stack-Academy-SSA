@@ -30,6 +30,7 @@ import {
 
 let currentUser = null;
 let course = null;
+let modules = [];
 let lessons = [];
 
 const params = new URLSearchParams(
@@ -173,13 +174,16 @@ async function loadCourse() {
         }
 
         course = {
-
-            id:
-                snapshot.id,
-
+            id: snapshot.id,
             ...snapshot.data()
-
         };
+
+        const courseStatus = String(course.status || "").trim().toLowerCase();
+        if (courseStatus === "deleted" || course.deletedAt
+            || (course.published !== true && courseStatus !== "published")) {
+            showError("This course is no longer available in the Academy Marketplace.");
+            return;
+        }
 
         console.log(
             "📚 COURSE:",
@@ -187,6 +191,7 @@ async function loadCourse() {
         );
 
 
+        await loadModules();
         await loadLessons();
 
         renderCourse();
@@ -226,6 +231,22 @@ async function loadCourse() {
 // ============================================
 // LOAD LESSONS
 // ============================================
+
+async function loadModules() {
+    try {
+        const snapshot = await getDocs(query(
+            collection(db, "courseModules"),
+            where("courseId", "==", courseId)
+        ));
+        modules = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+        modules.sort((a, b) =>
+            Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0)
+        );
+    } catch (error) {
+        console.warn("Course module lookup was unavailable:", error);
+        modules = [];
+    }
+}
 
 async function loadLessons() {
     const lessonQueries = [
@@ -278,6 +299,20 @@ function renderCourse() {
         course.title ||
         "Untitled Course"
     );
+
+    const coverImage = document.getElementById("courseCoverImage");
+    const coverFallback = document.getElementById("courseCoverFallback");
+    const coverUrl = course.thumbnail || course.image || course.coverImage || "";
+    if (coverImage && /^https:\/\//i.test(String(coverUrl))) {
+        coverImage.src = coverUrl;
+        coverImage.alt = course.title || "Course cover";
+        coverImage.hidden = false;
+        if (coverFallback) coverFallback.hidden = true;
+    } else if (coverImage) {
+        coverImage.hidden = true;
+        coverImage.removeAttribute("src");
+        if (coverFallback) coverFallback.hidden = false;
+    }
 
 
     setText(
@@ -567,116 +602,77 @@ function renderLearningPoints() {
 // ============================================
 
 function renderCurriculum() {
-
-    const box =
-        document.getElementById(
-            "curriculumList"
-        );
-
-    if (!box)
-        return;
-
+    const box = document.getElementById("curriculumList");
+    if (!box) return;
 
     if (!lessons.length) {
-
         box.innerHTML = `
-
             <div class="curriculum-empty">
-
                 <i data-lucide="book-open"></i>
-
-                <h3>
-                    Curriculum coming soon
-                </h3>
-
-                <p>
-                    Lessons are being prepared by the instructor.
-                </p>
-
+                <h3>Curriculum coming soon</h3>
+                <p>Lessons are being prepared by the instructor.</p>
             </div>
-
         `;
-
         refreshIcons();
-
         return;
-
     }
 
+    const lessonMarkup = (lesson, index) => {
+        const type = String(lesson.type || "lesson").toLowerCase();
+        const duration = lesson.duration ? `${lesson.duration} min` : "Lesson";
+        const icon = type === "video" ? "play-circle" : type === "quiz" ? "clipboard-check" : "file-text";
+        return `
+            <div class="curriculum-item">
+                <div class="lesson-number">${index + 1}</div>
+                <div class="lesson-icon"><i data-lucide="${icon}"></i></div>
+                <div class="lesson-info">
+                    <strong>${escapeHTML(lesson.title || `Lesson ${index + 1}`)}</strong>
+                    <span>${escapeHTML(duration)}</span>
+                </div>
+                <i class="lesson-lock" data-lucide="lock"></i>
+            </div>
+        `;
+    };
 
-    box.innerHTML =
-        lessons
-            .map(
-                (lesson, index) => {
+    const groupedIds = new Set();
+    const groups = modules.map((module, moduleIndex) => {
+        const moduleLessons = lessons.filter(lesson => lesson.moduleId === module.id);
+        moduleLessons.forEach(lesson => groupedIds.add(lesson.id));
+        if (!moduleLessons.length) return "";
+        return `
+            <section class="course-curriculum-module">
+                <header class="course-curriculum-module-header">
+                    <span>MODULE ${moduleIndex + 1}</span>
+                    <h3>${escapeHTML(module.title || `Module ${moduleIndex + 1}`)}</h3>
+                    ${module.description ? `<p>${escapeHTML(module.description)}</p>` : ""}
+                    <small>${moduleLessons.length} ${moduleLessons.length === 1 ? "lesson" : "lessons"}</small>
+                </header>
+                <div class="course-curriculum-module-lessons">
+                    ${moduleLessons.map((lesson, index) => lessonMarkup(lesson, index)).join("")}
+                </div>
+            </section>
+        `;
+    }).filter(Boolean);
 
-                    const type =
-                        lesson.type ||
-                        "lesson";
+    const ungrouped = lessons.filter(lesson => !groupedIds.has(lesson.id));
+    if (ungrouped.length || !groups.length) {
+        groups.push(`
+            <section class="course-curriculum-module">
+                <header class="course-curriculum-module-header">
+                    <span>${groups.length ? "ADDITIONAL CONTENT" : "COURSE LESSONS"}</span>
+                    <h3>${groups.length ? "Additional lessons" : "Course lessons"}</h3>
+                    <small>${ungrouped.length || lessons.length} ${(ungrouped.length || lessons.length) === 1 ? "lesson" : "lessons"}</small>
+                </header>
+                <div class="course-curriculum-module-lessons">
+                    ${(ungrouped.length ? ungrouped : lessons).map((lesson, index) => lessonMarkup(lesson, index)).join("")}
+                </div>
+            </section>
+        `);
+    }
 
-
-                    const duration =
-                        lesson.duration
-                            ? `${lesson.duration} min`
-                            : "";
-
-
-                    return `
-
-                        <div class="curriculum-item">
-
-                            <div class="lesson-number">
-                                ${index + 1}
-                            </div>
-
-
-                            <div class="lesson-icon">
-
-                                <i data-lucide="${
-                                    type === "video"
-                                        ? "play-circle"
-                                        : "file-text"
-                                }"></i>
-
-                            </div>
-
-
-                            <div class="lesson-info">
-
-                                <strong>
-                                    ${escapeHTML(
-                                        lesson.title ||
-                                        `Lesson ${index + 1}`
-                                    )}
-                                </strong>
-
-                                <span>
-                                    ${
-                                        duration ||
-                                        "Lesson"
-                                    }
-                                </span>
-
-                            </div>
-
-
-                            <i
-                                class="lesson-lock"
-                                data-lucide="lock">
-                            </i>
-
-                        </div>
-
-                    `;
-
-                }
-            )
-            .join("");
-
-
+    box.innerHTML = groups.join("");
     refreshIcons();
-
 }
-
 
 // ============================================
 // CHECK ENROLLMENT
@@ -1378,8 +1374,5 @@ function refreshIcons() {
 
 
 function goBack() {
-
-    window.location.href =
-        "course-library.html";
-
+    window.location.href = "marketplace.html";
 }

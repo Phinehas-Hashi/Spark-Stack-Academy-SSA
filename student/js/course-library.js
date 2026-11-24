@@ -1,132 +1,25 @@
-// Spark Stack Academy — Institution Learning Library
-// Lists only courses with a valid institution-scoped enrolment.
-// Global discovery and independent purchases belong in Marketplace / My Courses.
+// Spark Stack Academy — Institution Course Library
+// Independent Academy enrolments remain in My Courses; this page is institution-scoped.
 import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const $ = id => document.getElementById(id);
-const grid = $("libraryCourses");
-const search = $("courseSearch");
-const count = $("courseLibraryCount");
-const empty = $("libraryEmptyState");
-const error = $("libraryErrorState");
-const reset = $("resetCourseFilters");
-const retry = $("retryCoursesBtn");
-const filters = [...document.querySelectorAll(".filter-btn")];
-
-let user = null;
-let courses = [];
-let filter = "all";
-let term = "";
-
-const esc = value => String(value ?? "").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
-const time = value => value?.toMillis?.() || value?.toDate?.()?.getTime?.() || (Date.parse(value)||0);
-const validInstitutionEnrollment = record => {
-  const status = String(record.status || "").toLowerCase();
-  return Boolean(record.institutionId) && ["active","approved","completed"].includes(status);
-};
-
-function showLoading() {
-  empty.hidden = true; error.hidden = true;
-  grid.hidden = false;
-  grid.innerHTML = '<div class="library-state loading-card"><div class="state-icon"><i data-lucide="loader-circle"></i></div><h3>Loading your institution courses</h3><p>Checking your current enrolments.</p></div>';
-  window.lucide?.createIcons();
-}
-function showEmpty(noMatches = false) {
-  grid.innerHTML = "";
-  grid.hidden = true;
-  error.hidden = true;
-  empty.hidden = false;
-  const heading = empty.querySelector("h3");
-  const paragraph = empty.querySelector("p");
-  if (heading) heading.textContent = noMatches ? "No matching institution courses" : "No institution courses yet";
-  if (paragraph) paragraph.textContent = noMatches
-    ? "Try a different search or reset the course filters."
-    : "When an institution you belong to enrols you in a course, it will appear here. Browse global offerings in the Academy Marketplace.";
-  const action = empty.querySelector("#resetCourseFilters");
-  if (action) {
-    action.textContent = noMatches ? "Clear search and filters" : "Explore Academy Marketplace";
-    action.onclick = noMatches ? () => {
-      term = ""; filter = "all";
-      if (search) search.value = "";
-      filters.forEach(button => { const active = button.dataset.filter === "all"; button.classList.toggle("active",active); button.setAttribute("aria-pressed",String(active)); });
-      render();
-    } : () => { window.location.href = "marketplace.html"; };
-  }
-}
-function showError() {
-  grid.hidden = true; empty.hidden = true; error.hidden = false;
-}
-async function loadInstitutionCourses() {
-  if (!user) return;
-  showLoading();
-  try {
-    const ref = collection(db,"students",user.uid,"enrollments");
-    const snap = await getDocs(ref);
-    const records = snap.docs.map(d=>({id:d.id,...d.data()})).filter(validInstitutionEnrollment);
-    const unique = new Map();
-    for (const record of records) {
-      const courseId = String(record.courseId || record.courseID || record.course || "");
-      if (!courseId || unique.has(courseId)) continue;
-      const courseSnap = await getDoc(doc(db,"courses",courseId));
-      if (!courseSnap.exists()) continue;
-      const course = courseSnap.data();
-      const status = String(course.status || "").toLowerCase();
-      if (course.published !== true && status !== "published") continue;
-      unique.set(courseId,{
-        id:courseId,...course,
-        institutionId:record.institutionId,
-        institutionName:record.institutionName || record.schoolName || course.institutionName || "Your institution",
-        enrollmentStatus:String(record.status || "active").toLowerCase(),
-        progress:Number(record.progress ?? record.progressPercent ?? 0),
-        enrolledAt:record.enrolledAt || record.createdAt || null
-      });
-    }
-    courses = [...unique.values()].sort((a,b)=>time(b.enrolledAt)-time(a.enrolledAt));
-    render();
-  } catch (e) {
-    console.error("Institution course library failed:",e);
-    showError();
-  }
-}
-function render() {
-  const shown = courses.filter(c=>{
-    const progress = Math.min(100,Math.max(0,c.progress));
-    const matchesFilter = filter==="all" || (filter==="completed" && (progress>=100 || c.enrollmentStatus==="completed")) || (filter==="progress" && progress<100 && c.enrollmentStatus!=="completed");
-    const text = [c.title,c.description,c.category,c.instructorName,c.institutionName].join(" ").toLowerCase();
-    return matchesFilter && (!term || text.includes(term));
-  });
-  count.textContent = shown.length+" "+(shown.length===1?"course":"courses");
-  if (!shown.length) { showEmpty(courses.length > 0); return; }
-  empty.hidden = true; error.hidden = true; grid.hidden = false;
-  grid.innerHTML = shown.map(c=>{
-    const p = Math.min(100,Math.max(0,c.progress));
-    const title = esc(c.title || "Untitled course");
-    const image = c.thumbnail || c.image || "";
-    const completed = p>=100 || c.enrollmentStatus==="completed";
-    return '<article class="library-course-card institution-course-card">'+
-      '<div class="course-cover">'+(image?'<img src="'+esc(image)+'" alt="'+title+'" loading="lazy">':'<div class="course-cover-placeholder"><i data-lucide="book-open"></i></div>')+
-      '<span class="institution-course-origin"><i data-lucide="building-2"></i>'+esc(c.institutionName)+'</span></div>'+
-      '<div class="course-card-body"><div class="institution-course-meta"><span>'+esc(c.category || "Institution course")+'</span><span>'+esc(c.level || "All levels")+'</span></div>'+
-      '<h3>'+title+'</h3><p>'+esc(c.description || "Continue your institution learning programme.")+'</p>'+
-      '<div class="institution-course-owner">Instructor: '+esc(c.instructorName || c.instructor || "Assigned instructor")+'</div>'+
-      '<div class="course-progress-block"><div class="progress-label"><span>'+(completed?"Completed":"Your progress")+'</span><strong>'+p+'%</strong></div><div class="progress-track"><span class="progress-fill" style="width:'+p+'%"></span></div></div>'+
-      '<a class="primary-btn institution-course-open" href="course-player.html?id='+encodeURIComponent(c.id)+'">'+(completed?"Review course":"Continue learning")+' <i data-lucide="arrow-right"></i></a></div></article>';
-  }).join("");
-  window.lucide?.createIcons();
-}
-onAuthStateChanged(auth,async current=>{
-  if (!current) { window.location.replace("../login.html"); return; }
-  user = current;
-  await loadInstitutionCourses();
-});
-search?.addEventListener("input",()=>{term=search.value.trim().toLowerCase();render();});
-$("clearCourseSearch")?.addEventListener("click",()=>{if(search)search.value="";term="";render();});
-filters.forEach(button=>button.addEventListener("click",()=>{
-  filter=button.dataset.filter || "all";
-  filters.forEach(item=>{const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-pressed",String(active));});
-  render();
-}));
-reset?.addEventListener("click",()=>{window.location.href="marketplace.html";});
-retry?.addEventListener("click",loadInstitutionCourses);
+import { collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const $=id=>document.getElementById(id),grid=$("libraryCourses"),search=$("courseSearch"),count=$("courseLibraryCount"),empty=$("libraryEmptyState"),error=$("libraryErrorState"),filters=[...document.querySelectorAll(".filter-btn")];
+let user=null,courses=[],filter="all",term="";
+const esc=v=>String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+const time=v=>{if(v?.toMillis)return v.toMillis();if(v?.toDate)return v.toDate().getTime();const n=Date.parse(v||"");return Number.isFinite(n)?n:0;};
+const progressOf=r=>Math.min(100,Math.max(0,Number(r.progress??r.progressPercent??r.completion??0)||0));
+function validInstitutionEnrollment(r){return Boolean(r.institutionId)&&["active","approved","completed"].includes(String(r.status||"").trim().toLowerCase());}
+function showLoading(){empty.hidden=true;error.hidden=true;grid.hidden=false;grid.innerHTML='<div class="library-state loading-card"><div class="state-icon"><i data-lucide="loader-circle"></i></div><h3>Loading institution courses</h3><p>Checking your active institution enrolments.</p></div>';window.lucide?.createIcons();}
+function resetFilters(){term="";filter="all";if(search)search.value="";filters.forEach(b=>{const a=b.dataset.filter==="all";b.classList.toggle("active",a);b.setAttribute("aria-pressed",String(a));});render();}
+function showEmpty(noMatches=false){grid.innerHTML="";grid.hidden=true;error.hidden=true;empty.hidden=false;const h=empty.querySelector("h3"),p=empty.querySelector("p"),action=$("resetCourseFilters");if(h)h.textContent=noMatches?"No matching institution courses":"No institution courses yet";if(p)p.textContent=noMatches?"Try another search or reset the course filters.":"Courses assigned to you by an institution will appear here. Your independent enrolments are available under My Courses.";if(action){action.textContent=noMatches?"Clear search and filters":"View My Courses";action.onclick=noMatches?resetFilters:()=>{location.href="courses.html";};}}
+function showError(){grid.hidden=true;empty.hidden=true;error.hidden=false;}
+async function loadInstitutionCourses(){if(!user)return;showLoading();try{
+ const refs=[getDocs(collection(db,"students",user.uid,"enrollments")),getDocs(query(collection(db,"enrollments"),where("userId","==",user.uid))),getDocs(query(collection(db,"enrollments"),where("studentId","==",user.uid)))];
+ const results=await Promise.allSettled(refs),successful=results.filter(r=>r.status==="fulfilled");if(!successful.length)throw results.find(r=>r.status==="rejected")?.reason||new Error("No enrolment source could be read.");
+ const records=new Map();results.forEach((result,index)=>{if(result.status!=="fulfilled"){console.warn("[SSA Institution Library] Source unavailable:",index,result.reason);return;}result.value.docs.forEach(snap=>{const r={id:snap.id,...snap.data()};if(!validInstitutionEnrollment(r))return;const id=String(r.courseId||r.courseID||r.courseUid||r.course||"");if(!id)return;const prev=records.get(id),stamp=time(r.updatedAt||r.enrolledAt||r.createdAt);if(!prev||stamp>=time(prev.updatedAt||prev.enrolledAt||prev.createdAt))records.set(id,{...r,courseId:id});});});
+ const loaded=await Promise.allSettled([...records.values()].map(async enrollment=>{const snap=await getDoc(doc(db,"courses",enrollment.courseId));if(!snap.exists())return null;const course=snap.data(),status=String(course.status||"").toLowerCase();if(status==="deleted"||course.deletedAt||(course.published!==true&&status!=="published"))return null;return{id:enrollment.courseId,...course,institutionId:enrollment.institutionId,institutionName:enrollment.institutionName||enrollment.schoolName||course.institutionName||"Your institution",enrollmentStatus:String(enrollment.status||"active").toLowerCase(),progress:progressOf(enrollment),enrolledAt:enrollment.enrolledAt||enrollment.joinedAt||enrollment.createdAt||null};}));
+ courses=loaded.filter(r=>r.status==="fulfilled"&&r.value).map(r=>r.value);loaded.filter(r=>r.status==="rejected").forEach(r=>console.warn("[SSA Institution Library] Course unavailable:",r.reason));courses.sort((a,b)=>time(b.enrolledAt)-time(a.enrolledAt));render();
+ }catch(e){console.error("[SSA Institution Library] Failed to load courses:",e);showError();}}
+function render(){const shown=courses.filter(c=>{const p=progressOf(c),done=p>=100||c.enrollmentStatus==="completed",match=filter==="all"||(filter==="completed"&&done)||(filter==="progress"&&!done),hay=[c.title,c.description,c.category,c.instructorName,c.instructor,c.institutionName].join(" ").toLowerCase();return match&&(!term||hay.includes(term));});count.textContent=shown.length+(shown.length===1?" course":" courses");if(!shown.length){showEmpty(courses.length>0);return;}empty.hidden=true;error.hidden=true;grid.hidden=false;grid.innerHTML=shown.map(c=>{const p=progressOf(c),done=p>=100||c.enrollmentStatus==="completed",title=esc(c.title||"Untitled course"),image=c.thumbnail||c.image||c.coverImage||"";return'<article class="library-course-card institution-course-card"><div class="course-cover">'+(image?'<img src="'+esc(image)+'" alt="'+title+'" loading="lazy">':'<i data-lucide="book-open" aria-hidden="true"></i>')+'<span class="institution-course-origin"><i data-lucide="building-2"></i>'+esc(c.institutionName)+'</span></div><div class="course-card-body"><div class="institution-course-meta"><span>'+esc(c.category||"Institution course")+'</span><span>'+esc(c.level||"All levels")+'</span></div><h3>'+title+'</h3><p>'+esc(c.description||"Continue your institution learning programme.")+'</p><div class="institution-course-owner">Instructor: '+esc(c.instructorName||c.instructor||"Assigned instructor")+'</div><div class="course-progress-block"><div class="progress-label"><span>'+(done?"Completed":"Your progress")+'</span><strong>'+p+'%</strong></div><div class="progress-track" role="progressbar" aria-label="'+title+' progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+p+'"><span class="progress-fill" style="width:'+p+'%"></span></div></div><a class="primary-btn institution-course-open" href="course-player.html?id='+encodeURIComponent(c.id)+'">'+(done?"Review course":"Continue learning")+' <i data-lucide="arrow-right"></i></a></div></article>';}).join("");grid.setAttribute("aria-busy","false");window.lucide?.createIcons();}
+onAuthStateChanged(auth,async current=>{if(!current){location.replace("../login.html");return;}user=current;await loadInstitutionCourses();});
+search?.addEventListener("input",()=>{term=search.value.trim().toLowerCase();render();});$("clearCourseSearch")?.addEventListener("click",()=>{if(search)search.value="";term="";render();});filters.forEach(button=>button.addEventListener("click",()=>{filter=button.dataset.filter||"all";filters.forEach(item=>{const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-pressed",String(active));});render();}));$("resetCourseFilters")?.addEventListener("click",resetFilters);$("retryCoursesBtn")?.addEventListener("click",loadInstitutionCourses);
