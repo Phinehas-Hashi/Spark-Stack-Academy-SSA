@@ -23,7 +23,7 @@ body{background:#f6f8fc;font-family:Inter,Poppins,system-ui;color:#0f172a}
 .pm-plan h3{margin:0 0 14px;color:#21064f}
 .pm-field{display:grid;gap:6px;margin:12px 0}
 .pm-field label{font-size:13px;font-weight:700;color:#334155}
-.pm-field input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit}
+.pm-field input,.pm-field textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;resize:vertical}
 .pm-periods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pm-publish{display:flex;align-items:center;gap:10px;margin:18px 0;font-weight:700}
 .pm-status{padding:12px 14px;border-radius:12px;background:#f5f1fb;color:#4c3470;margin:12px 0;line-height:1.5}
@@ -54,6 +54,7 @@ body{background:#f6f8fc;font-family:Inter,Poppins,system-ui;color:#0f172a}
             <div class="pm-field"><label for="learnerPlusMonthly">Monthly (KSh)</label><input id="learnerPlusMonthly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
             <div class="pm-field"><label for="learnerPlusQuarterly">Quarterly (KSh)</label><input id="learnerPlusQuarterly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
           </div>
+          <div class="pm-field"><label for="learnerPlusBenefits">Included benefits (one per line)</label><textarea id="learnerPlusBenefits" rows="4" placeholder="Enter only approved benefits"></textarea></div>
           <label class="pm-publish"><input id="learnerPlusEnabled" type="checkbox" checked> Offer this plan</label>
         </article>
         <article class="pm-plan">
@@ -62,6 +63,7 @@ body{background:#f6f8fc;font-family:Inter,Poppins,system-ui;color:#0f172a}
             <div class="pm-field"><label for="proLearnerMonthly">Monthly (KSh)</label><input id="proLearnerMonthly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
             <div class="pm-field"><label for="proLearnerQuarterly">Quarterly (KSh)</label><input id="proLearnerQuarterly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
           </div>
+          <div class="pm-field"><label for="proLearnerBenefits">Included benefits (one per line)</label><textarea id="proLearnerBenefits" rows="4" placeholder="Enter only approved benefits"></textarea></div>
           <label class="pm-publish"><input id="proLearnerEnabled" type="checkbox" checked> Offer this plan</label>
         </article>
         <article class="pm-plan">
@@ -70,6 +72,7 @@ body{background:#f6f8fc;font-family:Inter,Poppins,system-ui;color:#0f172a}
             <div class="pm-field"><label for="careerAcceleratorMonthly">Monthly (KSh)</label><input id="careerAcceleratorMonthly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
             <div class="pm-field"><label for="careerAcceleratorQuarterly">Quarterly (KSh)</label><input id="careerAcceleratorQuarterly" type="number" min="1" step="1" inputmode="numeric" placeholder="Not set"></div>
           </div>
+          <div class="pm-field"><label for="careerAcceleratorBenefits">Included benefits (one per line)</label><textarea id="careerAcceleratorBenefits" rows="4" placeholder="Enter only approved benefits"></textarea></div>
           <label class="pm-publish"><input id="careerAcceleratorEnabled" type="checkbox" checked> Offer this plan</label>
         </article>
       </div>
