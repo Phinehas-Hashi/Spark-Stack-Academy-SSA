@@ -199,7 +199,7 @@ async function loadEarnings() {
         const withdrawalSnapshot = await getDocs(withdrawalQuery);
         const withdrawals = withdrawalSnapshot.docs.map(record => ({ id: record.id, ...record.data() }));
         const releasedStatuses = ["rejected", "declined", "cancelled", "canceled", "failed"];
-        const pendingStatuses = ["pending", "processing", "under_review"];
+        const pendingStatuses = ["pending", "processing", "under_review", "approved"];
         const reserved = withdrawals.reduce((sum, item) => {
             const status = String(item.status || "pending").trim().toLowerCase();
             const amount = Number(item.amount || 0);
