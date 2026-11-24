@@ -157,6 +157,45 @@ exports.requestInstructorWithdrawal = onCall(async request => {
   });
 });
 
+exports.getInstructorEarningsSettings = onCall(async request => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to load instructor earnings settings.");
+  const [userSnap, controlsSnap, settingsSnap, monetizationSnap] = await Promise.all([
+    db.doc("users/" + uid).get(),
+    platformRef.get(),
+    db.doc("platformSettings/earnings").get(),
+    db.doc("settings/monetization").get()
+  ]);
+  if (!userSnap.exists) throw new HttpsError("permission-denied", "Instructor profile not found.");
+  const user = userSnap.data() || {};
+  if (user.role !== "instructor" || user.status !== "active" || user.active !== true || user.verified !== true) {
+    throw new HttpsError("permission-denied", "Only active, verified instructors can view earnings settings.");
+  }
+  const controls = controlsSnap.exists ? controlsSnap.data() || {} : {};
+  const maintenance = controls.maintenance || {};
+  const now = Date.now();
+  const start = maintenance.startAt?.toMillis ? maintenance.startAt.toMillis() : new Date(maintenance.startAt || 0).getTime();
+  const end = maintenance.endAt?.toMillis ? maintenance.endAt.toMillis() : new Date(maintenance.endAt || 0).getTime();
+  const maintenanceBlocked = maintenance.scheduled === true
+    && (maintenance.target === "instructor" || maintenance.target === "all")
+    && now >= start && now < end;
+  if (controls.lockdown === true || controls.instructor?.suspended === true || maintenanceBlocked) {
+    throw new HttpsError("failed-precondition", "Instructor portal access is currently restricted.");
+  }
+
+  const settings = settingsSnap.exists ? settingsSnap.data() || {} : {};
+  const monetization = monetizationSnap.exists ? monetizationSnap.data() || {} : {};
+  return {
+    minimumWithdrawal: Number(monetization.minimumWithdrawal ?? settings.minimumWithdrawal ?? 1000),
+    withdrawalFeePercent: Number(monetization.withdrawalFeePercent ?? settings.withdrawalFeePercent ?? 0),
+    platformTaxPercent: Number(settings.platformTaxPercent ?? 0),
+    premiumMonthlyPrice: Number(settings.premiumMonthlyPrice ?? monetization.premiumMonthly ?? 999),
+    withdrawalsEnabled: settings.withdrawalsEnabled !== false && monetization.enableWithdrawals !== false,
+    mpesaWithdrawalsEnabled: settings.mpesaWithdrawalsEnabled !== false && monetization.enableMpesa !== false,
+    withdrawalApproval: settings.withdrawalApproval !== false && monetization.withdrawalApproval !== false && monetization.automaticPayouts !== true
+  };
+});
+
 async function requireFounder(request) {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "You must be signed in as a founder.");
