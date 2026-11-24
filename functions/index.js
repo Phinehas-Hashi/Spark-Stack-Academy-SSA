@@ -67,6 +67,9 @@ exports.syncStudentLeaderboardOnSettingsWrite = onDocumentWritten("studentSettin
 });
 
 exports.syncStudentLeaderboardOnUserWrite = onDocumentWritten("users/{studentId}", async event => {
+  const before = event.data?.before?.data() || {};
+  const after = event.data?.after?.data() || {};
+  if (before.role !== "student" && after.role !== "student") return;
   await syncPublicLeaderboardEntry(event.params.studentId);
 });
 
