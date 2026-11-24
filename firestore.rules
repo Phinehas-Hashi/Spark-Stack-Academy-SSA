@@ -805,7 +805,7 @@ service cloud.firestore {
             signedIn()
             && get(/databases/$(database)/documents/reports/$(reportId))
                  .data.reporterId == uid()
-            && get(/databases/$(database)/documents/reports/$(reportId))
+            && getAfter(/databases/$(database)/documents/reports/$(reportId))
                  .data.get('status', '') in ['pending', 'reviewing', 'resolved']
             && request.resource.data.senderId == uid()
             && request.resource.data.senderRole == 'student'
