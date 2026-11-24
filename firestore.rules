@@ -718,8 +718,12 @@ service cloud.firestore {
         && (
           request.resource.data.get('type', '') != 'support'
           || (
-            isStudent()
-            && studentPortalOpen()
+            (
+              (isStudent() && studentPortalOpen()
+                && request.resource.data.get('reporterRole', '') == 'student')
+              || (isInstructor() && instructorPortalOpen()
+                && request.resource.data.get('reporterRole', '') == 'instructor')
+            )
             && request.resource.data.get('status', '') == 'pending'
             && request.resource.data.get('reportId', '') is string
             && request.resource.data.reportId.size() >= 12
@@ -808,7 +812,12 @@ service cloud.firestore {
             && getAfter(/databases/$(database)/documents/reports/$(reportId))
                  .data.get('status', '') in ['pending', 'reviewing', 'resolved']
             && request.resource.data.senderId == uid()
-            && request.resource.data.senderRole == 'student'
+            && (
+              (isStudent() && studentPortalOpen()
+                && request.resource.data.senderRole == 'student')
+              || (isInstructor() && instructorPortalOpen()
+                && request.resource.data.senderRole == 'instructor')
+            )
             && request.resource.data.message is string
             && request.resource.data.message.size() > 0
             && request.resource.data.message.size() <= 5000
