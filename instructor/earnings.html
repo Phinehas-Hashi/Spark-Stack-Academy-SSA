@@ -649,14 +649,10 @@
 <div
     id="withdrawalModal"
     class="modal hidden"
-    role="dialog"
-    aria-modal="true"
-    aria-hidden="true"
-    aria-labelledby="withdrawalModalTitle"
 >
 
 
-    <div class="modal-backdrop" aria-hidden="true"></div>
+    <div class="modal-backdrop"></div>
 
 
     <div class="withdrawal-modal">
@@ -679,7 +675,7 @@
                 SECURE PAYOUT
             </span>
 
-            <h2 id="withdrawalModalTitle">
+            <h2>
                 Withdraw Funds
             </h2>
 
@@ -708,11 +704,8 @@
                 <input
                     id="withdrawalAmount"
                     type="number"
-                    min="100"
-                    step="1"
-                    inputmode="decimal"
+                    min="0"
                     placeholder="0"
-                    required
                 >
 
             </div>
@@ -735,13 +728,19 @@
                 Withdrawal Method
             </label>
 
-            <input
+            <select
                 id="withdrawalMethod"
-                type="text"
-                value="M-Pesa"
-                readonly
-                aria-readonly="true"
-            />
+            >
+
+                <option value="mpesa">
+                    M-Pesa
+                </option>
+
+                <option value="bank">
+                    Bank Account
+                </option>
+
+            </select>
 
         </div>
 
@@ -751,16 +750,13 @@
         <div class="withdrawal-field">
 
             <label for="withdrawalAccount">
-                M-Pesa Phone Number
+                Account / Phone Number
             </label>
 
             <input
                 id="withdrawalAccount"
-                type="tel"
-                inputmode="tel"
-                autocomplete="tel"
-                placeholder="0712345678 or +254712345678"
-                required
+                type="text"
+                placeholder="Enter payout details"
             >
 
         </div>
