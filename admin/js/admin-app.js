@@ -12,6 +12,24 @@ const sidebar = document.getElementById("adminSidebar"), topbar = document.getEl
 
 async function fetchComponent(path) { const response = await fetch(path); if (!response.ok) throw new Error(`Failed to load ${path} (${response.status})`); return response.text(); }
 
+function initAdminModalState() {
+    const sync = () => {
+        const open = [...document.querySelectorAll(".admin-modal")].some(modal =>
+            !modal.classList.contains("hidden") && modal.getAttribute("aria-hidden") !== "true"
+        );
+        document.body.classList.toggle("admin-modal-open", open);
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(document.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ["class", "aria-hidden"]
+    });
+    sync();
+}
+
+
 async function loadAdminShell() {
     try {
         const [sidebarHTML, topbarHTML] = await Promise.all([fetchComponent(COMPONENTS.sidebar), fetchComponent(COMPONENTS.topbar)]);
@@ -73,6 +91,7 @@ window.AdminApp = { getProfile:getAdminProfile, logout:logoutAdmin, isAuthorized
 async function bootAdmin() {
     const shellReady = await loadAdminShell();
     if (!shellReady) return;
+    initAdminModalState();
     initLogout();
     onAuthStateChanged(auth, async user => {
         if (!user) { window.location.href = "../login.html"; return; }
