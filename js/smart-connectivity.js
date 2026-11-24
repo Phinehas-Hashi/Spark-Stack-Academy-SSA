@@ -191,8 +191,18 @@
       lastLatencyMs=performance.now()-started;lastCheckedAt=Date.now();
       try{firestoreReachable=await probe("https://firestore.googleapis.com/v1/projects/spark-stack-academy/databases/(default)/documents",5000);}catch(_){firestoreReachable=false;}
       const weak=lastLatencyMs>=1800||Number(connection?.rtt||0)>=1200;
-      setState(weak?"weak":"online",weak?"Slow network response":"");
-      if(recoveryVisible)completeRecovery();
+      if(recoveryVisible&&firestoreReachable!==true){
+        setState("weak","Internet is available; Academy data service is not verified");
+        moduleState("network","Verified");
+        moduleState("services","Unavailable");
+        diagnostic("internet","Internet reachability: verified","good");
+        diagnostic("firestore","Firestore endpoint: unavailable","bad");
+        $("[data-phase-label]").textContent="INTERNET RESTORED · CHECKING ACADEMY";
+        $("[data-copy]").textContent="Your internet connection is back, but the Academy data service has not responded yet. Your page will remain protected while Spark retries.";
+      }else{
+        setState(weak?"weak":"online",weak?"Slow network response":"");
+        if(recoveryVisible)completeRecovery();
+      }
     }catch(_){lastCheckedAt=Date.now();lastLatencyMs=null;firestoreReachable=false;setState("offline");showRecovery();}
     finally{probeInFlight=false;refresh();}
   }
