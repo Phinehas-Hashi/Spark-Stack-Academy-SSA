@@ -132,7 +132,7 @@ function createAnnouncementCard(id, announcement = {}) {
                 <i data-lucide="user-round" aria-hidden="true"></i>
                 ${escapeHTML(author)}
             </span>
-            <time class="announcement-date" datetime="${escapeHTML(date.iso)}">
+            <time class="announcement-date" ${date.iso ? `datetime="${escapeHTML(date.iso)}"` : ""}>
                 <i data-lucide="calendar-days" aria-hidden="true"></i>
                 ${escapeHTML(date.label)}
             </time>
