@@ -192,15 +192,18 @@ exports.awardStudentXP = onCall(async request => {
         }
       });
       const score = Math.round((correctCount / questionSnap.size) * 100);
-      const passingScore = Number(quizSnap.data().passingScore || 0);
+      const passingValue = Number(quizSnap.data().passingScore ?? 0);
+      const passingScore = Number.isFinite(passingValue) ? Math.max(0, Math.min(100, passingValue)) : 0;
       const passed = score >= passingScore;
-      const baseXP = Math.min(100, Math.max(1, Number(quizSnap.data().xpReward ?? quizSnap.data().xp ?? 30)));
+      const configuredXP = Number(quizSnap.data().xpReward ?? quizSnap.data().xp ?? 30);
+      const baseXP = Number.isFinite(configuredXP) ? Math.min(100, Math.max(1, configuredXP)) : 30;
       reward = passed ? Math.max(Math.floor(baseXP * score / 100), 1) : Math.floor(baseXP * 0.25);
       if (reward <= 0) throw new HttpsError("failed-precondition", "This quiz attempt did not qualify for XP.");
       counterField = "quizzesCompleted";
     }
 
-    const oldXP = Math.max(0, Number(student.xp || 0));
+    const oldXPValue = Number(student.xp ?? 0);
+    const oldXP = Number.isFinite(oldXPValue) && oldXPValue >= 0 ? oldXPValue : 0;
     const newXP = oldXP + reward;
     const oldLevel = Math.floor(oldXP / 100) + 1;
     const newLevel = Math.floor(newXP / 100) + 1;
@@ -209,7 +212,7 @@ exports.awardStudentXP = onCall(async request => {
       ...student,
       xp: newXP,
       level: newLevel,
-      [counterField]: Number(student[counterField] || 0) + 1
+      [counterField]: (Number.isFinite(Number(student[counterField] || 0)) ? Math.max(0, Number(student[counterField] || 0)) : 0) + 1
     };
     const updates = {
       xp: newXP,
