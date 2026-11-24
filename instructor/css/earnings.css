@@ -1057,3 +1057,10 @@
 .withdrawal-status-badge.approved,
 .withdrawal-status-badge.paid { background: #e9f8ef; color: #16803c; }
 .withdrawal-status-badge.rejected { background: #ffe9e7; color: #b42318; }
+
+.revenue-breakdown-note {
+    margin: 8px 0 12px;
+    color: #8793a5;
+    font-size: 10px;
+    line-height: 1.55;
+}
