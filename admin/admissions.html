@@ -1,299 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Admissions | Admin Console | Spark Stack Academy</title>
-
-<link rel="stylesheet" href="css/admin-core.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/admissions.css">
-<link rel="stylesheet" href="css/responsive.css">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-<script src="https://unpkg.com/lucide@latest"></script>
-</head>
-
-<body>
-
-<div class="admin-app">
-
-    <aside id="adminSidebar" class="admin-sidebar"></aside>
-
-    <div id="sidebarOverlay" class="sidebar-overlay"></div>
-
-    <main class="admin-main">
-
-        <header id="adminTopbar" class="admin-topbar"></header>
-
-        <section class="admin-page admissions-page">
-
-            <div class="page-header">
-                <div>
-                    <span class="page-eyebrow">STUDENT ADMISSIONS</span>
-                    <h1>Admissions</h1>
-                    <p>
-                        Review student applications, approve qualified applicants,
-                        and manage admission decisions.
-                    </p>
-                </div>
-
-                <button
-                    type="button"
-                    class="admin-btn secondary"
-                    id="refreshAdmissionsBtn"
-                >
-                    <i data-lucide="refresh-cw"></i>
-                    Refresh
-                </button>
-            </div>
-
-            <div class="moderator-notice">
-                <i data-lucide="shield-check"></i>
-
-                <div>
-                    <strong>Admissions Management</strong>
-                    <span>
-                        Approved applicants receive an admission number and
-                        access to the Student Portal.
-                    </span>
-                </div>
-            </div>
-
-            <section class="admin-stat-grid admissions-stats">
-
-                <article class="admin-stat">
-                    <div class="admin-stat-icon blue">
-                        <i data-lucide="files"></i>
-                    </div>
-                    <span>Total Applications</span>
-                    <strong id="totalApplications">0</strong>
-                </article>
-
-                <article class="admin-stat">
-                    <div class="admin-stat-icon gold">
-                        <i data-lucide="clock-3"></i>
-                    </div>
-                    <span>Pending Review</span>
-                    <strong id="pendingApplications">0</strong>
-                </article>
-
-                <article class="admin-stat">
-                    <div class="admin-stat-icon green">
-                        <i data-lucide="user-check"></i>
-                    </div>
-                    <span>Approved</span>
-                    <strong id="approvedApplications">0</strong>
-                </article>
-
-                <article class="admin-stat">
-                    <div class="admin-stat-icon purple">
-                        <i data-lucide="user-x"></i>
-                    </div>
-                    <span>Rejected</span>
-                    <strong id="rejectedApplications">0</strong>
-                </article>
-
-            </section>
-
-            <section class="admin-card admissions-card">
-
-                <div class="admissions-toolbar">
-
-                    <div class="admin-search">
-                        <i data-lucide="search"></i>
-
-                        <input
-                            id="admissionSearch"
-                            type="search"
-                            placeholder="Search applicants by name or email..."
-                            autocomplete="off"
-                        >
-                    </div>
-
-                    <select id="admissionStatusFilter">
-                        <option value="all">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-
-                    <select id="admissionSort">
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                        <option value="name">Name A–Z</option>
-                        <option value="name-desc">Name Z–A</option>
-                    </select>
-
-                </div>
-
-                <div class="admissions-results">
-                    <strong id="admissionResultsCount">0</strong>
-                    <span>applications found</span>
-
-                    <button type="button" id="clearAdmissionFilters">
-                        Clear Filters
-                    </button>
-                </div>
-
-                <div class="admin-table-wrap">
-
-                    <table class="admin-table admissions-table">
-
-                        <thead>
-                            <tr>
-                                <th>Applicant</th>
-                                <th>Course</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Applied</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="admissionsTableBody">
-
-                            <tr>
-                                <td colspan="6" class="table-state-cell">
-                                    <div class="table-loading">
-                                        <div class="loading-spinner"></div>
-                                        <span>Loading applications...</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-                <div id="admissionsEmpty" class="admin-empty hidden">
-                    <i data-lucide="inbox"></i>
-                    <h3>No applications found</h3>
-                    <p>Try changing your search or filters.</p>
-                </div>
-
-            </section>
-
-        </section>
-
-    </main>
-</div>
-
-<!-- DETAILS MODAL -->
-
-<div id="admissionModal" class="admin-modal hidden" aria-hidden="true">
-
-    <div class="admin-modal-backdrop"></div>
-
-    <div
-        class="admin-modal-panel admission-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="admissionModalTitle"
-    >
-
-        <div class="admin-modal-header">
-
-            <div>
-                <span class="page-eyebrow">APPLICATION REVIEW</span>
-                <h2 id="admissionModalTitle">Applicant Details</h2>
-            </div>
-
-            <button
-                type="button"
-                class="modal-close-btn"
-                id="closeAdmissionModal"
-                aria-label="Close"
-            >
-                <i data-lucide="x"></i>
-            </button>
-
-        </div>
-
-        <div class="admission-profile">
-
-            <div class="admission-avatar" id="modalAvatar">A</div>
-
-            <div>
-                <h3 id="modalName">Applicant</h3>
-                <span id="modalEmail">—</span>
-            </div>
-
-        </div>
-
-        <div class="admission-details-grid">
-
-            <div>
-                <span>Application ID</span>
-                <strong id="modalApplicationId">—</strong>
-            </div>
-
-            <div>
-                <span>Student UID</span>
-                <strong id="modalStudentUid">—</strong>
-            </div>
-
-            <div>
-                <span>Course</span>
-                <strong id="modalCourse">—</strong>
-            </div>
-
-            <div>
-                <span>Phone</span>
-                <strong id="modalPhone">—</strong>
-            </div>
-
-            <div>
-                <span>Status</span>
-                <strong id="modalStatus">Pending</strong>
-            </div>
-
-            <div>
-                <span>Applied</span>
-                <strong id="modalDate">—</strong>
-            </div>
-
-        </div>
-
-        <div class="admission-actions">
-
-            <button
-                type="button"
-                class="admin-btn danger"
-                id="rejectAdmissionBtn"
-            >
-                <i data-lucide="x-circle"></i>
-                Reject
-            </button>
-
-            <button
-                type="button"
-                class="admin-btn primary"
-                id="approveAdmissionBtn"
-            >
-                <i data-lucide="user-check"></i>
-                Approve Admission
-            </button>
-
-        </div>
-
-    </div>
-</div>
-
-<script type="module" src="js/admin-app.js"></script>
-<script type="module" src="js/admissions.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    if (window.lucide) lucide.createIcons();
-});
-</script>
-
-</body>
-</html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827"><title>Student Approvals | Admin Console | Spark Stack Academy</title>
+<link rel="stylesheet" href="css/admin-core.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/admissions.css"><link rel="stylesheet" href="css/responsive.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><script src="https://unpkg.com/lucide@latest"></script>
+</head><body><div class="admin-app">
+<aside id="adminSidebar" class="admin-sidebar"></aside><div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="admin-main"><header id="adminTopbar" class="admin-topbar"></header>
+<section class="admin-page admissions-page">
+<div class="admissions-hero"><div class="admissions-heading"><span class="page-eyebrow">ACADEMY OPERATIONS / ADMISSIONS</span><h1>Student approvals</h1><p>Review applications, verify applicant details and control access to the Student Portal.</p></div><button type="button" class="admin-btn secondary" id="refreshAdmissionsBtn"><i data-lucide="refresh-cw"></i><span>Refresh queue</span></button></div>
+<div class="admissions-guidance"><div class="guidance-icon"><i data-lucide="shield-check"></i></div><div><strong>Admissions review workspace</strong><p>Approving an application activates the student account and assigns an admission number. Rejection records a decision without granting portal access.</p></div><span class="guidance-tag">STAFF ACCESS</span></div>
+<section class="admissions-stats" aria-label="Admission statistics">
+<article class="admission-stat stat-total"><div class="stat-icon"><i data-lucide="layers"></i></div><span>Applications</span><strong id="totalApplications">0</strong><small>All submitted records</small></article>
+<article class="admission-stat stat-pending"><div class="stat-icon"><i data-lucide="hourglass"></i></div><span>Awaiting review</span><strong id="pendingApplications">0</strong><small>Require a decision</small></article>
+<article class="admission-stat stat-approved"><div class="stat-icon"><i data-lucide="user-check"></i></div><span>Approved</span><strong id="approvedApplications">0</strong><small>Portal access granted</small></article>
+<article class="admission-stat stat-rejected"><div class="stat-icon"><i data-lucide="user-x"></i></div><span>Rejected</span><strong id="rejectedApplications">0</strong><small>Decision recorded</small></article></section>
+<section class="admin-card admissions-card"><div class="admissions-card-head"><div><span class="section-kicker">APPLICATION QUEUE</span><h2>Review applicants</h2><p>Search and filter the admissions register.</p></div><div class="queue-live"><span></span> Queue overview</div></div>
+<div class="admissions-toolbar"><label class="admission-search"><i data-lucide="search"></i><input id="admissionSearch" type="search" placeholder="Search name, email, phone or application ID..." autocomplete="off"></label><select id="admissionStatusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select><select id="admissionSort" aria-label="Sort applications"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Name A–Z</option><option value="name-desc">Name Z–A</option></select></div>
+<div class="admissions-results"><span><strong id="admissionResultsCount">0</strong> applications shown</span><button type="button" id="clearAdmissionFilters">Reset filters</button></div>
+<div class="admin-table-wrap"><table class="admin-table admissions-table"><thead><tr><th>Applicant</th><th>Programme / course</th><th>Contact</th><th>Status</th><th>Submitted</th><th>Action</th></tr></thead><tbody id="admissionsTableBody"><tr><td colspan="6" class="table-state-cell"><div class="table-loading"><div class="loading-spinner"></div><span>Loading applications...</span></div></td></tr></tbody></table></div>
+<div id="admissionsEmpty" class="admin-empty hidden"><i data-lucide="inbox"></i><h3>No applications found</h3><p>Try another search or clear the active filters.</p></div><div class="admissions-footnote"><i data-lucide="lock"></i><span>Applicant records are visible to authorised Academy staff only.</span></div></section>
+</section></main></div>
+<div id="admissionModal" class="admin-modal hidden" aria-hidden="true"><div class="admin-modal-backdrop"></div><section class="admin-modal-panel admission-modal" role="dialog" aria-modal="true" aria-labelledby="admissionModalTitle">
+<header class="admin-modal-header"><div><span class="page-eyebrow">APPLICATION REVIEW</span><h2 id="admissionModalTitle">Applicant profile</h2></div><button type="button" class="modal-close-btn" id="closeAdmissionModal" aria-label="Close review"><i data-lucide="x"></i></button></header>
+<div class="admission-profile"><div class="admission-avatar" id="modalAvatar">A</div><div class="profile-copy"><h3 id="modalName">Applicant</h3><span id="modalEmail">—</span><div id="modalStatusBadge" class="admission-status pending">Pending</div></div></div>
+<div class="modal-section-title"><i data-lucide="clipboard-list"></i><span>Application information</span></div>
+<div class="admission-details-grid"><div><span>Application ID</span><strong id="modalApplicationId">—</strong></div><div><span>Student account UID</span><strong id="modalStudentUid">—</strong></div><div><span>Programme / course</span><strong id="modalCourse">Not specified</strong></div><div><span>Phone number</span><strong id="modalPhone">Not provided</strong></div><div><span>Submitted</span><strong id="modalDate">—</strong></div><div><span>Admission number</span><strong id="modalAdmissionNumber">Assigned after approval</strong></div></div>
+<div class="admission-review-note"><i data-lucide="info"></i><p>Before approving, confirm that applicant details match the student account. Approval grants access to the Student Portal.</p></div>
+<footer class="admission-actions"><button type="button" class="admin-btn danger" id="rejectAdmissionBtn"><i data-lucide="x-circle"></i> Reject application</button><button type="button" class="admin-btn primary" id="approveAdmissionBtn"><i data-lucide="user-check"></i> Approve student</button></footer>
+</section></div>
+<script type="module" src="js/admin-app.js"></script><script type="module" src="js/admissions.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.lucide?.createIcons());</script>
+</body></html>
