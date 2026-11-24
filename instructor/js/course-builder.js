@@ -319,6 +319,19 @@ function renderCourseHeader() {
     );
 
 
+    if ($("builderCourseDuration")) {
+        $("builderCourseDuration").value = course.duration ?? "";
+    }
+    if ($("builderCoursePrice")) {
+        $("builderCoursePrice").value = course.price ?? "";
+    }
+    if ($("builderCourseDiscount")) {
+        $("builderCourseDiscount").value = course.discountPrice ?? "";
+    }
+    if ($("builderCourseFree")) {
+        $("builderCourseFree").checked = course.isFree === true || Number(course.price || 0) <= 0;
+    }
+    updateCoursePricingPreview();
     updateStatus();
 
 }
@@ -1040,6 +1053,12 @@ function setupEvents() {
             "click",
             saveCourse
         );
+
+    $("saveCourseDetailsBtn")?.addEventListener("click", saveCourseDetails);
+    $("builderCourseFree")?.addEventListener("change", toggleBuilderCoursePricing);
+    ["builderCoursePrice", "builderCourseDiscount"].forEach(id => {
+        $(id)?.addEventListener("input", updateCoursePricingPreview);
+    });
 
 
     $("previewCourseBtn")?.addEventListener("click", previewCourse);
@@ -1863,47 +1882,98 @@ async function deleteLesson(
 // SAVE COURSE
 // ============================================================
 
-async function saveCourse() {
+function toggleBuilderCoursePricing() {
+    const isFree = $("builderCourseFree")?.checked === true;
+    ["builderCoursePrice", "builderCourseDiscount"].forEach(id => {
+        const field = $(id);
+        if (!field) return;
+        field.disabled = isFree;
+        if (isFree) field.value = "";
+    });
+    updateCoursePricingPreview();
+}
 
-    if (!courseId) return;
+function updateCoursePricingPreview() {
+    const preview = $("builderCoursePricePreview");
+    if (!preview) return;
+    const isFree = $("builderCourseFree")?.checked === true;
+    const price = Number($("builderCoursePrice")?.value || 0);
+    const discount = Number($("builderCourseDiscount")?.value || 0);
+    if (isFree) {
+        preview.textContent = "Students will see this course as FREE.";
+    } else if (discount > 0 && price > 0 && discount < price) {
+        preview.textContent = `Student price: KSh ${discount.toLocaleString("en-KE")} (regular KSh ${price.toLocaleString("en-KE")}).`;
+    } else if (price > 0) {
+        preview.textContent = `Student price: KSh ${price.toLocaleString("en-KE")}.`;
+    } else {
+        preview.textContent = "Set a valid price or mark the course as free.";
+    }
+}
 
+async function saveCourseDetails() {
+    if (!courseId || !course || !instructor) return;
 
-    try {
+    const isFree = $("builderCourseFree")?.checked === true;
+    const rawPrice = $("builderCoursePrice")?.value.trim() || "";
+    const rawDiscount = $("builderCourseDiscount")?.value.trim() || "";
+    const rawDuration = $("builderCourseDuration")?.value.trim() || "";
+    const price = isFree ? 0 : Number(rawPrice);
+    const discountPrice = isFree || !rawDiscount ? 0 : Number(rawDiscount);
+    const duration = rawDuration ? Number(rawDuration) : 0;
+    const message = $("builderCourseDetailsMessage");
+    const button = $("saveCourseDetailsBtn");
 
-        await updateDoc(
-
-            doc(
-                db,
-                "courses",
-                courseId
-            ),
-
-            {
-                updatedAt:
-                    serverTimestamp()
-            }
-
-        );
-
-
-        showToast(
-            "Course saved successfully."
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Save course error:",
-            error
-        );
-
-        alert(
-            "Unable to save course."
-        );
-
+    if (!isFree && (!rawPrice || !Number.isFinite(price) || price <= 0 || price > 10000000)) {
+        if (message) message.textContent = "Enter a valid course price, or select the free option.";
+        $("builderCoursePrice")?.focus();
+        return;
+    }
+    if (!isFree && discountPrice > 0 && (!Number.isFinite(discountPrice) || discountPrice >= price)) {
+        if (message) message.textContent = "The discount price must be lower than the regular price.";
+        $("builderCourseDiscount")?.focus();
+        return;
+    }
+    if (rawDuration && (!Number.isInteger(duration) || duration < 1 || duration > 10000)) {
+        if (message) message.textContent = "Duration must be a whole number of hours between 1 and 10,000.";
+        $("builderCourseDuration")?.focus();
+        return;
     }
 
+    try {
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i data-lucide="loader-circle"></i> Saving...';
+            refreshIcons();
+        }
+
+        const updates = {
+            isFree,
+            price,
+            discountPrice,
+            duration: rawDuration ? duration : "",
+            updatedAt: serverTimestamp()
+        };
+
+        await updateDoc(doc(db, "courses", courseId), updates);
+        course = { ...course, ...updates, duration: rawDuration ? duration : "" };
+        if (message) message.textContent = "Pricing and duration saved.";
+        updateCoursePricingPreview();
+        showToast("Course pricing and duration updated.");
+    } catch (error) {
+        console.error("Course details save failed:", error);
+        if (message) message.textContent = "Unable to save course details. Check your connection and permissions.";
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i data-lucide="save"></i> Save Pricing &amp; Duration';
+            refreshIcons();
+        }
+    }
+}
+
+async function saveCourse() {
+    if (!courseId) return;
+    await saveCourseDetails();
 }
 
 
