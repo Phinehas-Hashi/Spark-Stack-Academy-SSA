@@ -1165,6 +1165,20 @@ async function updateReportStatus(
             }
         );
 
+        const report = reports.find(item => item.id === reportId);
+        if (report?.reporterId && ["resolved", "dismissed"].includes(status)) {
+            await addDoc(collection(db, "notifications"), {
+                userId: report.reporterId,
+                title: status === "resolved" ? "Support ticket reviewed" : "Support ticket update",
+                message: status === "resolved"
+                    ? "The support team marked your ticket as resolved. Open Help Center to review the response."
+                    : "The support team updated your ticket. Open Help Center to view the latest information.",
+                type: "report_response",
+                reportId,
+                read: false,
+                createdAt: serverTimestamp()
+            });
+        }
 
         const index =
             reports.findIndex(
