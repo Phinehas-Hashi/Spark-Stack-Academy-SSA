@@ -629,3 +629,110 @@
         padding: 22px 18px;
     }
 }
+
+
+/* ============================================================
+   OBSIDIAN LUXURY — INSTRUCTOR CALENDAR
+============================================================ */
+.instructor-calendar-page { color: #f4f1ff; }
+.calendar-eyebrow,
+.calendar-card-header span,
+.calendar-card-header > i { color: #e0c17c; }
+.calendar-hero h1,
+.calendar-month-controls h2,
+.calendar-card-header h2 { color: #f4f1ff; }
+.calendar-hero p { color: #aaa6bd; }
+.calendar-card,
+.calendar-modal-dialog {
+    border: 1px solid rgba(190,183,225,.15);
+    background: linear-gradient(145deg,#211f2d,#191824);
+    box-shadow: 0 14px 36px rgba(0,0,0,.18);
+}
+.calendar-toolbar { border-bottom-color: rgba(190,183,225,.14); }
+.calendar-icon-btn,
+.calendar-today-btn,
+.calendar-secondary-btn,
+.calendar-modal-close {
+    border: 1px solid rgba(190,183,225,.16);
+    background: #171622;
+    color: #d5d1e2;
+}
+.calendar-icon-btn:hover,
+.calendar-secondary-btn:hover { background: #29263a; color: #f4f1ff; }
+.calendar-today-btn { color: #c4b5fd; background: rgba(167,139,250,.12); }
+.calendar-weekdays span { color: #8f8aa3; }
+.calendar-day {
+    border-color: rgba(190,183,225,.12);
+    background: #191824;
+}
+.calendar-day.other-month { background: #14131e; }
+.calendar-day:hover { border-color: rgba(167,139,250,.4); }
+.calendar-day.today { border-color: #a78bfa; box-shadow: inset 0 0 0 1px rgba(167,139,250,.18); }
+.calendar-day-number { color: #d5d1e2; }
+.calendar-day.today .calendar-day-number { background: #7654c8; color: #fff; }
+.calendar-event-chip { color: #e1deeb; }
+.calendar-event-chip.assignment { background: rgba(224,193,124,.12); color: #e0c17c; }
+.calendar-event-chip.quiz { background: rgba(167,139,250,.14); color: #d5c8ff; }
+.calendar-event-chip.course { background: rgba(103,217,232,.11); color: #83e2ed; }
+.calendar-event-chip.announcement { background: rgba(103,217,232,.08); color: #83e2ed; }
+.calendar-event-chip.event { background: rgba(190,183,225,.10); color: #d5d1e2; }
+.calendar-legend { color: #aaa6bd; }
+.upcoming-event {
+    border-color: rgba(190,183,225,.13);
+    background: #171622;
+}
+.upcoming-event:hover { border-color: rgba(103,217,232,.28); }
+.upcoming-event-type { color: #c4b5fd; }
+.upcoming-event-date,
+.upcoming-event-course { color: #aaa6bd; }
+.upcoming-event-title { color: #f4f1ff; }
+.calendar-empty,
+.calendar-loading { color: #8f8aa3; }
+.calendar-empty strong { color: #d5d1e2; }
+.calendar-primary-btn {
+    background: linear-gradient(110deg,#7654c8,#4c78a8);
+    color: #fff;
+}
+.calendar-modal-backdrop { background: rgba(8,7,15,.78); }
+.calendar-modal-dialog h2 { color: #f4f1ff; }
+.calendar-modal-type { color: #e0c17c; }
+.calendar-detail-row,
+.calendar-modal-dialog > p { color: #c8c3d8; }
+.calendar-form-error { color: #fda4af; }
+.calendar-modal-dialog label { color: #d5d1e2; }
+.calendar-modal-dialog input,
+.calendar-modal-dialog select,
+.calendar-modal-dialog textarea {
+    border: 1px solid rgba(190,183,225,.18);
+    background: #14131e;
+    color: #f4f1ff;
+}
+.calendar-modal-dialog input:focus,
+.calendar-modal-dialog select:focus,
+.calendar-modal-dialog textarea:focus {
+    border-color: #a78bfa;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(167,139,250,.13);
+}
+@media (max-width: 760px) {
+    .instructor-calendar-page { padding: 16px; }
+    .calendar-hero { align-items: stretch; flex-direction: column; }
+    .calendar-hero .calendar-primary-btn { width: 100%; }
+    .calendar-layout { grid-template-columns: minmax(0,1fr); }
+    .calendar-toolbar { padding: 14px; }
+    .calendar-month-controls { gap: 6px; }
+    .calendar-month-controls h2 { min-width: 130px; font-size: 16px; }
+    .calendar-weekdays { padding: 10px 8px 6px; }
+    .calendar-grid { padding: 6px 8px 12px; gap: 4px; }
+    .calendar-day { min-height: 74px; padding: 4px; border-radius: 8px; }
+    .calendar-day-number { width: 22px; height: 22px; font-size: 10px; }
+    .calendar-event-chip { padding: 3px 4px; font-size: 8px; }
+    .calendar-legend { padding: 0 12px 14px; gap: 9px; font-size: 10px; }
+    .calendar-modal-dialog { padding: 22px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .instructor-calendar-page *, .instructor-calendar-page *::before, .instructor-calendar-page *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+    }
+}
