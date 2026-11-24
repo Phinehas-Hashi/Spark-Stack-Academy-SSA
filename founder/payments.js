@@ -721,7 +721,7 @@ const matchesSearch =
 
 ||
 
-(payment.receiptNumber || "")
+(payment.receiptNumber || payment.manualReceiptCode || "")
 
 .toLowerCase()
 
@@ -729,7 +729,7 @@ const matchesSearch =
 
 ||
 
-(payment.transactionId || "")
+(payment.transactionId || payment.mpesaReceiptNumber || "" )
 
 .toLowerCase()
 
