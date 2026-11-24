@@ -71,7 +71,15 @@ function initializeTopbar() {
             const activeOverlay = document.getElementById("sidebarOverlay");
             if (!sidebar) {
                 // The sidebar fragment may still be loading; retry after its loader settles.
-                window.dispatchEvent(new CustomEvent("ssa:student-sidebar-toggle-request"));
+                let attempts = 0;
+                const retryToggle = () => {
+                    if (document.getElementById("sidebar")) {
+                        menuBtn.click();
+                    } else if (++attempts < 10) {
+                        window.setTimeout(retryToggle, 120);
+                    }
+                };
+                window.setTimeout(retryToggle, 120);
                 return;
             }
 
