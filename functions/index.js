@@ -104,13 +104,15 @@ exports.requestInstructorWithdrawal = onCall(async request => {
 
     const earningsTotal = earningsSnap.docs.reduce((sum, item) => {
       const data = item.data() || {};
-      return sum + Number(data.netAmount ?? data.amount ?? data.total ?? data.earnings ?? 0);
+      const value = Number(data.netAmount ?? data.amount ?? data.total ?? data.earnings ?? 0);
+      return sum + (Number.isFinite(value) && value > 0 ? value : 0);
     }, 0);
     const releasedStatuses = ["rejected", "declined", "cancelled", "canceled", "failed"];
     const reservedTotal = withdrawalsSnap.docs.reduce((sum, item) => {
       const data = item.data() || {};
       const status = safeText(data.status, "pending").toLowerCase();
-      return releasedStatuses.includes(status) ? sum : sum + Number(data.amount || 0);
+      const value = Number(data.amount || 0);
+      return releasedStatuses.includes(status) || !Number.isFinite(value) || value <= 0 ? sum : sum + value;
     }, 0);
     const available = Math.max(0, Math.round((earningsTotal - reservedTotal) * 100) / 100);
 
