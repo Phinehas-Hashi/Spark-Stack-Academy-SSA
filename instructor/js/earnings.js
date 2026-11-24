@@ -442,7 +442,7 @@ function openWithdrawalWindow() {
     const amount = $("withdrawalAmount");
     if (amount) {
         amount.min = String(Number(earningsSettings.minimumWithdrawal || 100));
-        amount.max = String(currentBalance);
+        amount.max = String(Math.min(currentBalance, Number(earningsSettings.withdrawalLimit || 50000)));
         amount.value = "";
     }
     updateWithdrawalPreview();
@@ -487,6 +487,10 @@ async function submitWithdrawal() {
     const minimum = Number(earningsSettings.minimumWithdrawal || 100);
     if (!Number.isFinite(amount) || amount < minimum) {
         alert(`Minimum withdrawal is ${formatMoney(minimum)}.`);
+        return;
+    }
+    if (amount > Number(earningsSettings.withdrawalLimit || 50000)) {
+        alert("The maximum withdrawal request is " + formatMoney(earningsSettings.withdrawalLimit) + ".");
         return;
     }
     if (amount > currentBalance) {
