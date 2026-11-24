@@ -544,6 +544,14 @@ function renderModules() {
             .join("");
 
 
+    container.querySelectorAll("[data-move-module]").forEach(button => {
+        button.addEventListener("click", () => reorderContent("module", button.dataset.moveModule, button.dataset.direction));
+    });
+
+    container.querySelectorAll("[data-move-lesson]").forEach(button => {
+        button.addEventListener("click", () => reorderContent("lesson", button.dataset.moveLesson, button.dataset.direction));
+    });
+
     container
         .querySelectorAll(
             "[data-add-lesson]"
@@ -701,6 +709,13 @@ function renderModule(
 
                 <div class="module-actions">
 
+                    <button type="button" class="module-action order-action" data-move-module="${module.id}" data-direction="up" aria-label="Move module up" title="Move up">
+                        <i data-lucide="chevron-up"></i>
+                    </button>
+                    <button type="button" class="module-action order-action" data-move-module="${module.id}" data-direction="down" aria-label="Move module down" title="Move down">
+                        <i data-lucide="chevron-down"></i>
+                    </button>
+
                     <button
                         type="button"
                         class="module-action"
@@ -841,6 +856,13 @@ function renderLesson(
 
 
             <div class="lesson-actions">
+
+                <button type="button" class="lesson-action order-action" data-move-lesson="${lesson.id}" data-direction="up" aria-label="Move lesson up" title="Move up">
+                    <i data-lucide="chevron-up"></i>
+                </button>
+                <button type="button" class="lesson-action order-action" data-move-lesson="${lesson.id}" data-direction="down" aria-label="Move lesson down" title="Move down">
+                    <i data-lucide="chevron-down"></i>
+                </button>
 
                 <button
                     type="button"
@@ -1395,6 +1417,11 @@ function openLessonModal(
     $("lessonVideoUrl").value =
         lesson?.videoUrl || "";
 
+    $("lessonObjectives").value =
+        Array.isArray(lesson?.learningObjectives) ? lesson.learningObjectives.join("\n") : "";
+
+    $("lessonResources").value =
+        Array.isArray(lesson?.resources) ? lesson.resources.map(item => `${item.title || "Resource"} | ${item.url || ""}`).join("\n") : "";
 
     $("lessonDuration").value =
         lesson?.duration || "";
@@ -1415,6 +1442,45 @@ function openLessonModal(
         100
     );
 
+}
+
+
+// ============================================================
+// CURRICULUM ORDERING
+// ============================================================
+
+async function reorderContent(kind, id, direction) {
+    const source = kind === "module" ? modules : lessons;
+    const item = source.find(entry => entry.id === id);
+    if (!item) return;
+
+    const siblings = kind === "module"
+        ? [...modules]
+        : lessons.filter(entry => entry.moduleId === item.moduleId);
+
+    siblings.sort(sortByOrder);
+    const index = siblings.findIndex(entry => entry.id === id);
+    const nextIndex = index + (direction === "up" ? -1 : 1);
+    if (nextIndex < 0 || nextIndex >= siblings.length) return;
+
+    const reordered = [...siblings];
+    [reordered[index], reordered[nextIndex]] = [reordered[nextIndex], reordered[index]];
+
+    try {
+        const collectionName = kind === "module" ? "courseModules" : "courseLessons";
+        await Promise.all(reordered.map((entry, position) =>
+            updateDoc(doc(db, collectionName, entry.id), {
+                order: position,
+                updatedAt: serverTimestamp()
+            })
+        ));
+        await reloadBuilder();
+        showToast(kind === "module" ? "Module order updated." : "Lesson order updated.");
+    } catch (error) {
+        console.error("Curriculum reorder failed:", error);
+        alert("The order could not be saved. Refresh the builder and try again.");
+        await reloadBuilder();
+    }
 }
 
 
@@ -1494,6 +1560,30 @@ async function saveLesson(
                 ?.value || 0
         );
 
+    const learningObjectives = $("lessonObjectives").value
+        .split("\n").map(value => value.trim()).filter(Boolean).slice(0, 20);
+
+    const resourceLines = $("lessonResources").value
+        .split("\n").map(value => value.trim()).filter(Boolean);
+
+    const resources = [];
+    for (const line of resourceLines) {
+        const separator = line.indexOf("|");
+        if (separator < 1) {
+            alert(`Each resource must use "Title | HTTPS link". Invalid line: ${line}`);
+            return;
+        }
+        const resourceTitle = line.slice(0, separator).trim();
+        const resourceUrl = line.slice(separator + 1).trim();
+        try {
+            const parsedUrl = new URL(resourceUrl);
+            if (!resourceTitle || parsedUrl.protocol !== "https:") throw new Error("Invalid resource");
+        } catch {
+            alert(`Resource links must be valid HTTPS URLs. Check: ${resourceTitle || line}`);
+            return;
+        }
+        resources.push({ title: resourceTitle, url: resourceUrl });
+    }
 
     const status =
         $("lessonStatus")
@@ -1584,6 +1674,10 @@ async function saveLesson(
             description,
 
             content,
+
+            learningObjectives,
+
+            resources,
 
             videoUrl,
 
@@ -1787,8 +1881,22 @@ async function saveCourse() {
 // ============================================================
 
 async function publishCourse() {
+    const status = String(course?.status || "draft").toLowerCase();
+    if (status === "pending_review" || status === "awaiting_admin_review") {
+        alert("This course is already waiting for administrator review.");
+        return;
+    }
+    if (status === "published") {
+        alert("This course is already published. Contact an administrator if it needs to be returned for review.");
+        return;
+    }
     if (!modules.length || !lessons.length) {
         alert("Add at least one module and one lesson before submitting for review.");
+        return;
+    }
+    const missingTitles = lessons.some(lesson => !String(lesson.title || "").trim());
+    if (missingTitles) {
+        alert("Every lesson must have a title before review.");
         return;
     }
     const confirmed = confirm("Submit this course to Spark Stack Admin for review? Students will not see it until an administrator approves it.");
@@ -2065,10 +2173,19 @@ function updateEmptyState() {
 // ============================================================
 
 function updateStatus() {
-
-    const published =
-        course?.status ===
-        "published";
+    const status = String(course?.status || "draft").toLowerCase();
+    const labels = {
+        published: "Published",
+        pending_review: "In Review",
+        awaiting_admin_review: "In Review",
+        rejected: "Changes Requested",
+        archived: "Archived",
+        draft: "Draft"
+    };
+    const label = labels[status] || "Draft";
+    const tone = status === "published" ? "published" :
+        ["pending_review", "awaiting_admin_review"].includes(status) ? "review" :
+        status === "rejected" ? "needs-changes" : "draft";
 
 
     const headerStatus =
@@ -2081,43 +2198,16 @@ function updateStatus() {
 
     if (headerStatus) {
 
-        headerStatus.textContent =
-            published
-                ? "Published"
-                : "Draft";
-
-
-        headerStatus.className =
-            `builder-status ${
-                published
-                    ? "published"
-                    : "draft"
-            }`;
+        headerStatus.textContent = label;
+        headerStatus.className = `builder-status ${tone}`;
 
     }
 
 
     if (sideStatus) {
 
-        sideStatus.className =
-            `side-status ${
-                published
-                    ? "published"
-                    : "draft"
-            }`;
-
-
-        sideStatus.innerHTML = `
-
-            <span></span>
-
-            ${
-                published
-                    ? "Published"
-                    : "Draft"
-            }
-
-        `;
+        sideStatus.className = `side-status ${tone}`;
+        sideStatus.innerHTML = `<span></span>${escapeHTML(label)}`;
 
     }
 
