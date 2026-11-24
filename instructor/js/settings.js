@@ -11,6 +11,8 @@ import {
 import {
     onAuthStateChanged,
     updatePassword,
+    EmailAuthProvider,
+    reauthenticateWithCredential,
     signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -199,9 +201,19 @@ async function saveSettings() {
         }
 
 
+        const phoneValue = $("settingsPhone")?.value.trim() || "";
+        if (phoneValue.length > 30) {
+            showToast("Phone number must be 30 characters or fewer.", "error");
+            $("settingsPhone")?.focus();
+            return;
+        }
+
         const settingsData = {
 
             phone:
+                $("settingsPhone")?.value.trim() || "",
+
+            phoneNumber:
                 $("settingsPhone")?.value.trim() || "",
 
             notifications: {
@@ -472,73 +484,46 @@ function setupNavigation() {
 // ============================================================
 
 async function handleChangePassword() {
-
     if (!currentUser) return;
 
-
-    const password =
-        prompt(
-            "Enter your new password (minimum 6 characters):"
-        );
-
-
-    if (!password) return;
-
-
-    if (password.length < 6) {
-
-        showToast(
-            "Password must be at least 6 characters.",
-            "error"
-        );
-
+    const supportsPassword = currentUser.providerData?.some(
+        provider => provider.providerId === "password"
+    );
+    if (!supportsPassword || !currentUser.email) {
+        showToast("This account does not use an email password. Manage its sign-in method through your identity provider.", "error");
         return;
-
     }
 
+    const currentPassword = prompt("Enter your current password to continue:");
+    if (!currentPassword) return;
+    const newPassword = prompt("Enter your new password (minimum 8 characters):");
+    if (!newPassword) return;
+    if (newPassword.length < 8) {
+        showToast("Use a password with at least 8 characters.", "error");
+        return;
+    }
+    const confirmation = prompt("Confirm your new password:");
+    if (confirmation !== newPassword) {
+        showToast("The password confirmation does not match.", "error");
+        return;
+    }
 
     try {
-
-        await updatePassword(
-            currentUser,
-            password
-        );
-
-
-        showToast(
-            "Password changed successfully.",
-            "success"
-        );
-
-
+        const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+        await reauthenticateWithCredential(currentUser, credential);
+        await updatePassword(currentUser, newPassword);
+        showToast("Password changed successfully.", "success");
     } catch (error) {
-
-        console.error(error);
-
-
-        if (
-            error.code ===
-            "auth/requires-recent-login"
-        ) {
-
-            showToast(
-                "Please sign in again before changing your password.",
-                "error"
-            );
-
+        console.error("Password update failed:", error);
+        if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+            showToast("The current password is incorrect.", "error");
+        } else if (error.code === "auth/weak-password") {
+            showToast("Choose a stronger password.", "error");
         } else {
-
-            showToast(
-                "Unable to change password.",
-                "error"
-            );
-
+            showToast("Unable to change password. Please sign in again and retry.", "error");
         }
-
     }
-
 }
-
 
 // ============================================================
 // SIGN OUT
