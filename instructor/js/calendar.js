@@ -146,24 +146,30 @@ async function loadEvents() {
             return;
         }
 
-        const snapshot = await getDocs(collection(db, EVENTS_COLLECTION));
+        // Firestore rules are not query filters. Fetch only events the
+        // instructor is allowed to see, then merge and de-duplicate.
+        const [sharedSnapshot, personalSnapshot] = await Promise.all([
+            getDocs(query(
+                collection(db, EVENTS_COLLECTION),
+                where("audience", "in", ["students", "instructors", "all"])
+            )),
+            getDocs(query(
+                collection(db, EVENTS_COLLECTION),
+                where("userId", "==", user.uid)
+            ))
+        ]);
 
-        state.events = snapshot.docs
+        const unique = new Map();
+        [...sharedSnapshot.docs, ...personalSnapshot.docs].forEach(item => {
+            if (!unique.has(item.id)) unique.set(item.id, item);
+        });
+
+        state.events = [...unique.values()]
             .map(normalizeEvent)
-            .filter(event => {
-                if (!event.startAt) return false;
-
-                if (event.audience === "user" || event.audience === "private") {
-                    return event.userId === user.uid;
-                }
-
-                return (
-                    event.audience === "all" ||
-                    event.audience === "instructors" ||
-                    event.audience === "students" ||
-                    event.userId === user.uid
-                );
-            });
+            .filter(event => event.startAt && (
+                ["students", "instructors", "all"].includes(event.audience)
+                || event.userId === user.uid
+            ));
 
         renderCalendar();
         renderUpcoming();
