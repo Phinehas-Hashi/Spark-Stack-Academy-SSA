@@ -9,6 +9,8 @@ const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 initializeApp();
 const db = getFirestore();
 const adminAuth = getAuth();
+const { getStorage } = require("firebase-admin/storage");
+const adminStorage = getStorage();
 const platformRef = db.doc("platform_controls/global");
 
 // Safaricom Daraja credentials are managed in Firebase Secret Manager.
@@ -798,6 +800,18 @@ exports.attachStudentPaymentProof = onCall(async request => {
   const paymentSnap = await paymentRef.get();
   if (!paymentSnap.exists) throw new HttpsError("not-found", "Payment record not found.");
   const payment = paymentSnap.data();
+  let proofMetadata;
+  try {
+    const [metadata] = await adminStorage.bucket().file(storagePath).getMetadata();
+    proofMetadata = metadata;
+  } catch (_) {
+    throw new HttpsError("failed-precondition", "Upload the M-Pesa confirmation screenshot before submitting proof.");
+  }
+  const proofSize = Number(proofMetadata.size || 0);
+  if (!/^image\/(jpeg|png|webp)$/.test(safeText(proofMetadata.contentType))
+      || proofSize < 1 || proofSize > 5 * 1024 * 1024) {
+    throw new HttpsError("failed-precondition", "The uploaded proof must be a valid image no larger than 5 MB.");
+  }
   if (payment.userId !== uid || payment.method !== "manual_mpesa" || payment.status !== "pending_review") {
     throw new HttpsError("permission-denied", "This payment cannot accept proof from this account.");
   }
