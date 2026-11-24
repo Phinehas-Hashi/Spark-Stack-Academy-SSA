@@ -81,6 +81,7 @@ exports.awardStudentXP = onCall(async request => {
   if (!uid) throw new HttpsError("unauthenticated", "Sign in before earning XP.");
 
   const source = safeText(request.data?.source);
+  if (!source || source.length > 120) throw new HttpsError("invalid-argument", "Invalid XP activity source.");
   const reason = safeText(request.data?.reason, "Learning activity").slice(0, 180);
   const parts = source.split(":");
   const type = parts[0];
