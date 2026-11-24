@@ -1207,3 +1207,27 @@ body.modal-open {
         flex-wrap: wrap;
     }
 }
+
+
+/* Advanced student-facing preview */
+.preview-modal-panel { width: min(920px, 100%); }
+#coursePreviewContent { color: #eeeaff; }
+.builder-preview-shell { padding: 22px; }
+.builder-preview-hero { padding: 25px; border-radius: 16px; background: linear-gradient(125deg, #29204f, #173c50); }
+.builder-preview-hero > span, .builder-preview-module-heading > span, .builder-preview-lesson-top > span { color: #70d8ef; font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+.builder-preview-hero h1 { margin: 9px 0; color: #fff; font-size: clamp(22px, 4vw, 34px); }
+.builder-preview-hero p, .builder-preview-module-heading p, .builder-preview-lesson p, .builder-preview-empty { color: #c1bdd5; line-height: 1.65; }
+.builder-preview-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.builder-preview-stats span { padding: 7px 10px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; color: #f2edff; font-size: 11px; }
+.builder-preview-content > h2 { margin: 22px 0 12px; color: #f4f1ff; font-size: 19px; }
+.builder-preview-module { margin-top: 13px; padding: 17px; border: 1px solid rgba(154,132,255,.2); border-radius: 13px; background: rgba(255,255,255,.035); }
+.builder-preview-module-heading h3, .builder-preview-lesson-top strong { color: #f4f1ff; }
+.builder-preview-lesson { padding: 14px 0; border-top: 1px solid rgba(184,178,204,.14); }
+.builder-preview-lesson-top strong { display: block; margin-top: 5px; }
+.builder-preview-lesson-top small { display: block; margin-top: 4px; color: #aaa5c0; }
+.builder-preview-objectives b, .builder-preview-resources b { color: #e9c780; font-size: 12px; }
+.builder-preview-objectives ul { padding-left: 20px; color: #c1bdd5; }
+.builder-preview-resources { display: flex; flex-wrap: wrap; gap: 9px; }
+.builder-preview-resources b { flex-basis: 100%; }
+.builder-preview-resources a { color: #70d8ef; overflow-wrap: anywhere; font-size: 12px; }
+@media (max-width: 600px) { .builder-preview-shell { padding: 13px; } .builder-preview-hero { padding: 18px; } .builder-preview-module { padding: 13px; } }
