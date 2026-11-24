@@ -559,7 +559,7 @@ async function submitWithdrawal(event) {
         );
 
 
-    const method = "mpesa";
+    const method = "M-Pesa";
 
 
     const account =
