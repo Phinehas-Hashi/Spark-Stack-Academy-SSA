@@ -301,51 +301,31 @@ async function loadSubmissions() {
         );
 
 
-    let snapshot;
+    // Firestore rules authorize instructor submission reads through
+    // the stored instructorId. Query by that field first, then apply
+    // the optional course filter locally to avoid a rules mismatch.
+    const q =
+        query(
+            ref,
+            where(
+                "instructorId",
+                "==",
+                instructor.uid
+            )
+        );
 
-
-    if (courseId) {
-
-        const q =
-            query(
-                ref,
-                where(
-                    "courseId",
-                    "==",
-                    courseId
-                )
-            );
-
-        snapshot =
-            await getDocs(q);
-
-    } else {
-
-        const q =
-            query(
-                ref,
-                where(
-                    "instructorId",
-                    "==",
-                    instructor.uid
-                )
-            );
-
-        snapshot =
-            await getDocs(q);
-
-    }
-
+    const snapshot =
+        await getDocs(q);
 
     submissions =
         snapshot.docs
             .map(item => ({
-
                 id: item.id,
-
                 ...item.data()
-
-            }));
+            }))
+            .filter(submission =>
+                !courseId || submission.courseId === courseId
+            );
 
 }
 

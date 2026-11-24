@@ -230,9 +230,7 @@ async function loadQuiz() {
 
 
     if (
-        data.instructorId &&
-        data.instructorId !==
-            instructor.uid
+        data.instructorId !== instructor.uid
     ) {
 
         throw new Error(
@@ -370,31 +368,23 @@ async function loadQuestions() {
         );
 
 
+    // Quiz questions include answer keys. Only the owning instructor
+    // may load them; student delivery must use a sanitized server response.
     const q =
         query(
             ref,
-            where(
-                "quizId",
-                "==",
-                quizId
-            )
+            where("instructorId", "==", instructor.uid)
         );
 
-
-    const snapshot =
-        await getDocs(q);
-
+    const snapshot = await getDocs(q);
 
     questions =
         snapshot.docs
             .map(item => ({
-
-                id:
-                    item.id,
-
+                id: item.id,
                 ...item.data()
-
             }))
+            .filter(question => question.quizId === quizId)
             .sort(
                 (a, b) =>
                     Number(a.order || 0) -
@@ -417,31 +407,30 @@ async function loadSubmissions() {
         );
 
 
+    // The Firestore read rule requires instructorId == current UID.
+    // Query that authorized scope first, then keep this quiz's attempts.
     const q =
         query(
             ref,
             where(
-                "quizId",
+                "instructorId",
                 "==",
-                quizId
+                instructor.uid
             )
         );
-
 
     const snapshot =
         await getDocs(q);
 
-
     submissions =
         snapshot.docs
             .map(item => ({
-
-                id:
-                    item.id,
-
+                id: item.id,
                 ...item.data()
-
-            }));
+            }))
+            .filter(submission =>
+                submission.quizId === quizId
+            );
 
 
     submissions.sort(

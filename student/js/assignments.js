@@ -51,7 +51,10 @@ async function loadAssignments(uid) {
         }
 
         const [assignmentResult, submissionResult] = await Promise.allSettled([
-            getDocs(collection(db, "assignments")),
+            getDocs(query(
+                collection(db, "assignments"),
+                where("status", "in", ["published", "pending", "active"])
+            )),
             getDocs(query(
                 collection(db, "submissions"),
                 where("studentId", "==", uid)
@@ -77,6 +80,9 @@ async function loadAssignments(uid) {
         assignments = [];
         assignmentResult.value.forEach(assignmentDoc => {
             const data = assignmentDoc.data();
+            const status = String(data.status || "published").toLowerCase();
+            const isStudentVisible = ["published", "pending", "active"].includes(status);
+            if (!isStudentVisible || data.published === false) return;
             if (!data.courseId || !courseIds.has(String(data.courseId))) return;
 
             assignments.push({

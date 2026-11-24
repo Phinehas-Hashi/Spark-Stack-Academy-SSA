@@ -629,3 +629,159 @@
     }
 
 }
+
+/* ============================================================
+   OBSIDIAN REVIEW WORKSPACE REFINEMENT
+============================================================ */
+
+.assignment-page {
+    color: #f4f1ff;
+}
+
+.back-link { color: #aaa6bd; }
+.back-link:hover { color: #67d9e8; }
+.page-eyebrow, .card-eyebrow { color: #e0c17c; }
+
+.assignment-header h1,
+.card-header h2,
+.assignment-side-card h2,
+.submissions-header h2 { color: #f4f1ff; }
+
+.assignment-header p,
+.submissions-header p { color: #aaa6bd; }
+
+.assignment-status {
+    border: 1px solid rgba(103, 217, 232, .24);
+    background: rgba(103, 217, 232, .10);
+    color: #83e2ed;
+}
+
+.assignment-status.draft,
+.assignment-status.closed,
+.assignment-status.archived {
+    border-color: rgba(224, 193, 124, .25);
+    background: rgba(224, 193, 124, .10);
+    color: #e0c17c;
+}
+
+.overview-card,
+.assignment-main-card,
+.assignment-side-card,
+.submissions-card {
+    border-color: rgba(190, 183, 225, .14);
+    background: linear-gradient(145deg, #211f2d, #191824);
+    box-shadow: 0 16px 42px rgba(0, 0, 0, .18);
+}
+
+.overview-card span,
+.review-stat span,
+.submission-date span,
+.submission-score span { color: #aaa6bd; }
+
+.overview-card strong,
+.review-stat strong,
+.submission-score strong { color: #f4f1ff; }
+
+.overview-icon.blue {
+    background: rgba(103, 217, 232, .12);
+    color: #67d9e8;
+}
+.overview-icon.gold {
+    background: rgba(224, 193, 124, .12);
+    color: #e0c17c;
+}
+.overview-icon.purple {
+    background: rgba(167, 139, 250, .14);
+    color: #c4b5fd;
+}
+.overview-icon.green {
+    background: rgba(103, 217, 232, .10);
+    color: #83e2ed;
+}
+
+.card-header,
+.submissions-header,
+.submission-filters,
+.submission-item,
+.review-stat { border-color: rgba(190, 183, 225, .12); }
+
+.assignment-instructions { color: #d5d1e2; }
+
+.submission-search input {
+    border-color: rgba(190, 183, 225, .18);
+    background: #14131e;
+    color: #f4f1ff;
+}
+.submission-search input:focus {
+    border-color: #a78bfa;
+    background: #171622;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, .13);
+}
+
+.submission-filter { color: #aaa6bd; }
+.submission-filter:hover {
+    background: rgba(167, 139, 250, .10);
+    color: #f4f1ff;
+}
+.submission-filter.active {
+    background: rgba(167, 139, 250, .16);
+    color: #c4b5fd;
+}
+
+.submission-item:hover { background: rgba(167, 139, 250, .055); }
+.student-avatar {
+    border: 1px solid rgba(167, 139, 250, .24);
+    background: rgba(167, 139, 250, .13);
+    color: #c4b5fd;
+}
+.student-info strong { color: #f4f1ff; }
+.student-info span { color: #aaa6bd; }
+
+.submission-badge {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(224, 193, 124, .12);
+    color: #e0c17c;
+    font-size: 10px;
+    font-weight: 800;
+}
+.submission-badge.graded {
+    background: rgba(103, 217, 232, .11);
+    color: #83e2ed;
+}
+
+.submission-empty h3 { color: #f4f1ff; }
+.submission-empty p,
+.submission-loading { color: #aaa6bd; }
+.submission-empty .empty-icon {
+    background: rgba(167, 139, 250, .12);
+    color: #c4b5fd;
+}
+
+@media (max-width: 760px) {
+    .assignment-overview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .overview-card {
+        gap: 10px;
+        padding: 13px;
+        border-radius: 14px;
+    }
+    .overview-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+    }
+    .overview-card strong { font-size: 13px; }
+    .submission-item { flex-wrap: wrap; }
+    .submission-meta {
+        width: 100%;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        padding-left: 52px;
+    }
+    .submission-score { display: block; }
+}

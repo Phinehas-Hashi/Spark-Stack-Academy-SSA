@@ -18,7 +18,8 @@ import {
     doc,
     getDoc,
     serverTimestamp,
-    orderBy
+    orderBy,
+    writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -57,6 +58,16 @@ function escapeHTML(value) {
         .replaceAll("'", "&#039;");
 
 }
+
+function safeHttpsUrl(value) {
+    try {
+        const parsed = new URL(String(value || ""));
+        return parsed.protocol === "https:" ? parsed.href : "#";
+    } catch {
+        return "#";
+    }
+}
+
 
 
 
@@ -308,6 +319,19 @@ function renderCourseHeader() {
     );
 
 
+    if ($("builderCourseDuration")) {
+        $("builderCourseDuration").value = course.duration ?? "";
+    }
+    if ($("builderCoursePrice")) {
+        $("builderCoursePrice").value = course.price ?? "";
+    }
+    if ($("builderCourseDiscount")) {
+        $("builderCourseDiscount").value = course.discountPrice ?? "";
+    }
+    if ($("builderCourseFree")) {
+        $("builderCourseFree").checked = course.isFree === true || Number(course.price || 0) <= 0;
+    }
+    toggleBuilderCoursePricing();
     updateStatus();
 
 }
@@ -544,6 +568,14 @@ function renderModules() {
             .join("");
 
 
+    container.querySelectorAll("[data-move-module]").forEach(button => {
+        button.addEventListener("click", () => reorderContent("module", button.dataset.moveModule, button.dataset.direction));
+    });
+
+    container.querySelectorAll("[data-move-lesson]").forEach(button => {
+        button.addEventListener("click", () => reorderContent("lesson", button.dataset.moveLesson, button.dataset.direction));
+    });
+
     container
         .querySelectorAll(
             "[data-add-lesson]"
@@ -630,19 +662,12 @@ function renderModules() {
             "[data-delete-lesson]"
         )
         .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    deleteLesson(
-                        button.dataset.deleteLesson
-                    );
-
-                }
-            );
-
+            button.addEventListener("click", () => deleteLesson(button.dataset.deleteLesson));
         });
+
+    container.querySelectorAll("[data-duplicate-lesson]").forEach(button => {
+        button.addEventListener("click", () => duplicateLesson(button.dataset.duplicateLesson));
+    });
 
 }
 
@@ -700,6 +725,13 @@ function renderModule(
 
 
                 <div class="module-actions">
+
+                    <button type="button" class="module-action order-action" data-move-module="${module.id}" data-direction="up" aria-label="Move module up" title="Move up">
+                        <i data-lucide="chevron-up"></i>
+                    </button>
+                    <button type="button" class="module-action order-action" data-move-module="${module.id}" data-direction="down" aria-label="Move module down" title="Move down">
+                        <i data-lucide="chevron-down"></i>
+                    </button>
 
                     <button
                         type="button"
@@ -841,6 +873,17 @@ function renderLesson(
 
 
             <div class="lesson-actions">
+
+                <button type="button" class="lesson-action order-action" data-move-lesson="${lesson.id}" data-direction="up" aria-label="Move lesson up" title="Move up">
+                    <i data-lucide="chevron-up"></i>
+                </button>
+                <button type="button" class="lesson-action order-action" data-move-lesson="${lesson.id}" data-direction="down" aria-label="Move lesson down" title="Move down">
+                    <i data-lucide="chevron-down"></i>
+                </button>
+
+                <button type="button" class="lesson-action" data-duplicate-lesson="${lesson.id}" title="Duplicate lesson" aria-label="Duplicate lesson">
+                    <i data-lucide="copy"></i>
+                </button>
 
                 <button
                     type="button"
@@ -1011,13 +1054,18 @@ function setupEvents() {
             saveCourse
         );
 
+    $("saveCourseDetailsBtn")?.addEventListener("click", saveCourseDetails);
+    $("builderCourseFree")?.addEventListener("change", toggleBuilderCoursePricing);
+    ["builderCoursePrice", "builderCourseDiscount"].forEach(id => {
+        $(id)?.addEventListener("input", updateCoursePricingPreview);
+    });
 
-    $("previewCourseBtn")
-        ?.addEventListener(
-            "click",
-            previewCourse
-        );
 
+    $("previewCourseBtn")?.addEventListener("click", previewCourse);
+    $("closePreviewModal")?.addEventListener("click", closePreviewModal);
+    $("previewModal")?.addEventListener("click", event => {
+        if (event.target.matches("[data-close-preview]")) closePreviewModal();
+    });
 
     $("publishCourseBtn")
         ?.addEventListener(
@@ -1393,8 +1441,13 @@ function openLessonModal(
 
 
     $("lessonVideoUrl").value =
-        lesson?.videoUrl || "";
+        lesson?.videoUrl || lesson?.youtubeUrl || lesson?.video || "";
 
+    $("lessonObjectives").value =
+        Array.isArray(lesson?.learningObjectives) ? lesson.learningObjectives.join("\n") : "";
+
+    $("lessonResources").value =
+        Array.isArray(lesson?.resources) ? lesson.resources.map(item => `${item.title || "Resource"} | ${item.url || ""}`).join("\n") : "";
 
     $("lessonDuration").value =
         lesson?.duration || "";
@@ -1415,6 +1468,47 @@ function openLessonModal(
         100
     );
 
+}
+
+
+// ============================================================
+// CURRICULUM ORDERING
+// ============================================================
+
+async function reorderContent(kind, id, direction) {
+    const source = kind === "module" ? modules : lessons;
+    const item = source.find(entry => entry.id === id);
+    if (!item) return;
+
+    const siblings = kind === "module"
+        ? [...modules]
+        : lessons.filter(entry => entry.moduleId === item.moduleId);
+
+    siblings.sort(sortByOrder);
+    const index = siblings.findIndex(entry => entry.id === id);
+    const nextIndex = index + (direction === "up" ? -1 : 1);
+    if (nextIndex < 0 || nextIndex >= siblings.length) return;
+
+    const reordered = [...siblings];
+    [reordered[index], reordered[nextIndex]] = [reordered[nextIndex], reordered[index]];
+
+    try {
+        const collectionName = kind === "module" ? "courseModules" : "courseLessons";
+        const batch = writeBatch(db);
+        reordered.forEach((entry, position) => {
+            batch.update(doc(db, collectionName, entry.id), {
+                order: position,
+                updatedAt: serverTimestamp()
+            });
+        });
+        await batch.commit();
+        await reloadBuilder();
+        showToast(kind === "module" ? "Module order updated." : "Lesson order updated.");
+    } catch (error) {
+        console.error("Curriculum reorder failed:", error);
+        alert("The order could not be saved. Refresh the builder and try again.");
+        await reloadBuilder();
+    }
 }
 
 
@@ -1494,6 +1588,30 @@ async function saveLesson(
                 ?.value || 0
         );
 
+    const learningObjectives = $("lessonObjectives").value
+        .split("\n").map(value => value.trim()).filter(Boolean).slice(0, 20);
+
+    const resourceLines = $("lessonResources").value
+        .split("\n").map(value => value.trim()).filter(Boolean);
+
+    const resources = [];
+    for (const line of resourceLines) {
+        const separator = line.indexOf("|");
+        if (separator < 1) {
+            alert(`Each resource must use "Title | HTTPS link". Invalid line: ${line}`);
+            return;
+        }
+        const resourceTitle = line.slice(0, separator).trim();
+        const resourceUrl = line.slice(separator + 1).trim();
+        try {
+            const parsedUrl = new URL(resourceUrl);
+            if (!resourceTitle || parsedUrl.protocol !== "https:") throw new Error("Invalid resource");
+        } catch {
+            alert(`Resource links must be valid HTTPS URLs. Check: ${resourceTitle || line}`);
+            return;
+        }
+        resources.push({ title: resourceTitle, url: resourceUrl });
+    }
 
     const status =
         $("lessonStatus")
@@ -1523,18 +1641,18 @@ async function saveLesson(
     }
 
 
-    if (
-        type === "video" &&
-        videoUrl &&
-        !isYouTubeUrl(videoUrl)
-    ) {
-
-        alert(
-            "Please enter a valid YouTube URL."
-        );
-
+    if (videoUrl) {
+        try {
+            const parsedVideoUrl = new URL(videoUrl);
+            if (parsedVideoUrl.protocol !== "https:") throw new Error("HTTPS required");
+        } catch {
+            alert("Enter a valid secure HTTPS video URL.");
+            return;
+        }
+    }
+    if (type === "video" && !videoUrl) {
+        alert("Add a video URL for a video lesson.");
         return;
-
     }
 
 
@@ -1584,6 +1702,10 @@ async function saveLesson(
             description,
 
             content,
+
+            learningObjectives,
+
+            resources,
 
             videoUrl,
 
@@ -1683,6 +1805,28 @@ async function saveLesson(
 // DELETE LESSON
 // ============================================================
 
+async function duplicateLesson(id) {
+    const source = lessons.find(item => item.id === id);
+    if (!source) return;
+    const { id: ignoredId, createdAt: ignoredCreatedAt, updatedAt: ignoredUpdatedAt, ...copy } = source;
+    const siblingCount = lessons.filter(item => item.moduleId === source.moduleId).length;
+    try {
+        await addDoc(collection(db, "courseLessons"), {
+            ...copy,
+            title: `${source.title || "Lesson"} (Copy)`,
+            status: "draft",
+            order: siblingCount,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+        await reloadBuilder();
+        showToast("Lesson duplicated as a draft.");
+    } catch (error) {
+        console.error("Lesson duplication failed:", error);
+        alert("Unable to duplicate this lesson. Please try again.");
+    }
+}
+
 async function deleteLesson(
     id
 ) {
@@ -1738,47 +1882,98 @@ async function deleteLesson(
 // SAVE COURSE
 // ============================================================
 
-async function saveCourse() {
+function toggleBuilderCoursePricing() {
+    const isFree = $("builderCourseFree")?.checked === true;
+    ["builderCoursePrice", "builderCourseDiscount"].forEach(id => {
+        const field = $(id);
+        if (!field) return;
+        field.disabled = isFree;
+        if (isFree) field.value = "";
+    });
+    updateCoursePricingPreview();
+}
 
-    if (!courseId) return;
+function updateCoursePricingPreview() {
+    const preview = $("builderCoursePricePreview");
+    if (!preview) return;
+    const isFree = $("builderCourseFree")?.checked === true;
+    const price = Number($("builderCoursePrice")?.value || 0);
+    const discount = Number($("builderCourseDiscount")?.value || 0);
+    if (isFree) {
+        preview.textContent = "Students will see this course as FREE.";
+    } else if (discount > 0 && price > 0 && discount < price) {
+        preview.textContent = `Student price: KSh ${discount.toLocaleString("en-KE")} (regular KSh ${price.toLocaleString("en-KE")}).`;
+    } else if (price > 0) {
+        preview.textContent = `Student price: KSh ${price.toLocaleString("en-KE")}.`;
+    } else {
+        preview.textContent = "Set a valid price or mark the course as free.";
+    }
+}
 
+async function saveCourseDetails() {
+    if (!courseId || !course || !instructor) return;
 
-    try {
+    const isFree = $("builderCourseFree")?.checked === true;
+    const rawPrice = $("builderCoursePrice")?.value.trim() || "";
+    const rawDiscount = $("builderCourseDiscount")?.value.trim() || "";
+    const rawDuration = $("builderCourseDuration")?.value.trim() || "";
+    const price = isFree ? 0 : Number(rawPrice);
+    const discountPrice = isFree || !rawDiscount ? 0 : Number(rawDiscount);
+    const duration = rawDuration ? Number(rawDuration) : 0;
+    const message = $("builderCourseDetailsMessage");
+    const button = $("saveCourseDetailsBtn");
 
-        await updateDoc(
-
-            doc(
-                db,
-                "courses",
-                courseId
-            ),
-
-            {
-                updatedAt:
-                    serverTimestamp()
-            }
-
-        );
-
-
-        showToast(
-            "Course saved successfully."
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Save course error:",
-            error
-        );
-
-        alert(
-            "Unable to save course."
-        );
-
+    if (!isFree && (!rawPrice || !Number.isFinite(price) || price <= 0 || price > 10000000)) {
+        if (message) message.textContent = "Enter a valid course price, or select the free option.";
+        $("builderCoursePrice")?.focus();
+        return;
+    }
+    if (!isFree && discountPrice > 0 && (!Number.isFinite(discountPrice) || discountPrice >= price)) {
+        if (message) message.textContent = "The discount price must be lower than the regular price.";
+        $("builderCourseDiscount")?.focus();
+        return;
+    }
+    if (rawDuration && (!Number.isInteger(duration) || duration < 1 || duration > 10000)) {
+        if (message) message.textContent = "Duration must be a whole number of hours between 1 and 10,000.";
+        $("builderCourseDuration")?.focus();
+        return;
     }
 
+    try {
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i data-lucide="loader-circle"></i> Saving...';
+            refreshIcons();
+        }
+
+        const updates = {
+            isFree,
+            price,
+            discountPrice,
+            duration: rawDuration ? duration : "",
+            updatedAt: serverTimestamp()
+        };
+
+        await updateDoc(doc(db, "courses", courseId), updates);
+        course = { ...course, ...updates, duration: rawDuration ? duration : "" };
+        if (message) message.textContent = "Pricing and duration saved.";
+        updateCoursePricingPreview();
+        showToast("Course pricing and duration updated.");
+    } catch (error) {
+        console.error("Course details save failed:", error);
+        if (message) message.textContent = "Unable to save course details. Check your connection and permissions.";
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i data-lucide="save"></i> Save Pricing &amp; Duration';
+            refreshIcons();
+        }
+    }
+}
+
+async function saveCourse() {
+    if (!courseId) return;
+    await saveCourseDetails();
 }
 
 
@@ -1787,12 +1982,24 @@ async function saveCourse() {
 // ============================================================
 
 async function publishCourse() {
-    if (!modules.length || !lessons.length) {
-        alert("Add at least one module and one lesson before submitting for review.");
+    const status = String(course?.status || "draft").toLowerCase();
+    if (["pending_review", "awaiting_admin_review"].includes(status)) {
+        showToast("This course is already awaiting administrator review.");
         return;
     }
-    const confirmed = confirm("Submit this course to Spark Stack Admin for review? Students will not see it until an administrator approves it.");
-    if (!confirmed) return;
+    if (["published", "archived"].includes(status)) {
+        showToast("This course cannot be submitted from its current status.");
+        return;
+    }
+    const readiness = getCourseReadiness();
+    if (readiness.length) {
+        alert("Complete these items before submitting for review:\n\n• " + readiness.join("\n• "));
+        updateStatus();
+        return;
+    }
+    if (!confirm("Submit this course to Spark Stack Admin for review? Students will not see it until an administrator approves it.")) return;
+    const buttons = [$("publishCourseBtn"), $("sidePublishBtn")].filter(Boolean);
+    buttons.forEach(button => button.disabled = true);
     try {
         await updateDoc(doc(db, "courses", courseId), {
             status: "pending_review",
@@ -1810,6 +2017,7 @@ async function publishCourse() {
     } catch (error) {
         console.error("Course review submission error:", error);
         alert("Unable to submit this course for review.");
+        buttons.forEach(button => button.disabled = false);
     }
 }
 
@@ -1818,18 +2026,52 @@ async function publishCourse() {
 // ============================================================
 
 function previewCourse() {
-
-    const url =
-        `course-preview.html?id=${encodeURIComponent(courseId)}`;
-
-
-    window.open(
-        url,
-        "_blank"
-    );
-
+    const container = $("coursePreviewContent");
+    if (!container) return;
+    const moduleMarkup = modules.map((module, index) => {
+        const moduleLessons = lessons.filter(lesson => lesson.moduleId === module.id).sort(sortByOrder);
+        const lessonMarkup = moduleLessons.map((lesson, lessonIndex) => {
+            const objectives = Array.isArray(lesson.learningObjectives) ? lesson.learningObjectives : [];
+            const resources = Array.isArray(lesson.resources) ? lesson.resources : [];
+            return `
+                <article class="builder-preview-lesson">
+                    <div class="builder-preview-lesson-top">
+                        <span>LESSON ${lessonIndex + 1}</span>
+                        <strong>${escapeHTML(lesson.title || "Untitled lesson")}</strong>
+                        <small>${escapeHTML(lesson.type || "text")} · ${Number(lesson.duration) > 0 ? Number(lesson.duration) + " min" : "Duration not set"}</small>
+                    </div>
+                    <p>${escapeHTML(lesson.description || lesson.content || "Lesson content has not been added yet.")}</p>
+                    ${objectives.length ? `<div class="builder-preview-objectives"><b>Learning objectives</b><ul>${objectives.map(item => `<li>${escapeHTML(item)}</li>`).join("")}</ul></div>` : ""}
+                    ${resources.length ? `<div class="builder-preview-resources"><b>Resources</b>${resources.map(resource => `<a href="${escapeHTML(safeHttpsUrl(resource.url))}" target="_blank" rel="noopener noreferrer">${escapeHTML(resource.title || "Learning resource")}</a>`).join("")}</div>` : ""}
+                </article>`;
+        }).join("");
+        return `
+            <section class="builder-preview-module">
+                <div class="builder-preview-module-heading"><span>MODULE ${index + 1}</span><h3>${escapeHTML(module.title || "Untitled module")}</h3><p>${escapeHTML(module.description || "")}</p></div>
+                ${lessonMarkup || '<p class="builder-preview-empty">No lessons in this module yet.</p>'}
+            </section>`;
+    }).join("");
+    container.innerHTML = `
+        <div class="builder-preview-shell">
+            <header class="builder-preview-hero">
+                <span>STUDENT EXPERIENCE PREVIEW</span>
+                <h1>${escapeHTML(course?.title || "Untitled course")}</h1>
+                <p>${escapeHTML(course?.description || "No course description has been added.")}</p>
+                <div class="builder-preview-stats"><span>${modules.length} modules</span><span>${lessons.length} lessons</span><span>${quizzes.length} quizzes</span><span>${assignments.length} assignments</span></div>
+            </header>
+            <div class="builder-preview-content"><h2>Course curriculum</h2>${moduleMarkup || '<p class="builder-preview-empty">Add a module and lesson to build your curriculum.</p>'}</div>
+        </div>`;
+    showModal("previewModal");
 }
 
+function closePreviewModal() {
+    const modal = $("previewModal");
+    modal?.classList.add("hidden");
+    modal?.setAttribute("aria-hidden", "true");
+    if ($("moduleModal")?.classList.contains("hidden") && $("lessonModal")?.classList.contains("hidden")) {
+        document.body.classList.remove("modal-open");
+    }
+}
 
 // ============================================================
 // YOUTUBE
@@ -2064,65 +2306,59 @@ function updateEmptyState() {
 // STATUS
 // ============================================================
 
-function updateStatus() {
-
-    const published =
-        course?.status ===
-        "published";
-
-
-    const headerStatus =
-        $("courseBuilderStatus");
-
-
-    const sideStatus =
-        $("sideCourseStatus");
-
-
-    if (headerStatus) {
-
-        headerStatus.textContent =
-            published
-                ? "Published"
-                : "Draft";
-
-
-        headerStatus.className =
-            `builder-status ${
-                published
-                    ? "published"
-                    : "draft"
-            }`;
-
-    }
-
-
-    if (sideStatus) {
-
-        sideStatus.className =
-            `side-status ${
-                published
-                    ? "published"
-                    : "draft"
-            }`;
-
-
-        sideStatus.innerHTML = `
-
-            <span></span>
-
-            ${
-                published
-                    ? "Published"
-                    : "Draft"
-            }
-
-        `;
-
-    }
-
+function getCourseReadiness() {
+    const issues = [];
+    if (!modules.length) issues.push("Create at least one module");
+    if (!lessons.length) issues.push("Add at least one lesson");
+    modules.forEach((module, index) => {
+        if (!String(module.title || "").trim()) issues.push(`Add a title to module ${index + 1}`);
+    });
+    lessons.forEach((lesson, index) => {
+        const title = String(lesson.title || "").trim();
+        if (!title) issues.push(`Add a title to lesson ${index + 1}`);
+        const hasText = Boolean(String(lesson.content || lesson.body || lesson.text || lesson.description || "").trim());
+        const hasVideo = Boolean(String(lesson.videoUrl || lesson.youtubeUrl || lesson.video || "").trim());
+        if (lesson.type === "text" && !hasText) issues.push(`Add learning content to "${lesson.title || "Lesson " + (index + 1)}"`);
+        if (lesson.type === "video" && !hasVideo) issues.push(`Add a video URL to "${lesson.title || "Lesson " + (index + 1)}"`);
+        if (lesson.type === "mixed" && !hasText && !hasVideo) issues.push(`Add text or video content to "${lesson.title || "Lesson " + (index + 1)}"`);
+    });
+    return [...new Set(issues)];
 }
 
+function updateStatus() {
+    const status = String(course?.status || "draft").toLowerCase();
+    const labels = { published: "Published", pending_review: "In Review", awaiting_admin_review: "In Review", rejected: "Changes Requested", archived: "Archived", draft: "Draft" };
+    const label = labels[status] || "Draft";
+    const tone = status === "published" ? "published" :
+        ["pending_review", "awaiting_admin_review"].includes(status) ? "review" :
+        status === "rejected" ? "needs-changes" : "draft";
+    const headerStatus = $("courseBuilderStatus");
+    const sideStatus = $("sideCourseStatus");
+    if (headerStatus) {
+        headerStatus.textContent = label;
+        headerStatus.className = `builder-status ${tone}`;
+    }
+    if (sideStatus) {
+        sideStatus.className = `side-status ${tone}`;
+        sideStatus.innerHTML = `<span></span>${escapeHTML(label)}`;
+    }
+    const issues = getCourseReadiness();
+    const requirements = $("publishRequirements");
+    if (requirements) {
+        requirements.textContent = ["pending_review", "awaiting_admin_review"].includes(status)
+            ? "Submitted. The course remains hidden from students until Spark Stack Admin completes its review."
+            : status === "published"
+                ? "This course is published. New changes may require another review."
+                : issues.length
+                    ? `Before review: ${issues.slice(0, 3).join(" • ")}${issues.length > 3 ? ` • +${issues.length - 3} more` : ""}.`
+                    : "Course structure is ready to submit for administrator review.";
+    }
+    const locked = ["pending_review", "awaiting_admin_review", "published", "archived"].includes(status);
+    [$("publishCourseBtn"), $("sidePublishBtn")].filter(Boolean).forEach(button => {
+        button.disabled = locked || issues.length > 0;
+        if (["pending_review", "awaiting_admin_review"].includes(status)) button.textContent = "Submitted for Review";
+    });
+}
 
 // ============================================================
 // RELOAD

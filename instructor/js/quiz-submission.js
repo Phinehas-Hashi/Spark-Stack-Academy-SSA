@@ -42,6 +42,7 @@ let answers = [];
 
 let marksAwarded = 0;
 let totalMarks = 0;
+let gradeSaving = false;
 
 
 // ============================================================
@@ -164,6 +165,7 @@ async function initialize() {
         renderPage();
 
         setupScoreInputs();
+        setupFeedbackCounter();
 
         refreshIcons();
 
@@ -222,9 +224,7 @@ async function loadQuiz() {
     // SECURITY CHECK
 
     if (
-        data.instructorId &&
-        data.instructorId !==
-            instructor.uid
+        data.instructorId !== instructor.uid
     ) {
 
         throw new Error(
@@ -287,15 +287,12 @@ async function loadSubmission() {
     // to this quiz.
 
     if (
-        submission.quizId &&
-        submission.quizId !==
-            quizId
+        submission.quizId !== quizId ||
+        submission.instructorId !== instructor.uid
     ) {
-
         throw new Error(
-            "Submission does not belong to this quiz."
+            "This submission is not linked to a quiz owned by your account."
         );
-
     }
 
 }
@@ -306,95 +303,22 @@ async function loadSubmission() {
 // ============================================================
 
 async function loadQuestions() {
-
-    /*
-       Expected structure:
-
-       quizzes/{quizId}
-       questions: [
-           {
-               id,
-               text,
-               type,
-               options,
-               correctAnswer,
-               marks
-           }
-       ]
-
-       If your questions are stored
-       separately, the fallback query
-       below handles that.
-    */
-
-
-    if (
-        Array.isArray(
-            quiz.questions
-        )
-    ) {
-
-        questions =
-            quiz.questions.map(
-                (question, index) => ({
-
-                    id:
-                        question.id ||
-                        `question-${index}`,
-
-                    ...question
-
-                })
-            );
-
-        return;
-
-    }
-
-
-    const questionsRef =
-        collection(
-            db,
-            "questions"
-        );
-
-
-    const q =
-        query(
-            questionsRef,
-            where(
-                "quizId",
-                "==",
-                quizId
-            )
-        );
-
-
-    const snapshot =
-        await getDocs(q);
-
-
-    questions =
-        snapshot.docs.map(
-            item => ({
-
-                id:
-                    item.id,
-
-                ...item.data()
-
-            })
-        );
-
-
-    questions.sort(
-        (a, b) =>
-            (a.order || 0) -
-            (b.order || 0)
+    // Questions are stored in quizQuestions. Restrict the query to the
+    // instructor-owned scope required by Firestore rules.
+    const questionsRef = collection(db, "quizQuestions");
+    const q = query(
+        questionsRef,
+        where("instructorId", "==", instructor.uid)
     );
-
+    const snapshot = await getDocs(q);
+    questions = snapshot.docs
+        .map(item => ({ id: item.id, ...item.data() }))
+        .filter(question => question.quizId === quizId)
+        .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+    if (!questions.length) {
+        throw new Error("No questions were found for this quiz.");
+    }
 }
-
 
 // ============================================================
 // BUILD ANSWERS
@@ -1069,12 +993,33 @@ function recalculateLiveScore() {
 
 
 // ============================================================
+// FEEDBACK COUNTER
+// ============================================================
+
+function setupFeedbackCounter() {
+    const field = $("instructorFeedback");
+    const counter = $("feedbackCounter");
+    if (!field || !counter) return;
+
+    const update = () => {
+        counter.textContent = `${field.value.length.toLocaleString()} / 5,000 characters`;
+        counter.classList.toggle("near-limit", field.value.length >= 4500);
+    };
+
+    field.addEventListener("input", update);
+    update();
+}
+
+
+// ============================================================
 // SAVE GRADE
 // ============================================================
 
 async function saveGrade() {
 
-    if (!submission) return;
+    if (!submission || gradeSaving) return;
+
+    gradeSaving = true;
 
 
     const button =
@@ -1101,8 +1046,15 @@ async function saveGrade() {
         );
 
 
-        const gradedAnswers =
-            collectScores();
+        if (
+            submission.quizId !== quizId ||
+            submission.instructorId !== instructor.uid ||
+            quiz.instructorId !== instructor.uid
+        ) {
+            throw new Error("Ownership verification failed. The grade was not saved.");
+        }
+
+        const gradedAnswers = collectScores();
 
 
         const score =
@@ -1131,7 +1083,8 @@ async function saveGrade() {
 
         const result =
             getResult(
-                percentage
+                percentage,
+                true
             );
 
 
@@ -1140,6 +1093,10 @@ async function saveGrade() {
                 ?.value
                 ?.trim() ||
             "";
+
+        if (feedback.length > 5000) {
+            throw new Error("Feedback must be 5,000 characters or fewer.");
+        }
 
 
         const submissionRef =
@@ -1176,6 +1133,12 @@ async function saveGrade() {
                     instructor.uid,
 
                 gradedAt:
+                    serverTimestamp(),
+
+                reviewedAt:
+                    serverTimestamp(),
+
+                updatedAt:
                     serverTimestamp()
 
             }
@@ -1238,6 +1201,8 @@ async function saveGrade() {
 
     } finally {
 
+        gradeSaving = false;
+
         setButtonLoading(
             button,
             false,
@@ -1262,56 +1227,37 @@ async function saveGrade() {
 
 function collectScores() {
 
-    return questions.map(
-        question => {
+    return questions.map(question => {
+        const input = document.querySelector(
+            `[data-score-input][data-question-id="${CSS.escape(question.id)}"]`
+        );
+        const maxScore = Number(question.marks ?? question.points ?? 1);
+        const rawValue = input?.value ?? "0";
+        const score = Number(rawValue);
 
-            const input =
-                document.querySelector(
-                    `[data-score-input][data-question-id="${CSS.escape(
-                        question.id
-                    )}"]`
-                );
-
-
-            const score =
-                Math.max(
-                    0,
-                    Number(
-                        input?.value || 0
-                    )
-                );
-
-
-            const existing =
-                getAnswer(
-                    question.id
-                );
-
-
-            return {
-
-                questionId:
-                    question.id,
-
-                answer:
-                    existing?.answer ??
-                    existing?.value ??
-                    null,
-
-                score,
-
-                maxScore:
-                    Number(
-                        question.marks ??
-                        question.points ??
-                        1
-                    )
-
-            };
-
+        if (
+            !Number.isFinite(maxScore) ||
+            maxScore <= 0 ||
+            rawValue.trim() === "" ||
+            !Number.isFinite(score) ||
+            score < 0 ||
+            score > maxScore
+        ) {
+            input?.setCustomValidity(`Enter a mark between 0 and ${maxScore}.`);
+            input?.reportValidity();
+            throw new Error("One or more question marks are outside the allowed range.");
         }
-    );
 
+        input?.setCustomValidity("");
+
+        const existing = getAnswer(question.id);
+        return {
+            questionId: question.id,
+            answer: existing?.answer ?? existing?.value ?? null,
+            score,
+            maxScore
+        };
+    });
 }
 
 
@@ -1442,7 +1388,8 @@ function calculatePercentage() {
 // ============================================================
 
 function getResult(
-    percentage
+    percentage,
+    isGraded = submission?.status === "graded"
 ) {
 
     const passMark =
@@ -1453,10 +1400,7 @@ function getResult(
         );
 
 
-    if (
-        submission?.status !==
-        "graded"
-    ) {
+    if (!isGraded) {
 
         return {
 

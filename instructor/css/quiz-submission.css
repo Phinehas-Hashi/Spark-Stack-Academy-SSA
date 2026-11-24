@@ -1306,3 +1306,190 @@
     }
 
 }
+
+/* ============================================================
+   OBSIDIAN LUXURY — QUIZ SUBMISSION REVIEW
+   Scoped to the grading page.
+============================================================ */
+
+.quiz-submission-page {
+    color: #f4f1ff;
+}
+.quiz-submission-page .breadcrumb,
+.quiz-submission-page .breadcrumb a,
+.submission-title-row p {
+    color: #aaa6bd;
+}
+.quiz-submission-page .breadcrumb a:hover { color: #67d9e8; }
+.submission-title-row h1,
+.student-summary-info h2,
+.quiz-submission-page .section-heading h2,
+.grading-card-header h3 {
+    color: #f4f1ff;
+}
+.submission-title-icon,
+.student-large-avatar {
+    border: 1px solid rgba(167, 139, 250, .22);
+    background: rgba(167, 139, 250, .13);
+    color: #c4b5fd;
+}
+.student-summary-card,
+.grading-stat-card,
+.answers-panel,
+.grading-card {
+    border-color: rgba(190, 183, 225, .14);
+    background: linear-gradient(145deg, #211f2d, #191824);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, .17);
+}
+.student-summary-info > span,
+.summary-meta-item span,
+.grading-stat-card span,
+.quiz-submission-page .section-heading p,
+.grading-card-header > svg {
+    color: #aaa6bd;
+}
+.student-summary-info p,
+.summary-meta-item strong,
+.grading-stat-card strong {
+    color: #d5d1e2;
+}
+.summary-meta-item { border-color: rgba(190, 183, 225, .13); }
+.submission-status.pending {
+    border: 1px solid rgba(224, 193, 124, .22);
+    background: rgba(224, 193, 124, .10);
+    color: #e0c17c;
+}
+.submission-status.graded {
+    border: 1px solid rgba(103, 217, 232, .22);
+    background: rgba(103, 217, 232, .10);
+    color: #83e2ed;
+}
+.answer-count {
+    border: 1px solid rgba(224, 193, 124, .2);
+    background: rgba(224, 193, 124, .09);
+    color: #e0c17c;
+}
+.answer-card {
+    border-color: rgba(190, 183, 225, .14);
+    background: rgba(17, 16, 26, .48);
+}
+.answer-card:hover {
+    border-color: rgba(167, 139, 250, .3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .16);
+}
+.answer-question-number {
+    border: 1px solid rgba(167, 139, 250, .2);
+    background: rgba(167, 139, 250, .13);
+    color: #c4b5fd;
+}
+.answer-question h3 { color: #f4f1ff; }
+.answer-type {
+    background: rgba(255, 255, 255, .06);
+    color: #aaa6bd;
+}
+.student-answer-box {
+    border-color: rgba(190, 183, 225, .14);
+    background: #14131e;
+}
+.student-answer-box > span,
+.answer-marking label { color: #aaa6bd; }
+.student-answer-box p { color: #e1deeb; }
+.answer-marking { border-color: rgba(190, 183, 225, .13); }
+.answer-score-input,
+.grading-card textarea {
+    border-color: rgba(190, 183, 225, .18);
+    background: #14131e;
+    color: #f4f1ff;
+}
+.answer-score-input:focus,
+.grading-card textarea:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, .13);
+}
+.grading-card textarea::placeholder { color: #77738a; }
+.feedback-counter {
+    display: block;
+    margin-top: 8px;
+    text-align: right;
+    color: #aaa6bd;
+    font-size: 11px;
+}
+.feedback-counter.near-limit { color: #e0c17c; }
+.grading-info-list { color: #d5d1e2; }
+.grading-info-row { border-color: rgba(190, 183, 225, .12); }
+.result-pending { color: #e0c17c; }
+.result-pass { color: #83e2ed; }
+.result-fail { color: #fda4af; }
+.quiz-submission-page .btn-primary {
+    border: 1px solid rgba(167, 139, 250, .28);
+    background: linear-gradient(110deg, #7654c8, #4c78a8);
+    color: #fff;
+}
+.quiz-submission-page .btn-secondary {
+    border: 1px solid rgba(190, 183, 225, .18);
+    background: #171622;
+    color: #d5d1e2;
+}
+.quiz-submission-page .btn:disabled {
+    cursor: not-allowed;
+    opacity: .65;
+    transform: none;
+}
+.answers-empty {
+    border-color: rgba(190, 183, 225, .2);
+    background: rgba(17, 16, 26, .34);
+}
+.answers-empty h3 { color: #f4f1ff; }
+.answers-empty p { color: #aaa6bd; }
+.answers-empty .empty-icon {
+    background: rgba(167, 139, 250, .12);
+    color: #c4b5fd;
+}
+
+@media (max-width: 760px) {
+    .quiz-submission-page { padding: 16px; }
+    .quiz-submission-page .page-header-content {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .quiz-submission-page .page-header-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .student-summary-card {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 16px;
+    }
+    .student-summary-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .summary-meta-item {
+        min-width: 0;
+        padding: 10px 0 0;
+        border-left: 0;
+        border-top: 1px solid rgba(190, 183, 225, .13);
+    }
+    .grading-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .grading-stat-card { min-height: 88px; padding: 14px; }
+    .grading-stat-card strong { font-size: 20px; }
+    .submission-content-grid { grid-template-columns: minmax(0, 1fr); }
+    .grading-sidebar { position: static; }
+    .answers-panel { padding: 15px; }
+    .answer-card { padding: 14px; }
+    .answer-card-header { flex-wrap: wrap; }
+    .answer-type { margin-left: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .quiz-submission-page *,
+    .quiz-submission-page *::before,
+    .quiz-submission-page *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+    }
+}

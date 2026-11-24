@@ -232,21 +232,12 @@ function setupEvents() {
 
 
                     document
-                        .querySelectorAll(
-                            ".assignment-filter"
-                        )
+                        .querySelectorAll(".assignment-filter")
                         .forEach(btn => {
-
-                            btn.classList.remove(
-                                "active"
-                            );
-
+                            const active = btn === button;
+                            btn.classList.toggle("active", active);
+                            btn.setAttribute("aria-pressed", String(active));
                         });
-
-
-                    button.classList.add(
-                        "active"
-                    );
 
 
                     renderAssignments();
@@ -326,6 +317,7 @@ async function loadAssignments() {
 
         if (list) {
 
+            list.setAttribute("aria-busy", "false");
             list.innerHTML = `
 
                 <div class="assignment-loading">
@@ -354,155 +346,62 @@ async function loadAssignments() {
 // ============================================================
 
 async function loadSubmissionStats() {
+    const results = [];
 
-    try {
+    // Bound concurrency for instructors with larger assignment libraries.
+    for (let start = 0; start < assignments.length; start += 10) {
+        const batch = assignments.slice(start, start + 10);
+        const batchResults = await Promise.allSettled(
+            batch.map(async assignment => {
+                const snapshot = await getDocs(query(
+                    collection(db, "submissions"),
+                    where("assignmentId", "==", assignment.id)
+                ));
 
-        const submissionsRef =
-            collection(db, "submissions");
+                let pending = 0;
+                let graded = 0;
 
+                snapshot.forEach(submissionDoc => {
+                    const data = submissionDoc.data();
+                    const status = String(data.status || "").toLowerCase();
+                    const hasGrade = data.grade != null || data.score != null;
 
-        const q =
-            query(
-                submissionsRef,
-                where(
-                    "instructorId",
-                    "==",
-                    instructor.uid
-                )
-            );
+                    if (hasGrade || ["graded", "reviewed", "returned"].includes(status)) {
+                        graded++;
+                    } else if (["submitted", "resubmitted", "pending_review", "under_review"].includes(status)) {
+                        pending++;
+                    }
+                });
 
-
-        const snapshot =
-            await getDocs(q);
-
-
-        const stats = {};
-
-
-        snapshot.forEach(doc => {
-
-            const data = doc.data();
-
-            const assignmentId =
-                data.assignmentId;
-
-
-            if (!assignmentId) return;
-
-
-            if (!stats[assignmentId]) {
-
-                stats[assignmentId] = {
-
-                    total: 0,
-
-                    pending: 0,
-
-                    graded: 0
-
-                };
-
-            }
-
-
-            stats[assignmentId].total++;
-
-
-            const status =
-                String(
-                    data.status || ""
-                ).toLowerCase();
-
-
-            if (
-                status === "pending_review" ||
-                status === "submitted"
-            ) {
-
-                stats[assignmentId].pending++;
-
-            }
-
-
-            if (
-                status === "graded"
-            ) {
-
-                stats[assignmentId].graded++;
-
-            }
-
-        });
-
-
-        assignments =
-            assignments.map(
-                assignment => {
-
-                    const data =
-                        stats[assignment.id] || {
-
-                            total: 0,
-
-                            pending: 0,
-
-                            graded: 0
-
-                        };
-
-
-                    return {
-
-                        ...assignment,
-
-                        submissionCount:
-                            data.total,
-
-                        pendingReviewCount:
-                            data.pending,
-
-                        gradedSubmissionCount:
-                            data.graded
-
-                    };
-
-                }
-            );
-
-
-    } catch (error) {
-
-        console.warn(
-            "⚠ Submission statistics unavailable:",
-            error
+                return { id: assignment.id, total: snapshot.size, pending, graded };
+            })
         );
-
-
-        assignments =
-            assignments.map(
-                assignment => ({
-
-                    ...assignment,
-
-                    submissionCount:
-                        Number(
-                            assignment.submissionCount ||
-                            0
-                        ),
-
-                    pendingReviewCount:
-                        0,
-
-                    gradedSubmissionCount:
-                        0
-
-                })
-            );
-
+        results.push(...batchResults);
     }
 
-}
+    const stats = new Map();
+    results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+            stats.set(result.value.id, result.value);
+        } else {
+            console.warn(
+                "Submission statistics unavailable for assignment:",
+                assignments[index]?.id,
+                result.reason
+            );
+        }
+    });
 
+    assignments = assignments.map(assignment => {
+        const data = stats.get(assignment.id);
+        return {
+            ...assignment,
+            submissionCount: data?.total ?? Number(assignment.submissionCount || 0),
+            pendingReviewCount: data?.pending ?? 0,
+            gradedSubmissionCount: data?.graded ?? 0
+        };
+    });
+}
 
 // ============================================================
 // STATS
@@ -512,24 +411,6 @@ function calculateStats() {
 
     const total =
         assignments.length;
-
-
-    const published =
-        assignments.filter(
-            assignment =>
-                getAssignmentStatus(
-                    assignment
-                ) === "published"
-        ).length;
-
-
-    const drafts =
-        assignments.filter(
-            assignment =>
-                getAssignmentStatus(
-                    assignment
-                ) === "draft"
-        ).length;
 
 
     const pendingReviews =
@@ -599,24 +480,13 @@ function getAssignmentStatus(assignment) {
         ).toLowerCase();
 
 
-    if (status === "published") {
+    if (["published", "pending", "active"].includes(status)) {
         return "published";
     }
 
-
-    if (status === "draft") {
-        return "draft";
+    if (["closed", "archived", "scheduled"].includes(status)) {
+        return status;
     }
-
-
-    // Legacy assignments created with
-    // the old "pending" status are treated
-    // as published.
-
-    if (status === "pending") {
-        return "published";
-    }
-
 
     return "draft";
 
@@ -628,256 +498,96 @@ function getAssignmentStatus(assignment) {
 // ============================================================
 
 function renderAssignments() {
-
-    const list =
-        $("assignmentList");
-
-    const empty =
-        $("assignmentEmpty");
-
-
+    const list = $("assignmentList");
+    const empty = $("assignmentEmpty");
     if (!list || !empty) return;
 
+    list.setAttribute("aria-busy", "false");
 
-    const search =
-        ($("assignmentSearch")?.value || "")
-            .trim()
-            .toLowerCase();
-
-
-    const filtered =
-        assignments.filter(
-            assignment => {
-
-                const status =
-                    getAssignmentStatus(
-                        assignment
-                    );
-
-
-                const matchesFilter =
-                    activeFilter === "all" ||
-                    status === activeFilter;
-
-
-                const title =
-                    String(
-                        assignment.title || ""
-                    ).toLowerCase();
-
-
-                const course =
-                    String(
-                        assignment.courseName ||
-                        assignment.courseTitle ||
-                        ""
-                    ).toLowerCase();
-
-
-                const matchesSearch =
-                    !search ||
-                    title.includes(search) ||
-                    course.includes(search);
-
-
-                return (
-                    matchesFilter &&
-                    matchesSearch
-                );
-
-            }
-        );
-
+    const search = ($("assignmentSearch")?.value || "").trim().toLowerCase();
+    const filtered = assignments.filter(assignment => {
+        const status = getAssignmentStatus(assignment);
+        const matchesFilter = activeFilter === "all" || status === activeFilter;
+        const searchable = [
+            assignment.title,
+            assignment.courseName,
+            assignment.courseTitle,
+            assignment.description,
+            assignment.instructions
+        ].map(value => String(value || "").toLowerCase()).join(" ");
+        return matchesFilter && searchable.includes(search);
+    });
 
     if (!filtered.length) {
-
         list.innerHTML = "";
+        empty.classList.remove("hidden");
 
-        empty.classList.remove(
-            "hidden"
-        );
+        const heading = empty.querySelector("h3");
+        const message = empty.querySelector("p");
+        const createButton = $("emptyCreateAssignmentBtn");
+
+        if (assignments.length) {
+            if (heading) heading.textContent = "No matching assignments";
+            if (message) message.textContent = "Try another search term or change the status filter.";
+            if (createButton) createButton.hidden = true;
+        } else {
+            if (heading) heading.textContent = "No assignments yet";
+            if (message) message.textContent = "Create your first assignment for students in one of your courses.";
+            if (createButton) createButton.hidden = false;
+        }
 
         refreshIcons();
-
         return;
-
     }
 
-
-    empty.classList.add(
-        "hidden"
-    );
-
-
-    list.innerHTML =
-        filtered
-            .map(
-                createAssignmentHTML
-            )
-            .join("");
-
-
+    empty.classList.add("hidden");
+    list.innerHTML = filtered.map(createAssignmentHTML).join("");
     refreshIcons();
-
-
-    list
-        .querySelectorAll(
-            "[data-assignment-id]"
-        )
-        .forEach(item => {
-
-            item.addEventListener(
-                "click",
-                () => {
-
-                    const id =
-                        item.dataset.assignmentId;
-
-
-                    window.location.href =
-                        `assignment.html?id=${encodeURIComponent(id)}`;
-
-                }
-            );
-
-        });
-
 }
-
 
 // ============================================================
 // ASSIGNMENT CARD
 // ============================================================
 
-function createAssignmentHTML(
-    assignment
-) {
-
-    const status =
-        getAssignmentStatus(
-            assignment
-        );
-
-
-    const title =
-        escapeHTML(
-            assignment.title ||
-            "Untitled Assignment"
-        );
-
-
-    const course =
-        escapeHTML(
-            assignment.courseName ||
-            assignment.courseTitle ||
-            "Course"
-        );
-
-
-    const submissions =
-        Number(
-            assignment.submissionCount || 0
-        );
-
-
-    const pending =
-        Number(
-            assignment.pendingReviewCount || 0
-        );
-
-
-    const dueDate =
-        formatDate(
-            assignment.dueDate
-        );
-
-
-    const statusLabel =
-        status === "published"
-            ? "Published"
-            : "Draft";
-
-
-    let submissionText =
-        `${submissions} submission${submissions === 1 ? "" : "s"}`;
-
-
-    if (pending > 0) {
-
-        submissionText +=
-            ` • ${pending} pending review`;
-
-    }
-
+function createAssignmentHTML(assignment) {
+    const status = getAssignmentStatus(assignment);
+    const title = escapeHTML(assignment.title || "Untitled Assignment");
+    const course = escapeHTML(assignment.courseName || assignment.courseTitle || "Course");
+    const submissions = Number(assignment.submissionCount || 0);
+    const pending = Number(assignment.pendingReviewCount || 0);
+    const dueDate = formatDate(assignment.dueDate);
+    const labels = {
+        published: "Published",
+        draft: "Draft",
+        closed: "Closed",
+        archived: "Archived",
+        scheduled: "Scheduled"
+    };
+    const statusLabel = labels[status] || "Draft";
+    const submissionText = `${submissions} submission${submissions === 1 ? "" : "s"}${pending ? ` · ${pending} pending review` : ""}`;
 
     return `
-
-        <div
-            class="assignment-item"
-            data-assignment-id="${escapeHTML(
-                assignment.id
-            )}"
-            style="cursor:pointer"
-        >
-
+        <article class="assignment-item">
             <div class="assignment-main">
-
-                <div class="assignment-icon">
-
+                <div class="assignment-icon" aria-hidden="true">
                     <i data-lucide="clipboard-list"></i>
-
                 </div>
-
-
                 <div class="assignment-info">
-
-                    <h3>
-                        ${title}
-                    </h3>
-
-
-                    <p>
-
-                        ${course}
-
-                        •
-                        
-                        ${submissionText}
-
-                        ${
-                            dueDate
-                                ? ` • Due ${dueDate}`
-                                : ""
-                        }
-
-                    </p>
-
+                    <h3>${title}</h3>
+                    <p class="assignment-course">${course}</p>
+                    <p class="assignment-summary">${submissionText}${dueDate ? ` · Due ${escapeHTML(dueDate)}` : ""}</p>
                 </div>
-
             </div>
-
-
             <div class="assignment-meta">
-
-                <span
-                    class="assignment-status ${status}"
-                >
-
-                    ${statusLabel}
-
-                </span>
-
-
-                <i data-lucide="chevron-right"></i>
-
+                <span class="assignment-status ${status}">${statusLabel}</span>
+                <a class="assignment-open" href="assignment.html?id=${encodeURIComponent(assignment.id)}" aria-label="Review submissions for ${title}">
+                    Review submissions
+                    <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                </a>
             </div>
-
-        </div>
-
+        </article>
     `;
-
 }
-
 
 // ============================================================
 // CREATE ASSIGNMENT

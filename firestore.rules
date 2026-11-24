@@ -220,6 +220,13 @@ service cloud.firestore {
                'profilePhoto',
                'photoURL',
                'phone',
+               'phoneNumber',
+               'location',
+               'headline',
+               'notifications',
+               'teaching',
+               'instructorStatus',
+               'instructorDisabledAt',
                'lastLogin',
                'updatedAt'
              ])
@@ -521,15 +528,9 @@ service cloud.firestore {
           && resource.data.instructorId == uid()
         );
 
+      // Trusted callable validates and reserves the instructor's balance.
       allow create:
-        if isInstructor()
-        && instructorPortalOpen()
-        && request.resource.data.instructorId == uid()
-        && request.resource.data.status == 'pending'
-        && request.resource.data.amount is number
-        && request.resource.data.amount > 0
-        && request.resource.data.method is string
-        && request.resource.data.account is string;
+        if false;
 
       allow update, delete:
         if isFounder();
@@ -718,8 +719,12 @@ service cloud.firestore {
         && (
           request.resource.data.get('type', '') != 'support'
           || (
-            isStudent()
-            && studentPortalOpen()
+            (
+              (isStudent() && studentPortalOpen()
+                && request.resource.data.get('reporterRole', '') == 'student')
+              || (isInstructor() && instructorPortalOpen()
+                && request.resource.data.get('reporterRole', '') == 'instructor')
+            )
             && request.resource.data.get('status', '') == 'pending'
             && request.resource.data.get('reportId', '') is string
             && request.resource.data.reportId.size() >= 12
@@ -808,7 +813,12 @@ service cloud.firestore {
             && getAfter(/databases/$(database)/documents/reports/$(reportId))
                  .data.get('status', '') in ['pending', 'reviewing', 'resolved']
             && request.resource.data.senderId == uid()
-            && request.resource.data.senderRole == 'student'
+            && (
+              (isStudent() && studentPortalOpen()
+                && request.resource.data.senderRole == 'student')
+              || (isInstructor() && instructorPortalOpen()
+                && request.resource.data.senderRole == 'instructor')
+            )
             && request.resource.data.message is string
             && request.resource.data.message.size() > 0
             && request.resource.data.message.size() <= 5000
@@ -879,6 +889,73 @@ service cloud.firestore {
 
       allow create, update, delete:
         if isFounder();
+    }
+
+
+    // ============================================================
+    // CALENDAR EVENTS
+    // ============================================================
+
+    match /calendarEvents/{eventId} {
+      allow get, list:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && (
+            resource.data.get('userId', '') == uid()
+            || resource.data.get('audience', '') in ['students', 'instructors', 'all']
+          )
+        )
+        || (
+          isStudent()
+          && studentPortalOpen()
+          && (
+            resource.data.get('userId', '') == uid()
+            || resource.data.get('audience', '') in ['students', 'all']
+          )
+        );
+
+      allow create:
+        if isInstructor()
+        && instructorPortalOpen()
+        && request.resource.data.userId == uid()
+        && request.resource.data.get('audience', '') in ['students', 'instructors', 'all', 'user', 'private']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.startAt is timestamp
+        && request.resource.data.endAt is timestamp
+        && request.resource.data.endAt > request.resource.data.startAt
+        && request.resource.data.get('description', '') is string
+        && request.resource.data.get('description', '').size() <= 1000
+        && request.resource.data.keys().hasOnly([
+          'title', 'description', 'type', 'startAt', 'endAt',
+          'courseId', 'courseName', 'meetingProvider', 'meetingUrl',
+          'userId', 'audience', 'createdAt'
+        ]);
+
+      allow update:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.userId == uid()
+          && request.resource.data.userId == uid()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'title', 'description', 'type', 'startAt', 'endAt',
+            'courseId', 'courseName', 'meetingProvider', 'meetingUrl',
+            'audience', 'updatedAt'
+          ])
+        );
+
+      allow delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.userId == uid()
+        );
     }
 
 
@@ -1034,6 +1111,7 @@ service cloud.firestore {
         || (
           isStudent()
           && studentPortalOpen()
+          && resource.data.get('status', 'published') in ['published', 'pending', 'active']
         )
         || (
           isInstructor()
@@ -1046,6 +1124,9 @@ service cloud.firestore {
           isInstructor()
           && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
+          && request.resource.data.courseId is string
+          && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
+          && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.instructorId == uid()
         );
 
       allow update:
@@ -1055,6 +1136,9 @@ service cloud.firestore {
           && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
+          && request.resource.data.courseId is string
+          && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
+          && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.instructorId == uid()
         );
 
       allow delete:
@@ -1217,11 +1301,64 @@ service cloud.firestore {
 
 
     // ============================================================
+    // QUIZ QUESTIONS — ANSWER KEYS ARE INSTRUCTOR-ONLY
+    // Students must receive sanitized question payloads from a trusted
+    // server endpoint; never expose correctAnswer through direct reads.
+    // ============================================================
+
+    match /quizQuestions/{questionId} {
+      allow get, list:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+        );
+
+      allow create:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && request.resource.data.instructorId == uid()
+          && request.resource.data.quizId is string
+          && exists(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId))
+          && get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.instructorId == uid()
+        );
+
+      allow update:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+          && request.resource.data.instructorId == uid()
+          && request.resource.data.quizId == resource.data.quizId
+          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
+          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
+        );
+
+      allow delete:
+        if staff()
+        || (
+          isInstructor()
+          && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
+          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
+        );
+    }
+
+
+    // ============================================================
     // SUBMISSIONS
     // ============================================================
 
     match /submissions/{submissionId} {
 
+      // Instructors access submissions only through an assignment they own.
+      // The assignmentId equality in instructor queries lets Firestore prove
+      // that every returned submission belongs to this instructor's assignment.
       allow get, list:
         if staff()
         || (
@@ -1232,13 +1369,29 @@ service cloud.firestore {
         || (
           isInstructor()
           && instructorPortalOpen()
-          && resource.data.instructorId == uid()
+          && resource.data.assignmentId is string
+          && exists(/databases/$(database)/documents/assignments/$(resource.data.assignmentId))
+          && get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.instructorId == uid()
         );
 
+      // Students may submit only against an existing published assignment.
+      // Grade fields and instructor ownership fields cannot be supplied by clients.
       allow create:
         if isStudent()
         && studentPortalOpen()
-        && request.resource.data.studentId == uid();
+        && request.resource.data.studentId == uid()
+        && request.resource.data.assignmentId is string
+        && exists(/databases/$(database)/documents/assignments/$(request.resource.data.assignmentId))
+        && get(/databases/$(database)/documents/assignments/$(request.resource.data.assignmentId)).data.get('status', 'published') in ['published', 'pending']
+        && request.resource.data.status in ['submitted', 'resubmitted']
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 20000
+        && request.resource.data.keys().hasOnly([
+          'assignmentId', 'userId', 'studentId', 'studentName',
+          'studentEmail', 'content', 'notes', 'status',
+          'submittedAt', 'updatedAt'
+        ]);
 
       allow update:
         if staff()
@@ -1247,11 +1400,39 @@ service cloud.firestore {
           && studentPortalOpen()
           && resource.data.studentId == uid()
           && request.resource.data.studentId == uid()
+          && request.resource.data.assignmentId == resource.data.assignmentId
+          && !(resource.data.get('status', '') in ['graded', 'reviewed', 'returned'])
+          && request.resource.data.status in ['submitted', 'resubmitted']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'content', 'notes', 'status', 'submittedAt', 'updatedAt'
+          ])
+          && request.resource.data.content is string
+          && request.resource.data.content.size() > 0
+          && request.resource.data.content.size() <= 20000
         )
         || (
           isInstructor()
           && instructorPortalOpen()
-          && resource.data.instructorId == uid()
+          && resource.data.assignmentId is string
+          && exists(/databases/$(database)/documents/assignments/$(resource.data.assignmentId))
+          && get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.instructorId == uid()
+          && request.resource.data.assignmentId == resource.data.assignmentId
+          && request.resource.data.studentId == resource.data.studentId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'score', 'grade', 'maxScore', 'feedback', 'instructorFeedback',
+            'status', 'gradedAt', 'reviewedAt', 'updatedAt'
+          ])
+          && request.resource.data.status in ['graded', 'reviewed']
+          && request.resource.data.score is number
+          && request.resource.data.grade is number
+          && request.resource.data.maxScore is number
+          && request.resource.data.maxScore == get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.get('maxScore', 100)
+          && request.resource.data.score >= 0
+          && request.resource.data.score <= request.resource.data.maxScore
+          && request.resource.data.grade == request.resource.data.score
+          && request.resource.data.feedback is string
+          && request.resource.data.feedback.size() <= 5000
+          && request.resource.data.instructorFeedback == request.resource.data.feedback
         );
 
       allow delete:
@@ -1277,24 +1458,56 @@ service cloud.firestore {
           && resource.data.instructorId == uid()
         );
 
+      // Student attempts are created once. Their score fields are still
+      // client-generated in the current player and require server grading
+      // before they can be treated as authoritative.
       allow create:
         if isStudent()
         && studentPortalOpen()
-        && request.resource.data.studentId == uid();
+        && request.resource.data.studentId == uid()
+        && request.resource.data.quizId is string
+        && exists(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId))
+        && get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.get('status', 'draft') in ['published', 'active']
+        && request.resource.data.instructorId == get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.instructorId
+        && request.resource.data.keys().hasOnly([
+          'studentId', 'quizId', 'courseId', 'instructorId',
+          'attemptNumber', 'answers', 'score', 'correct', 'total',
+          'passed', 'completed', 'status', 'xpEarned', 'submittedAt'
+        ]);
 
+      // Student attempts cannot be edited after creation. Only the owning
+      // instructor can update review and grade fields.
       allow update:
         if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && resource.data.studentId == uid()
-          && request.resource.data.studentId == uid()
-        )
         || (
           isInstructor()
           && instructorPortalOpen()
           && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
+          && resource.data.quizId is string
+          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
+          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
+          && request.resource.data.instructorId == resource.data.instructorId
+          && request.resource.data.quizId == resource.data.quizId
+          && request.resource.data.studentId == resource.data.studentId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'answers', 'score', 'totalMarks', 'percentage', 'status',
+            'result', 'instructorFeedback', 'gradedBy', 'gradedAt',
+            'reviewedAt', 'updatedAt'
+          ])
+          && request.resource.data.status == 'graded'
+          && request.resource.data.answers is list
+          && request.resource.data.score is number
+          && request.resource.data.totalMarks is number
+          && request.resource.data.totalMarks > 0
+          && request.resource.data.score >= 0
+          && request.resource.data.score <= request.resource.data.totalMarks
+          && request.resource.data.percentage is number
+          && request.resource.data.percentage >= 0
+          && request.resource.data.percentage <= 100
+          && request.resource.data.result in ['passed', 'failed']
+          && request.resource.data.instructorFeedback is string
+          && request.resource.data.instructorFeedback.size() <= 5000
+          && request.resource.data.gradedBy == uid()
         );
 
       allow delete:

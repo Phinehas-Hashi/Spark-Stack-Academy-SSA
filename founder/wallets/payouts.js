@@ -135,18 +135,25 @@ async function action(id, type) {
 
   if (status === "paid") {
     await runTransaction(db, async tx => {
-      const [requestSnap, treasurySnap] = await Promise.all([tx.get(ref), tx.get(treasuryRef)]);
+      const walletRef = doc(db, "instructorWallets", row.instructorId);
+      const [requestSnap, treasurySnap, walletSnap] = await Promise.all([tx.get(ref), tx.get(treasuryRef), tx.get(walletRef)]);
       if (!requestSnap.exists()) throw new Error("Payout request no longer exists.");
       if (!treasurySnap.exists()) throw new Error("Treasury is not initialized.");
+      if (!walletSnap.exists()) throw new Error("Instructor wallet is missing. Reconcile the wallet before paying this request.");
 
       const latest = requestSnap.data();
       if (String(latest.status || "pending").toLowerCase() !== "approved") throw new Error("This payout is no longer approved for settlement.");
+      if (latest.instructorId !== row.instructorId) throw new Error("Payout owner changed. Refresh and review again.");
 
       const treasuryBalance = Number(treasurySnap.data().balance || 0);
+      const walletBalance = Number(walletSnap.data().balance || 0);
+      if (String(walletSnap.data().status || "active").toLowerCase() !== "active") throw new Error("This instructor wallet is restricted and cannot be paid.");
       if (treasuryBalance < amount) throw new Error(`Insufficient treasury funds. Available: ${money(treasuryBalance)}.`);
+      if (walletBalance < amount) throw new Error(`Insufficient instructor wallet balance. Available: ${money(walletBalance)}.`);
 
-      tx.update(ref, { status:"paid", paidBy:me.uid, paidAt:serverTimestamp(), updatedAt:serverTimestamp() });
+      tx.update(ref, { status:"paid", walletBalanceDebited:true, paidBy:me.uid, paidAt:serverTimestamp(), updatedAt:serverTimestamp() });
       tx.update(treasuryRef, { balance:treasuryBalance - amount, updatedAt:serverTimestamp() });
+      tx.update(walletRef, { balance:walletBalance - amount, totalPaid:Number(walletSnap.data().totalPaid||0)+amount, updatedAt:serverTimestamp() });
     });
   } else {
     await updateDoc(ref, {

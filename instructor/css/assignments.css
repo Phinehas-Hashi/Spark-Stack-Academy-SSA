@@ -1,468 +1,70 @@
 /* ============================================================
-   SPARK STACK ACADEMY
-   INSTRUCTOR ASSIGNMENTS
-   ============================================================ */
-
-.assignments-page {
-    padding: 32px;
-    max-width: 1500px;
-    margin: 0 auto;
-}
-
-/* ============================================================
-   PAGE HEADER
-   ============================================================ */
-
-.page-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 28px;
-}
-
-.page-eyebrow,
-.card-eyebrow {
-    display: block;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.4px;
-    text-transform: uppercase;
-    color: #2979ff;
-    margin-bottom: 7px;
-}
-
-.page-header h1 {
-    margin: 0;
-    font-size: 32px;
-    font-weight: 800;
-    color: #081c3a;
-}
-
-.page-header p {
-    margin: 8px 0 0;
-    color: #718096;
-    font-size: 14px;
-}
-
-/* ============================================================
-   BUTTON
-   ============================================================ */
-
-.primary-btn,
-.empty-action {
-    border: 0;
-    border-radius: 12px;
-    padding: 12px 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: .2s ease;
-}
-
-.primary-btn {
-    background: #081c3a;
-    color: #fff;
-    box-shadow: 0 8px 20px rgba(8, 28, 58, .15);
-}
-
-.primary-btn:hover {
-    transform: translateY(-2px);
-}
-
-.primary-btn svg,
-.empty-action svg {
-    width: 17px;
-    height: 17px;
-}
-
-/* ============================================================
-   STATS
-   ============================================================ */
-
-.assignment-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    margin-bottom: 26px;
-}
-
-.assignment-stat {
-    background: #fff;
-    border: 1px solid #e9eef5;
-    border-radius: 16px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    min-height: 88px;
-    box-shadow: 0 5px 20px rgba(8, 28, 58, .04);
-}
-
-.stat-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 13px;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-}
-
-.stat-icon svg {
-    width: 21px;
-    height: 21px;
-}
-
-.stat-icon.blue {
-    background: #eaf2ff;
-    color: #2979ff;
-}
-
-.stat-icon.gold {
-    background: #fff7df;
-    color: #d99b00;
-}
-
-.stat-icon.green {
-    background: #eafaf1;
-    color: #20a464;
-}
-
-.stat-icon.purple {
-    background: #f2edff;
-    color: #7654d8;
-}
-
-.assignment-stat span {
-    display: block;
-    color: #7b8798;
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.assignment-stat strong {
-    color: #081c3a;
-    font-size: 25px;
-    font-weight: 800;
-}
-
-/* ============================================================
-   MAIN CARD
-   ============================================================ */
-
-.assignments-card {
-    background: #fff;
-    border: 1px solid #e9eef5;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 5px 25px rgba(8, 28, 58, .04);
-}
-
-.assignments-toolbar {
-    padding: 23px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    border-bottom: 1px solid #edf1f6;
-}
-
-.assignments-toolbar h2 {
-    margin: 0;
-    color: #081c3a;
-    font-size: 19px;
-    font-weight: 800;
-}
-
-.assignment-search {
-    width: 280px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 0 13px;
-    background: #f7f9fc;
-    border: 1px solid #e6ebf2;
-    border-radius: 11px;
-}
-
-.assignment-search svg {
-    width: 17px;
-    color: #8995a6;
-    flex-shrink: 0;
-}
-
-.assignment-search input {
-    width: 100%;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    font-family: inherit;
-    font-size: 12px;
-    color: #081c3a;
-}
-
-.assignment-search input::placeholder {
-    color: #9aa5b4;
-}
-
-/* ============================================================
-   FILTERS
-   ============================================================ */
-
-.assignment-filters {
-    display: flex;
-    gap: 8px;
-    padding: 16px 24px;
-    border-bottom: 1px solid #edf1f6;
-}
-
-.assignment-filter {
-    border: 0;
-    background: transparent;
-    color: #778396;
-    padding: 8px 15px;
-    border-radius: 9px;
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: .2s ease;
-}
-
-.assignment-filter:hover {
-    background: #f4f7fb;
-    color: #081c3a;
-}
-
-.assignment-filter.active {
-    background: #081c3a;
-    color: #fff;
-}
-
-/* ============================================================
-   LIST
-   ============================================================ */
-
-.assignment-list {
-    padding: 8px 24px 20px;
-}
-
-.assignment-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 17px 5px;
-    border-bottom: 1px solid #edf1f6;
-}
-
-.assignment-item:last-child {
-    border-bottom: 0;
-}
-
-.assignment-icon {
-    width: 43px;
-    height: 43px;
-    border-radius: 11px;
-    display: grid;
-    place-items: center;
-    background: #edf4ff;
-    color: #2979ff;
-    flex-shrink: 0;
-}
-
-.assignment-icon svg {
-    width: 19px;
-}
-
-.assignment-content {
-    min-width: 0;
-    flex: 1;
-}
-
-.assignment-content h3 {
-    margin: 0 0 4px;
-    color: #081c3a;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.assignment-content p {
-    margin: 0;
-    color: #8792a3;
-    font-size: 11px;
-}
-
-.assignment-meta {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-}
-
-.assignment-meta-item {
-    color: #758194;
-    font-size: 11px;
-    white-space: nowrap;
-}
-
-.assignment-status {
-    padding: 6px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.assignment-status.pending {
-    background: #fff6dd;
-    color: #b47a00;
-}
-
-.assignment-status.graded {
-    background: #e9f9f0;
-    color: #16834c;
-}
-
-/* ============================================================
-   EMPTY / LOADING
-   ============================================================ */
-
-.assignment-loading,
-.assignment-empty,
-.empty-state {
-    text-align: center;
-    padding: 55px 20px;
-}
-
-.assignment-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    color: #8490a1;
-    font-size: 13px;
-}
-
-.loading-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #dfe7f1;
-    border-top-color: #2979ff;
-    border-radius: 50%;
-    animation: assignmentSpin .7s linear infinite;
-}
-
-@keyframes assignmentSpin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.assignment-empty.hidden {
-    display: none;
-}
-
-.empty-icon {
-    width: 54px;
-    height: 54px;
-    margin: 0 auto 14px;
-    display: grid;
-    place-items: center;
-    border-radius: 15px;
-    background: #f0f4fa;
-    color: #7d8a9e;
-}
-
-.empty-icon svg {
-    width: 24px;
-}
-
-.assignment-empty h3 {
-    margin: 0 0 7px;
-    color: #081c3a;
-    font-size: 16px;
-}
-
-.assignment-empty p {
-    margin: 0 0 18px;
-    color: #8994a5;
-    font-size: 12px;
-}
-
-.empty-action {
-    background: #2979ff;
-    color: #fff;
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-
-@media (max-width: 1000px) {
-
-    .assignment-stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-}
-
-@media (max-width: 700px) {
-
-    .assignments-page {
-        padding: 20px 15px;
-    }
-
-    .page-header {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .page-header h1 {
-        font-size: 26px;
-    }
-
-    .primary-btn {
-        width: 100%;
-    }
-
-    .assignment-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .assignments-toolbar {
-        align-items: stretch;
-        flex-direction: column;
-        padding: 18px;
-    }
-
-    .assignment-search {
-        width: auto;
-    }
-
-    .assignment-filters {
-        padding: 12px 18px;
-        overflow-x: auto;
-    }
-
-    .assignment-list {
-        padding: 5px 15px 15px;
-    }
-
-    .assignment-item {
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-
-    .assignment-meta {
-        width: 100%;
-        padding-left: 58px;
-        flex-wrap: wrap;
-    }
-
-}
+   SPARK STACK ACADEMY — INSTRUCTOR ASSIGNMENTS
+   Navy foundation with violet, cyan and gold accents
+============================================================ */
+.assignments-page{width:min(100%,1500px);margin:0 auto;padding:28px clamp(15px,3vw,32px) 42px}
+.assignments-page .page-header{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:22px;padding:27px 29px;border-radius:22px;background:linear-gradient(130deg,#081c3a,#123d70);color:#fff;box-shadow:0 16px 38px rgba(8,28,58,.15)}
+.assignments-page .page-header:after{content:"";position:absolute;width:210px;height:210px;right:-65px;top:-105px;border-radius:50%;background:rgba(118,88,237,.18);pointer-events:none}
+.assignments-page .page-header:before{content:"";position:absolute;width:115px;height:115px;right:150px;bottom:-82px;border-radius:50%;background:rgba(38,184,202,.12);pointer-events:none}
+.assignments-page .page-header>div,.assignments-page .page-header>button{position:relative;z-index:1}
+.assignments-page .page-eyebrow,.assignments-page .card-eyebrow{display:block;margin-bottom:7px;color:#76dce6;font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.assignments-page .page-header h1{margin:0;color:#fff;font-size:clamp(26px,3vw,34px);font-weight:800;letter-spacing:-.03em}
+.assignments-page .page-header p{margin:8px 0 0;color:rgba(255,255,255,.74);font-size:13px;line-height:1.6}
+.assignments-page .primary-btn,.assignments-page .empty-action{min-height:45px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:linear-gradient(135deg,#7658ed,#5941c8);color:#fff;box-shadow:0 8px 20px rgba(60,42,150,.25);font:inherit;font-size:12px;font-weight:750;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+.assignments-page .primary-btn:hover,.assignments-page .empty-action:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(60,42,150,.3)}
+.assignments-page .primary-btn svg,.assignments-page .empty-action svg{width:17px;height:17px}
+.assignments-page .assignment-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
+.assignments-page .assignment-stat{min-width:0;min-height:92px;display:flex;align-items:center;gap:14px;padding:17px;border:1px solid rgba(8,28,58,.08);border-radius:17px;background:#fff;box-shadow:0 8px 24px rgba(8,28,58,.045);transition:transform .18s ease,box-shadow .18s ease}
+.assignments-page .assignment-stat:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(8,28,58,.075)}
+.assignments-page .stat-icon{width:43px;height:43px;flex:0 0 43px;display:grid;place-items:center;border-radius:13px}
+.assignments-page .stat-icon svg{width:20px;height:20px}
+.assignments-page .stat-icon.blue{background:#e9f8fa;color:#1599aa}
+.assignments-page .stat-icon.gold{background:#fff7df;color:#c58b08}
+.assignments-page .stat-icon.green{background:#eaf8f1;color:#15945d}
+.assignments-page .stat-icon.purple{background:#f0ecff;color:#7658d9}
+.assignments-page .assignment-stat span{display:block;margin-bottom:5px;color:#718096;font-size:11px;font-weight:650}
+.assignments-page .assignment-stat strong{color:#081c3a;font-size:25px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.assignments-page .assignments-card{overflow:hidden;border:1px solid rgba(8,28,58,.08);border-radius:20px;background:#fff;box-shadow:0 10px 30px rgba(8,28,58,.05)}
+.assignments-page .assignments-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px;border-bottom:1px solid #edf1f6}
+.assignments-page .assignments-toolbar .card-eyebrow{color:#7658d9}
+.assignments-page .assignments-toolbar h2{margin:0;color:#081c3a;font-size:18px;font-weight:800}
+.assignments-page .assignment-search{width:min(100%,320px);min-height:43px;display:flex;align-items:center;gap:10px;padding:0 13px;border:1px solid #e2e8f0;border-radius:12px;background:#f7f9fc}
+.assignments-page .assignment-search:focus-within{border-color:#7a68dc;box-shadow:0 0 0 3px rgba(118,88,237,.09)}
+.assignments-page .assignment-search svg{width:17px;flex:0 0 auto;color:#8995a8}
+.assignments-page .assignment-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#081c3a;font:inherit;font-size:12px}
+.assignments-page .assignment-search input::placeholder{color:#9aa5b4}
+.assignments-page .assignment-filters{display:flex;gap:7px;overflow-x:auto;padding:13px 24px;border-bottom:1px solid #edf1f6;scrollbar-width:thin}
+.assignments-page .assignment-filter{flex:0 0 auto;min-height:35px;padding:0 14px;border:1px solid transparent;border-radius:10px;background:transparent;color:#718096;font:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:.18s ease}
+.assignments-page .assignment-filter:hover{background:#f5f3ff;color:#5e49bd}
+.assignments-page .assignment-filter.active{border-color:#e3dcff;background:#f0ecff;color:#654bc9}
+.assignments-page .assignment-list{padding:5px 22px 15px}
+.assignments-page .assignment-item{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 5px;border-bottom:1px solid #edf1f6}
+.assignments-page .assignment-item:last-child{border-bottom:0}
+.assignments-page .assignment-main{min-width:0;flex:1;display:flex;align-items:center;gap:13px}
+.assignments-page .assignment-icon{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border:1px solid #e4e0ff;border-radius:13px;background:linear-gradient(145deg,#effbfc,#f2edff);color:#6853ce}
+.assignments-page .assignment-icon svg{width:19px;height:19px}
+.assignments-page .assignment-info{min-width:0}
+.assignments-page .assignment-info h3{overflow:hidden;margin:0 0 4px;color:#102a4c;font-size:13px;font-weight:750;text-overflow:ellipsis;white-space:nowrap}
+.assignments-page .assignment-info p{overflow:hidden;margin:0;color:#758297;font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+.assignments-page .assignment-info .assignment-summary{margin-top:4px;color:#929caf;font-size:10px}
+.assignments-page .assignment-meta{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:0 0 auto}
+.assignments-page .assignment-status{display:inline-flex;align-items:center;padding:6px 10px;border:1px solid transparent;border-radius:999px;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.assignments-page .assignment-status.published{border-color:#c9eef1;background:#e9f8fa;color:#137f8c}
+.assignments-page .assignment-status.draft{border-color:#f2e3b6;background:#fff8e4;color:#a87500}
+.assignments-page .assignment-status.closed,.assignments-page .assignment-status.archived{border-color:#e2e8f0;background:#f3f5f8;color:#64748b}
+.assignments-page .assignment-status.scheduled{border-color:#e3dcff;background:#f2efff;color:#7057ce}
+.assignments-page .assignment-open{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #e3dcff;border-radius:10px;background:#f5f2ff;color:#634cc5;font-size:10px;font-weight:750;text-decoration:none;white-space:nowrap}
+.assignments-page .assignment-open:hover{background:#ebe5ff;color:#4936a7}
+.assignments-page .assignment-open svg{width:14px;height:14px}
+.assignments-page .assignment-loading,.assignments-page .assignment-empty{padding:48px 18px;text-align:center;color:#7b8797;font-size:12px}
+.assignments-page .loading-spinner{width:21px;height:21px;margin:0 auto 10px;border:2px solid #e2e8f0;border-top-color:#26b8ca;border-radius:50%;animation:assignmentSpin .7s linear infinite}
+@keyframes assignmentSpin{to{transform:rotate(360deg)}}
+.assignments-page .assignment-empty.hidden{display:none}
+.assignments-page .empty-icon{width:52px;height:52px;display:grid;place-items:center;margin:0 auto 13px;border:1px solid #e3dcff;border-radius:15px;background:#f2efff;color:#7057ce}
+.assignments-page .empty-icon svg{width:23px;height:23px}
+.assignments-page .assignment-empty h3{margin:0 0 7px;color:#102a4c;font-size:15px}
+.assignments-page .assignment-empty p{margin:0 0 17px;color:#8792a3;font-size:11px}
+@media(max-width:1000px){.assignments-page .assignment-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.assignments-page{padding:19px 14px 32px}.assignments-page .page-header{align-items:stretch;flex-direction:column;padding:22px 20px}.assignments-page .page-header h1{font-size:27px}.assignments-page .primary-btn{width:100%}.assignments-page .assignments-toolbar{align-items:stretch;flex-direction:column;padding:18px}.assignments-page .assignment-search{width:auto}.assignments-page .assignment-filters{padding:12px 17px}.assignments-page .assignment-list{padding:4px 15px 12px}.assignments-page .assignment-item{align-items:flex-start;flex-direction:column;gap:12px}.assignments-page .assignment-main{width:100%}.assignments-page .assignment-meta{width:100%;justify-content:space-between;padding-left:57px}}
+@media(max-width:390px){.assignments-page .assignment-stats{gap:9px}.assignments-page .assignment-stat{min-height:80px;gap:9px;padding:12px}.assignments-page .stat-icon{width:36px;height:36px;flex-basis:36px}.assignments-page .assignment-stat span{font-size:10px}.assignments-page .assignment-stat strong{font-size:21px}.assignments-page .assignment-meta{padding-left:0}}
+@media(prefers-reduced-motion:reduce){.assignments-page *,.assignments-page *:before,.assignments-page *:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}

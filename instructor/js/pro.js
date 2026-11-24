@@ -121,18 +121,25 @@ function updatePriceUI() {
     const button =
         $("upgradeProBtn");
 
+    const notice = $("proPaymentNotice");
+    if (notice) {
+        notice.hidden = Boolean(BACKEND_URL);
+        notice.textContent = BACKEND_URL
+            ? ""
+            : "Online checkout is not configured yet. Your plan and current status remain visible; contact Spark Support if you need help with an existing payment.";
+    }
+
     if (button && !button.disabled) {
 
-        button.innerHTML = `
-
-            <i data-lucide="zap"></i>
-
-            Upgrade to Pro — ${formatMoney(
-                premiumPrice
-            )}
-
-        `;
-
+        if (!BACKEND_URL) {
+            button.disabled = true;
+            button.innerHTML = '<i data-lucide="clock"></i> Checkout unavailable';
+        } else {
+            button.innerHTML = `
+                <i data-lucide="zap"></i>
+                Upgrade to Pro — ${formatMoney(premiumPrice)}
+            `;
+        }
         refreshIcons();
 
     }
@@ -371,7 +378,7 @@ async function verifyPayment() {
         );
 
 
-    if (!reference || !currentUser) {
+    if (!BACKEND_URL || !reference || !currentUser) {
         return;
     }
 

@@ -1,298 +1,40 @@
 /* ============================================================
-   SPARK STACK ACADEMY
-   CREATE ASSIGNMENT
-   ============================================================ */
-
-.create-assignment-page {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 32px;
-}
-
-
-/* ============================================================
-   PAGE HEADER
-   ============================================================ */
-
-.page-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 30px;
-}
-
-.page-eyebrow,
-.form-card-header > span {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    opacity: .6;
-    margin-bottom: 7px;
-}
-
-.page-header h1 {
-    margin: 0;
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: -.6px;
-}
-
-.page-header p {
-    margin: 7px 0 0;
-    font-size: 14px;
-    opacity: .65;
-}
-
-
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-
-.primary-btn,
-.secondary-btn {
-    min-height: 46px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    padding: 0 18px;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-    transition: .2s ease;
-    border: 1px solid transparent;
-}
-
-.primary-btn {
-    color: #fff;
-    background: #081c3a;
-    border-color: #081c3a;
-}
-
-.primary-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 25px rgba(8, 28, 58, .18);
-}
-
-.primary-btn:disabled {
-    opacity: .6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.secondary-btn {
-    color: #081c3a;
-    background: #fff;
-    border-color: #e5e7eb;
-}
-
-.secondary-btn:hover {
-    background: #f8fafc;
-    border-color: #d1d5db;
-}
-
-
-/* ============================================================
-   FORM CARD
-   ============================================================ */
-
-.form-card {
-    background: #fff;
-    border: 1px solid #e8ebf0;
-    border-radius: 20px;
-    padding: 28px;
-    box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
-}
-
-.form-card-header {
-    padding-bottom: 22px;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #edf0f4;
-}
-
-.form-card-header h2 {
-    margin: 0;
-    font-size: 19px;
-    font-weight: 750;
-}
-
-
-/* ============================================================
-   FORM GRID
-   ============================================================ */
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group.full {
-    grid-column: 1 / -1;
-}
-
-.form-group label {
-    font-size: 13px;
-    font-weight: 700;
-    color: #172033;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    box-sizing: border-box;
-    border: 1px solid #dfe4eb;
-    border-radius: 12px;
-    background: #fbfcfe;
-    color: #172033;
-    padding: 13px 14px;
-    font-family: inherit;
-    font-size: 13px;
-    outline: none;
-    transition: .2s ease;
-}
-
-.form-group input,
-.form-group select {
-    height: 48px;
-}
-
-.form-group textarea {
-    min-height: 150px;
-    resize: vertical;
-    line-height: 1.6;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    background: #fff;
-    border-color: #2979ff;
-    box-shadow: 0 0 0 3px rgba(41, 121, 255, .1);
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    color: #9aa3b2;
-}
-
-
-/* ============================================================
-   ACTIONS
-   ============================================================ */
-
-.form-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 22px;
-}
-
-
-/* ============================================================
-   MESSAGE
-   ============================================================ */
-
-.form-message {
-    margin-top: 18px;
-    padding: 13px 16px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.form-message.success {
-    background: #ecfdf3;
-    color: #087443;
-    border: 1px solid #b7ebcc;
-}
-
-.form-message.error {
-    background: #fff1f2;
-    color: #be123c;
-    border: 1px solid #fecdd3;
-}
-
-
-/* ============================================================
-   LOADING
-   ============================================================ */
-
-.loading-spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid currentColor;
-    border-right-color: transparent;
-    border-radius: 50%;
-    display: inline-block;
-    animation: assignmentSpin .7s linear infinite;
-}
-
-@keyframes assignmentSpin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
-@media (max-width: 700px) {
-
-    .create-assignment-page {
-        padding: 20px 15px;
-    }
-
-    .page-header {
-        align-items: stretch;
-        flex-direction: column;
-        margin-bottom: 22px;
-    }
-
-    .page-header h1 {
-        font-size: 25px;
-    }
-
-    .page-header .secondary-btn {
-        width: 100%;
-    }
-
-    .form-card {
-        padding: 20px 16px;
-        border-radius: 16px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    .form-group.full {
-        grid-column: auto;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse;
-    }
-
-    .form-actions > * {
-        width: 100%;
-    }
-
-}
+   SPARK STACK ACADEMY — CREATE ASSIGNMENT
+   Instructor signature: navy, violet, cyan and gold
+============================================================ */
+.create-assignment-page{width:min(100%,1120px);margin:0 auto;padding:28px clamp(15px,3vw,32px) 44px;color:#102a4c}
+.create-assignment-page .page-header{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:22px;padding:26px 28px;border-radius:22px;background:linear-gradient(130deg,#081c3a,#123d70);color:#fff;box-shadow:0 16px 38px rgba(8,28,58,.14)}
+.create-assignment-page .page-header:after{content:"";position:absolute;width:210px;height:210px;right:-65px;top:-110px;border-radius:50%;background:rgba(118,88,237,.2);pointer-events:none}
+.create-assignment-page .page-header>div,.create-assignment-page .page-header>a{position:relative;z-index:1}
+.create-assignment-page .page-eyebrow{display:block;margin-bottom:7px;color:#76dce6;font-size:10px;font-weight:800;letter-spacing:.16em}
+.create-assignment-page .page-header h1{margin:0;color:#fff;font-size:clamp(26px,3vw,34px);font-weight:800;letter-spacing:-.035em}
+.create-assignment-page .page-header p{margin:8px 0 0;color:rgba(255,255,255,.76);font-size:13px;line-height:1.6}
+.create-assignment-page .primary-btn,.create-assignment-page .secondary-btn{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:0 18px;border:1px solid transparent;border-radius:12px;font:inherit;font-size:12px;font-weight:750;text-decoration:none;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.create-assignment-page .primary-btn{border-color:rgba(255,255,255,.15);background:linear-gradient(135deg,#7658ed,#5941c8);color:#fff;box-shadow:0 8px 20px rgba(60,42,150,.2)}
+.create-assignment-page .primary-btn:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(60,42,150,.28)}
+.create-assignment-page .primary-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.create-assignment-page .secondary-btn{border-color:#e1e7ef;background:#fff;color:#17365d}
+.create-assignment-page .secondary-btn:hover{border-color:#c9c0f3;background:#f7f5ff}
+.create-assignment-page .form-card{margin-bottom:16px;padding:26px;border:1px solid rgba(8,28,58,.08);border-radius:19px;background:#fff;box-shadow:0 10px 30px rgba(8,28,58,.045)}
+.create-assignment-page .form-card-header{padding-bottom:19px;margin-bottom:22px;border-bottom:1px solid #edf1f6}
+.create-assignment-page .form-card-header>span{display:block;margin-bottom:6px;color:#7658d9;font-size:10px;font-weight:800;letter-spacing:.15em}
+.create-assignment-page .form-card-header h2{margin:0;color:#102a4c;font-size:19px;font-weight:800}
+.create-assignment-page .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.create-assignment-page .form-group{min-width:0;display:flex;flex-direction:column;gap:8px}
+.create-assignment-page .form-group.full{grid-column:1/-1}
+.create-assignment-page .form-group label{color:#183453;font-size:12px;font-weight:750}
+.create-assignment-page .form-group input,.create-assignment-page .form-group select,.create-assignment-page .form-group textarea{width:100%;box-sizing:border-box;border:1px solid #dfe6ef;border-radius:12px;background:#f8fafd;color:#102a4c;padding:13px 14px;font:inherit;font-size:13px;outline:none;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.create-assignment-page .form-group input,.create-assignment-page .form-group select{min-height:48px}
+.create-assignment-page .form-group textarea{min-height:155px;resize:vertical;line-height:1.65}
+.create-assignment-page .form-group input:focus,.create-assignment-page .form-group select:focus,.create-assignment-page .form-group textarea:focus{border-color:#7968dc;background:#fff;box-shadow:0 0 0 3px rgba(118,88,237,.1)}
+.create-assignment-page .form-group input::placeholder,.create-assignment-page .form-group textarea::placeholder{color:#9aa5b5}
+.create-assignment-page .field-help{color:#7d8ba0;font-size:11px;line-height:1.5}
+.create-assignment-page .form-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:20px}
+.create-assignment-page .form-message{margin-top:17px;padding:13px 15px;border:1px solid transparent;border-radius:12px;font-size:12px;font-weight:650;line-height:1.5}
+.create-assignment-page .form-message[hidden]{display:none}
+.create-assignment-page .form-message.success{border-color:#bde8d1;background:#effaf4;color:#087443}
+.create-assignment-page .form-message.error{border-color:#f6c9d0;background:#fff3f4;color:#a51f3d}
+.create-assignment-page .loading-spinner{width:16px;height:16px;display:inline-block;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:createAssignmentSpin .7s linear infinite}
+@keyframes createAssignmentSpin{to{transform:rotate(360deg)}}
+@media(max-width:700px){.create-assignment-page{padding:18px 14px 32px}.create-assignment-page .page-header{align-items:stretch;flex-direction:column;padding:22px 19px}.create-assignment-page .page-header h1{font-size:27px}.create-assignment-page .page-header .secondary-btn{width:100%}.create-assignment-page .form-card{padding:21px 16px;border-radius:16px}.create-assignment-page .form-grid{grid-template-columns:1fr;gap:17px}.create-assignment-page .form-group.full{grid-column:auto}.create-assignment-page .form-actions{align-items:stretch;flex-direction:column-reverse}.create-assignment-page .form-actions>*{width:100%}}
+@media(prefers-reduced-motion:reduce){.create-assignment-page *,.create-assignment-page *:before,.create-assignment-page *:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}

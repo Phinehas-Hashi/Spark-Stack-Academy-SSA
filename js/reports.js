@@ -25,7 +25,7 @@ export async function submitReport({
     const profile = await getDoc(doc(db, "users", user.uid));
     if (profile.exists()) {
       reporterRole = profile.data().role || reporterRole;
-      reporterName = profile.data().name || profile.data().fullName || reporterName;
+      reporterName = profile.data().displayName || profile.data().name || profile.data().fullName || reporterName;
     }
   } catch (error) {
     console.warn("Support profile details unavailable:", error);
@@ -41,7 +41,7 @@ export async function submitReport({
     priority: ["low", "medium", "high", "critical"].includes(priority) ? priority : "medium",
     status: "pending",
     reporterId: user.uid,
-    reporterName: reporterName || "Student",
+    reporterName: reporterName || (String(reporterRole).toLowerCase() === "instructor" ? "Instructor" : "Student"),
     reporterEmail: user.email || "",
     reporterRole,
     reportedUserId,
@@ -95,7 +95,7 @@ export async function sendReportMessage({ reportDocId, body }) {
     const profile = await getDoc(doc(db, "users", user.uid));
     if (profile.exists()) {
       senderRole = profile.data().role || senderRole;
-      senderName = profile.data().name || profile.data().fullName || senderName;
+      senderName = profile.data().displayName || profile.data().name || profile.data().fullName || senderName;
     }
   } catch {}
 

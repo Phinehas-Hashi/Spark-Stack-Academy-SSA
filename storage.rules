@@ -36,6 +36,24 @@ service firebase.storage {
         );
     }
 
+    function isActiveInstructor(instructorId) {
+      return signedIn()
+        && request.auth.uid == instructorId
+        && firestore.exists(/databases/(default)/documents/users/$(instructorId))
+        && firestore.get(/databases/(default)/documents/users/$(instructorId)).data.get('role', '') == 'instructor'
+        && firestore.get(/databases/(default)/documents/users/$(instructorId)).data.get('status', '') == 'active'
+        && firestore.get(/databases/(default)/documents/users/$(instructorId)).data.get('active', false) == true
+        && firestore.get(/databases/(default)/documents/users/$(instructorId)).data.get('verified', false) == true;
+    }
+
+    match /instructor-profile/{instructorId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isActiveInstructor(instructorId)
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if isActiveInstructor(instructorId);
+    }
+
     match /academy-profile/{fileName} {
       allow read: if true;
       allow write: if isFounder()

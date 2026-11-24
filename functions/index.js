@@ -466,6 +466,210 @@ async function requireActiveStudent(request) {
   return { uid, user };
 }
 
+async function requireActiveInstructor(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in with your instructor account.");
+
+  const [userSnap, controlsSnap] = await Promise.all([
+    db.doc("users/" + uid).get(),
+    platformRef.get()
+  ]);
+
+  const user = userSnap.exists ? userSnap.data() : {};
+  if (safeText(user.role).toLowerCase() !== "instructor"
+      || user.status !== "active" || user.active !== true || user.verified !== true) {
+    throw new HttpsError("permission-denied", "An active, verified instructor account is required.");
+  }
+
+  const controls = controlsSnap.exists ? controlsSnap.data() : {};
+  const maintenance = controls.maintenance || {};
+  const target = safeText(maintenance.target).toLowerCase();
+  const startValue = maintenance.startAt?.toMillis
+    ? maintenance.startAt.toMillis()
+    : (maintenance.start ? new Date(maintenance.start).getTime() : NaN);
+  const endValue = maintenance.endAt?.toMillis
+    ? maintenance.endAt.toMillis()
+    : (maintenance.end ? new Date(maintenance.end).getTime() : NaN);
+  const maintenanceActive = maintenance.scheduled === true
+    && (target === "instructor" || target === "all")
+    && Number.isFinite(startValue) && Number.isFinite(endValue)
+    && Date.now() >= startValue && Date.now() < endValue;
+
+  if (controls.lockdown === true
+      || controls.instructor?.suspended === true
+      || maintenanceActive) {
+    throw new HttpsError("failed-precondition", "The Instructor Portal is temporarily unavailable.");
+  }
+
+  return { uid, user };
+}
+
+function instructorEnrollmentIsActive(enrollment) {
+  const status = safeText(enrollment.status).toLowerCase();
+  const paymentStatus = safeText(enrollment.paymentStatus).toLowerCase();
+  const activeStatuses = ["active", "approved", "completed"];
+
+  if (["revoked", "suspended", "cancelled", "canceled", "rejected", "pending"].includes(status)) {
+    return false;
+  }
+  if (enrollment.institutionId && activeStatuses.includes(status)) return true;
+  if (activeStatuses.includes(status) && ["paid", "free"].includes(paymentStatus)) return true;
+  return status === "paid" && (!paymentStatus || paymentStatus === "paid");
+}
+
+exports.getInstructorFinanceData = onCall(async request => {
+  const { uid } = await requireActiveInstructor(request);
+  const [coursesSnap, earningsSnap, withdrawalsSnap, settingsSnap, walletSnap] = await Promise.all([
+    db.collection("courses").where("instructorId", "==", uid).get(),
+    db.collection("instructorEarnings").where("instructorId", "==", uid).get(),
+    db.collection("withdrawalRequests").where("instructorId", "==", uid).get(),
+    db.doc("platformSettings/earnings").get(),
+    db.doc("instructorWallets/" + uid).get()
+  ]);
+  const courses = new Map(coursesSnap.docs.map(item => [item.id, item.data()]));
+  const ids = [...courses.keys()];
+  const paymentDocs = [];
+  for (let i = 0; i < ids.length; i += 8) {
+    const batch = ids.slice(i, i + 8);
+    const snapshots = await Promise.all(batch.map(courseId =>
+      db.collection("payments").where("courseId", "==", courseId).get()
+    ));
+    snapshots.forEach(snapshot => paymentDocs.push(...snapshot.docs));
+  }
+  const payments = paymentDocs.map(item => {
+    const p = item.data();
+    const course = courses.get(safeText(p.courseId)) || {};
+    return {
+      id: item.id, courseName: safeText(p.courseName || p.course || course.title, "Course payment"),
+      studentName: safeText(p.studentName || p.name || p.studentEmail, "Student"),
+      studentEmail: safeText(p.studentEmail || p.email),
+      amount: Number(p.amount || p.total || 0), currency: safeText(p.currency, "KES"),
+      status: safeText(p.status || p.paymentStatus, "pending").toLowerCase(),
+      reference: safeText(p.mpesaReceiptNumber || p.manualReceiptCode || p.reference || p.transactionId || item.id),
+      createdAt: p.createdAt?.toMillis ? p.createdAt.toMillis() : null
+    };
+  }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0,500);
+  const earnings = earningsSnap.docs.map(item => {
+    const e = item.data();
+    return { id:item.id, description:safeText(e.description,"Instructor earning"),
+      netAmount:Number(e.netAmount || 0), status:safeText(e.status,"earned").toLowerCase(),
+      createdAt:e.createdAt?.toMillis ? e.createdAt.toMillis() : null };
+  }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const withdrawals = withdrawalsSnap.docs.map(item => {
+    const w = item.data();
+    return { id:item.id, amount:Number(w.amount || 0), withdrawalFee:Number(w.withdrawalFee || 0),
+      netAmount:Number(w.netAmount || 0), method:safeText(w.method),
+      status:safeText(w.status,"pending").toLowerCase(),
+      walletBalanceDebited:w.walletBalanceDebited === true,
+      createdAt:w.createdAt?.toMillis ? w.createdAt.toMillis() : null };
+  }).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const walletRecord = walletSnap.exists ? walletSnap.data() : {};
+  const walletBalance = Math.max(0, Number(walletRecord.balance || 0));
+  const reserved = withdrawals.filter(w => ["pending","approved","processing"].includes(w.status))
+    .reduce((sum,w) => sum + w.amount,0);
+  const legacyPaid = withdrawals.filter(w => ["paid","completed","successful"].includes(w.status) && w.walletBalanceDebited !== true)
+    .reduce((sum,w) => sum + w.amount,0);
+  const paidOut = Math.max(0, Number(walletRecord.totalPaid || 0)) + legacyPaid;
+  const earned = walletBalance + paidOut;
+  const settings = settingsSnap.exists ? settingsSnap.data() : {};
+  const stats = payments.reduce((out,p) => {
+    if (["paid","success","successful","completed"].includes(p.status)) out.successful += p.amount;
+    else if (["pending","pending_review","verification_pending","initiating"].includes(p.status)) out.pending += p.amount;
+    else if (["failed","initiation_failed","cancelled","canceled"].includes(p.status)) out.failed += p.amount;
+    return out;
+  }, {successful:0,pending:0,failed:0});
+  return { payments, earnings, withdrawals, wallet:{
+    earned, reserved, paidOut, available:Math.max(0,walletBalance-reserved-legacyPaid),
+    pending:reserved, lifetime:earned, walletStatus:safeText(walletRecord.status, walletSnap.exists ? "active" : "not_created")
+  }, settings:{
+    minimumWithdrawal:Number(settings.minimumWithdrawal || 100),
+    withdrawalFeePercent:Number(settings.withdrawalFeePercent || 0),
+    platformTaxPercent:Number(settings.platformTaxPercent || 0)
+  }, paymentStats:stats };
+});
+
+exports.requestInstructorWithdrawal = onCall(async request => {
+  const { uid } = await requireActiveInstructor(request);
+  const amount = Number(request.data?.amount);
+  const method = safeText(request.data?.method).toLowerCase();
+  let account = safeText(request.data?.account).slice(0,120);
+  if (!Number.isSafeInteger(amount) || amount <= 0) throw new HttpsError("invalid-argument","Enter a whole-number withdrawal amount.");
+  if (!["mpesa","bank"].includes(method) || account.length < 5) throw new HttpsError("invalid-argument","Enter valid payout details.");
+  if (method === "mpesa") account = normalizeKenyanPhone(account);
+  const settingsSnap = await db.doc("platformSettings/earnings").get();
+  const settings = settingsSnap.exists ? settingsSnap.data() : {};
+  const minimum = Number(settings.minimumWithdrawal || 100);
+  const feePercent = Number(settings.withdrawalFeePercent || 0);
+  if (amount < minimum) throw new HttpsError("failed-precondition","The amount is below the minimum withdrawal.");
+  if (!Number.isFinite(feePercent) || feePercent < 0 || feePercent > 100) throw new HttpsError("failed-precondition","Withdrawal fee settings are invalid.");
+  const fee = Math.round(amount * feePercent) / 100;
+  const requestRef = db.collection("withdrawalRequests").doc();
+  const walletRef = db.doc("instructorWallets/" + uid);
+  await db.runTransaction(async transaction => {
+    const [walletSnap, requestsSnap] = await Promise.all([
+      transaction.get(walletRef),
+      transaction.get(db.collection("withdrawalRequests").where("instructorId","==",uid))
+    ]);
+    if (!walletSnap.exists) throw new HttpsError("failed-precondition","Your instructor wallet has not been provisioned. Contact Academy Finance.");
+    const wallet = walletSnap.data();
+    if (safeText(wallet.status,"active").toLowerCase() !== "active") throw new HttpsError("failed-precondition","Your instructor wallet is currently restricted. Contact Academy Finance.");
+    const committed = requestsSnap.docs.reduce((sum,item) => {
+      const w=item.data(), status=safeText(w.status).toLowerCase();
+      if (["pending","approved","processing"].includes(status)) return sum+Number(w.amount||0);
+      if (["paid","completed","successful"].includes(status) && w.walletBalanceDebited !== true) return sum+Number(w.amount||0);
+      return sum;
+    },0);
+    const available = Math.max(0,Number(wallet.balance||0)-committed);
+    if (amount > available) throw new HttpsError("failed-precondition","Your available wallet balance changed. Refresh the wallet and try again.");
+    transaction.create(requestRef,{instructorId:uid,amount,withdrawalFee:fee,netAmount:Math.max(0,amount-fee),
+      method,account,status:"pending",createdAt:Timestamp.now(),updatedAt:Timestamp.now()});
+  });
+  return {success:true,requestId:requestRef.id,status:"pending"};
+});
+
+exports.getInstructorCourseEnrollmentStats = onCall(async request => {
+  const { uid } = await requireActiveInstructor(request);
+
+  const coursesSnapshot = await db.collection("courses")
+    .where("instructorId", "==", uid)
+    .get();
+
+  const courseStudentCounts = {};
+  const allStudents = new Set();
+  const ownedCourses = coursesSnapshot.docs;
+
+  // Keep the number of concurrent Firestore reads bounded for instructors
+  // with larger course libraries.
+  for (let index = 0; index < ownedCourses.length; index += 8) {
+    const batch = ownedCourses.slice(index, index + 8);
+    const results = await Promise.all(batch.map(async courseDoc => {
+      const enrollments = await db.collection("enrollments")
+        .where("courseId", "==", courseDoc.id)
+        .get();
+
+      const students = new Set();
+      enrollments.docs.forEach(enrollmentDoc => {
+        const enrollment = enrollmentDoc.data();
+        if (!instructorEnrollmentIsActive(enrollment)) return;
+        const studentId = safeText(enrollment.studentId || enrollment.userId);
+        if (studentId) students.add(studentId);
+      });
+
+      return { courseId: courseDoc.id, students };
+    }));
+
+    results.forEach(result => {
+      courseStudentCounts[result.courseId] = result.students.size;
+      result.students.forEach(studentId => allStudents.add(studentId));
+    });
+  }
+
+  return {
+    totalStudents: allStudents.size,
+    courseStudentCounts
+  };
+});
+
 async function resolveStudentPurchase(uid, data) {
   const purchaseType = safeText(data.purchaseType).toLowerCase();
   if (purchaseType === "course") {
