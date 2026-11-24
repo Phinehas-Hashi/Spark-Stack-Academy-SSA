@@ -561,6 +561,8 @@ function studentDarajaCallbackUrl() {
 exports.getStudentPaymentQuote = onCall(async request => {
   const { uid } = await requireActiveStudent(request);
   const purchase = await resolveStudentPurchase(uid, request.data || {});
+  const settingsSnap = await db.doc("system/payment_settings").get();
+  const manualMpesa = settingsSnap.exists ? (settingsSnap.data().manualMpesa || {}) : {};
   return {
     purchaseType: purchase.purchaseType,
     courseId: purchase.courseId || null,
@@ -568,7 +570,15 @@ exports.getStudentPaymentQuote = onCall(async request => {
     billingPeriod: purchase.billingPeriod || null,
     title: purchase.courseTitle,
     amount: purchase.amount,
-    currency: purchase.currency
+    currency: purchase.currency,
+    manualMpesa: {
+      enabled: manualMpesa.enabled === true,
+      method: safeText(manualMpesa.method),
+      businessName: safeText(manualMpesa.businessName),
+      number: safeText(manualMpesa.number),
+      account: safeText(manualMpesa.account),
+      instructions: safeText(manualMpesa.instructions)
+    }
   };
 });
 
@@ -631,8 +641,39 @@ exports.initiateStudentStkPayment = onCall({ secrets: DARAJA_SECRETS }, async re
   }
 });
 
+exports.saveManualMpesaSettings = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data || {};
+  const enabled = input.enabled === true;
+  const method = safeText(input.method).toLowerCase();
+  const businessName = safeText(input.businessName).slice(0, 100);
+  const number = safeText(input.number).replace(/[^0-9]/g, "").slice(0, 20);
+  const account = safeText(input.account).slice(0, 80);
+  const instructions = safeText(input.instructions).slice(0, 1000);
+  if (enabled && !["paybill", "till", "other"].includes(method)) {
+    throw new HttpsError("invalid-argument", "Choose Paybill, Buy Goods Till or Other.");
+  }
+  if (enabled && (!businessName || !instructions || (method !== "other" && number.length < 5))) {
+    throw new HttpsError("invalid-argument", "Add the business name, payment number and clear payment instructions before enabling manual M-Pesa.");
+  }
+  await db.doc("system/payment_settings").set({
+    manualMpesa: { enabled, method, businessName, number, account, instructions, updatedAt: Timestamp.now(), updatedBy: founder.uid },
+    updatedAt: Timestamp.now()
+  }, { merge: true });
+  await db.collection("audit_logs").add({
+    action: "manual_mpesa_settings_updated", actorId: founder.uid,
+    enabled, method, createdAt: Timestamp.now()
+  });
+  return { success: true, enabled };
+});
+
 exports.submitStudentManualPayment = onCall(async request => {
   const { uid, user } = await requireActiveStudent(request);
+  const settingsSnap = await db.doc("system/payment_settings").get();
+  const manualMpesa = settingsSnap.exists ? (settingsSnap.data().manualMpesa || {}) : {};
+  if (manualMpesa.enabled !== true) {
+    throw new HttpsError("failed-precondition", "Manual M-Pesa submission is not currently configured by the Founder.");
+  }
   const purchase = await resolveStudentPurchase(uid, request.data || {});
   const receiptCode = safeText(request.data?.receiptCode).toUpperCase().replace(/\s+/g, "");
   const payerPhone = normalizeKenyanPhone(request.data?.phoneNumber);
