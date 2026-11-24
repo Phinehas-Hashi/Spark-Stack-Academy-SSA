@@ -820,6 +820,41 @@ exports.darajaStudentCallback = onRequest({ secrets: DARAJA_SECRETS, invoker: "p
 });
 
 
+exports.reconcileStudentStkPayments = onSchedule({
+  schedule: "every 5 minutes",
+  secrets: DARAJA_SECRETS,
+  timeZone: "Africa/Nairobi"
+}, async () => {
+  const pending = await db.collection("payments")
+    .where("status", "==", "verification_pending").limit(50).get();
+  for (const paymentDoc of pending.docs) {
+    const payment = paymentDoc.data();
+    const metadata = payment.callbackMetadata || {};
+    try {
+      if (!payment.checkoutRequestId || !safeText(metadata.MpesaReceiptNumber)) continue;
+      if (!await verifyDarajaStkCheckout(payment.checkoutRequestId)) continue;
+      if (Number(metadata.Amount) !== Number(payment.amount)
+          || String(metadata.PhoneNumber || "") !== String(payment.phoneNumber || "")) {
+        throw new Error("Pending student payment metadata did not match the payment record.");
+      }
+      await activateStudentPayment(paymentDoc.ref, payment, {
+        method: "daraja_stk_query",
+        receiptCode: safeText(metadata.MpesaReceiptNumber),
+        transactionDate: metadata.TransactionDate || null
+      });
+      await db.collection("audit_logs").add({
+        action: "student_mpesa_stk_payment_reconciled",
+        actorId: "daraja_reconciliation", targetId: payment.userId,
+        paymentId: paymentDoc.id, receiptCode: safeText(metadata.MpesaReceiptNumber),
+        amount: payment.amount, currency: payment.currency, createdAt: Timestamp.now()
+      });
+    } catch (error) {
+      console.error("Student STK reconciliation failed:", paymentDoc.id, error.message);
+    }
+  }
+});
+
+
 function requireActiveInstitutionMember(request) {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Sign in to manage institution courses.");
