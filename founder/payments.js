@@ -773,7 +773,7 @@ const payment =
 paymentDoc.data();
 
 document.getElementById("receiptNumber").textContent =
-payment.receiptNumber || "-";
+payment.receiptNumber || payment.manualReceiptCode || "-";
 
 document.getElementById("receiptDate").textContent =
 payment.createdAt
@@ -793,7 +793,7 @@ document.getElementById("receiptMethod").textContent =
 payment.method || "-";
 
 document.getElementById("receiptTransaction").textContent =
-payment.transactionId || "-";
+payment.transactionId || payment.mpesaReceiptNumber || payment.manualReceiptCode || "-";
 
 document.getElementById("receiptAmount").textContent =
 `KES ${Number(payment.amount || 0).toLocaleString()}`;
