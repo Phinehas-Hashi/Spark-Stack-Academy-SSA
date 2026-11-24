@@ -231,6 +231,23 @@ service cloud.firestore {
                'updatedAt'
              ])
 
+      // Staff may activate a student account only as part of admission approval.
+      || (
+        staff()
+        && resource.data.get('role', '') == 'student'
+        && request.resource.data.get('role', '') == 'student'
+        && request.resource.data.get('status', '') == 'active'
+        && request.resource.data.get('active', false) == true
+        && request.resource.data.get('verified', false) == true
+        && request.resource.data.get('admissionNumber', '') is string
+        && request.resource.data.get('admissionNo', '') is string
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'active', 'verified',
+          'admissionNumber', 'admissionNo',
+          'approvedBy', 'approvedAt', 'updatedAt'
+        ])
+      )
+
       // Founder may approve/reject instructors only.
       || (
         isFounder()
@@ -1068,7 +1085,10 @@ service cloud.firestore {
           && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
           && (
             get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('isFree', false) == true
-            || get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) <= 0
+            || (
+              get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) is number
+              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) <= 0
+            )
           )
         );
 
