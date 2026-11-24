@@ -19,6 +19,57 @@ const MPESA_PASSKEY = defineSecret("MPESA_PASSKEY");
 const MPESA_ENVIRONMENT = defineSecret("MPESA_ENVIRONMENT");
 const MPESA_TRANSACTION_TYPE = defineSecret("MPESA_TRANSACTION_TYPE");
 
+async function syncPublicLeaderboardEntry(studentId) {
+  const publicRef = db.doc("leaderboardPublic/" + studentId);
+  const [userSnap, studentSnap, settingsSnap] = await Promise.all([
+    db.doc("users/" + studentId).get(),
+    db.doc("students/" + studentId).get(),
+    db.doc("studentSettings/" + studentId).get()
+  ]);
+
+  const user = userSnap.exists ? userSnap.data() || {} : {};
+  const student = studentSnap.exists ? studentSnap.data() || {} : {};
+  const settings = settingsSnap.exists ? settingsSnap.data() || {} : {};
+  const optedIn = settings.privacy?.leaderboard === true;
+  const activeStudent = user.role === "student" && user.status === "active" && user.active === true;
+
+  if (!optedIn || !activeStudent || !studentSnap.exists) {
+    if ((await publicRef.get()).exists) await publicRef.delete();
+    return;
+  }
+
+  const xp = Number(student.xp ?? 0);
+  if (!Number.isFinite(xp) || xp < 0) {
+    if ((await publicRef.get()).exists) await publicRef.delete();
+    return;
+  }
+
+  const rawName = safeText(student.publicName || student.displayName || student.name || student.fullName || user.displayName || "Student");
+  const nameParts = rawName.split(/\s+/).filter(Boolean);
+  const publicName = nameParts.length > 1
+    ? nameParts[0] + " " + nameParts[nameParts.length - 1].charAt(0).toUpperCase() + "."
+    : nameParts[0] || "Student";
+
+  await publicRef.set({
+    publicName,
+    xp,
+    level: Math.max(1, Number(student.level) || 1),
+    updatedAt: Timestamp.now()
+  });
+}
+
+exports.syncStudentLeaderboardOnStudentWrite = onDocumentWritten("students/{studentId}", async event => {
+  await syncPublicLeaderboardEntry(event.params.studentId);
+});
+
+exports.syncStudentLeaderboardOnSettingsWrite = onDocumentWritten("studentSettings/{studentId}", async event => {
+  await syncPublicLeaderboardEntry(event.params.studentId);
+});
+
+exports.syncStudentLeaderboardOnUserWrite = onDocumentWritten("users/{studentId}", async event => {
+  await syncPublicLeaderboardEntry(event.params.studentId);
+});
+
 function safeText(value, fallback = "") { return String(value ?? fallback).trim(); }
 function eventKey(event, suffix) {
   const raw = safeText(event.id || event.params?.docId || Date.now());
