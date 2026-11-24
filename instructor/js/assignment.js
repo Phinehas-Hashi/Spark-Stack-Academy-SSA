@@ -209,9 +209,7 @@ async function loadAssignment() {
     // ========================================================
 
     if (
-        data.instructorId &&
-        data.instructorId !==
-            instructor.uid
+        data.instructorId !== instructor.uid
     ) {
 
         console.error(
@@ -492,12 +490,9 @@ function isGraded(submission) {
     return (
         status === "graded" ||
         status === "reviewed" ||
-        (
-            submission.score !==
-                undefined &&
-            submission.score !==
-                null
-        )
+        status === "returned" ||
+        submission.score !== undefined && submission.score !== null ||
+        submission.grade !== undefined && submission.grade !== null
     );
 
 }
@@ -693,6 +688,7 @@ function renderSubmission(
 
     const score =
         submission.score ??
+        submission.grade ??
         "—";
 
 
