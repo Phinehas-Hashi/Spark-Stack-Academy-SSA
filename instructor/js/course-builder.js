@@ -331,7 +331,7 @@ function renderCourseHeader() {
     if ($("builderCourseFree")) {
         $("builderCourseFree").checked = course.isFree === true || Number(course.price || 0) <= 0;
     }
-    updateCoursePricingPreview();
+    toggleBuilderCoursePricing();
     updateStatus();
 
 }
