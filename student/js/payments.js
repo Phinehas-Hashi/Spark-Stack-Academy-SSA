@@ -174,7 +174,7 @@ async function submitManualPayment() {
   if (!phoneNumber || !receiptCode || !file) {
     return message("Enter the payer phone number, M-Pesa transaction code, and attach the confirmation screenshot.", true);
   }
-  if (!/^image\\/(jpeg|png|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
     return message("Use a JPG, PNG or WebP screenshot no larger than 5 MB.", true);
   }
   setBusy("submitManualPayment", true, "Submitting…");
@@ -225,7 +225,7 @@ async function retryManualProofUpload() {
   if (!file || !pendingProofPaymentId) {
     return message("Select the payment screenshot again, then retry.", true);
   }
-  if (!/^image\\/(jpeg|png|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
     return message("Use a JPG, PNG or WebP screenshot no larger than 5 MB.", true);
   }
   setBusy("retryProofUpload", true, "Uploading…");
