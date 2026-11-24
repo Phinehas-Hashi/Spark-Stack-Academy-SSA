@@ -574,13 +574,13 @@ todayCount++;
 
 }
 
-if(payment.status==="pending"){
+if(["pending","pending_review","verification_pending"].includes(payment.status)){
 
 pending++;
 
 }
 
-if(payment.status==="completed"){
+if(["completed","paid"].includes(payment.status)){
 
 successful++;
 
