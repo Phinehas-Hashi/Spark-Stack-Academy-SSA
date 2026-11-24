@@ -165,6 +165,7 @@ async function initialize() {
         renderPage();
 
         setupScoreInputs();
+        setupFeedbackCounter();
 
         refreshIcons();
 
@@ -307,12 +308,12 @@ async function loadQuestions() {
     const questionsRef = collection(db, "quizQuestions");
     const q = query(
         questionsRef,
-        where("quizId", "==", quizId),
         where("instructorId", "==", instructor.uid)
     );
     const snapshot = await getDocs(q);
     questions = snapshot.docs
         .map(item => ({ id: item.id, ...item.data() }))
+        .filter(question => question.quizId === quizId)
         .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
     if (!questions.length) {
         throw new Error("No questions were found for this quiz.");
@@ -988,6 +989,25 @@ function recalculateLiveScore() {
         result.label
     );
 
+}
+
+
+// ============================================================
+// FEEDBACK COUNTER
+// ============================================================
+
+function setupFeedbackCounter() {
+    const field = $("instructorFeedback");
+    const counter = $("feedbackCounter");
+    if (!field || !counter) return;
+
+    const update = () => {
+        counter.textContent = `${field.value.length.toLocaleString()} / 5,000 characters`;
+        counter.classList.toggle("near-limit", field.value.length >= 4500);
+    };
+
+    field.addEventListener("input", update);
+    update();
 }
 
 
