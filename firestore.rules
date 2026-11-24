@@ -834,8 +834,8 @@ service cloud.firestore {
           isStudent()
           && studentPortalOpen()
           && (
-            resource.data.studentId == uid()
-            || resource.data.userId == uid()
+            resource.data.get('studentId', '') == uid()
+            || resource.data.get('userId', '') == uid()
           )
         )
         || (
