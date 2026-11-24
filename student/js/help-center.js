@@ -17,7 +17,7 @@ import {
     addDoc, collection, doc, onSnapshot, orderBy, query,
     serverTimestamp, updateDoc, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { submitReport } from "../../js/reports.js";
+import { submitReport, sendReportMessage } from "../../js/reports.js";
 
 
 console.log("🛟 Help Center Loaded");
@@ -899,18 +899,14 @@ function openTicketThread(id, panel) {
         panel.scrollTop = panel.scrollHeight;
     }, error => { console.error(error); panel.textContent = "Conversation unavailable. Please try again later."; });
 }
-async function sendTicketReply(id, panel) {
+async async function sendTicketReply(id, panel) {
     const textarea = panel?.querySelector("textarea");
     const message = textarea?.value.trim();
     if (!message || !currentUser) return;
     const button = panel.querySelector("[data-ticket-reply]");
     button.disabled = true;
     try {
-        await addDoc(collection(db, "reports", id, "responses"), {
-            message, senderId: currentUser.uid,
-            senderName: currentUser.displayName || currentUser.email || "Student",
-            senderRole: "student", createdAt: serverTimestamp()
-        });
+        await sendReportMessage({ reportDocId: id, body: message });
         textarea.value = "";
         window.ssaToast?.("Your reply has been added to the ticket.", "success", "Spark Support");
     } catch (error) {
@@ -918,7 +914,7 @@ async function sendTicketReply(id, panel) {
         window.ssaToast?.("Your reply could not be sent. Please retry.", "error", "Spark Support");
     } finally { button.disabled = false; }
 }
-async function setStudentTicketStatus(id, status) {
+async async function setStudentTicketStatus(id, status) {
     if (!currentUser || !["pending", "closed"].includes(status)) return;
     try {
         await updateDoc(doc(db, "reports", id), {
