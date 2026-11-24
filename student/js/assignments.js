@@ -51,7 +51,10 @@ async function loadAssignments(uid) {
         }
 
         const [assignmentResult, submissionResult] = await Promise.allSettled([
-            getDocs(collection(db, "assignments")),
+            getDocs(query(
+                collection(db, "assignments"),
+                where("status", "in", ["published", "pending", "active"])
+            )),
             getDocs(query(
                 collection(db, "submissions"),
                 where("studentId", "==", uid)
