@@ -193,85 +193,187 @@ class="menu-btn">
 
 </header>
 
-<!-- ===========================
-     HERO SECTION
-=========================== -->
+<!-- =====================================================
+     SIGNATURE ACADEMY HERO
+     HTML structure phase: visual styling follows in CSS.
+===================================================== -->
 
-<section
-id="home"
-class="hero">
-
-<div class="hero-content">
-
-<div class="hero-badge">
-
-<i class="fa-solid fa-bolt"></i>
-
-Africa's Next Generation Tech Academy
-
-</div>
-
-<h1>
-
-Learn Today.
-
-Build Tomorrow.
-
-Lead the Future.
-
-</h1>
-
-<p>
-
-Master Software Development, Artificial Intelligence,
-Cybersecurity, Data Science, UI/UX Design and more with
-industry-focused courses designed for future innovators.
-
-</p>
-
-<div class="hero-buttons">
-
-<a
-href="signup.html"
-class="primary-btn">
-
-Start Learning
-
-</a>
-
-<a
-href="#courses"
-class="secondary-btn">
-
-Browse Courses
-
-</a>
-
-</div>
-
-<div class="hero-stats">
-<div><h2>Project-Based</h2><p>Learning</p></div>
-<div><h2>Mentor-Led</h2><p>Guidance</p></div>
-<div><h2>Career-Focused</h2><p>Skills</p></div>
-</div>
-</div>
-
-<div class="hero-visual" aria-label="Spark Stack Academy learning and innovation">
-  <div class="hero-visual-glow"></div>
-  <div class="hero-visual-grid"></div>
-  <div class="hero-orbit hero-orbit-one"></div>
-  <div class="hero-orbit hero-orbit-two"></div>
-  <div class="hero-core">
-    <span class="hero-core-label"><i class="fa-solid fa-atom"></i> THE FUTURE IS BUILT</span>
-    <img src="assets/images/ssa-badge.png" alt="Spark Stack Academy emblem">
-    <h2>Ideas into impact.</h2>
-    <p>Learn with purpose. Build with confidence.</p>
+<section id="home" class="hero signature-hero">
+  <div class="hero-brand-lockup">
+    <img
+      class="hero-academy-logo"
+      src="assets/images/ssa-logo.png"
+      alt="Spark Stack Academy — Learn, Teach, Grow">
   </div>
-  <div class="hero-float-card float-code"><span><i class="fa-solid fa-code"></i></span><div><strong>CREATE</strong><small>Build real projects</small></div></div>
-  <div class="hero-float-card float-ai"><span><i class="fa-solid fa-brain"></i></span><div><strong>INNOVATE</strong><small>Explore emerging tech</small></div></div>
-  <div class="hero-float-card float-community"><span><i class="fa-solid fa-users"></i></span><div><strong>CONNECT</strong><small>Grow together</small></div></div>
-  <div class="hero-visual-caption"><span></span> SPARK STACK INTERNATIONAL <span></span></div>
-</div>
+
+  <div class="hero-message">
+    <span class="hero-eyebrow">LEARN • TEACH • GROW</span>
+    <h1>One Platform. Multiple Opportunities.</h1>
+    <p>
+      A complete e-learning ecosystem for learners, instructors,
+      institutions and more. Learn with purpose, teach with impact,
+      and build skills for the future.
+    </p>
+    <div class="hero-actions">
+      <a href="signup.html" class="primary-btn">Join the Academy</a>
+      <a href="#portals" class="secondary-btn">Explore the portals</a>
+    </div>
+  </div>
+
+  <div class="hero-certification">
+    <img
+      src="assets/images/ssa-badge.png"
+      alt="Spark Stack Academy certified emblem">
+    <span>LEARN. TEACH. GROW.</span>
+  </div>
+</section>
+
+<!-- =====================================================
+     ACADEMY PORTAL SHOWCASE
+===================================================== -->
+
+<section id="portals" class="portal-showcase" aria-labelledby="portal-showcase-title">
+  <div class="section-header">
+    <span>ONE CONNECTED ECOSYSTEM</span>
+    <h2 id="portal-showcase-title">The right space for every role</h2>
+    <p>Purpose-built portals connected through the Spark Stack Academy experience.</p>
+  </div>
+
+  <div class="portal-showcase-grid">
+    <article class="portal-showcase-card portal-student">
+      <div class="portal-card-heading">
+        <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+        <div><h3>Student Portal</h3><p>Learn at your own pace.</p></div>
+      </div>
+      <div class="portal-preview" aria-hidden="true">
+        <aside class="portal-preview-sidebar"><span></span><span></span><span></span><span></span><span></span></aside>
+        <div class="portal-preview-main">
+          <div class="portal-preview-welcome"><b>Welcome back, learner!</b><i></i></div>
+          <div class="portal-preview-progress"><span></span></div>
+          <div class="portal-preview-tiles"><i></i><i></i><i></i></div>
+          <div class="portal-preview-lines"><i></i><i></i><i></i></div>
+        </div>
+      </div>
+      <a href="login.html" class="portal-card-link" aria-label="Sign in to the Student Portal">Enter student portal <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </article>
+
+    <article class="portal-showcase-card portal-instructor">
+      <div class="portal-card-heading">
+        <i class="fa-solid fa-people-group" aria-hidden="true"></i>
+        <div><h3>Instructor Portal</h3><p>Create. Teach. Inspire.</p></div>
+      </div>
+      <div class="portal-preview" aria-hidden="true">
+        <aside class="portal-preview-sidebar"><span></span><span></span><span></span><span></span><span></span></aside>
+        <div class="portal-preview-main">
+          <div class="portal-preview-welcome"><b>Welcome, instructor!</b><i></i></div>
+          <div class="portal-preview-tiles"><i></i><i></i><i></i></div>
+          <div class="portal-preview-lines"><i></i><i></i><i></i></div>
+        </div>
+      </div>
+      <a href="login.html" class="portal-card-link" aria-label="Sign in to the Instructor Portal">Enter instructor portal <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </article>
+
+    <article class="portal-showcase-card portal-admin">
+      <div class="portal-card-heading">
+        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+        <div><h3>Admin Portal</h3><p>Manage. Monitor. Grow.</p></div>
+      </div>
+      <div class="portal-preview" aria-hidden="true">
+        <aside class="portal-preview-sidebar"><span></span><span></span><span></span><span></span><span></span></aside>
+        <div class="portal-preview-main">
+          <div class="portal-preview-metrics"><i></i><i></i><i></i></div>
+          <div class="portal-preview-chart"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="portal-preview-lines"><i></i><i></i></div>
+        </div>
+      </div>
+      <a href="login.html" class="portal-card-link" aria-label="Sign in to the Admin Portal">Enter admin portal <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </article>
+
+    <article class="portal-showcase-card portal-founder">
+      <div class="portal-card-heading">
+        <i class="fa-solid fa-crown" aria-hidden="true"></i>
+        <div><h3>Founder Portal</h3><p>Lead. Strategize. Scale.</p></div>
+      </div>
+      <div class="portal-preview" aria-hidden="true">
+        <aside class="portal-preview-sidebar"><span></span><span></span><span></span><span></span><span></span></aside>
+        <div class="portal-preview-main">
+          <div class="portal-preview-welcome"><b>Founder dashboard</b><i></i></div>
+          <div class="portal-preview-tiles"><i></i><i></i><i></i></div>
+          <div class="portal-preview-chart"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <a href="login.html" class="portal-card-link" aria-label="Sign in to the Founder Portal">Enter founder portal <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </article>
+
+    <article class="portal-showcase-card portal-institution">
+      <div class="portal-card-heading">
+        <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+        <div><h3>Institution Portal</h3><p>Manage your institution's learning.</p></div>
+      </div>
+      <div class="portal-preview" aria-hidden="true">
+        <aside class="portal-preview-sidebar"><span></span><span></span><span></span><span></span><span></span></aside>
+        <div class="portal-preview-main">
+          <div class="portal-preview-welcome"><b>Institution overview</b><i></i></div>
+          <div class="portal-preview-tiles"><i></i><i></i><i></i></div>
+          <div class="portal-preview-chart"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <a href="login.html" class="portal-card-link" aria-label="Sign in to the Institution Portal">Explore institution access <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </article>
+
+    <article class="portal-showcase-card portal-marketplace">
+      <div class="portal-card-heading">
+        <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+        <div><h3>Financial &amp; Marketplace</h3><p>Earn. Transact. Grow.</p></div>
+      </div>
+      <div class="portal-preview" aria-hidden="true">
+        <aside class="portal-preview-sidebar"><span></span><span></span><span></span><span></span><span></span></aside>
+        <div class="portal-preview-main">
+          <div class="portal-preview-welcome"><b>Financial overview</b><i></i></div>
+          <div class="portal-preview-metrics"><i></i><i></i><i></i></div>
+          <div class="portal-preview-lines"><i></i><i></i><i></i></div>
+        </div>
+      </div>
+      <a href="login.html" class="portal-card-link" aria-label="Sign in to access financial and marketplace features">Explore marketplace <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </article>
+  </div>
+</section>
+
+<!-- =====================================================
+     ACADEMY EXPERIENCE + MOBILE
+===================================================== -->
+
+<section class="academy-experience" aria-labelledby="academy-experience-title">
+  <div class="academy-experience-copy">
+    <span class="section-tag">THE COMPLETE ACADEMY EXPERIENCE</span>
+    <h2 id="academy-experience-title">Spark Stack Academy</h2>
+    <p>Learn. Teach. Grow. A connected learning environment designed to turn curiosity into practical skills and meaningful progress.</p>
+    <div class="academy-experience-points">
+      <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> Flexible learning</span>
+      <span><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Expert instructors</span>
+      <span><i class="fa-solid fa-certificate" aria-hidden="true"></i> Verified certificates</span>
+      <span><i class="fa-solid fa-globe" aria-hidden="true"></i> Connected community</span>
+    </div>
+    <a href="signup.html" class="primary-btn">Get started</a>
+  </div>
+  <div class="academy-experience-art">
+    <img src="assets/images/ssa-badge.png" alt="Spark Stack Academy emblem">
+  </div>
+</section>
+
+<section class="mobile-experience" aria-labelledby="mobile-experience-title">
+  <div>
+    <span class="section-tag">LEARN ANYWHERE</span>
+    <h2 id="mobile-experience-title">Your Academy, wherever you are.</h2>
+    <p>Access your learning journey across devices with a responsive Academy experience.</p>
+  </div>
+  <div class="mobile-experience-device" aria-hidden="true">
+    <div class="mobile-device-camera"></div>
+    <div class="mobile-device-brand"><img src="assets/images/ssa-logo.png" alt=""></div>
+    <strong>Learn. Teach. Grow.</strong>
+    <span>Your future is at your fingertips.</span>
+    <i class="fa-solid fa-graduation-cap"></i>
+  </div>
 </section>
 
 <!-- ==========================================
