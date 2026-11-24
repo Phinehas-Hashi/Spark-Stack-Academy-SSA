@@ -1065,9 +1065,11 @@ service cloud.firestore {
           && request.resource.data.courseId is string
           && request.resource.data.status == 'active'
           && request.resource.data.paymentStatus == 'free'
-          && get(
-               /databases/$(database)/documents/courses/$(request.resource.data.courseId)
-             ).data.get('isFree', false) == true
+          && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
+          && (
+            get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('isFree', false) == true
+            || get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) <= 0
+          )
         );
 
       // Students may update ONLY harmless learning-progress fields.

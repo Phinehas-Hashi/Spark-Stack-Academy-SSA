@@ -1010,3 +1010,28 @@ RESPONSIVE
     overscroll-behavior: none;
   }
 }
+
+
+/* Course curriculum module labels and assignments */
+.lesson-module-heading {
+    padding: 13px 14px 8px;
+    margin-top: 8px;
+    color: var(--text-secondary, #8b93a5);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border-color, rgba(255,255,255,.08));
+}
+.course-assignments-list { display: grid; gap: 12px; }
+.course-assignment-card {
+    padding: 15px;
+    border: 1px solid var(--border-color, rgba(255,255,255,.1));
+    border-radius: 12px;
+    background: var(--card-surface, rgba(255,255,255,.025));
+}
+.course-assignment-card h4 { margin: 0 0 7px; }
+.course-assignment-card p { margin: 0 0 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.course-assignment-card small { display: block; margin-bottom: 10px; color: var(--text-secondary, #8b93a5); }
+.course-assignment-link { display: inline-flex; font-weight: 600; text-decoration: none; }
+.course-assignment-empty { margin: 0; color: var(--text-secondary, #8b93a5); }

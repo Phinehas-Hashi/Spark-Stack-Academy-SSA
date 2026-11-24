@@ -239,11 +239,22 @@ async function loadCourse() {
 
 async function loadModules() {
     try {
-        const snapshot = await getDocs(query(
-            collection(db, "courseModules"),
-            where("courseId", "==", courseId)
-        ));
-        modules = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+        const lookups = [
+            query(collection(db, "courseModules"), where("courseId", "==", courseId)),
+            query(collection(db, "courseModules"), where("courseID", "==", courseId))
+        ];
+        const results = await Promise.allSettled(lookups.map(item => getDocs(item)));
+        const byId = new Map();
+        for (const result of results) {
+            if (result.status !== "fulfilled") {
+                console.warn("A course module lookup was unavailable:", result.reason);
+                continue;
+            }
+            result.value.docs.forEach(item => {
+                if (!byId.has(item.id)) byId.set(item.id, { id: item.id, ...item.data() });
+            });
+        }
+        modules = [...byId.values()];
         modules.sort((a, b) =>
             Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0)
         );
@@ -641,7 +652,7 @@ function renderCurriculum() {
 
     const groupedIds = new Set();
     const groups = modules.map((module, moduleIndex) => {
-        const moduleLessons = lessons.filter(lesson => lesson.moduleId === module.id);
+        const moduleLessons = lessons.filter(lesson => (lesson.moduleId || lesson.moduleID) === module.id);
         moduleLessons.forEach(lesson => groupedIds.add(lesson.id));
         if (!moduleLessons.length) return "";
         return `
@@ -832,10 +843,12 @@ enrollBtn?.addEventListener(
             setAvailableState();
 
 
-            showToast(
-                "Enrollment failed. Please try again.",
-                "error"
-            );
+            const reason = error?.code === "permission-denied"
+                ? "Enrollment was blocked by Firestore permissions. Confirm the published rules and that this course is marked free."
+                : error?.code === "already-exists"
+                    ? "An enrollment record already exists. Please refresh your course access or contact support."
+                    : "Enrollment failed. Check your connection and try again.";
+            showToast(reason, "error");
 
         }
 
