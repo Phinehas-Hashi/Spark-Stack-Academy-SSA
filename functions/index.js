@@ -466,6 +466,100 @@ async function requireActiveStudent(request) {
   return { uid, user };
 }
 
+async function requireActiveInstructor(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in with your instructor account.");
+
+  const [userSnap, controlsSnap] = await Promise.all([
+    db.doc("users/" + uid).get(),
+    platformRef.get()
+  ]);
+
+  const user = userSnap.exists ? userSnap.data() : {};
+  if (safeText(user.role).toLowerCase() !== "instructor"
+      || user.status !== "active" || user.active !== true || user.verified !== true) {
+    throw new HttpsError("permission-denied", "An active, verified instructor account is required.");
+  }
+
+  const controls = controlsSnap.exists ? controlsSnap.data() : {};
+  const maintenance = controls.maintenance || {};
+  const target = safeText(maintenance.target).toLowerCase();
+  const startValue = maintenance.startAt?.toMillis
+    ? maintenance.startAt.toMillis()
+    : (maintenance.start ? new Date(maintenance.start).getTime() : NaN);
+  const endValue = maintenance.endAt?.toMillis
+    ? maintenance.endAt.toMillis()
+    : (maintenance.end ? new Date(maintenance.end).getTime() : NaN);
+  const maintenanceActive = maintenance.scheduled === true
+    && (target === "instructor" || target === "all")
+    && Number.isFinite(startValue) && Number.isFinite(endValue)
+    && Date.now() >= startValue && Date.now() < endValue;
+
+  if (controls.lockdown === true
+      || controls.instructor?.suspended === true
+      || maintenanceActive) {
+    throw new HttpsError("failed-precondition", "The Instructor Portal is temporarily unavailable.");
+  }
+
+  return { uid, user };
+}
+
+function instructorEnrollmentIsActive(enrollment) {
+  const status = safeText(enrollment.status).toLowerCase();
+  const paymentStatus = safeText(enrollment.paymentStatus).toLowerCase();
+  const activeStatuses = ["active", "approved", "completed"];
+
+  if (["revoked", "suspended", "cancelled", "canceled", "rejected", "pending"].includes(status)) {
+    return false;
+  }
+  if (enrollment.institutionId && activeStatuses.includes(status)) return true;
+  if (activeStatuses.includes(status) && ["paid", "free"].includes(paymentStatus)) return true;
+  return status === "paid" && (!paymentStatus || paymentStatus === "paid");
+}
+
+exports.getInstructorCourseEnrollmentStats = onCall(async request => {
+  const { uid } = await requireActiveInstructor(request);
+
+  const coursesSnapshot = await db.collection("courses")
+    .where("instructorId", "==", uid)
+    .get();
+
+  const courseStudentCounts = {};
+  const allStudents = new Set();
+  const ownedCourses = coursesSnapshot.docs;
+
+  // Keep the number of concurrent Firestore reads bounded for instructors
+  // with larger course libraries.
+  for (let index = 0; index < ownedCourses.length; index += 8) {
+    const batch = ownedCourses.slice(index, index + 8);
+    const results = await Promise.all(batch.map(async courseDoc => {
+      const enrollments = await db.collection("enrollments")
+        .where("courseId", "==", courseDoc.id)
+        .get();
+
+      const students = new Set();
+      enrollments.docs.forEach(enrollmentDoc => {
+        const enrollment = enrollmentDoc.data();
+        if (!instructorEnrollmentIsActive(enrollment)) return;
+        const studentId = safeText(enrollment.studentId || enrollment.userId);
+        if (studentId) students.add(studentId);
+      });
+
+      return { courseId: courseDoc.id, students };
+    }));
+
+    results.forEach(result => {
+      courseStudentCounts[result.courseId] = result.students.size;
+      result.students.forEach(studentId => allStudents.add(studentId));
+    });
+  }
+
+  return {
+    totalStudents: allStudents.size,
+    courseStudentCounts
+  };
+});
+
 async function resolveStudentPurchase(uid, data) {
   const purchaseType = safeText(data.purchaseType).toLowerCase();
   if (purchaseType === "course") {
