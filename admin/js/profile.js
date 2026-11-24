@@ -440,7 +440,7 @@ function openPasswordModal() {
     );
 
     document.body.classList.add(
-        "modal-open"
+        "admin-modal-open"
     );
 }
 
@@ -457,7 +457,7 @@ function closePasswordModalHandler() {
     );
 
     document.body.classList.remove(
-        "modal-open"
+        "admin-modal-open"
     );
 
     passwordForm?.reset();

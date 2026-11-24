@@ -30,4 +30,29 @@ body.admin-messages-page .rm-msg.mine div { border-color:#5d1ed6; background:lin
 body.admin-messages-page .rm-composer button { background:linear-gradient(105deg,#762cff,#5d1ed6); color:#fff; }
 body.admin-messages-page .rm-empty { color:var(--ssa-color-muted,#77758f); }
 body.admin-messages-page .rm-empty strong { color:var(--ssa-color-ink,#17152f); }
-@media(max-width:800px){body.admin-messages-page{padding:8px}body.admin-messages-page .rm-shell{height:calc(100dvh - 16px);min-height:0;border-radius:16px}}
+
+/* Shared Admin shell integration; keep contacts available on narrow screens. */
+body.admin-messages-page { padding: 0; }
+body.admin-messages-page .rm-shell {
+  width: 100%;
+  height: calc(100dvh - 150px);
+  min-height: 520px;
+}
+@media (max-width: 800px) {
+  body.admin-messages-page .rm-shell {
+    height: calc(100dvh - 130px);
+    min-height: 480px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(160px, 34%) minmax(300px, 1fr);
+  }
+  body.admin-messages-page .rm-contacts {
+    display: flex;
+    min-height: 0;
+    overflow: hidden;
+  }
+  body.admin-messages-page .rm-people {
+    min-height: 0;
+    overflow: auto;
+  }
+  body.admin-messages-page .rm-chat { min-height: 0; }
+}
