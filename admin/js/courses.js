@@ -13,6 +13,7 @@ import {
     query,
     orderBy,
     updateDoc,
+    writeBatch,
     doc,
     Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -86,6 +87,9 @@ function initEvents() {
 
     $("toggleCourseStatusBtn")
         ?.addEventListener("click", toggleCourseStatus);
+
+    $("syncCourseMarketplaceBtn")
+        ?.addEventListener("click", syncCurrentCourseToMarketplace);
 
     $("viewCourseProfileBtn")
         ?.addEventListener("click", () => {
@@ -822,6 +826,15 @@ function openModal(course) {
     }
 
 
+    const syncButton = $("syncCourseMarketplaceBtn");
+    if (syncButton) {
+        const canSync = status === "published"
+            && course.reviewStatus === "approved"
+            && course.marketplaceVisibility !== "hidden";
+        syncButton.hidden = !canSync;
+        syncButton.style.display = canSync ? "" : "none";
+    }
+
     const toggleButton =
         $("toggleCourseStatusBtn");
 
@@ -890,99 +903,92 @@ function closeModal() {
 // TOGGLE STATUS
 // ============================================================
 
-async function toggleCourseStatus() {
-
-    if (!currentCourse) return;
-
-
-    const course =
-        currentCourse;
-
-
-    const oldStatus =
-        getStatus(course);
-
-
-    const newStatus =
-        oldStatus === "published"
-            ? "draft"
-            : "published";
-
-
-    const button =
-        $("toggleCourseStatusBtn");
-
-
-    if (button) {
-        button.disabled = true;
-    }
-
-
-    try {
-
-        await updateDoc(
-            doc(
-                db,
-                "courses",
-                course.id
-            ),
-            {
-                status: newStatus,
-                published: newStatus === "published",
-                marketplaceVisibility: newStatus === "published" ? "public" : "hidden",
-                reviewStatus: newStatus === "published" ? "approved" : "not_submitted",
-                reviewedAt: Timestamp.now()
-            }
-        );
-
-
-        course.status =
-            newStatus;
-
-
-        updateStats();
-
-        applyFilters();
-
-
-        if (
-            $("courseDetailsModal") &&
-            !$("courseDetailsModal")
-                .classList.contains("hidden")
-        ) {
-
-            openModal(course);
-
-        }
-
-
-        console.log(
-            `✓ Course ${newStatus}`
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "❌ Failed updating course:",
-            error
-        );
-
-
-        alert(
-            "Unable to update course status."
-        );
-
-    } finally {
-
-        if (button) {
-            button.disabled = false;
-        }
-
-    }
-
+function buildMarketplaceCourseListing(course) {
+    const title = String(course.title || course.name || course.courseName || "Untitled course").trim();
+    const now = Timestamp.now();
+    const priceValue = Number(course.price || 0);
+    return {
+        itemId: "course_" + course.id,
+        sourceCollection: "courses",
+        sourceId: course.id,
+        productType: "course",
+        title,
+        description: String(course.description || "").trim(),
+        category: String(course.category || "").trim(),
+        price: Number.isFinite(priceValue) ? priceValue : 0,
+        currency: String(course.currency || "KES"),
+        instructorId: String(course.instructorId || course.instructorID || course.teacherId || course.createdBy || ""),
+        institutionId: String(course.institutionId || ""),
+        ownerType: String(course.ownerType || (course.institutionId ? "institution" : "instructor")),
+        status: "published",
+        published: true,
+        updatedAt: now,
+        createdAt: course.createdAt || now
+    };
 }
 
+async function syncCurrentCourseToMarketplace() {
+    if (!currentCourse || getStatus(currentCourse) !== "published") return;
+    const button = $("syncCourseMarketplaceBtn");
+    if (button) button.disabled = true;
+    try {
+        const batch = writeBatch(db);
+        batch.set(doc(db, "marketplaceItems", "course_" + currentCourse.id), buildMarketplaceCourseListing(currentCourse), { merge: true });
+        await batch.commit();
+        console.log("✓ Course marketplace listing synchronized:", currentCourse.id);
+        alert("Course listing synchronized. Refresh the student Academy Marketplace to verify it.");
+    } catch (error) {
+        console.error("Failed syncing course to marketplace:", error);
+        alert("Unable to sync this course listing. Check administrator access and Firestore rules.");
+    } finally {
+        if (button) button.disabled = false;
+    }
+}
+
+async function toggleCourseStatus() {
+    if (!currentCourse) return;
+    const course = currentCourse;
+    const oldStatus = getStatus(course);
+    const newStatus = oldStatus === "published" ? "draft" : "published";
+    const button = $("toggleCourseStatusBtn");
+    if (button) button.disabled = true;
+
+    try {
+        const batch = writeBatch(db);
+        const courseRef = doc(db, "courses", course.id);
+        const listingRef = doc(db, "marketplaceItems", "course_" + course.id);
+        batch.update(courseRef, {
+            status: newStatus,
+            published: newStatus === "published",
+            marketplaceVisibility: newStatus === "published" ? "public" : "hidden",
+            reviewStatus: newStatus === "published" ? "approved" : "not_submitted",
+            reviewedAt: Timestamp.now()
+        });
+
+        if (newStatus === "published") {
+            const listingCourse = { ...course, status: "published", published: true, marketplaceVisibility: "public", reviewStatus: "approved" };
+            batch.set(listingRef, buildMarketplaceCourseListing(listingCourse), { merge: true });
+        } else {
+            batch.delete(listingRef);
+        }
+
+        await batch.commit();
+        course.status = newStatus;
+        course.published = newStatus === "published";
+        course.marketplaceVisibility = newStatus === "published" ? "public" : "hidden";
+        course.reviewStatus = newStatus === "published" ? "approved" : "not_submitted";
+        updateStats();
+        applyFilters();
+
+        if ($("courseDetailsModal") && !$("courseDetailsModal").classList.contains("hidden")) openModal(course);
+        console.log(`✓ Course ${newStatus}; marketplace listing ${newStatus === "published" ? "created" : "removed"}`);
+    } catch (error) {
+        console.error("❌ Failed updating course and marketplace listing:", error);
+        alert("Unable to update the course and its Marketplace listing. No partial publish should be applied.");
+    } finally {
+        if (button) button.disabled = false;
+    }
+}
 
 // ============================================================
 // CLEAR FILTERS

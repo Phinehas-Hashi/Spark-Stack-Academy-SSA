@@ -1803,11 +1803,41 @@ service cloud.firestore {
 
     // ============================================================
     // UNIFIED MARKETPLACE CATALOGUE
-    // Entries are created and maintained by trusted Cloud Functions.
+    // Course listings are staff-managed and must match a published
+    // course in the same atomic batch/transaction.
     // ============================================================
+    function courseIsPublishedAfter(courseId) {
+      let coursePath = /databases/$(database)/documents/courses/$(courseId);
+      return existsAfter(coursePath)
+        && (
+          getAfter(coursePath).data.get('published', false) == true
+          || getAfter(coursePath).data.get('status', '') == 'published'
+        )
+        && getAfter(coursePath).data.get('status', '') != 'deleted'
+        && getAfter(coursePath).data.get('reviewStatus', '') == 'approved'
+        && getAfter(coursePath).data.get('marketplaceVisibility', 'public') != 'hidden';
+    }
+
     match /marketplaceItems/{itemId} {
       allow get, list: if resource.data.get('status', '') == 'published';
-      allow create, update, delete: if false;
+
+      allow create, update:
+        if staff()
+        && request.resource.data.get('productType', '') == 'course'
+        && request.resource.data.get('sourceCollection', '') == 'courses'
+        && request.resource.data.get('sourceId', '') is string
+        && itemId == 'course_' + request.resource.data.sourceId
+        && request.resource.data.get('status', '') == 'published'
+        && request.resource.data.get('published', false) == true
+        && courseIsPublishedAfter(request.resource.data.sourceId);
+
+      allow delete:
+        if staff()
+        && resource.data.get('productType', '') == 'course'
+        && resource.data.get('sourceCollection', '') == 'courses'
+        && resource.data.get('sourceId', '') is string
+        && itemId == 'course_' + resource.data.sourceId
+        && !courseIsPublishedAfter(resource.data.sourceId);
     }
 
     // ============================================================
