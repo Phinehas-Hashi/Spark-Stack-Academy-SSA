@@ -177,7 +177,7 @@ function renderReview() {
                     <span class="grading-icon"><i data-lucide="clipboard-check" aria-hidden="true"></i></span>
                 </div>
 
-                ${graded ? '<div class="existing-grade-note">A grade has already been saved. Changes here will update the student's displayed result.</div>' : '<p class="grading-intro">Enter a mark within the assignment's maximum score and add feedback the student can act on.</p>'}
+                ${graded ? "<div class='existing-grade-note'>A grade has already been saved. Changes here will update the student's displayed result.</div>" : "<p class='grading-intro'>Enter a mark within the assignment's maximum score and add feedback the student can act on.</p>"}
 
                 <div class="score-box">
                     <label for="score">Awarded mark</label>
