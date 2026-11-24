@@ -1,0 +1,7 @@
+/* Versioned Founder shell responsive corrections. */
+@media (max-width: 900px) {
+  body.founder-portal-page .founder-main {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
