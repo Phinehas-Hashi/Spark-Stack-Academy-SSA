@@ -1445,3 +1445,23 @@
 .ticket-status.reopened { background: #fff5df; color: #80520a; }
 .ticket-card { scroll-margin-top: 90px; }
 @media(max-width:600px) { .guide-detail-panel { padding: 18px; } .guide-detail-panel h3 { padding-right: 75px; } }
+
+.ticket-status-guide {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px 14px;
+    margin: 14px 0 18px;
+    padding: 16px;
+    border: 1px solid #e7def4;
+    border-radius: 14px;
+    background: #fbf9ff;
+}
+.ticket-status-guide span {
+    color: #756987;
+    font-size: 11px;
+    line-height: 1.55;
+}
+.ticket-status-guide strong { color: #51278a; }
+@media(max-width:600px) {
+    .ticket-status-guide { grid-template-columns: 1fr; padding: 13px; }
+}
