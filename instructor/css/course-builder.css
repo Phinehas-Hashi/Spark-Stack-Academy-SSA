@@ -1095,3 +1095,115 @@ body.modal-open {
     }
 
 }
+
+/* ============================================================
+   ADVANCED BUILDER REFINEMENT — SIGNATURE SSA PALETTE
+============================================================ */
+.course-builder-page {
+    color: #e9e7f2;
+}
+.course-builder-header h1,
+.builder-section-header h2,
+.side-card-header h3,
+.module-info h3,
+.overview-course-info strong,
+.overview-stat strong {
+    color: #f4f1ff;
+}
+.builder-overview-card,
+.builder-content-panel,
+.builder-side-card,
+.module-card {
+    background: linear-gradient(145deg, #171b31, #20223b);
+    border-color: rgba(154, 132, 255, .2);
+    box-shadow: 0 14px 36px rgba(4, 7, 20, .22);
+}
+.module-header {
+    background: rgba(117, 93, 220, .10);
+}
+.module-info p,
+.builder-section-header p,
+.builder-header-left p,
+.overview-course-info small,
+.overview-stat span {
+    color: #aaa9c5;
+}
+.page-eyebrow,
+.card-eyebrow {
+    color: #9b8cff;
+}
+.back-link {
+    color: #a9a6c4;
+}
+.back-link:hover {
+    color: #70d8ef;
+}
+.primary-btn {
+    border-color: #8069ef;
+    background: linear-gradient(120deg, #7358df, #8c63f3);
+    box-shadow: 0 8px 22px rgba(116, 87, 226, .25);
+}
+.primary-btn:hover {
+    box-shadow: 0 12px 28px rgba(116, 87, 226, .34);
+}
+.secondary-btn,
+.module-action,
+.lesson-action {
+    color: #dedaf4;
+    background: #272943;
+    border-color: rgba(164, 151, 226, .24);
+}
+.secondary-btn:hover,
+.module-action:hover,
+.lesson-action:hover {
+    background: #343657;
+    border-color: #7f71d9;
+}
+.overview-course-icon,
+.module-number,
+.quick-add-icon {
+    color: #d9d0ff;
+    background: linear-gradient(135deg, rgba(127, 104, 237, .32), rgba(58, 185, 215, .16));
+}
+.builder-status.review,
+.side-status.review {
+    color: #a8e9f4;
+    background: rgba(50, 173, 204, .16);
+}
+.builder-status.needs-changes,
+.side-status.needs-changes {
+    color: #ffd2a1;
+    background: rgba(223, 142, 71, .16);
+}
+.builder-status.published,
+.side-status.published {
+    color: #a8e9c2;
+    background: rgba(48, 176, 117, .16);
+}
+.builder-advanced-field textarea {
+    min-height: 92px;
+    line-height: 1.6;
+}
+.order-action {
+    min-width: 30px;
+}
+@media (max-width: 680px) {
+    .course-builder-page {
+        padding: 16px;
+    }
+    .builder-header-actions {
+        justify-content: stretch;
+    }
+    .builder-header-actions > * {
+        flex: 1 1 calc(50% - 8px);
+    }
+    .module-header {
+        flex-wrap: wrap;
+    }
+    .module-actions {
+        margin-left: auto;
+    }
+    .lesson-actions {
+        flex-wrap: wrap;
+    }
+}
