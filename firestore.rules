@@ -724,14 +724,70 @@ service cloud.firestore {
           || isFounder()
         );
 
+      // Students can query only their own tickets using reporterId == uid().
       allow list:
-        if staff();
+        if staff()
+        || (
+          signedIn()
+          && resource.data.reporterId == uid()
+        );
 
+      // Students may only confirm a resolved ticket or reopen a closed one.
+      // Staff retain the existing full review workflow.
       allow update:
-        if staff();
+        if staff()
+        || (
+          signedIn()
+          && resource.data.reporterId == uid()
+          && request.resource.data.reporterId == resource.data.reporterId
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'studentStatusUpdatedAt', 'updatedAt'])
+          && request.resource.data.studentStatusUpdatedAt == request.time
+          && request.resource.data.updatedAt == request.time
+          && (
+            (
+              resource.data.get('status', '') == 'resolved'
+              && request.resource.data.status in ['closed', 'pending']
+            )
+            || (
+              resource.data.get('status', '') in ['dismissed', 'closed']
+              && request.resource.data.status == 'pending'
+            )
+          )
+        );
 
       allow delete:
         if isFounder();
+
+      // Public-facing conversation thread for the ticket owner and staff.
+      match /responses/{responseId} {
+        allow get, list:
+          if staff()
+          || (
+            signedIn()
+            && get(/databases/$(database)/documents/reports/$(reportId))
+                 .data.reporterId == uid()
+          );
+
+        allow create:
+          if staff()
+          || (
+            signedIn()
+            && get(/databases/$(database)/documents/reports/$(reportId))
+                 .data.reporterId == uid()
+            && request.resource.data.senderId == uid()
+            && request.resource.data.senderRole == 'student'
+            && request.resource.data.message is string
+            && request.resource.data.message.size() > 0
+            && request.resource.data.message.size() <= 5000
+            && request.resource.data.keys().hasOnly([
+              'message', 'senderId', 'senderName', 'senderRole', 'createdAt'
+            ])
+          );
+
+        allow update, delete:
+          if false;
+      }
     }
 
 
