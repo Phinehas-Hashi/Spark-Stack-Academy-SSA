@@ -5,12 +5,20 @@
 
 import {
     auth,
-    db
+    db,
+    storage
 } from "../../js/firebase.js";
 
 import {
-    onAuthStateChanged
+    onAuthStateChanged,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+    ref as storageRef,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 import {
     doc,
@@ -152,7 +160,7 @@ function renderProfile() {
 
     setValue(
         "phoneNumber",
-        currentProfile.phoneNumber
+        currentProfile.phoneNumber || currentProfile.phone
     );
 
     setValue(
@@ -245,7 +253,7 @@ function handleAvatarChange(event) {
     if (!file) return;
 
 
-    if (!file.type.startsWith("image/")) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
 
         alert("Please select an image.");
 
@@ -300,135 +308,76 @@ function handleAvatarChange(event) {
 // ============================================================
 
 async function saveProfile() {
-
     if (!currentUser) return;
 
+    const displayName = $("displayName")?.value.trim() || "";
+    const phoneNumber = $("phoneNumber")?.value.trim() || "";
+    const location = $("location")?.value.trim() || "";
+    const headline = $("headline")?.value.trim() || "";
+    const bio = $("bio")?.value.trim() || "";
+    const expertise = $("expertise")?.value.trim() || "";
 
-    const button =
-        $("saveProfileBtn");
-
-
-    const profileData = {
-
-        displayName:
-            $("displayName")?.value.trim() || "",
-
-        phoneNumber:
-            $("phoneNumber")?.value.trim() || "",
-
-        location:
-            $("location")?.value.trim() || "",
-
-        headline:
-            $("headline")?.value.trim() || "",
-
-        bio:
-            $("bio")?.value.trim() || "",
-
-        expertise:
-            $("expertise")?.value.trim() || "",
-
-        updatedAt:
-            serverTimestamp()
-
-    };
-
-
-    try {
-
-        if (button) {
-
-            button.disabled = true;
-
-            button.innerHTML = `
-                <i data-lucide="loader-circle"></i>
-                Saving...
-            `;
-
-            refreshIcons();
-
-        }
-
-
-        /*
-         * Avatar upload will be connected to
-         * Firebase Storage when Storage is enabled.
-         */
-
-        if (selectedAvatar) {
-
-            console.log(
-                "Avatar selected:",
-                selectedAvatar.name
-            );
-
-            /*
-             * Temporary:
-             * Profile preview works immediately.
-             * Storage upload can be connected later.
-             */
-
-        }
-
-
-        await setDoc(
-            doc(
-                db,
-                "users",
-                currentUser.uid
-            ),
-            profileData,
-            {
-                merge: true
-            }
-        );
-
-
-        currentProfile = {
-            ...currentProfile,
-            ...profileData
-        };
-
-
-        renderProfile();
-
-
-        alert(
-            "Profile updated successfully."
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "❌ Failed saving profile:",
-            error
-        );
-
-        alert(
-            "Unable to save your profile."
-        );
-
-
-    } finally {
-
-        if (button) {
-
-            button.disabled = false;
-
-            button.innerHTML = `
-                <i data-lucide="save"></i>
-                Save Changes
-            `;
-
-            refreshIcons();
-
-        }
-
+    if (displayName.length < 2 || displayName.length > 100) {
+        alert("Enter a name between 2 and 100 characters.");
+        $("displayName")?.focus();
+        return;
+    }
+    if (phoneNumber.length > 30 || location.length > 120 || headline.length > 120 || bio.length > 1000 || expertise.length > 300) {
+        alert("One or more profile fields exceed their allowed length.");
+        return;
     }
 
-}
+    const button = $("saveProfileBtn");
+    try {
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i data-lucide="loader-circle"></i> Saving...';
+            refreshIcons();
+        }
 
+        let photoURL = currentProfile?.photoURL || currentProfile?.profilePhoto || currentUser.photoURL || "";
+        if (selectedAvatar) {
+            const extension = selectedAvatar.type === "image/png" ? "png" : selectedAvatar.type === "image/webp" ? "webp" : "jpg";
+            const destination = storageRef(storage, `instructor-profile/${currentUser.uid}/profile-${Date.now()}.${extension}`);
+            const uploaded = await uploadBytes(destination, selectedAvatar, { contentType: selectedAvatar.type });
+            photoURL = await getDownloadURL(uploaded.ref);
+        }
+
+        await updateProfile(currentUser, { displayName, photoURL: photoURL || null });
+
+        const profileData = {
+            displayName,
+            name: displayName,
+            phoneNumber,
+            phone: phoneNumber,
+            location,
+            headline,
+            bio,
+            expertise,
+            photoURL,
+            profilePhoto: photoURL,
+            updatedAt: serverTimestamp()
+        };
+
+        await setDoc(doc(db, "users", currentUser.uid), profileData, { merge: true });
+        currentProfile = { ...currentProfile, ...profileData };
+        selectedAvatar = null;
+        if ($("avatarInput")) $("avatarInput").value = "";
+        renderProfile();
+        alert("Profile updated successfully.");
+    } catch (error) {
+        console.error("Instructor profile save failed:", error);
+        alert(error?.code === "storage/unauthorized"
+            ? "Profile photo upload is not permitted. Check that the latest Storage rules have been deployed and your instructor account is active."
+            : "Unable to save your profile. Check your connection and try again.");
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i data-lucide="save"></i> Save Changes';
+            refreshIcons();
+        }
+    }
+}
 
 // ============================================================
 // PRO STATUS
