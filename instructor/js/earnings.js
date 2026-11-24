@@ -12,6 +12,8 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
 import {
     collection,
     query,
@@ -21,8 +23,6 @@ import {
     getDocs,
     doc,
     getDoc,
-    addDoc,
-    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -33,8 +33,11 @@ import {
 const DEFAULT_SETTINGS = {
     platformTaxPercent: 0,
     withdrawalFeePercent: 0,
-    minimumWithdrawal: 100,
-    premiumMonthlyPrice: 999
+    minimumWithdrawal: 1000,
+    premiumMonthlyPrice: 999,
+    withdrawalsEnabled: true,
+    mpesaWithdrawalsEnabled: true,
+    withdrawalApproval: true
 };
 
 
@@ -48,6 +51,7 @@ let earningsSettings = {
 };
 
 let currentBalance = 0;
+let earningsSettingsLoaded = false;
 
 
 // ============================================================
@@ -100,47 +104,26 @@ function formatDate(timestamp) {
 // ============================================================
 
 async function loadEarningsSettings() {
-
     try {
-
-        const ref =
-            doc(
-                db,
-                "platformSettings",
-                "earnings"
-            );
-
-        const snap =
-            await getDoc(ref);
-
-
-        if (snap.exists()) {
-
-            earningsSettings = {
-                ...DEFAULT_SETTINGS,
-                ...snap.data()
-            };
-
-        }
-
-
-        console.log(
-            "✓ Earnings settings loaded",
-            earningsSettings
-        );
-
-
+        const getSettings = httpsCallable(getFunctions(), "getInstructorEarningsSettings");
+        const result = await getSettings();
+        earningsSettings = {
+            ...DEFAULT_SETTINGS,
+            ...(result.data || {})
+        };
+        earningsSettingsLoaded = true;
+        console.log("Instructor earnings settings loaded", earningsSettings);
     } catch (error) {
-
-        console.error(
-            "❌ Failed loading earnings settings:",
-            error
-        );
-
+        console.error("Failed loading instructor earnings settings:", error);
+        earningsSettings = {
+            ...DEFAULT_SETTINGS,
+            withdrawalsEnabled: false,
+            mpesaWithdrawalsEnabled: false,
+            withdrawalApproval: false
+        };
+        earningsSettingsLoaded = false;
     }
-
 }
-
 
 // ============================================================
 // LOAD INSTRUCTOR PROFILE
@@ -184,114 +167,89 @@ async function loadInstructorProfile(uid) {
 // ============================================================
 
 async function loadEarnings() {
-
     if (!currentInstructor) return;
 
-
     try {
-
-        const q =
-            query(
-                collection(db, "instructorEarnings"),
-                where(
-                    "instructorId",
-                    "==",
-                    currentInstructor.uid
-                ),
-                orderBy(
-                    "createdAt",
-                    "desc"
-                )
-            );
-
-
-        const snapshot =
-            await getDocs(q);
-
-
-        let total = 0;
-        let monthTotal = 0;
-        let transactions = [];
-
-
+        const earningsQuery = query(
+            collection(db, "instructorEarnings"),
+            where("instructorId", "==", currentInstructor.uid)
+        );
+        const earningsSnapshot = await getDocs(earningsQuery);
         const now = new Date();
+        let lifetime = 0;
+        let monthTotal = 0;
+        const transactions = [];
 
-        snapshot.forEach(item => {
-
-            const data = item.data();
-
-            const amount =
-                Number(data.netAmount || 0);
-
-            total += amount;
-
-
-            const date =
-                data.createdAt?.toDate
-                    ? data.createdAt.toDate()
-                    : null;
-
-
-            if (
-                date &&
-                date.getMonth() === now.getMonth() &&
-                date.getFullYear() === now.getFullYear()
-            ) {
-
+        earningsSnapshot.forEach(record => {
+            const data = record.data();
+            const amountValue = Number(data.netAmount ?? data.amount ?? data.total ?? data.earnings ?? 0);
+            const amount = Number.isFinite(amountValue) && amountValue > 0 ? amountValue : 0;
+            lifetime += amount;
+            const date = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+            if (date && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) {
                 monthTotal += amount;
-
             }
-
-
-            transactions.push({
-                id: item.id,
-                ...data
-            });
-
+            transactions.push({ id: record.id, ...data });
         });
 
-
-        currentBalance = total;
-
-
-        updateMoney(
-            "earningsBalance",
-            total
+        const withdrawalQuery = query(
+            collection(db, "withdrawalRequests"),
+            where("instructorId", "==", currentInstructor.uid)
         );
+        const withdrawalSnapshot = await getDocs(withdrawalQuery);
+        const withdrawals = withdrawalSnapshot.docs.map(record => ({ id: record.id, ...record.data() }));
+        const releasedStatuses = ["rejected", "declined", "cancelled", "canceled", "failed"];
+        const pendingStatuses = ["pending", "processing", "under_review", "approved"];
+        const reserved = withdrawals.reduce((sum, item) => {
+            const status = String(item.status || "pending").trim().toLowerCase();
+            const amount = Number(item.amount || 0);
+            return releasedStatuses.includes(status) || !Number.isFinite(amount) || amount <= 0 ? sum : sum + amount;
+        }, 0);
+        const pending = withdrawals.reduce((sum, item) => {
+            const status = String(item.status || "pending").trim().toLowerCase();
+            const amount = Number(item.amount || 0);
+            return pendingStatuses.includes(status) && Number.isFinite(amount) && amount > 0 ? sum + amount : sum;
+        }, 0);
 
-        updateMoney(
-            "earningsTotal",
-            total
-        );
+        currentBalance = Math.max(0, lifetime - reserved);
+        updateMoney("availableBalance", currentBalance);
+        updateMoney("pendingBalance", pending);
+        updateMoney("monthlyEarnings", monthTotal);
+        updateMoney("lifetimeEarnings", lifetime);
+        setText("totalSales", transactions.length);
+        updateMoney("minimumWithdrawal", earningsSettings.minimumWithdrawal);
+        setText("withdrawalFee", `${Number(earningsSettings.withdrawalFeePercent || 0)}%`);
+        setText("platformTax", `${Number(earningsSettings.platformTaxPercent || 0)}%`);
+        updateMoney("premiumPrice", earningsSettings.premiumMonthlyPrice);
 
-        updateMoney(
-            "earningsMonth",
-            monthTotal
-        );
+        const status = $("withdrawalStatus");
+        const message = $("withdrawalMessage");
+        const withdrawalsEnabled = earningsSettingsLoaded
+            && earningsSettings.withdrawalsEnabled !== false
+            && earningsSettings.mpesaWithdrawalsEnabled !== false
+            && earningsSettings.withdrawalApproval !== false;
+        const canWithdraw = withdrawalsEnabled && currentBalance >= Number(earningsSettings.minimumWithdrawal || 100);
+        if (status) status.textContent = !withdrawalsEnabled
+            ? "M-Pesa withdrawals disabled"
+            : canWithdraw ? "Withdrawal available" : "Minimum balance not reached";
+        if (message) message.textContent = !withdrawalsEnabled
+            ? "The Founder has disabled M-Pesa withdrawals or manual payout approval."
+            : canWithdraw
+                ? "Your available balance is ready for an M-Pesa payout request."
+                : `You need ${formatMoney(Math.max(0, Number(earningsSettings.minimumWithdrawal || 100) - currentBalance))} more to reach the withdrawal minimum.`;
+        ["withdrawBtn", "heroWithdrawBtn"].forEach(id => {
+            const button = $(id);
+            if (button) button.disabled = !canWithdraw;
+        });
 
-
-        setText(
-            "earningsTransactions",
-            transactions.length
-        );
-
-
-        renderTransactions(
-            transactions
-        );
-
-
+        renderTransactions(transactions);
+        renderWithdrawalHistory(withdrawals);
     } catch (error) {
-
-        console.error(
-            "❌ Failed loading earnings:",
-            error
-        );
-
+        console.error("Failed loading instructor earnings and withdrawals:", error);
         showEarningsError();
-
+        const history = $("withdrawalHistory");
+        if (history) history.textContent = "Withdrawal history could not be loaded.";
     }
-
 }
 
 
@@ -369,7 +327,7 @@ function renderTransactions(items) {
         items.slice(0, 20).map(item => {
 
             const amount =
-                Number(item.netAmount || 0);
+                Number(item.netAmount ?? item.amount ?? item.total ?? item.earnings ?? 0);
 
 
             return `
@@ -422,273 +380,183 @@ function renderTransactions(items) {
 }
 
 
+function renderWithdrawalHistory(items) {
+    const container = $("withdrawalHistory");
+    if (!container) return;
+    if (!items.length) {
+        container.innerHTML = '<div class="earnings-empty"><i data-lucide="banknote"></i><p>No withdrawals yet.</p></div>';
+        refreshIcons();
+        return;
+    }
+    const ordered = [...items].sort((a, b) => {
+        const dateOf = value => value?.toDate ? value.toDate().getTime() : new Date(value || 0).getTime();
+        return dateOf(b.createdAt) - dateOf(a.createdAt);
+    });
+    container.innerHTML = ordered.slice(0, 20).map(item => {
+        const status = String(item.status || "pending").toLowerCase();
+        const phone = String(item.account || "");
+        const maskedPhone = phone.length > 4 ? `${phone.slice(0, 4)}••••${phone.slice(-2)}` : phone;
+        return `
+            <div class="transaction-item withdrawal-history-item">
+                <div class="transaction-info">
+                    <div class="transaction-icon"><i data-lucide="smartphone"></i></div>
+                    <div>
+                        <strong>M-Pesa · ${escapeHTML(maskedPhone)}</strong>
+                        <span>${formatDate(item.createdAt)}</span>
+                    </div>
+                </div>
+                <div class="withdrawal-history-meta">
+                    <strong>${formatMoney(item.amount || 0)}</strong>
+                    <span class="withdrawal-status-pill status-${escapeHTML(status.replace(/[^a-z0-9_-]/g, ""))}">${escapeHTML(status.replaceAll("_", " "))}</span>
+                </div>
+            </div>
+        `;
+    }).join("");
+    refreshIcons();
+}
+
+
 // ============================================================
 // WITHDRAWAL WINDOW
 // ============================================================
 
+let withdrawalTrigger = null;
+let previousBodyOverflow = "";
+
 function openWithdrawalWindow() {
-
-    const modal =
-        $("withdrawalModal");
-
+    const modal = $("withdrawalModal");
     if (!modal) return;
-
-
-    const available =
-        $("withdrawAvailable");
-
-
-    if (available) {
-
-        available.textContent =
-            formatMoney(currentBalance);
-
+    if (!earningsSettingsLoaded) {
+        alert("Withdrawal settings are unavailable. Refresh the page and try again.");
+        return;
     }
-
-
+    if (earningsSettings.withdrawalsEnabled === false || earningsSettings.mpesaWithdrawalsEnabled === false || earningsSettings.withdrawalApproval === false) {
+        alert("M-Pesa withdrawals are currently disabled by the Founder.");
+        return;
+    }
+    if (currentBalance < Number(earningsSettings.minimumWithdrawal || 100)) return;
+    withdrawalTrigger = document.activeElement;
+    previousBodyOverflow = document.body.style.overflow;
+    const available = $("modalAvailableBalance");
+    if (available) available.textContent = formatMoney(currentBalance);
+    const amount = $("withdrawalAmount");
+    if (amount) {
+        amount.min = String(Number(earningsSettings.minimumWithdrawal || 100));
+        amount.max = String(Math.min(currentBalance, Number(earningsSettings.withdrawalLimit || 50000)));
+        amount.value = "";
+    }
     updateWithdrawalPreview();
-
-    modal.classList.add("active");
-
-    document.body.style.overflow =
-        "hidden";
-
+    modal.classList.remove("hidden");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    $("withdrawalAccount")?.focus();
 }
-
 
 function closeWithdrawalWindow() {
-
-    const modal =
-        $("withdrawalModal");
-
-    if (!modal) return;
-
-
-    modal.classList.remove("active");
-
-    document.body.style.overflow =
-        "";
-
+    const modal = $("withdrawalModal");
+    if (!modal || modal.classList.contains("hidden")) return;
+    modal.classList.add("hidden");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = previousBodyOverflow;
+    if (withdrawalTrigger?.isConnected) withdrawalTrigger.focus();
 }
-
-
-// ============================================================
-// WITHDRAWAL PREVIEW
-// ============================================================
 
 function updateWithdrawalPreview() {
-
-    const input =
-        $("withdrawAmount");
-
-    if (!input) return;
-
-
-    const amount =
-        Number(input.value || 0);
-
-
-    const fee =
-        calculateWithdrawalFee(amount);
-
-
-    const receive =
-        Math.max(
-            amount - fee,
-            0
-        );
-
-
-    updateMoney(
-        "withdrawFee",
-        fee
-    );
-
-    updateMoney(
-        "withdrawReceive",
-        receive
-    );
-
+    const amount = Math.max(0, Number($("withdrawalAmount")?.value || 0));
+    const tax = amount * Number(earningsSettings.platformTaxPercent || 0) / 100;
+    const fee = amount * Number(earningsSettings.withdrawalFeePercent || 0) / 100;
+    const receive = Math.max(0, amount - tax - fee);
+    updateMoney("summaryGross", amount);
+    updateMoney("summaryTax", tax);
+    updateMoney("summaryFee", fee);
+    updateMoney("summaryNet", receive);
 }
 
-
-// ============================================================
-// FEE
-// ============================================================
-
-function calculateWithdrawalFee(amount) {
-
-    return (
-        Number(amount || 0) *
-        Number(
-            earningsSettings.withdrawalFeePercent || 0
-        ) /
-        100
-    );
-
+function normalizeMpesaPhone(value) {
+    const digits = String(value || "").replace(/[^0-9]/g, "");
+    if (/^0[17][0-9]{8}$/.test(digits)) return `+254${digits.slice(1)}`;
+    if (/^254[17][0-9]{8}$/.test(digits)) return `+${digits}`;
+    if (/^[17][0-9]{8}$/.test(digits)) return `+254${digits}`;
+    return null;
 }
 
-
-// ============================================================
-// SUBMIT WITHDRAWAL
-// ============================================================
-
-async function submitWithdrawal(event) {
-
-    event.preventDefault();
-
-
-    if (!currentInstructor) return;
-
-
-    const amount =
-        Number(
-            $("withdrawAmount")?.value || 0
-        );
-
-
-    const method =
-        $("withdrawMethod")?.value || "";
-
-
-    const account =
-        $("withdrawAccount")?.value.trim() || "";
-
-
-    const minimum =
-        Number(
-            earningsSettings.minimumWithdrawal || 100
-        );
-
-
-    if (amount < minimum) {
-
-        alert(
-            `Minimum withdrawal is ${formatMoney(minimum)}.`
-        );
-
+async function submitWithdrawal() {
+    if (!currentInstructor || !earningsSettingsLoaded) return;
+    const amount = Number($("withdrawalAmount")?.value || 0);
+    const phone = normalizeMpesaPhone($("withdrawalAccount")?.value);
+    const minimum = Number(earningsSettings.minimumWithdrawal || 100);
+    if (!Number.isFinite(amount) || amount < minimum) {
+        alert(`Minimum withdrawal is ${formatMoney(minimum)}.`);
         return;
-
     }
-
-
+    if (amount > Number(earningsSettings.withdrawalLimit || 50000)) {
+        alert("The maximum withdrawal request is " + formatMoney(earningsSettings.withdrawalLimit) + ".");
+        return;
+    }
     if (amount > currentBalance) {
-
-        alert(
-            "Insufficient available balance."
-        );
-
+        alert("Insufficient available balance.");
         return;
-
+    }
+    if (!phone) {
+        alert("Enter a valid Kenyan M-Pesa number, such as 0712345678 or +254712345678.");
+        $("withdrawalAccount")?.focus();
+        return;
     }
 
-
-    if (!method || !account) {
-
-        alert(
-            "Please complete your withdrawal details."
-        );
-
-        return;
-
+    const tax = amount * Number(earningsSettings.platformTaxPercent || 0) / 100;
+    const fee = amount * Number(earningsSettings.withdrawalFeePercent || 0) / 100;
+    const netAmount = Math.max(0, amount - tax - fee);
+    const button = $("confirmWithdrawalBtn");
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Submitting request…";
     }
-
-
-    const fee =
-        calculateWithdrawalFee(amount);
-
-
-    const netAmount =
-        Math.max(
-            amount - fee,
-            0
-        );
-
-
-    const button =
-        $("withdrawSubmit");
-
-
     try {
-
-        if (button) {
-
-            button.disabled = true;
-
-            button.textContent =
-                "Submitting...";
-
-        }
-
-
-        await addDoc(
-            collection(
-                db,
-                "withdrawalRequests"
-            ),
-            {
-
-                instructorId:
-                    currentInstructor.uid,
-
-                amount,
-
-                withdrawalFee:
-                    fee,
-
-                netAmount,
-
-                method,
-
-                account,
-
-                status:
-                    "pending",
-
-                createdAt:
-                    serverTimestamp()
-
-            }
-        );
-
-
-        alert(
-            "Withdrawal request submitted successfully."
-        );
-
-
-        $("withdrawForm")?.reset();
-
+        const requestWithdrawal = httpsCallable(getFunctions(), "requestInstructorWithdrawal");
+        await requestWithdrawal({ amount, phone });
+        await loadEarnings();
         closeWithdrawalWindow();
-
-
+        alert("Your M-Pesa withdrawal request has been submitted for review.");
     } catch (error) {
-
-        console.error(
-            "❌ Withdrawal failed:",
-            error
-        );
-
-        alert(
-            "Unable to submit withdrawal request."
-        );
-
-
+        console.error("Withdrawal request failed:", error);
+        alert(error?.message || "Unable to submit the withdrawal request. Please try again.");
     } finally {
-
         if (button) {
-
             button.disabled = false;
-
-            button.textContent =
-                "Request Withdrawal";
-
+            button.innerHTML = '<i data-lucide="shield-check"></i> Confirm Withdrawal';
+            refreshIcons();
         }
-
     }
-
 }
 
+function bindWithdrawalModalKeyboard() {
+    const modal = $("withdrawalModal");
+    if (!modal) return;
+    document.addEventListener("keydown", event => {
+        if (modal.classList.contains("hidden")) return;
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeWithdrawalWindow();
+            return;
+        }
+        if (event.key !== "Tab") return;
+        const focusable = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+            .filter(element => element.getClientRects().length);
+        if (!focusable.length) {
+            event.preventDefault();
+            return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+}
 
 // ============================================================
 // PREMIUM INSTRUCTOR
@@ -758,75 +626,17 @@ function setupPremiumInstructor() {
 // ============================================================
 
 function setupEvents() {
-
-    $("withdrawBtn")
-        ?.addEventListener(
-            "click",
-            openWithdrawalWindow
-        );
-
-
-    $("withdrawClose")
-        ?.addEventListener(
-            "click",
-            closeWithdrawalWindow
-        );
-
-
-    $("withdrawCancel")
-        ?.addEventListener(
-            "click",
-            closeWithdrawalWindow
-        );
-
-
-    $("withdrawAmount")
-        ?.addEventListener(
-            "input",
-            updateWithdrawalPreview
-        );
-
-
-    $("withdrawForm")
-        ?.addEventListener(
-            "submit",
-            submitWithdrawal
-        );
-
-
-    $("withdrawalModal")
-        ?.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target.id ===
-                    "withdrawalModal"
-                ) {
-
-                    closeWithdrawalWindow();
-
-                }
-
-            }
-        );
-
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Escape"
-            ) {
-
-                closeWithdrawalWindow();
-
-            }
-
+    $("withdrawBtn")?.addEventListener("click", openWithdrawalWindow);
+    $("heroWithdrawBtn")?.addEventListener("click", openWithdrawalWindow);
+    $("closeWithdrawalModal")?.addEventListener("click", closeWithdrawalWindow);
+    $("confirmWithdrawalBtn")?.addEventListener("click", submitWithdrawal);
+    $("withdrawalAmount")?.addEventListener("input", updateWithdrawalPreview);
+    $("withdrawalModal")?.addEventListener("click", event => {
+        if (event.target === $("withdrawalModal") || event.target.classList.contains("modal-backdrop")) {
+            closeWithdrawalWindow();
         }
-    );
-
+    });
+    bindWithdrawalModalKeyboard();
 }
 
 

@@ -51,11 +51,20 @@ body.instructor-messages-page .rm-composer button {
 }
 body.instructor-messages-page .rm-empty { color: var(--ssa-color-muted, #77758f); }
 body.instructor-messages-page .rm-empty strong { color: var(--ssa-color-ink, #17152f); }
+
+
+/* Shared shell integration and narrow-screen conversation layout. */
+body.instructor-messages-page { min-height: 0; padding: 0; }
+body.instructor-messages-page .messages-page { min-height: 0; }
+body.instructor-messages-page .rm-shell { width: 100%; height: calc(100dvh - 150px); min-height: 520px; }
 @media (max-width: 800px) {
-    body.instructor-messages-page { padding: 8px; }
-    body.instructor-messages-page .rm-shell {
-        height: calc(100dvh - 16px);
-        min-height: 0;
-        border-radius: 16px;
-    }
+  body.instructor-messages-page .rm-shell {
+    height: calc(100dvh - 130px);
+    min-height: 480px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(160px, 34%) minmax(300px, 1fr);
+  }
+  body.instructor-messages-page .rm-contacts { display: flex; min-height: 0; overflow: hidden; }
+  body.instructor-messages-page .rm-people { min-height: 0; overflow: auto; }
+  body.instructor-messages-page .rm-chat { min-height: 0; }
 }

@@ -25,6 +25,191 @@ function eventKey(event, suffix) {
   return `${raw}-${suffix}`.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 140);
 }
 
+function normalizeInstructorMpesaPhone(value) {
+  let phone = safeText(value).replace(/[^0-9]/g, "");
+  if (phone.startsWith("0")) phone = "254" + phone.slice(1);
+  else if (phone.startsWith("7") || phone.startsWith("1")) phone = "254" + phone;
+  if (!/^254[17][0-9]{8}$/.test(phone)) {
+    throw new HttpsError("invalid-argument", "Enter a valid Kenyan M-Pesa phone number.");
+  }
+  return "+" + phone;
+}
+
+exports.requestInstructorWithdrawal = onCall(async request => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in before requesting a withdrawal.");
+
+  const amount = Number(request.data?.amount);
+  if (!Number.isFinite(amount) || amount <= 0 || Number(amount.toFixed(2)) !== amount) {
+    throw new HttpsError("invalid-argument", "Enter a valid withdrawal amount with no more than two decimal places.");
+  }
+  const phone = normalizeInstructorMpesaPhone(request.data?.phone);
+
+  const userRef = db.doc("users/" + uid);
+  const settingsRef = db.doc("platformSettings/earnings");
+  const monetizationRef = db.doc("settings/monetization");
+  const financeSecurityRef = db.doc("finance/security");
+  const walletRef = db.doc("withdrawalLocks/" + uid);
+  const earningsQuery = db.collection("instructorEarnings").where("instructorId", "==", uid);
+  const withdrawalsQuery = db.collection("withdrawalRequests").where("instructorId", "==", uid);
+  const requestRef = db.collection("withdrawalRequests").doc();
+
+  return db.runTransaction(async transaction => {
+    const [userSnap, controlsSnap, settingsSnap, monetizationSnap, financeSecuritySnap, earningsSnap, withdrawalsSnap, walletSnap] = await Promise.all([
+      transaction.get(userRef),
+      transaction.get(platformRef),
+      transaction.get(settingsRef),
+      transaction.get(monetizationRef),
+      transaction.get(financeSecurityRef),
+      transaction.get(earningsQuery),
+      transaction.get(withdrawalsQuery),
+      transaction.get(walletRef)
+    ]);
+
+    if (!userSnap.exists) throw new HttpsError("permission-denied", "Instructor profile not found.");
+    const user = userSnap.data() || {};
+    if (user.role !== "instructor" || user.status !== "active" || user.active !== true || user.verified !== true) {
+      throw new HttpsError("permission-denied", "Only active, verified instructors can request withdrawals.");
+    }
+
+    const controls = controlsSnap.exists ? controlsSnap.data() || {} : {};
+    const maintenance = controls.maintenance || {};
+    const nowMs = Date.now();
+    const startMs = maintenance.startAt?.toMillis ? maintenance.startAt.toMillis() : new Date(maintenance.startAt || 0).getTime();
+    const endMs = maintenance.endAt?.toMillis ? maintenance.endAt.toMillis() : new Date(maintenance.endAt || 0).getTime();
+    const maintenanceBlocked = maintenance.scheduled === true
+      && (maintenance.target === "instructor" || maintenance.target === "all")
+      && nowMs >= startMs && nowMs < endMs;
+    if (controls.lockdown === true || controls.instructor?.suspended === true || maintenanceBlocked) {
+      throw new HttpsError("failed-precondition", "Instructor withdrawals are unavailable while the portal is restricted.");
+    }
+
+    const settings = settingsSnap.exists ? settingsSnap.data() || {} : {};
+    const monetization = monetizationSnap.exists ? monetizationSnap.data() || {} : {};
+    if (settings.withdrawalsEnabled === false || monetization.enableWithdrawals === false) {
+      throw new HttpsError("failed-precondition", "Instructor withdrawals are currently disabled by the Founder.");
+    }
+    if (settings.mpesaWithdrawalsEnabled === false || monetization.enableMpesa === false) {
+      throw new HttpsError("failed-precondition", "M-Pesa withdrawals are currently disabled by the Founder.");
+    }
+    if (settings.withdrawalApproval === false || monetization.withdrawalApproval === false || monetization.automaticPayouts === true) {
+      throw new HttpsError("failed-precondition", "Manual Founder approval is required. Automatic payouts are not enabled for this workflow.");
+    }
+    const minimum = Number(monetization.minimumWithdrawal ?? settings.minimumWithdrawal ?? 1000);
+    const financeSecurity = financeSecuritySnap.exists ? financeSecuritySnap.data() || {} : {};
+    const withdrawalLimit = Number(financeSecurity.withdrawalLimit ?? 50000);
+    const taxRate = Number(settings.platformTaxPercent ?? 0);
+    const feeRate = Number(monetization.withdrawalFeePercent ?? settings.withdrawalFeePercent ?? 0);
+    if (!Number.isFinite(minimum) || minimum < 0
+        || !Number.isFinite(taxRate) || taxRate < 0 || taxRate > 100
+        || !Number.isFinite(feeRate) || feeRate < 0 || feeRate > 100) {
+      throw new HttpsError("failed-precondition", "Withdrawal settings are invalid. Contact the Founder.");
+    }
+
+    const earningsTotal = earningsSnap.docs.reduce((sum, item) => {
+      const data = item.data() || {};
+      const value = Number(data.netAmount ?? data.amount ?? data.total ?? data.earnings ?? 0);
+      return sum + (Number.isFinite(value) && value > 0 ? value : 0);
+    }, 0);
+    const releasedStatuses = ["rejected", "declined", "cancelled", "canceled", "failed"];
+    const reservedTotal = withdrawalsSnap.docs.reduce((sum, item) => {
+      const data = item.data() || {};
+      const status = safeText(data.status, "pending").toLowerCase();
+      const value = Number(data.amount || 0);
+      return releasedStatuses.includes(status) || !Number.isFinite(value) || value <= 0 ? sum : sum + value;
+    }, 0);
+    const available = Math.max(0, Math.round((earningsTotal - reservedTotal) * 100) / 100);
+
+    if (!Number.isFinite(withdrawalLimit) || withdrawalLimit <= 0) {
+      throw new HttpsError("failed-precondition", "The Founder withdrawal limit is not configured correctly.");
+    }
+    if (amount < minimum) {
+      throw new HttpsError("failed-precondition", "The minimum withdrawal is KES " + minimum.toLocaleString("en-KE") + ".");
+    }
+    if (amount > withdrawalLimit) {
+      throw new HttpsError("failed-precondition", "The maximum withdrawal request is KES " + withdrawalLimit.toLocaleString("en-KE") + ".");
+    }
+    if (amount > available) {
+      throw new HttpsError("failed-precondition", "Insufficient available balance. Current available balance: KES " + available.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ".");
+    }
+
+    const platformTax = Math.round(amount * taxRate) / 100;
+    const withdrawalFee = Math.round(amount * feeRate) / 100;
+    const netAmount = Math.round((amount - platformTax - withdrawalFee) * 100) / 100;
+    if (netAmount <= 0) throw new HttpsError("failed-precondition", "The configured fees leave no payable amount.");
+
+    const now = Timestamp.now();
+    transaction.create(requestRef, {
+      instructorId: uid,
+      amount,
+      platformTax,
+      withdrawalFee,
+      netAmount,
+      method: "mpesa",
+      account: phone,
+      currency: "KES",
+      status: "pending",
+      createdAt: now
+    });
+    transaction.set(walletRef, {
+      instructorId: uid,
+      withdrawalGuardUpdatedAt: now,
+      updatedAt: now
+    }, { merge: true });
+
+    return {
+      success: true,
+      requestId: requestRef.id,
+      amount,
+      platformTax,
+      withdrawalFee,
+      netAmount,
+      availableBalance: Math.max(0, Math.round((available - amount) * 100) / 100)
+    };
+  });
+});
+
+exports.getInstructorEarningsSettings = onCall(async request => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to load instructor earnings settings.");
+  const [userSnap, controlsSnap, settingsSnap, monetizationSnap, financeSecuritySnap] = await Promise.all([
+    db.doc("users/" + uid).get(),
+    platformRef.get(),
+    db.doc("platformSettings/earnings").get(),
+    db.doc("settings/monetization").get(),
+    db.doc("finance/security").get()
+  ]);
+  if (!userSnap.exists) throw new HttpsError("permission-denied", "Instructor profile not found.");
+  const user = userSnap.data() || {};
+  if (user.role !== "instructor" || user.status !== "active" || user.active !== true || user.verified !== true) {
+    throw new HttpsError("permission-denied", "Only active, verified instructors can view earnings settings.");
+  }
+  const controls = controlsSnap.exists ? controlsSnap.data() || {} : {};
+  const maintenance = controls.maintenance || {};
+  const now = Date.now();
+  const start = maintenance.startAt?.toMillis ? maintenance.startAt.toMillis() : new Date(maintenance.startAt || 0).getTime();
+  const end = maintenance.endAt?.toMillis ? maintenance.endAt.toMillis() : new Date(maintenance.endAt || 0).getTime();
+  const maintenanceBlocked = maintenance.scheduled === true
+    && (maintenance.target === "instructor" || maintenance.target === "all")
+    && now >= start && now < end;
+  if (controls.lockdown === true || controls.instructor?.suspended === true || maintenanceBlocked) {
+    throw new HttpsError("failed-precondition", "Instructor portal access is currently restricted.");
+  }
+
+  const settings = settingsSnap.exists ? settingsSnap.data() || {} : {};
+  const monetization = monetizationSnap.exists ? monetizationSnap.data() || {} : {};
+  return {
+    minimumWithdrawal: Number(monetization.minimumWithdrawal ?? settings.minimumWithdrawal ?? 1000),
+    withdrawalLimit: Number((financeSecuritySnap.exists ? financeSecuritySnap.data()?.withdrawalLimit : 50000) ?? 50000),
+    withdrawalFeePercent: Number(monetization.withdrawalFeePercent ?? settings.withdrawalFeePercent ?? 0),
+    platformTaxPercent: Number(settings.platformTaxPercent ?? 0),
+    premiumMonthlyPrice: Number(settings.premiumMonthlyPrice ?? monetization.premiumMonthly ?? 999),
+    withdrawalsEnabled: settings.withdrawalsEnabled !== false && monetization.enableWithdrawals !== false,
+    mpesaWithdrawalsEnabled: settings.mpesaWithdrawalsEnabled !== false && monetization.enableMpesa !== false,
+    withdrawalApproval: settings.withdrawalApproval !== false && monetization.withdrawalApproval !== false && monetization.automaticPayouts !== true
+  };
+});
+
 async function requireFounder(request) {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "You must be signed in as a founder.");
