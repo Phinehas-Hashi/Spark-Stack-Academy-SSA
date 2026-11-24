@@ -1249,3 +1249,39 @@
     }
 
 }
+
+/* LIVE SUPPORT CONVERSATION IN CASE TIMELINE */
+.ticket-timeline-message .ticket-timeline-content {
+    width: min(100%, 680px);
+    padding: 12px 15px;
+    border: 1px solid #e4e9f1;
+    border-radius: 13px;
+    background: #f8fafc;
+}
+.ticket-timeline-message.reporter .ticket-timeline-content {
+    border-color: #e5dcf5;
+    background: #faf7ff;
+}
+.ticket-timeline-message.staff .ticket-timeline-content {
+    border-color: #d7e5f7;
+    background: #f4f8ff;
+}
+.ticket-timeline-content strong {
+    display: block;
+    color: var(--admin-navy);
+    font-size: 11px;
+    font-weight: 800;
+}
+.ticket-timeline-content p {
+    margin: 7px 0;
+    color: var(--admin-text, #334155);
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.ticket-timeline-content time {
+    display: block;
+    color: var(--admin-muted);
+    font-size: 10px;
+}
