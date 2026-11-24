@@ -6,11 +6,12 @@
 import { app, auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, doc, getDoc, onSnapshot, orderBy, query, where, limit
+  collection, doc, onSnapshot, orderBy, query, where, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const functions = getFunctions(app, "us-central1");
+const getQuote = httpsCallable(functions, "getStudentPaymentQuote");
 const initiateStk = httpsCallable(functions, "initiateStudentStkPayment");
 const submitManual = httpsCallable(functions, "submitStudentManualPayment");
 
@@ -58,39 +59,30 @@ function setBusy(id, busy, label) {
 }
 
 async function loadPurchase() {
+  let request;
   if (purchaseType === "course" && courseId) {
-    const snap = await getDoc(doc(db, "courses", courseId));
-    if (!snap.exists()) throw new Error("This course could not be found.");
-    const data = snap.data();
-    if (data.published !== true && String(data.status || "").toLowerCase() !== "published") {
-      throw new Error("This course is not currently available for purchase.");
-    }
-    const amount = Number(data.price);
-    if (!Number.isSafeInteger(amount) || amount < 1 || String(data.currency || "KES").toUpperCase() !== "KES") {
-      throw new Error("This course does not have a valid KES payment price.");
-    }
-    purchase = { purchaseType: "course", courseId, title: data.title || "Academy Course", amount };
-    return;
+    request = { purchaseType: "course", courseId };
+  } else if (purchaseType === "premium" && plan) {
+    request = { purchaseType: "premium", plan, billingPeriod };
+  } else {
+    throw new Error("No valid course or membership was selected.");
   }
 
-  if (purchaseType === "premium" && plan) {
-    if (!["monthly", "quarterly"].includes(billingPeriod)) throw new Error("Choose a valid membership period.");
-    const snap = await getDoc(doc(db, "premiumPricing", "global"));
-    const pricing = snap.exists() ? snap.data() : {};
-    const planData = pricing.plans?.[plan];
-    const amount = Number(planData?.[billingPeriod === "monthly" ? "monthlyPrice" : "quarterlyPrice"]);
-    if (pricing.published !== true || !planData || planData.enabled === false || !Number.isSafeInteger(amount) || amount < 1) {
-      throw new Error("This membership price is not currently published by the Founder.");
-    }
-    purchase = {
-      purchaseType: "premium", plan, billingPeriod,
-      title: planData.name || plan.replaceAll("_", " "),
-      amount
-    };
-    return;
+  // The server calculates the amount from the published course or Founder
+  // pricing record. Never use a browser-supplied amount for checkout.
+  const result = await getQuote(request);
+  const data = result.data || {};
+  purchase = {
+    purchaseType: data.purchaseType,
+    courseId: data.courseId || "",
+    plan: data.plan || "",
+    billingPeriod: data.billingPeriod || "",
+    title: data.title || "Academy Purchase",
+    amount: Number(data.amount)
+  };
+  if (!Number.isSafeInteger(purchase.amount) || purchase.amount < 1) {
+    throw new Error("The Academy returned an invalid payment amount.");
   }
-
-  throw new Error("No valid course or membership was selected.");
 }
 
 function renderCheckout() {
