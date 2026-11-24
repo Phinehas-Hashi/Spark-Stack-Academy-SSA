@@ -1426,3 +1426,22 @@
 
 .ticket-creation-notice:empty { display:none; }
 .ticket-creation-notice:not(:empty) { margin-bottom:14px; padding:14px 16px; border:1px solid #d9c58b; border-radius:12px; background:#fbf7e9; color:#5c4815; font-size:13px; font-weight:700; overflow-wrap:anywhere; }
+
+
+/* EXPANDED STUDENT GUIDES */
+.guide-detail-panel {
+    position: relative;
+    margin-top: 18px;
+    padding: 22px 24px;
+    border: 1px solid #e3d8f3;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #fbf9ff, #f1eafb);
+    color: #2b1749;
+}
+.guide-detail-panel[hidden] { display: none; }
+.guide-detail-panel h3 { margin: 0 0 12px; color: #351078; font-size: 18px; }
+.guide-detail-panel ol { display: grid; gap: 10px; padding-left: 22px; color: #5e526e; font-size: 13px; line-height: 1.7; }
+.guide-detail-panel button { float: right; min-height: 34px; padding: 7px 12px; border: 1px solid #d8c9ed; border-radius: 9px; background: #fff; color: #51278a; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.ticket-status.reopened { background: #fff5df; color: #80520a; }
+.ticket-card { scroll-margin-top: 90px; }
+@media(max-width:600px) { .guide-detail-panel { padding: 18px; } .guide-detail-panel h3 { padding-right: 75px; } }
