@@ -172,7 +172,7 @@
     restoreTimer=setTimeout(()=>{
       recovery.hidden=true;recoveryVisible=false;document.body.style.overflow="";
       if(interruptedContext&&location.pathname+location.search+location.hash===interruptedContext.path)window.scrollTo(interruptedContext.scrollX,interruptedContext.scrollY);
-      interruptedContext=null;setState("online");status.focus({preventScroll:true});
+      interruptedContext=null;setState(state==="weak"?"weak":"online");status.focus({preventScroll:true});
     },1250);
   }
   async function probe(url,timeoutMs=4500,mode="cors"){
@@ -208,7 +208,7 @@
   document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!panel.hidden)panelOpen(false);if(event.key==="Escape"&&recoveryVisible)event.preventDefault();});
   window.addEventListener("offline",()=>{
     clearTimeout(offlineTimer);
-    offlineTimer=setTimeout(()=>{lastCheckedAt=Date.now();setState("offline");showRecovery();},900);
+    offlineTimer=setTimeout(()=>{clearTimeout(restoreTimer);lastCheckedAt=Date.now();setState("offline");if(recoveryVisible){recovery.dataset.phase="offline";$("[data-phase-label]").textContent="CONNECTION INTERRUPTED AGAIN";$("[data-copy]").textContent="The connection dropped during recovery. Your current page is still being kept open while Spark retries.";}showRecovery();},900);
   });
   window.addEventListener("online",()=>{clearTimeout(offlineTimer);setState("reconnecting");if(recoveryVisible)recovery.dataset.phase="reconnecting";checkConnection();});
   window.addEventListener("focus",checkConnection);
