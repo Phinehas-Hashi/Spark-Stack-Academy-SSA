@@ -641,6 +641,20 @@ exports.initiateStudentStkPayment = onCall({ secrets: DARAJA_SECRETS }, async re
   }
 });
 
+exports.getManualMpesaSettings = onCall(async request => {
+  await requireFounder(request);
+  const snap = await db.doc("system/payment_settings").get();
+  const settings = snap.exists ? (snap.data().manualMpesa || {}) : {};
+  return {
+    enabled: settings.enabled === true,
+    method: safeText(settings.method, "paybill"),
+    businessName: safeText(settings.businessName),
+    number: safeText(settings.number),
+    account: safeText(settings.account),
+    instructions: safeText(settings.instructions)
+  };
+});
+
 exports.saveManualMpesaSettings = onCall(async request => {
   const founder = await requireFounder(request);
   const input = request.data || {};
