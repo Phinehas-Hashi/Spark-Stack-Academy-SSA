@@ -215,6 +215,11 @@ async function loadSettings(user) {
             settings.privacy?.certificates !== false
         );
 
+        setChecked(
+            "showLeaderboard",
+            settings.privacy?.leaderboard === true
+        );
+
 
         // ---------------------------------
         // PREMIUM
@@ -534,6 +539,11 @@ async function savePreferences() {
                     certificates:
                         isChecked(
                             "showCertificates"
+                        ),
+
+                    leaderboard:
+                        isChecked(
+                            "showLeaderboard"
                         )
 
                 },
