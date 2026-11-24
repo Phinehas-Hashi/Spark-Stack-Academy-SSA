@@ -60,10 +60,17 @@ async function syncPublicLeaderboardEntry(studentId) {
 }
 
 exports.syncStudentLeaderboardOnStudentWrite = onDocumentWritten("students/{studentId}", async event => {
+  const before = event.data?.before?.data() || {};
+  const after = event.data?.after?.data() || {};
+  const fields = ["xp", "level", "publicName", "displayName", "name", "fullName"];
+  if (fields.every(field => before[field] === after[field])) return;
   await syncPublicLeaderboardEntry(event.params.studentId);
 });
 
 exports.syncStudentLeaderboardOnSettingsWrite = onDocumentWritten("studentSettings/{studentId}", async event => {
+  const before = event.data?.before?.data() || {};
+  const after = event.data?.after?.data() || {};
+  if (before.privacy?.leaderboard === after.privacy?.leaderboard) return;
   await syncPublicLeaderboardEntry(event.params.studentId);
 });
 
@@ -71,6 +78,8 @@ exports.syncStudentLeaderboardOnUserWrite = onDocumentWritten("users/{studentId}
   const before = event.data?.before?.data() || {};
   const after = event.data?.after?.data() || {};
   if (before.role !== "student" && after.role !== "student") return;
+  const fields = ["role", "status", "active", "displayName", "name", "fullName"];
+  if (fields.every(field => before[field] === after[field])) return;
   await syncPublicLeaderboardEntry(event.params.studentId);
 });
 
