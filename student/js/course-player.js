@@ -204,19 +204,39 @@ async function checkCourseAccess() {
 async function loadLessons() {
     lessons = [];
 
-    // courseLessons is the canonical lesson collection.
-    const q = query(
-        collection(db, "courseLessons"),
-        where("courseId", "==", courseId)
+    // New lessons use courseId. Older imported records may use courseID.
+    // Query both supported fields and merge by document ID.
+    const lessonQueries = [
+        query(collection(db, "courseLessons"), where("courseId", "==", courseId)),
+        query(collection(db, "courseLessons"), where("courseID", "==", courseId))
+    ];
+
+    const results = await Promise.allSettled(
+        lessonQueries.map(lessonQuery => getDocs(lessonQuery))
     );
 
-    const snap = await getDocs(q);
+    const byId = new Map();
+    let successfulQueries = 0;
 
-    snap.forEach(item => {
-        const data = item.data() || {};
-        lessons.push({ id: item.id, ...data });
-    });
+    for (const result of results) {
+        if (result.status !== "fulfilled") {
+            console.warn("A course lesson lookup was unavailable:", result.reason);
+            continue;
+        }
 
+        successfulQueries++;
+        result.value.docs.forEach(item => {
+            if (!byId.has(item.id)) {
+                byId.set(item.id, { id: item.id, ...(item.data() || {}) });
+            }
+        });
+    }
+
+    if (!successfulQueries) {
+        throw new Error("Course lessons could not be read. Check student access and Firestore rules.");
+    }
+
+    lessons = [...byId.values()];
     lessons.sort((a, b) => {
         const orderDiff = Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0);
         return orderDiff || String(a.title || "").localeCompare(String(b.title || ""));
