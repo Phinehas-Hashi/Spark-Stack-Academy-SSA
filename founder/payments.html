@@ -1094,6 +1094,41 @@ id="emailReceipt">
 ⚙️ Payment Settings
 </h2>
 
+<div class="glass-card manual-mpesa-config" style="margin:16px 0;padding:18px;">
+  <h3>Manual M-Pesa Instructions</h3>
+  <p>These instructions are shown to students during checkout. Keep them accurate and verify every submitted receipt against the M-Pesa statement before approving.</p>
+  <div class="setting-item">
+    <span>Enable manual M-Pesa</span>
+    <label class="switch"><input type="checkbox" id="manualMpesaEnabled"><span class="slider"></span></label>
+  </div>
+  <div class="setting-item">
+    <span>Payment type</span>
+    <select id="manualMpesaMethod">
+      <option value="paybill">Paybill</option>
+      <option value="till">Buy Goods Till</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+  <div class="setting-item">
+    <span>Business / account name</span>
+    <input id="manualMpesaBusinessName" type="text" maxlength="100" placeholder="Registered business or account name">
+  </div>
+  <div class="setting-item">
+    <span>Paybill / Till number</span>
+    <input id="manualMpesaNumber" type="text" inputmode="numeric" maxlength="20" placeholder="Enter official number">
+  </div>
+  <div class="setting-item">
+    <span>Account number / reference (if applicable)</span>
+    <input id="manualMpesaAccount" type="text" maxlength="80" placeholder="Student reference or account">
+  </div>
+  <div class="setting-item">
+    <span>Student instructions</span>
+    <textarea id="manualMpesaInstructions" rows="4" maxlength="1000" placeholder="Explain how students should pay and what reference to use."></textarea>
+  </div>
+  <button class="primary-btn" id="saveManualMpesaSettings" type="button">Save Manual M-Pesa Instructions</button>
+  <p id="manualMpesaSettingsStatus" role="status" aria-live="polite"></p>
+</div>
+
 <div class="settings-list">
 
 <div class="setting-item">
