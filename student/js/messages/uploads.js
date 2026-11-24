@@ -21,23 +21,7 @@ onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
-import {
-
-doc,
-collection,
-addDoc,
-serverTimestamp
-
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-import {
-
-ref,
-uploadBytes,
-getDownloadURL
-
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 
 console.log("📎 Uploads Loaded");
@@ -294,7 +278,8 @@ selectedFile = null;
 
 fileInput.value = "";
 
-uploadPreview.style.display="none";
+uploadPreview.classList.add("hidden");
+uploadPreview.style.display = "none";
 
 
 return fileData;
