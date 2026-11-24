@@ -221,23 +221,30 @@ async function loadModules() {
         successful++;
         result.value.docs.forEach(item => { if (!byId.has(item.id)) byId.set(item.id, { id: item.id, ...(item.data() || {}) }); });
     }
-    if (!successful) throw new Error("Course modules could not be read. Please refresh or contact support.");
+    if (!successful) {
+        console.warn("Course module records are unavailable; lessons will be shown in a single list.");
+        return;
+    }
     modules = [...byId.values()].sort((a,b) => Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0));
 }
 
 async function loadAssignments() {
     assignments = [];
-    const snapshot = await getDocs(query(
-        collection(db, "assignments"),
-        where("status", "in", ["published", "pending", "active"])
-    ));
-    assignments = snapshot.docs.map(item => ({ id: item.id, ...(item.data() || {}) }))
-        .filter(item => item.courseId === courseId && item.published !== false && ["published", "pending", "active"].includes(String(item.status || "published").toLowerCase()))
-        .sort((a,b) => {
-            const da = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
-            const dbValue = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
-            return (Number.isFinite(da) ? da : Number.MAX_SAFE_INTEGER) - (Number.isFinite(dbValue) ? dbValue : Number.MAX_SAFE_INTEGER);
-        });
+    try {
+        const snapshot = await getDocs(query(
+            collection(db, "assignments"),
+            where("status", "in", ["published", "pending", "active"])
+        ));
+        assignments = snapshot.docs.map(item => ({ id: item.id, ...(item.data() || {}) }))
+            .filter(item => item.courseId === courseId && item.published !== false && ["published", "pending", "active"].includes(String(item.status || "published").toLowerCase()))
+            .sort((a,b) => {
+                const da = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+                const dbValue = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+                return (Number.isFinite(da) ? da : Number.MAX_SAFE_INTEGER) - (Number.isFinite(dbValue) ? dbValue : Number.MAX_SAFE_INTEGER);
+            });
+    } catch (error) {
+        console.warn("Course assignments are temporarily unavailable:", error);
+    }
 }
 
 async function loadLessons() {
