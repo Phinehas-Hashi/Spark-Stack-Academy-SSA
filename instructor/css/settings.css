@@ -788,3 +788,73 @@
     }
 
 }
+
+/* ============================================================
+   OBSIDIAN LUXURY — INSTRUCTOR SETTINGS
+============================================================ */
+.settings-page { color: #f4f1ff; }
+.settings-page .page-header h1,
+.settings-card-header h2 { color: #f4f1ff; }
+.settings-page .page-header p,
+.settings-card-header p { color: #aaa6bd; }
+.settings-page .page-eyebrow,
+.settings-page .card-eyebrow { color: #e0c17c; }
+.settings-nav,
+.settings-card {
+    border-color: rgba(190,183,225,.14);
+    background: linear-gradient(145deg,#211f2d,#191824);
+    box-shadow: 0 14px 36px rgba(0,0,0,.16);
+}
+.settings-nav-item { color: #aaa6bd; }
+.settings-nav-item:hover { color: #d5c8ff; background: rgba(167,139,250,.10); }
+.settings-nav-item.active { color: #d5c8ff; background: rgba(167,139,250,.14); box-shadow: inset 3px 0 0 #a78bfa; }
+.settings-nav-item.danger { color: #fda4af; }
+.settings-icon.blue { color: #83e2ed; background: rgba(103,217,232,.11); }
+.settings-icon.purple { color: #c4b5fd; background: rgba(167,139,250,.13); }
+.settings-icon.green { color: #83e2ed; background: rgba(103,217,232,.10); }
+.settings-icon.gold { color: #e0c17c; background: rgba(224,193,124,.12); }
+.settings-icon.red { color: #fda4af; background: rgba(251,113,133,.11); }
+.form-group label,
+.setting-option strong,
+.payment-notice strong,
+.settings-info-grid strong { color: #d5d1e2; }
+.form-group input,
+.form-group select {
+    border-color: rgba(190,183,225,.18);
+    background: #14131e;
+    color: #f4f1ff;
+}
+.form-group input:focus,
+.form-group select:focus { border-color: #a78bfa; background: #14131e; box-shadow: 0 0 0 3px rgba(167,139,250,.13); }
+.form-group input:disabled { background: #211f2d; color: #8f8aa3; }
+.setting-option { border-color: rgba(190,183,225,.13); }
+.setting-option span,
+.payment-notice span,
+.settings-info-grid span { color: #aaa6bd; }
+.setting-option input { accent-color: #a78bfa; }
+.payment-notice,
+.pro-status-box,
+.settings-info-grid > div {
+    border-color: rgba(190,183,225,.14);
+    background: rgba(17,16,26,.48);
+}
+.security-action { border-color: rgba(190,183,225,.14); color: #d5d1e2; }
+.security-action:hover { border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.09); }
+.danger-card { border-color: rgba(251,113,133,.25); background: linear-gradient(145deg,#2a1c29,#211824); }
+.danger-action { border-bottom-color: rgba(251,113,133,.16); }
+.danger-action strong { color: #fda4af; }
+.danger-action span { color: #d5aeb7; }
+.secondary-btn { border-color: rgba(190,183,225,.18); background: #171622; color: #d5d1e2; }
+.danger-btn { border-color: rgba(251,113,133,.24); background: rgba(251,113,133,.10); color: #fda4af; }
+.settings-page #saveSettingsBtn,
+.settings-page .primary-btn { border-color: rgba(167,139,250,.25); background: linear-gradient(110deg,#7654c8,#4c78a8); color: #fff; }
+.settings-toast { background: #211f2d; color: #f4f1ff; border: 1px solid rgba(190,183,225,.18); }
+@media (max-width: 950px) {
+    .settings-nav { background: #191824; }
+    .settings-nav-item.active { box-shadow: inset 0 -3px 0 #a78bfa; }
+}
+@media (max-width: 760px) {
+    .settings-page { padding: 16px; }
+    .settings-page .page-header { align-items: stretch; }
+    .settings-page #saveSettingsBtn { width: 100%; }
+}
