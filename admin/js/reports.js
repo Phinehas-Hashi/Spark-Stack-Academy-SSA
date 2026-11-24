@@ -743,7 +743,7 @@ async function openReport(reportId) {
 
     setText(
         "reportModalId",
-        `#${report.reportId || report.id}`
+        `#${report.reportId || report.id} · ${capitalize(normalize(report.status) || "pending")}`
     );
 
     setText(
