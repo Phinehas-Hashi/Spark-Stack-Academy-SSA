@@ -250,7 +250,10 @@ async function loadChat() {
   const peerName = peer.name || peer.displayName || "Instructor";
   chatName.textContent = peerName;
   chatStatus.textContent = "Private conversation";
-  if (peer.photo || peer.photoURL) chatAvatar.src = peer.photo || peer.photoURL;
+  const avatarUrl = peer.photo || peer.photoURL;
+  if (typeof avatarUrl === "string" && /^https:\/\//i.test(avatarUrl)) {
+    chatAvatar.src = avatarUrl;
+  }
 
   startChatListeners();
   await markRead();
