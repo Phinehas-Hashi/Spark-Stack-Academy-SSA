@@ -12,6 +12,7 @@ import {
     collection,
     getDocs,
     getDoc,
+    onSnapshot,
     doc,
     query,
     orderBy,
@@ -35,6 +36,8 @@ import {
 let reports = [];
 let filteredReports = [];
 let currentReport = null;
+let responseUnsubscribe = null;
+let currentAuditLogs = [];
 
 let currentPage = 1;
 const reportsPerPage = 10;
@@ -855,6 +858,8 @@ function closeReportModal() {
             "true"
         );
 
+    responseUnsubscribe?.();
+    responseUnsubscribe = null;
     currentReport = null;
 
 }
@@ -1040,7 +1045,10 @@ async function sendReportResponse() {
 
                 senderName:
                     admin?.displayName ||
-                    "Moderator",
+                    "Spark Support",
+
+                senderRole:
+                    "staff",
 
                 createdAt:
                     serverTimestamp()
@@ -1049,13 +1057,15 @@ async function sendReportResponse() {
 
 
         // Keep the parent ticket's activity timestamp current for student tracking.
-        await updateDoc(
-            doc(db, "reports", currentReport.id),
-            {
-                lastResponseAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            }
-        );
+        const parentUpdate = {
+            lastResponseAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        };
+        if (["pending", "reopened"].includes(normalize(currentReport.status))) {
+            parentUpdate.status = "reviewing";
+            currentReport.status = "reviewing";
+        }
+        await updateDoc(doc(db, "reports", currentReport.id), parentUpdate);
 
 
         // Optional notification
@@ -1655,110 +1665,83 @@ async function loadAuditLog() {
 
 // ============================================================
 // TIMELINE
-// ============================================================
-
 async function loadTimeline(report) {
-
-    const container =
-        $("reportActivityTimeline");
-
+    const container = $("reportActivityTimeline");
     if (!container) return;
 
+    responseUnsubscribe?.();
+    responseUnsubscribe = null;
+    container.textContent = "Loading ticket conversation…";
 
     try {
+        const [auditSnapshot] = await Promise.all([
+            getDocs(query(
+                collection(db, "moderationAuditLogs"),
+                where("reportId", "==", report.id),
+                limit(50)
+            ))
+        ]);
 
-        const snapshot =
-            await getDocs(
-                query(
-                    collection(
-                        db,
-                        "moderationAuditLogs"
-                    ),
-                    where(
-                        "reportId",
-                        "==",
-                        report.id
-                    ),
-                    limit(30)
-                )
-            );
+        currentAuditLogs = auditSnapshot.docs.map(item => ({
+            kind: "audit",
+            ...item.data()
+        }));
 
-
-        const logs =
-            snapshot.docs
-                .map(d => d.data())
-                .sort(
-                    (a, b) =>
-                        getTimestamp(
-                            b.createdAt
-                        ) -
-                        getTimestamp(
-                            a.createdAt
-                        )
-                );
-
-
-        if (!logs.length) {
-
-            container.innerHTML = `
-
-                <div class="timeline-empty">
-
-                    <span>
-                        No case activity recorded yet.
-                    </span>
-
-                </div>
-
-            `;
-
-            return;
-
-        }
-
-
-        container.innerHTML =
-            logs.map(log => `
-
-                <div class="timeline-item">
-
-                    <div class="timeline-dot"></div>
-
-                    <div>
-
-                        <strong>
-                            ${escapeHTML(
-                                log.action ||
-                                "Activity"
-                            )}
-                        </strong>
-
-                        <span>
-                            ${formatDateTime(
-                                log.createdAt
-                            )}
-                        </span>
-
-                    </div>
-
-                </div>
-
-            `).join("");
-
-
-    } catch (error) {
-
-        console.error(
-            "Timeline error:",
-            error
+        const responsesQuery = query(
+            collection(db, "reports", report.id, "responses"),
+            orderBy("createdAt", "asc"),
+            limit(100)
         );
 
-    }
+        responseUnsubscribe = onSnapshot(responsesQuery, snapshot => {
+            const responses = snapshot.docs.map(item => ({
+                kind: "response",
+                ...item.data()
+            }));
+            const entries = [...currentAuditLogs, ...responses].sort(
+                (a, b) => getTimestamp(a.createdAt) - getTimestamp(b.createdAt)
+            );
 
+            if (!entries.length) {
+                container.innerHTML = '<div class="timeline-empty"><span>No messages or case activity yet.</span></div>';
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => {
+                if (entry.kind === "response") {
+                    const staffMessage = entry.senderRole === "staff" ||
+                        entry.senderRole === "admin" || entry.senderRole === "founder";
+                    return `<article class="timeline-item ticket-timeline-message ${staffMessage ? "staff" : "reporter"}">
+                        <div class="timeline-dot"></div>
+                        <div class="ticket-timeline-content">
+                            <strong>${escapeHTML(entry.senderName || (staffMessage ? "Spark Support" : "Reporter"))}</strong>
+                            <p>${escapeHTML(entry.message || "")}</p>
+                            <time>${escapeHTML(formatDateTime(entry.createdAt))}</time>
+                        </div>
+                    </article>`;
+                }
+                return `<div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div>
+                        <strong>${escapeHTML(entry.action || "Case activity")}</strong>
+                        <span>${escapeHTML(formatDateTime(entry.createdAt))}</span>
+                    </div>
+                </div>`;
+            }).join("");
+            container.scrollTop = container.scrollHeight;
+        }, error => {
+            console.error("Ticket conversation subscription failed:", error);
+            container.textContent = "The ticket conversation could not be loaded.";
+        });
+    } catch (error) {
+        console.error("Timeline error:", error);
+        container.textContent = "Case history is currently unavailable.";
+    }
 }
 
 
 // ============================================================
+// 
 // ANALYTICS
 // ============================================================
 
