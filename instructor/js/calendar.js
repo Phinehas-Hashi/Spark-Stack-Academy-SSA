@@ -1,4 +1,5 @@
 import { auth, db } from "../../js/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
     collection,
@@ -476,7 +477,19 @@ async function createEvent(event) {
         setupFormDefaults();
         closeCreateModal();
 
-        await loadEvents();
+        await onAuthStateChanged(auth, user => {
+    if (!user) {
+        calendarGrid.innerHTML = `
+            <div class="calendar-empty">
+                <i data-lucide="lock"></i>
+                <strong>Sign in required</strong>
+                <span>Please sign in to view your teaching calendar.</span>
+            </div>`;
+        refreshIcons();
+        return;
+    }
+    loadEvents();
+});
     } catch (error) {
         console.error("❌ Event creation failed:", error);
         showFormError("Couldn't create the event. Check your Firebase permissions and try again.");
