@@ -1033,3 +1033,11 @@
     }
 
 }
+
+/* Withdrawal history rows and status indicators. */
+.withdrawal-history-item { gap: 16px; }
+.withdrawal-history-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.withdrawal-status-pill { display: inline-flex; align-items: center; width: fit-content; padding: 4px 9px; border-radius: 999px; background: #eef2ff; color: #4655a6; font-size: 11px; font-weight: 700; text-transform: capitalize; }
+.withdrawal-status-pill.status-paid, .withdrawal-status-pill.status-completed, .withdrawal-status-pill.status-successful { background: #e8f7ef; color: #18794e; }
+.withdrawal-status-pill.status-rejected, .withdrawal-status-pill.status-failed, .withdrawal-status-pill.status-cancelled { background: #fff0f0; color: #b42318; }
+@media (max-width: 560px) { .withdrawal-history-item { align-items: flex-start; } .withdrawal-history-meta { align-items: flex-end; } }
