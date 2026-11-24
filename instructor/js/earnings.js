@@ -182,7 +182,8 @@ async function loadEarnings() {
 
         earningsSnapshot.forEach(record => {
             const data = record.data();
-            const amount = Number(data.netAmount ?? data.amount ?? data.total ?? data.earnings ?? 0);
+            const amountValue = Number(data.netAmount ?? data.amount ?? data.total ?? data.earnings ?? 0);
+            const amount = Number.isFinite(amountValue) && amountValue > 0 ? amountValue : 0;
             lifetime += amount;
             const date = data.createdAt?.toDate ? data.createdAt.toDate() : null;
             if (date && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) {
@@ -201,11 +202,13 @@ async function loadEarnings() {
         const pendingStatuses = ["pending", "processing", "under_review"];
         const reserved = withdrawals.reduce((sum, item) => {
             const status = String(item.status || "pending").trim().toLowerCase();
-            return releasedStatuses.includes(status) ? sum : sum + Number(item.amount || 0);
+            const amount = Number(item.amount || 0);
+            return releasedStatuses.includes(status) || !Number.isFinite(amount) || amount <= 0 ? sum : sum + amount;
         }, 0);
         const pending = withdrawals.reduce((sum, item) => {
             const status = String(item.status || "pending").trim().toLowerCase();
-            return pendingStatuses.includes(status) ? sum + Number(item.amount || 0) : sum;
+            const amount = Number(item.amount || 0);
+            return pendingStatuses.includes(status) && Number.isFinite(amount) && amount > 0 ? sum + amount : sum;
         }, 0);
 
         currentBalance = Math.max(0, lifetime - reserved);
