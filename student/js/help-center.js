@@ -504,54 +504,74 @@ function initializeCategories() {
 // =====================================
 
 function initializeGuides() {
-
-    const buttons =
-        document.querySelectorAll(
-            "[data-guide]"
-        );
-
-
-    buttons.forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const guide =
-                        button.dataset.guide;
-
-
-                    const messages = {
-
-                        "getting-started":
-                            "Start with your Dashboard, explore the Course Library, then enroll in a course to begin learning.",
-
-                        "courses":
-                            "Your Courses area lets you continue lessons, track progress and complete assignments.",
-
-                        "achievements":
-                            "Complete learning activities to earn XP, level up and unlock achievements and certificates.",
-
-                        "payments":
-                            "Payments and Premium subscriptions can be managed from the Payments and Premium sections of your student portal."
-
-                    };
-
-
-                    alert(
-                        messages[guide] ||
-                        "This guide is currently being prepared."
-                    );
-
-                }
-            );
-
+    const details = document.getElementById("guideDetails");
+    const content = document.getElementById("guideDetailsContent");
+    const close = document.getElementById("closeGuideDetails");
+    const guides = {
+        "getting-started": {
+            title: "Getting started with your Student Portal",
+            steps: [
+                "Start on your Dashboard to see your learning overview and important updates.",
+                "Open Explore Courses to discover available learning programmes.",
+                "Use My Courses to continue an active enrolment.",
+                "Visit Profile and Settings to check your account details and preferences.",
+                "Use Notifications and My Support Tickets to keep track of important updates."
+            ]
+        },
+        "courses": {
+            title: "Learning with courses",
+            steps: [
+                "Open My Courses and choose the course you want to study.",
+                "Use the course player to open lessons and mark supported learning activities complete.",
+                "Visit Learning Progress to review course completion and lesson progress.",
+                "Open Assignments to check instructions and deadlines.",
+                "Check Certificates after meeting the course requirements and Academy review."
+            ]
+        },
+        "achievements": {
+            title: "XP, achievements and certificates",
+            steps: [
+                "Complete eligible learning activities to earn experience points.",
+                "Visit Achievements to see available badges and your learning milestones.",
+                "Use Learning Progress to review your current course activity.",
+                "Open Certificates to view certificates issued to your account.",
+                "If a completed course certificate is missing, create a Certificates support ticket."
+            ]
+        },
+        "payments": {
+            title: "Payments and Premium",
+            steps: [
+                "Review a course or membership plan before making a payment.",
+                "Use Payment History to check recorded transactions and receipts.",
+                "If money is deducted but access is not updated, do not pay again immediately.",
+                "Create a Payments ticket with the transaction reference, course or plan name and approximate payment time.",
+                "Never share your M-Pesa PIN, password or one-time verification code with support."
+            ]
         }
-    );
+    };
 
+    document.querySelectorAll("[data-guide]").forEach(button => {
+        button.addEventListener("click", () => {
+            const guide = guides[button.dataset.guide];
+            if (!guide || !details || !content) return;
+            const heading = document.createElement("h3");
+            heading.textContent = guide.title;
+            const list = document.createElement("ol");
+            guide.steps.forEach(step => {
+                const item = document.createElement("li");
+                item.textContent = step;
+                list.appendChild(item);
+            });
+            content.replaceChildren(heading, list);
+            details.hidden = false;
+            details.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
+
+    close?.addEventListener("click", () => {
+        if (details) details.hidden = true;
+    });
 }
-
 
 // =====================================
 // SUPPORT
@@ -860,7 +880,7 @@ function normalizeStatus(value) {
     return String(value || "pending").toLowerCase().replaceAll(" ", "_");
 }
 function statusLabel(value) {
-    return ({ pending: "Open", reviewing: "Under review", resolved: "Resolved — awaiting your confirmation", dismissed: "Closed by support", closed: "Closed" })[value] || value;
+    return ({ pending: "Open", reviewing: "Under review", resolved: "Resolved — awaiting your confirmation", dismissed: "Closed by support", closed: "Closed", reopened: "Reopened — awaiting support" })[value] || value;
 }
 function escapeTicket(value) {
     return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
