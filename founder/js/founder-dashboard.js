@@ -8,7 +8,7 @@ const $ = id => document.getElementById(id);
 const text = (id,value) => { const el=$(id); if(el) el.textContent=value; };
 const amount = p => Number(p.amount ?? p.total ?? p.price ?? 0) || 0;
 const dateOf = v => v?.toDate ? v.toDate() : (v ? new Date(v) : null);
-const completed = p => ["completed","success","successful","paid","succeeded"].includes(String(p.status ?? p.paymentStatus ?? "completed").toLowerCase());
+const completed = p => ["completed","success","successful","paid","succeeded"].includes(String(p.status ?? p.paymentStatus ?? "").trim().toLowerCase());
 
 function refresh(){
   text("totalStudents",state.students.toLocaleString());
@@ -61,14 +61,20 @@ function renderAdminDirectory(){
   });
 }
 function bind(id,url){ $(id)?.addEventListener("click",()=>location.href=url); }
+let adminModalTrigger=null;
 function openAdminModal(){
   const modal=$("createAdminModal"); if(!modal)return;
+  adminModalTrigger=document.activeElement;
   modal.classList.add("show"); modal.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
   renderAdminDirectory(); window.lucide?.createIcons();
+  modal.querySelector(".founder-modal-close")?.focus();
 }
 function closeAdminModal(){
   const modal=$("createAdminModal"); if(!modal)return;
   modal.classList.remove("show"); modal.setAttribute("aria-hidden","true");
+  document.body.style.overflow="";
+  if(adminModalTrigger?.isConnected) adminModalTrigger.focus();
 }
 function bindAdminModal(){
   const modal=$("createAdminModal"); if(!modal) return;
@@ -78,7 +84,16 @@ function bindAdminModal(){
     const button=$("refreshAdminList"); if(button){button.disabled=true;button.innerHTML='<i data-lucide="loader-circle"></i> Refreshing…';window.lucide?.createIcons();}
     setTimeout(()=>{renderAdminDirectory();if(button){button.disabled=false;button.innerHTML='<i data-lucide="refresh-cw"></i> Refresh Admin Directory';window.lucide?.createIcons();}},500);
   });
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("show"))closeAdminModal();});
+  document.addEventListener("keydown",e=>{
+    if(!modal.classList.contains("show"))return;
+    if(e.key==="Escape"){e.preventDefault();closeAdminModal();return;}
+    if(e.key!=="Tab")return;
+    const items=[...modal.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>el.getClientRects().length);
+    if(!items.length){e.preventDefault();modal.querySelector(".founder-modal-card")?.focus();return;}
+    const first=items[0],last=items[items.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  });
 }
 function bindActions(){bind("manageStudentsBtn","students.html");bind("manageInstructorsBtn","instructors.html");bind("manageCoursesBtn","courses.html");bind("viewRevenueBtn","revenue.html");bind("viewReportsBtn","reports.html");bind("openSettingsBtn","platform-settings.html");bind("openSparkAiBtn","spark-ai.html");bind("viewAllActivityBtn","analytics.html");$("revenuePeriod")?.addEventListener("change",renderChart);bindAdminModal();}
 function listen(path,callback){return onSnapshot(collection(db,path),callback,error=>console.error(`Founder ${path} listener failed`,error));}
