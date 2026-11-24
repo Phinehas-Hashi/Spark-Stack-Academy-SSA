@@ -790,3 +790,43 @@
     }
 
 }
+
+/* Founder-published membership pricing */
+.premium-plans-status {
+  margin: 0 0 24px;
+  padding: 18px 20px;
+  border: 1px solid #e7e0f2;
+  border-radius: 16px;
+  background: #fbf9ff;
+  color: #5b4a78;
+  line-height: 1.6;
+}
+.premium-plan-periods {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+.premium-plan-period {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #eee8f7;
+  border-radius: 12px;
+  background: #fbf9ff;
+  color: #5b4a78;
+  font-size: 13px;
+}
+.premium-plan-period strong {
+  color: #21064F;
+  font-size: 16px;
+}
+.premium-purchase-note {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #eee8f7;
+  color: #7b718c;
+  font-size: 12px;
+  line-height: 1.5;
+}
