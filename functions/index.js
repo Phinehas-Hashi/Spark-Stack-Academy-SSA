@@ -1336,15 +1336,23 @@ exports.founderManageAnnouncement = onCall(async request => {
     const category = safeText(input.category).slice(0, 60);
     const audience = safeText(input.audience).slice(0, 40);
     const status = safeText(input.status).toLowerCase();
+    const publishDate = input.publishDate ? new Date(input.publishDate) : null;
+    const expiryDate = input.expiryDate ? new Date(input.expiryDate) : null;
     if (!title || !message || !["draft","published"].includes(status)) {
       throw new HttpsError("invalid-argument", "Provide a title, message and valid publication status.");
+    }
+    if ((publishDate && Number.isNaN(publishDate.getTime())) || (expiryDate && Number.isNaN(expiryDate.getTime()))) {
+      throw new HttpsError("invalid-argument", "Announcement dates are invalid.");
+    }
+    if (publishDate && expiryDate && expiryDate <= publishDate) {
+      throw new HttpsError("invalid-argument", "Expiry must be later than the publication date.");
     }
     const docRef = db.collection("announcements").doc();
     await db.runTransaction(async tx => {
       tx.create(docRef, {
         title, message, category, audience, status,
-        publishDate: input.publishDate ? Timestamp.fromDate(new Date(input.publishDate)) : null,
-        expiryDate: input.expiryDate ? Timestamp.fromDate(new Date(input.expiryDate)) : null,
+        publishDate: publishDate ? Timestamp.fromDate(publishDate) : null,
+        expiryDate: expiryDate ? Timestamp.fromDate(expiryDate) : null,
         pinned: input.pinned === true, important: input.important === true,
         push: input.push === true, email: input.email === true, popup: input.popup === true,
         createdAt: now, createdBy: founder.uid, updatedAt: now
