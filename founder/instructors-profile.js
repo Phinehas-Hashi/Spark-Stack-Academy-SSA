@@ -141,12 +141,13 @@ async function saveInstructorProfile(event) {
   const name=$("editName").value.trim(),expertise=$("editExpertise").value.trim(),bio=$("editBio").value.trim();
   if(!name||!expertise)return toast("Name and expertise are required.","warning");
   try{
-    await setDoc(doc(db,"instructors",instructorId),{
-      uid:instructorId,name,expertise,bio,
-      phone:instructor.phone||"",
-      updatedAt:serverTimestamp(),
-      updatedBy:auth.currentUser.uid
-    },{merge:true});
+    const userRef=doc(db,"users",instructorId),profileRef=doc(db,"instructors",instructorId);
+    await runTransaction(db,async tx=>{
+      const [userSnap,profileSnap]=await Promise.all([tx.get(userRef),tx.get(profileRef)]);
+      if(!userSnap.exists()||userSnap.data().role!=="instructor")throw new Error("Instructor account is missing or invalid.");
+      tx.update(userRef,{fullName:name,expertise,bio,updatedAt:serverTimestamp()});
+      tx.set(profileRef,{uid:instructorId,name,expertise,bio,phone:instructor.phone||"",updatedAt:serverTimestamp(),updatedBy:auth.currentUser.uid},{merge:true});
+    });
     window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Instructor profile edited"});
     hideModal("editModal");await loadInstructor();toast("Instructor profile updated.");
   }catch(error){console.error(error);toast(error.message||"Unable to update instructor profile.","error");}
@@ -184,6 +185,7 @@ document.querySelectorAll(".tab-btn").forEach(tab=>tab.addEventListener("click",
   document.querySelectorAll(".tab-content").forEach(content=>content.classList.toggle("active",content.id===tab.dataset.tab+"Tab"));
 }));
 
+window.addEventListener("beforeunload",()=>{});
 onAuthStateChanged(auth,async user=>{
   if(!user){location.replace("../login.html");return;}
   try{await requireFounder(user);await loadInstructor();if(params.get("edit")==="1")showModal("editModal");}
