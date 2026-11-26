@@ -1,6 +1,6 @@
 /* SSA FOUNDER OS — ADMISSIONS MANAGEMENT */
 import { auth, db } from "../js/firebase.js";
-import { collection, getDocs, doc, updateDoc, getDoc, serverTimestamp, onSnapshot, query, orderBy, where, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, doc, updateDoc, serverTimestamp, onSnapshot, query, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const applicationsTable = $("applicationsTable");
@@ -70,8 +70,8 @@ function generateAdmissionNumber() {
 async function approveApplication(id) {
     const application=applications.find(app=>app.id===id);
     if (!application || normalizeStatus(application.status)!=="pending") return;
-    if (!application.studentUid) throw new Error("This application is missing its student account. Ask the applicant to sign up again.");
-    if (!application.email) throw new Error("This application has no email address.");
+    if (!application.studentUid) return window.showFounderToast?.("This application is missing its student account. Ask the applicant to sign up again.","error");
+    if (!application.email) return window.showFounderToast?.("This application has no email address.","error");
     const confirmed=await (window.ssaConfirm ? window.ssaConfirm(
       `Approve ${application.name||"this applicant"}? Their existing account will be activated and assigned a unique admission number.`,
       {title:"Approve admission",confirmText:"Approve student",cancelText:"Keep pending"}
@@ -104,7 +104,7 @@ async function approveApplication(id) {
             transaction.update(userRef,{status:"active",active:true,admissionNumber:admissionNo,admissionNo,verified:true,approvedAt,approvedBy:founderUid});
             transaction.update(applicationRef,{status:"Approved",admissionNo,studentUid:application.studentUid,processedAt:approvedAt,processedBy:founderUid});
         });
-        window.ssaSecuritySignal?.("suspicious_action",{portal:"founder",note:"Founder approved an admission"});
+        window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Admission approved"});
         window.showFounderToast?.(`Admission approved — ${admissionNo}`,"success");
     } catch(error) {
         console.error("Approval failed:",error);
@@ -114,7 +114,8 @@ async function approveApplication(id) {
 async function rejectApplication(id) {
     const application=applications.find(app=>app.id===id);
     if (!application || normalizeStatus(application.status)!=="pending") return;
-    const reason=String(await (window.ssaPrompt?.("Provide a reason for rejecting this application.",{title:"Rejection reason",confirmText:"Continue",type:"text"}) ?? "")).trim();
+    const rawReason=await window.ssaPrompt?.("Provide a reason for rejecting this application.",{title:"Rejection reason",confirmText:"Continue",type:"text"});
+    const reason=String(rawReason||"").trim().slice(0,500);
     if(!reason) return window.showFounderToast?.("A rejection reason is required.","error");
     const confirmed=await (window.ssaConfirm ? window.ssaConfirm(`Reject ${application.name||"this application"}? The reason will be saved with the application.`,{title:"Reject application",confirmText:"Reject application",cancelText:"Keep pending",danger:true}) : Promise.resolve(false));
     if (!confirmed) return;
