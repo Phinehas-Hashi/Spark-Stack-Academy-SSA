@@ -14,15 +14,18 @@ import {
   serverTimestamp,
   setDoc
 } from "firebase/firestore";
+import { ref, uploadBytes } from "firebase/storage";
 
 const projectId = "demo-spark-stack-academy-tenant-tests";
 const rules = await readFile(new URL("../firestore.rules", import.meta.url), "utf8");
+const storageRules = await readFile(new URL("../storage.rules", import.meta.url), "utf8");
 let testEnv;
 
 before(async () => {
   testEnv = await initializeTestEnvironment({
     projectId,
-    firestore: { rules }
+    firestore: { rules },
+    storage: { rules: storageRules }
   });
 });
 
@@ -192,4 +195,22 @@ test("an institution owner can list only their own institution members", async (
   const db = testEnv.authenticatedContext("owner-a").firestore();
   const result = await assertSucceeds(getDocs(collection(db, "institutions/college-a/members")));
   assert.equal(result.size, 2);
+});
+
+
+test("institution shared files are writable only by managers in that tenant", async () => {
+  await seed(async db => {
+    await setDoc(doc(db, "institutions/college-a"), { institutionId: "college-a", status: "active" });
+    await setDoc(doc(db, "institutions/college-a/members/owner-a"), institutionMember("owner-a", "college-a"));
+    await setDoc(doc(db, "institutions/college-b"), { institutionId: "college-b", status: "active" });
+    await setDoc(doc(db, "institutions/college-b/members/owner-b"), institutionMember("owner-b", "college-b"));
+  });
+
+  const file = new Blob(["test course handout"], { type: "application/pdf" });
+  const ownerAStorage = testEnv.authenticatedContext("owner-a").storage();
+  const ownerBStorage = testEnv.authenticatedContext("owner-b").storage();
+
+  await assertSucceeds(uploadBytes(ref(ownerAStorage, "institution-files/college-a/shared/handout.pdf"), file));
+  await assertFails(uploadBytes(ref(ownerAStorage, "institution-files/college-b/shared/handout.pdf"), file));
+  await assertSucceeds(uploadBytes(ref(ownerBStorage, "institution-files/college-b/shared/handout.pdf"), file));
 });
