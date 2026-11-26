@@ -1073,23 +1073,18 @@ service cloud.firestore {
       // Only the public course metadata is exposed; write access remains restricted.
       allow get:
         if staff()
-        || (isStudent() && studentPortalOpen())
-        || (isInstructor() && instructorPortalOpen())
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid())
         || (resource.data.get('institutionId', '') != ''
           && institutionMember(resource.data.institutionId))
-        || (
-          resource.data.get('published', false) == true
-          && resource.data.get('status', '') == 'published'
-          && resource.data.get('reviewStatus', '') == 'approved'
-          && resource.data.get('marketplaceVisibility', 'public') != 'hidden'
-          && resource.data.get('deletedAt', null) == null
-        );
+        || publicCourse(courseId);
 
-      // Keep collection queries limited to authenticated portal roles/staff.
+      // Instructors can query only their own courses. Student marketplace
+      // discovery uses marketplaceItems; public course details use direct get.
       allow list:
         if staff()
-        || (isStudent() && studentPortalOpen())
-        || (isInstructor() && instructorPortalOpen())
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid())
         || (resource.data.get('institutionId', '') != ''
           && institutionMember(resource.data.institutionId));
 
@@ -1330,6 +1325,7 @@ service cloud.firestore {
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
           && request.resource.data.get('courseId', resource.data.get('courseId', '')) == resource.data.get('courseId', '')
+          && request.resource.data.get('courseID', resource.data.get('courseID', '')) == resource.data.get('courseID', '')
           && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
       allow delete: if staff()
         || (isInstructor() && instructorPortalOpen()
@@ -1356,6 +1352,7 @@ service cloud.firestore {
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
           && request.resource.data.get('courseId', resource.data.get('courseId', '')) == resource.data.get('courseId', '')
+          && request.resource.data.get('courseID', resource.data.get('courseID', '')) == resource.data.get('courseID', '')
           && request.resource.data.get('isPreview', false) is bool
           && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
       allow delete: if staff()
