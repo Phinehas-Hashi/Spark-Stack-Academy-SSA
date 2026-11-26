@@ -31,6 +31,9 @@ const DASHBOARDS = Object.freeze({
     institution_applicant: "institution/dashboard.html",
     institution_owner: "institution/dashboard.html",
     institution_admin: "institution/dashboard.html",
+    institution_moderator: "institution/dashboard.html",
+    institution_staff: "institution/dashboard.html",
+    department_manager: "institution/dashboard.html",
     student: "student/dashboard.html"
 });
 
@@ -305,7 +308,7 @@ function getAccessDecision(profile) {
             : { allowed: false, message: "Your instructor application is still under review. Portal access begins after approval and verification." };
     }
 
-    if (["institution", "institution_owner", "institution_admin"].includes(role)) {
+    if (["institution", "institution_owner", "institution_admin", "institution_moderator", "institution_staff", "department_manager"].includes(role)) {
         return data.status === "active" && data.active === true && data.verified === true && Boolean(data.institutionId)
             ? { allowed: true }
             : { allowed: false, message: "Your institution account is not yet active and verified. Contact Academy support." };
