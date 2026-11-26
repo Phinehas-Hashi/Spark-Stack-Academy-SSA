@@ -372,8 +372,20 @@ async function boot() {
       setupTeamForm();
       const canViewDirectory = ["institution_owner", "owner", "institution_admin",
         "institution_moderator", "department_manager"].includes(currentMembership.role);
+      const canManageWorkspace = ["institution_owner", "owner", "institution_admin"].includes(currentMembership.role);
       const teamPanel = document.querySelector(".team-management");
       if (teamPanel && !canViewDirectory) teamPanel.hidden = true;
+      if (!canManageWorkspace) {
+        document.querySelector("#limits")?.setAttribute("hidden", "");
+        document.querySelectorAll(".services-grid a[href*='billing'], .services-grid a[href*='settings'], .services-grid a[href*='reports'], .module-grid #billing, .module-grid #settings, .module-grid #reports")
+          .forEach(node => node.hidden = true);
+      }
+      if (!canViewDirectory) {
+        sidebar?.querySelectorAll('a[href^="members.html"]').forEach(link => link.hidden = true);
+      }
+      if (!canViewDirectory && currentMembership.role !== "instructor" && currentMembership.role !== "institution_staff") {
+        sidebar?.querySelectorAll('a[href="courses.html"]').forEach(link => link.hidden = true);
+      }
       if (canViewDirectory) await loadInstitutionTeam();
       document.documentElement.dataset.institutionPortalReady = "true";
       document.documentElement.dataset.institutionPortalMode = "active";
