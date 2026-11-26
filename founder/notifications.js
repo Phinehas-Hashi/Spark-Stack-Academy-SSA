@@ -211,7 +211,7 @@ onAuthStateChanged(auth,async user=>{
       window.ssaSecuritySignal?.("access_denied",{portal:"founder",note:"Founder notification feed listener denied"});
       toast("Notifications are temporarily unavailable.","error");
     });
-  }catch(error){console.error("[Founder Notifications] Access check failed:",error);setStatus(error.message||"Founder access denied",true);toast(error.message||"Founder authorization failed.","error");location.replace("security.html");}
+  }catch(error){console.error("[Founder Notifications] Access check failed:",error);setStatus(error.message||"Founder access denied",true);toast(error.message||"Founder authorization failed.","error");// Keep the current Founder page open; show the access/data error in place.}
 });
 window.addEventListener("beforeunload",()=>state.unsubscribe?.());
 window.addEventListener("DOMContentLoaded",()=>window.lucide?.createIcons());
