@@ -1,7 +1,7 @@
 import "../js/ui-runtime.js";
 import { auth, db } from "../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { collection, doc, getDoc, setDoc, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, doc, getDoc, setDoc, query, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const state = { user: null, profile: null, auditLogs: [] };
 const $ = id => document.getElementById(id);
@@ -12,19 +12,15 @@ async function requireFounder(user) {
   const snapshot = await getDoc(doc(db, "founder", user.uid));
   if (!snapshot.exists()) throw Error("Founder profile not found.");
   const profile = snapshot.data();
-  if (profile.role && profile.role !== "founder") throw Error("Founder access required.");
-  if (profile.status && profile.status !== "active") throw Error("Founder account is not active.");
+  if (profile.role !== "founder") throw Error("Founder access required.");
+  if (profile.status !== "active" || profile.active === false || profile.verified === false) throw Error("Founder account is not active and verified.");
   state.user = user;
   state.profile = profile;
 }
 
-async function audit(message, action, details = {}) {
-  return addDoc(collection(db, "audit_logs"), { actor_id: state.user.uid, actor_email: state.user.email || "", action, target_type: "platform", target_id: "global", details, message, created_at: serverTimestamp() });
-}
-
 async function writeControls(patch, auditMessage, action, details = {}) {
   await setDoc(controlRef(), { ...patch, updated_at: serverTimestamp(), updated_by: state.user.uid }, { merge: true });
-  await audit(auditMessage, action, details);
+  window.ssaSecuritySignal?.("founder_control_changed", { portal: "founder", note: String(action || auditMessage || "platform_control").slice(0, 180) });
 }
 
 async function askReason({ title, message, confirmText = "Continue", tone = "warning", icon = "✎", placeholder = "Enter a clear reason for users..." }) {
@@ -138,7 +134,6 @@ function renderAuditLog() {
         <small>${escapeHTML(d.actor_email || "Founder")} · ${auditDate(d.created_at)}</small>
         <span class="audit-action">${escapeHTML(d.action || "platform_action")}</span>
       </div></div>
-      <button class="audit-delete-btn" type="button" data-delete-audit="${escapeHTML(item.id)}" title="Delete audit entry" aria-label="Delete audit entry"><i data-lucide="trash-2"></i></button>
     </article>`;
   }).join("");
   window.lucide?.createIcons();
@@ -153,33 +148,10 @@ function listenAuditLog() {
     renderAuditLog();
   }, error => { console.error("Audit listener failed:", error); $("commandLog").innerHTML = '<div class="empty">Command history is temporarily unavailable.</div>'; });
 }
-async function deleteAuditEntry(id) {
-  if (!id) return;
-  const confirmed = await window.ssaConfirm?.("Delete this audit entry? This cannot be undone.", { title: "Delete audit entry?", confirmText: "Delete", tone: "danger", icon: "🗑" });
-  if (!confirmed) return;
-  await deleteDoc(doc(db, "audit_logs", id));
-  toast("Audit entry deleted.");
-}
-async function deleteFilteredAudit() {
-  const search = String($("auditSearch")?.value || "").trim().toLowerCase();
-  const sort = $("auditSort")?.value || "newest";
-  const items = state.auditLogs.filter(item => {
-    const d=item.data; return !search || [d.message,d.action,d.actor_email,d.target_type,d.target_id].filter(Boolean).join(" ").toLowerCase().includes(search);
-  });
-  if (!items.length) { toast("There are no shown audit entries to delete.","warning"); return; }
-  const confirmed = await window.ssaConfirm?.(`Delete ${items.length} shown audit entr${items.length === 1 ? "y" : "ies"}? This cannot be undone.`, { title: "Delete shown entries?", confirmText: "Delete shown", tone: "danger", icon: "🗑" });
-  if (!confirmed) return;
-  $("deleteFilteredAudit").disabled = true;
-  try { for (const item of items) await deleteDoc(doc(db, "audit_logs", item.id)); toast(`${items.length} audit entr${items.length === 1 ? "y" : "ies"} deleted.`); }
-  catch (error) { console.error(error); toast(error.message || "Unable to delete audit entries.","error"); }
-  finally { $("deleteFilteredAudit").disabled = false; }
-}
 function bindAuditControls() {
   $("auditSearch")?.addEventListener("input", renderAuditLog);
   $("auditSort")?.addEventListener("change", renderAuditLog);
   $("clearAuditSearch")?.addEventListener("click", () => { $("auditSearch").value=""; $("auditSort").value="newest"; renderAuditLog(); });
-  $("deleteFilteredAudit")?.addEventListener("click", deleteFilteredAudit);
-  $("commandLog")?.addEventListener("click", event => { const button=event.target.closest("[data-delete-audit]"); if (button) deleteAuditEntry(button.dataset.deleteAudit); });
 }
 
 async function scheduleMaintenance() {
@@ -213,6 +185,40 @@ async function cancelMaintenance() {
   if ($("scheduleInfo")) $("scheduleInfo").textContent = "No maintenance window scheduled.";
   toast("Scheduled maintenance cancelled.");
   return true;
+}
+
+async function loadSecurityIncidents() {
+  const list = $("securityIncidentList");
+  if (!list) return;
+  const base = String(window.SSA_SECURITY_API_BASE || "").replace(/\/$/, "");
+  if (!base) { list.textContent = "Security edge collector is not configured. Deploy security-worker and set its URL in js/security-config.js."; return; }
+  try {
+    const token = await state.user.getIdToken();
+    const response = await fetch(base + "/v1/incidents", { headers: { authorization: "Bearer " + token }, cache: "no-store" });
+    if (!response.ok) throw new Error("Incident service returned " + response.status);
+    const payload = await response.json();
+    const events = Array.isArray(payload.events) ? payload.events.slice(0, 30) : [];
+    list.replaceChildren();
+    $("securityIncidentCount").textContent = events.length + " recent";
+    if (!events.length) { const empty=document.createElement("p"); empty.className="empty"; empty.textContent="No incidents recorded by the edge collector."; list.appendChild(empty); return; }
+    events.forEach(event => {
+      const row=document.createElement("article"); row.className="incident-entry";
+      const main=document.createElement("div"); main.className="incident-main";
+      const title=document.createElement("strong"); title.textContent=String(event.event_type||"Security event").replaceAll("_"," ");
+      const meta=document.createElement("small");
+      const when=event.occurred_at?new Date(event.occurred_at).toLocaleString():"Unknown time";
+      const where=[event.city,event.region,event.country].filter(Boolean).join(", ")||"Location unavailable";
+      const who=event.actor_email||event.actor_uid||"Unattributed source";
+      meta.textContent=when+" · "+where+" · "+who;
+      const network=document.createElement("span"); network.textContent=[event.ip_address||"IP unavailable",event.portal||"unknown portal",event.source||"unknown source"].join(" · ");
+      main.append(title,meta,network);
+      const severity=document.createElement("b"); severity.className="incident-severity "+String(event.severity||"info").toLowerCase(); severity.textContent=String(event.severity||"info").toUpperCase();
+      row.append(main,severity); list.appendChild(row);
+    });
+  } catch(error) {
+    console.warn("Security incident feed unavailable:",error);
+    list.textContent="Unable to load incidents. Check Worker deployment, D1 binding and origin allowlist.";
+  }
 }
 
 function bindEvents() {
@@ -250,6 +256,6 @@ function bindEvents() {
 
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.replace("../login.html"); return; }
-  try { await requireFounder(user); listenControls(); listenAuditLog(); bindAuditControls(); bindEvents(); console.log("🔥 Founder Command Center connected to Firebase."); }
+  try { await requireFounder(user); listenControls(); listenAuditLog(); bindAuditControls(); bindEvents(); loadSecurityIncidents(); $("refreshSecurityIncidents")?.addEventListener("click",loadSecurityIncidents); console.log("🔥 Founder Command Center connected to Firebase."); }
   catch (error) { console.error(error); toast(error.message || "Founder authorization failed.", "error"); setTimeout(() => window.location.replace("../login.html"), 1500); }
 });

@@ -36,6 +36,11 @@ async function requireFounder(request) {
       || data.active === false || data.verified === false) {
     throw new HttpsError("permission-denied", "Only the active, verified Founder Super Admin can perform this operation.");
   }
+  // Callable endpoints are privileged too: require a Firebase session that
+  // completed the configured TOTP second factor, not merely an enrolled factor.
+  if (request.auth.token?.firebase?.sign_in_second_factor !== "totp") {
+    throw new HttpsError("permission-denied", "Complete Founder authenticator verification before using privileged operations.");
+  }
   return { uid, data };
 }
 
@@ -1317,6 +1322,329 @@ exports.saveMarketplacePricing = onCall(async request => {
   }, { merge: true });
   await db.collection("audit_logs").add({ action: "marketplace_pricing_proposals_updated", actorId: founder.uid, currency, createdAt: now });
   return { success: true, pricingStatus: "proposed", prices };
+});
+
+exports.getFounderPaymentGatewaySettings = onCall(async request => {
+  await requireFounder(request);
+  const snapshot = await db.collection("payment_gateways").get();
+  return { gateways: snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) };
+});
+
+exports.saveFounderPaymentGatewaySettings = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data || {};
+  const provider = safeText(input.provider).toLowerCase();
+  const allowed = ["mpesa","cards","bank","paypal"];
+  if (!allowed.includes(provider)) throw new HttpsError("invalid-argument","Unsupported payment provider.");
+  const environment = safeText(input.environment).toLowerCase();
+  if (!["sandbox","production"].includes(environment)) throw new HttpsError("invalid-argument","Invalid gateway environment.");
+  const validateEndpoint = value => {
+    const raw = safeText(value).trim();
+    if (!raw) return "";
+    let parsed;
+    try { parsed = new URL(raw); } catch { throw new HttpsError("invalid-argument","Gateway URLs must be valid HTTPS URLs."); }
+    if (parsed.protocol !== "https:") throw new HttpsError("invalid-argument","Gateway URLs must use HTTPS.");
+    return parsed.toString().slice(0, 500);
+  };
+  const ref = db.doc("payment_gateways/" + provider);
+  const now = Timestamp.now();
+  const enabled = input.enabled === true;
+  await db.runTransaction(async tx => {
+    tx.set(ref, {
+      provider, environment,
+      callbackUrl: validateEndpoint(input.callbackUrl),
+      webhookUrl: validateEndpoint(input.webhookUrl),
+      enabled, lastSync: now, updatedAt: now, updatedBy: founder.uid
+    }, { merge: true });
+    tx.set(db.collection("audit_logs").doc(), {
+      action: "founder_payment_gateway_updated", actorId: founder.uid,
+      targetId: provider, enabled, environment, createdAt: now
+    });
+  });
+  return { success: true, provider, enabled };
+});
+
+exports.saveFounderSparkAISettings = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data?.settings;
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new HttpsError("invalid-argument", "Spark AI settings are required.");
+  }
+  const provider = safeText(input.aiProvider).toLowerCase();
+  const model = safeText(input.aiModel).trim().slice(0, 120);
+  const endpoint = safeText(input.apiEndpoint).trim();
+  const temperature = Number(input.temperature);
+  const maxTokens = Number(input.maxTokens);
+  const rateLimit = Number(input.rateLimit);
+  const conversationLimit = Number(input.conversationLimit);
+  if (provider !== "groq") throw new HttpsError("invalid-argument", "Only the configured Groq provider is currently supported.");
+  if (endpoint && endpoint !== "https://api.groq.com/openai/v1") {
+    throw new HttpsError("invalid-argument", "Only the verified Groq API endpoint is allowed.");
+  }
+  if (!model || !Number.isFinite(temperature) || temperature < 0 || temperature > 2
+      || !Number.isInteger(maxTokens) || maxTokens < 1 || maxTokens > 32768
+      || !Number.isInteger(rateLimit) || rateLimit < 1 || rateLimit > 10000
+      || !Number.isInteger(conversationLimit) || conversationLimit < 1 || conversationLimit > 1000) {
+    throw new HttpsError("invalid-argument", "One or more Spark AI settings are outside the permitted range.");
+  }
+  const settings = {
+    aiProvider: provider, aiModel: model,
+    apiEndpoint: "https://api.groq.com/openai/v1",
+    temperature, maxTokens, rateLimit, conversationLimit,
+    systemPrompt: safeText(input.systemPrompt).slice(0, 12000),
+    aiPersonality: safeText(input.aiPersonality).slice(0, 2000),
+    defaultLanguage: safeText(input.defaultLanguage).slice(0, 40),
+    responseStyle: safeText(input.responseStyle).slice(0, 40),
+    enableStreaming: input.enableStreaming === true,
+    enableMemory: input.enableMemory === true,
+    enableWeb: input.enableWeb === true,
+    enableCode: input.enableCode === true,
+    enableImages: input.enableImages === true,
+    updatedAt: Timestamp.now(), updatedBy: founder.uid
+  };
+  const batch = db.batch();
+  batch.set(db.doc("settings/sparkAI"), settings, { merge: true });
+  batch.set(db.collection("audit_logs").doc(), {
+    action: "founder_spark_ai_settings_updated", actorId: founder.uid,
+    changedFields: Object.keys(settings).filter(key => key !== "updatedAt"),
+    createdAt: settings.updatedAt
+  });
+  await batch.commit();
+  return { success: true };
+});
+
+exports.founderManageAnnouncement = onCall(async request => {
+  const founder = await requireFounder(request);
+  const action = safeText(request.data?.action).toLowerCase();
+  const id = safeText(request.data?.announcementId);
+  const now = Timestamp.now();
+  if (action === "create") {
+    const input = request.data?.announcement || {};
+    const title = safeText(input.title).trim().slice(0, 140);
+    const message = safeText(input.message).trim().slice(0, 12000);
+    const category = safeText(input.category).slice(0, 60);
+    const audience = safeText(input.audience).slice(0, 40);
+    const status = safeText(input.status).toLowerCase();
+    const publishDate = input.publishDate ? new Date(input.publishDate) : null;
+    const expiryDate = input.expiryDate ? new Date(input.expiryDate) : null;
+    if (!title || !message || !["draft","published"].includes(status)) {
+      throw new HttpsError("invalid-argument", "Provide a title, message and valid publication status.");
+    }
+    if ((publishDate && Number.isNaN(publishDate.getTime())) || (expiryDate && Number.isNaN(expiryDate.getTime()))) {
+      throw new HttpsError("invalid-argument", "Announcement dates are invalid.");
+    }
+    if (publishDate && expiryDate && expiryDate <= publishDate) {
+      throw new HttpsError("invalid-argument", "Expiry must be later than the publication date.");
+    }
+    const docRef = db.collection("announcements").doc();
+    await db.runTransaction(async tx => {
+      tx.create(docRef, {
+        title, message, category, audience, status,
+        publishDate: publishDate ? Timestamp.fromDate(publishDate) : null,
+        expiryDate: expiryDate ? Timestamp.fromDate(expiryDate) : null,
+        pinned: input.pinned === true, important: input.important === true,
+        push: input.push === true, email: input.email === true, popup: input.popup === true,
+        createdAt: now, createdBy: founder.uid, updatedAt: now
+      });
+      tx.set(db.collection("audit_logs").doc(), {
+        action: "founder_announcement_created", actorId: founder.uid,
+        targetId: docRef.id, status, createdAt: now
+      });
+    });
+    return { success: true, announcementId: docRef.id };
+  }
+  if (!id) throw new HttpsError("invalid-argument", "Announcement ID is required.");
+  const ref = db.doc("announcements/" + id);
+  if (action === "pin") {
+    const pinned = request.data?.pinned === true;
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new HttpsError("not-found", "Announcement not found.");
+      tx.update(ref, { pinned, updatedAt: now, updatedBy: founder.uid });
+      tx.set(db.collection("audit_logs").doc(), {
+        action: pinned ? "founder_announcement_pinned" : "founder_announcement_unpinned",
+        actorId: founder.uid, targetId: id, createdAt: now
+      });
+    });
+    return { success: true, pinned };
+  }
+  if (action === "delete") {
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new HttpsError("not-found", "Announcement not found.");
+      tx.update(ref, { status: "archived", archivedAt: now, archivedBy: founder.uid, updatedAt: now });
+      tx.set(db.collection("audit_logs").doc(), {
+        action: "founder_announcement_archived", actorId: founder.uid,
+        targetId: id, createdAt: now
+      });
+    });
+    return { success: true, archived: true };
+  }
+  throw new HttpsError("invalid-argument", "Unsupported announcement action.");
+});
+
+exports.saveFounderMonetizationSettings = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data?.settings;
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new HttpsError("invalid-argument", "Monetization settings are required.");
+  }
+  const numeric = [
+    "courseFee","registrationFee","examinationFee","certificateFee",
+    "premiumMonthly","premiumQuarterly","premiumYearly","instructorCommission",
+    "platformCommission","maxDiscount","couponExpiry","minimumWithdrawal",
+    "withdrawalFeePercent","vatRate","decimalPlaces"
+  ];
+  const boolean = [
+    "enablePremium","premiumCertificates","enableMpesa","enableCards","enablePaypal",
+    "enableBank","enableInstructorEarnings","automaticPayouts","allowCoupons",
+    "allowScholarships","enableWithdrawals","withdrawalApproval","enableRevenueDashboard",
+    "trackStudentPurchases","trackInstructorRevenue","monthlyRevenueReports","enablePayments",
+    "allowRefunds"
+  ];
+  const textFields = ["withdrawalTime","billingCycle","invoicePrefix","currency","currencySymbol"];
+  const settings = {};
+  for (const key of numeric) {
+    const value = Number(input[key]);
+    if (!Number.isFinite(value) || value < 0 || value > 100000000) {
+      throw new HttpsError("invalid-argument", "Invalid numeric monetization value: " + key);
+    }
+    settings[key] = value;
+  }
+  for (const key of boolean) settings[key] = input[key] === true;
+  for (const key of textFields) settings[key] = safeText(input[key]).slice(0, 40);
+  if (settings.instructorCommission + settings.platformCommission !== 100) {
+    throw new HttpsError("invalid-argument", "Instructor and platform shares must total 100%.");
+  }
+  if (settings.withdrawalFeePercent > 100 || settings.maxDiscount > 100 || settings.vatRate > 100
+      || settings.decimalPlaces > 4 || settings.couponExpiry > 3650) {
+    throw new HttpsError("invalid-argument", "One or more percentage or range settings are invalid.");
+  }
+  if (!["KES","USD","EUR","GBP"].includes(settings.currency)) {
+    throw new HttpsError("invalid-argument", "Unsupported platform currency.");
+  }
+  if (!["Monthly","Quarterly","Yearly"].includes(settings.billingCycle)) {
+    throw new HttpsError("invalid-argument", "Unsupported billing cycle.");
+  }
+  if (settings.automaticPayouts) {
+    throw new HttpsError("failed-precondition", "Automatic payouts are not enabled for production. Keep this setting disabled until payout reconciliation is deployed.");
+  }
+  const now = Timestamp.now();
+  const batch = db.batch();
+  batch.set(db.doc("settings/monetization"), { ...settings, updatedAt: now, updatedBy: founder.uid }, { merge: true });
+  batch.set(db.doc("platformSettings/earnings"), {
+    minimumWithdrawal: settings.minimumWithdrawal,
+    withdrawalFeePercent: settings.withdrawalFeePercent,
+    withdrawalsEnabled: settings.enableWithdrawals,
+    withdrawalApproval: settings.withdrawalApproval,
+    withdrawalProcessingTime: settings.withdrawalTime,
+    updatedAt: now,
+    updatedBy: founder.uid
+  }, { merge: true });
+  batch.set(db.collection("audit_logs").doc(), {
+    action: "founder_monetization_settings_updated",
+    actorId: founder.uid,
+    changedFields: [...numeric, ...boolean, ...textFields],
+    createdAt: now
+  });
+  await batch.commit();
+  return { success: true, updatedAt: now.toMillis() };
+});
+
+exports.founderReviewWithdrawal = onCall(async request => {
+  const founder = await requireFounder(request);
+  const withdrawalId = safeText(request.data?.withdrawalId);
+  const decision = safeText(request.data?.decision).toLowerCase();
+  const reason = safeText(request.data?.reason).slice(0, 1000);
+  if (!withdrawalId || !["approve", "reject"].includes(decision)) {
+    throw new HttpsError("invalid-argument", "Choose a valid withdrawal and decision.");
+  }
+  if (decision === "reject" && reason.length < 5) {
+    throw new HttpsError("invalid-argument", "Provide a clear rejection reason of at least five characters.");
+  }
+  const ref = db.doc("withdrawals/" + withdrawalId);
+  const now = Timestamp.now();
+  let result;
+  await db.runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("not-found", "Withdrawal request was not found.");
+    const data = snap.data();
+    const status = safeText(data.status).toLowerCase();
+    if (status !== "pending") throw new HttpsError("failed-precondition", "This request is no longer pending. Refresh the queue.");
+    const nextStatus = decision === "approve" ? "approved" : "rejected";
+    tx.update(ref, {
+      status: nextStatus,
+      reviewReason: decision === "reject" ? reason : "",
+      reviewedAt: now,
+      reviewedBy: founder.uid,
+      updatedAt: now
+    });
+    result = { status: nextStatus, instructorId: safeText(data.instructorId || data.userId) };
+  });
+  await db.collection("audit_logs").add({
+    action: "founder_withdrawal_" + result.status,
+    actorId: founder.uid,
+    targetId: withdrawalId,
+    instructorId: result.instructorId || null,
+    reason: decision === "reject" ? reason : null,
+    createdAt: now
+  });
+  return { success: true, status: result.status, note: decision === "approve"
+    ? "Approved for payout processing. No funds have been transferred."
+    : "Request rejected and the reason recorded." };
+});
+
+exports.founderSendBroadcast = onCall(async request => {
+  const founder = await requireFounder(request);
+  const title = safeText(request.data?.title);
+  const message = safeText(request.data?.message);
+  const target = safeText(request.data?.target || "all");
+  const priority = safeText(request.data?.priority || "normal");
+  const roles = { students:"student", instructors:"instructor", admins:"admin" };
+
+  if (!title || title.length > 120) throw new HttpsError("invalid-argument","Announcement title must be 1–120 characters.");
+  if (!message || message.length > 4000) throw new HttpsError("invalid-argument","Announcement message must be 1–4,000 characters.");
+  if (!["all","students","instructors","admins"].includes(target)) throw new HttpsError("invalid-argument","Choose a valid announcement audience.");
+  if (!["normal","high","critical"].includes(priority)) throw new HttpsError("invalid-argument","Choose a valid announcement priority.");
+
+  const dayKey = new Date().toISOString().slice(0,10);
+  const limitRef = db.doc(`founderBroadcastLimits/${founder.uid}`);
+  await db.runTransaction(async tx => {
+    const snap = await tx.get(limitRef);
+    const data = snap.exists ? snap.data() : {};
+    const count = data.dayKey === dayKey ? Number(data.count || 0) : 0;
+    if (count >= 10) throw new HttpsError("resource-exhausted","Daily broadcast limit reached. Try again tomorrow.");
+    tx.set(limitRef,{dayKey,count:count+1,updatedAt:Timestamp.now()},{merge:true});
+  });
+
+  const recipientQuery = target === "all"
+    ? db.collection("users")
+    : db.collection("users").where("role","==",roles[target]);
+  const recipientSnap = await recipientQuery.get();
+  if (recipientSnap.size > 5000) throw new HttpsError("resource-exhausted","Audience exceeds the 5,000-recipient broadcast limit.");
+
+  const now = Timestamp.now();
+  const broadcastRef = db.collection("broadcasts").doc();
+  const announcementRef = db.collection("announcements").doc();
+  const audience = target === "all" ? "Everyone" : target[0].toUpperCase()+target.slice(1);
+  const notificationDocs = recipientSnap.docs.map(userDoc => ({
+    ref:db.collection("notifications").doc(),
+    data:{userId:userDoc.id,title,message,type:"broadcast",priority,read:false,broadcastId:broadcastRef.id,createdAt:now,createdBy:founder.uid}
+  }));
+
+  const firstBatch = db.batch();
+  firstBatch.create(broadcastRef,{title,message,target,priority,channels:["in-app","announcement"],status:"sent",sentBy:founder.uid,sentAt:now,recipientCount:notificationDocs.length});
+  firstBatch.create(announcementRef,{title,message,category:"System",audience,priority,important:priority!=="normal",pinned:priority==="critical",push:true,email:false,popup:priority==="critical",status:"published",createdAt:now,createdBy:founder.uid});
+  notificationDocs.slice(0,450).forEach(item=>firstBatch.create(item.ref,item.data));
+  await firstBatch.commit();
+
+  for(let index=450;index<notificationDocs.length;index+=450){
+    const batch=db.batch();
+    notificationDocs.slice(index,index+450).forEach(item=>batch.create(item.ref,item.data));
+    await batch.commit();
+  }
+  await db.collection("audit_logs").add({action:"founder_broadcast_sent",actorId:founder.uid,target,priority,recipientCount:notificationDocs.length,targetId:broadcastRef.id,createdAt:now});
+  return {success:true,broadcastId:broadcastRef.id,recipientCount:notificationDocs.length};
 });
 
 exports.founderModerateCourse = onCall(async request => {

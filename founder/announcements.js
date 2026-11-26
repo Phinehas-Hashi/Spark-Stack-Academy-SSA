@@ -4,13 +4,14 @@
 // ===================================
 
 import "../js/ui-runtime.js";
-import { db } from "../js/firebase.js";
+import { app, db } from "../js/firebase.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 import {
-  collection, addDoc, doc, deleteDoc, updateDoc,
-  onSnapshot, serverTimestamp, query, orderBy
+  collection, onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const announcementsRef = collection(db, "announcements");
+const manageAnnouncement = httpsCallable(getFunctions(app), "founderManageAnnouncement");
 const $ = id => document.getElementById(id);
 
 const announcementTitle = $("announcementTitle");
@@ -45,7 +46,6 @@ function formData(status) {
     email: sendEmail.checked,
     popup: showPopup.checked,
     status,
-    createdAt: serverTimestamp()
   };
 }
 
@@ -57,7 +57,7 @@ async function save(status) {
   }
 
   try {
-    await addDoc(announcementsRef, data);
+    await manageAnnouncement({ action: "create", announcement: data });
     window.ssaToast?.(status === "published" ? "Announcement published." : "Draft saved.", "success");
     clearForm();
   } catch (error) {
@@ -106,7 +106,7 @@ function loadAnnouncements() {
 
 async function togglePin(id, current) {
   try {
-    await updateDoc(doc(db, "announcements", id), { pinned: !current });
+    await manageAnnouncement({ action: "pin", announcementId: id, pinned: !current });
     window.ssaToast?.(current ? "Announcement unpinned." : "Announcement pinned.", "success");
   } catch (error) {
     console.error("Pin update failed:", error);
@@ -115,18 +115,18 @@ async function togglePin(id, current) {
 }
 
 async function removeAnnouncement(id) {
-  const confirmed = await (window.ssaConfirm?.("Delete this announcement? This cannot be undone.", {
-    title: "Delete announcement",
-    confirmText: "Delete",
-    cancelText: "Keep announcement",
+  const confirmed = await (window.ssaConfirm?.("Archive this announcement? It will be retained for audit history and removed from active publishing.", {
+    title: "Archive announcement",
+    confirmText: "Archive",
+    cancelText: "Keep active",
     tone: "danger",
     icon: "🗑"
   }) ?? false);
   if (!confirmed) return;
 
   try {
-    await deleteDoc(doc(db, "announcements", id));
-    window.ssaToast?.("Announcement deleted.", "success");
+    await manageAnnouncement({ action: "delete", announcementId: id });
+    window.ssaToast?.("Announcement archived. The record was retained for audit history.", "success");
   } catch (error) {
     console.error("Delete failed:", error);
     window.ssaToast?.("Unable to delete announcement.", "error");

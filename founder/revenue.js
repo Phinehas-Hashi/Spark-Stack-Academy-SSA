@@ -1,5 +1,9 @@
-import { db } from "../js/firebase.js";
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { app, db } from "../js/firebase.js";
+import { collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const functions = getFunctions(app);
+const reviewWithdrawal = httpsCallable(functions, "founderReviewWithdrawal");
 
 const $ = id => document.getElementById(id);
 const money = value => `KES ${Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
@@ -93,10 +97,16 @@ document.addEventListener("click",async e=>{
     const target=e.target.closest("button"); if(!target) return;
     const id=target.dataset.id;
     if(id && (target.classList.contains("approve")||target.classList.contains("reject"))){
-        const status=target.classList.contains("approve")?"completed":"failed";
-        if(!confirm(`${status === "completed" ? "Approve" : "Reject"} this withdrawal?`)) return;
+        const decision=target.classList.contains("approve")?"approve":"reject";
+        const reason=decision==="reject"?window.prompt("Enter the reason for rejecting this withdrawal (required):"):"";
+        if(decision==="reject" && (!reason || reason.trim().length<5)){toast("A clear rejection reason is required.","error");return;}
+        if(!window.confirm(decision==="approve"?"Approve this request for payout processing? This does not transfer funds.":"Reject this withdrawal request and record the reason?")) return;
         target.disabled=true;
-        try { await updateDoc(doc(db,"withdrawals",id),{status,processedAt:serverTimestamp()}); toast(`Withdrawal ${status}.`); } catch(err){console.error(err);toast(err.message||"Unable to update withdrawal.","error");} finally { target.disabled=false; }
+        try {
+            const result=await reviewWithdrawal({withdrawalId:id,decision,reason:reason?.trim()||""});
+            toast(result.data?.note || (decision==="approve"?"Withdrawal approved for payout processing.":"Withdrawal rejected."));
+        } catch(err){console.error(err);toast(err.message||"Unable to review withdrawal.","error");}
+        finally { target.disabled=false; }
     }
     if(target.dataset.paymentId) toast("Transaction details are available in the payment record.");
 });

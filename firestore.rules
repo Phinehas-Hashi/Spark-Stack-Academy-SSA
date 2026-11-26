@@ -70,7 +70,9 @@ service cloud.firestore {
         ).data.get('active', true) == true
         && get(
           /databases/$(database)/documents/founder/$(uid())
-        ).data.get('verified', true) == true;
+        ).data.get('verified', true) == true
+        // Enforce TOTP at the data layer, not only in Founder page JavaScript.
+        && request.auth.token.get('firebase', {}).get('sign_in_second_factor', '') == 'totp';
     }
 
     function staff() {
@@ -306,6 +308,78 @@ service cloud.firestore {
         ])
       )
 
+      // Founder may suspend or restore an existing student account.
+      || (
+        isFounder()
+        && resource.data.get('role', '') == 'student'
+        && request.resource.data.get('role', '') == 'student'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'active', 'suspensionReason', 'suspendedAt', 'suspendedBy', 'updatedAt'
+        ])
+        && (
+          (
+            request.resource.data.get('status', '') == 'suspended'
+            && request.resource.data.get('active', true) == false
+            && request.resource.data.get('suspensionReason', '') is string
+            && request.resource.data.suspensionReason.size() > 0
+            && request.resource.data.get('suspendedBy', '') == uid()
+            && request.resource.data.get('suspendedAt', request.time) is timestamp
+          )
+          ||
+          (
+            resource.data.get('status', '') == 'suspended'
+            && request.resource.data.get('status', '') == 'active'
+            && request.resource.data.get('active', false) == true
+            && request.resource.data.get('suspensionReason', '') == ''
+            && request.resource.data.get('suspendedBy', null) == null
+            && request.resource.data.get('suspendedAt', null) == null
+          )
+        )
+      )
+
+      // Founder may edit an instructor's public profile fields, but not login identity.
+      || (
+        isFounder()
+        && resource.data.get('role', '') == 'instructor'
+        && request.resource.data.get('role', '') == 'instructor'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'fullName', 'expertise', 'bio', 'updatedAt'
+        ])
+        && request.resource.data.get('fullName', '') is string
+        && request.resource.data.fullName.size() > 0
+        && request.resource.data.get('expertise', '') is string
+        && request.resource.data.get('updatedAt', request.time) is timestamp
+      )
+
+      // Founder may suspend or restore an approved instructor account.
+      || (
+        isFounder()
+        && resource.data.get('role', '') == 'instructor'
+        && request.resource.data.get('role', '') == 'instructor'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'active', 'suspensionReason', 'suspendedAt', 'suspendedBy', 'updatedAt'
+        ])
+        && (
+          (
+            request.resource.data.get('status', '') == 'suspended'
+            && request.resource.data.get('active', true) == false
+            && request.resource.data.get('suspensionReason', '') is string
+            && request.resource.data.suspensionReason.size() > 0
+            && request.resource.data.get('suspendedBy', '') == uid()
+            && request.resource.data.get('suspendedAt', request.time) is timestamp
+          )
+          ||
+          (
+            resource.data.get('status', '') == 'suspended'
+            && request.resource.data.get('status', '') == 'active'
+            && request.resource.data.get('active', false) == true
+            && request.resource.data.get('suspensionReason', '') == ''
+            && request.resource.data.get('suspendedBy', null) == null
+            && request.resource.data.get('suspendedAt', null) == null
+          )
+        )
+      )
+
       // Founder may approve/reject instructors only.
       || (
         isFounder()
@@ -329,7 +403,7 @@ service cloud.firestore {
       );
 
       allow delete:
-        if isFounder();
+        if false;
     }
 
 
@@ -353,6 +427,37 @@ service cloud.firestore {
       // Founder identity MUST NOT be client-created or deleted.
       // This is provisioned by trusted server/admin tooling.
       allow create, update, delete:
+        if false;
+    }
+
+
+    // ============================================================
+    // ADMISSION NUMBER RESERVATIONS
+    // A transaction reserves each generated admission number exactly once.
+    // ============================================================
+
+    match /admissionNumbers/{admissionNumber} {
+      allow get:
+        if isFounder();
+
+      allow list:
+        if false;
+
+      allow create:
+        if isFounder()
+        && request.resource.data.get('admissionNumber', '') == admissionNumber
+        && request.resource.data.get('studentUid', '') is string
+        && request.resource.data.studentUid.size() > 0
+        && request.resource.data.get('createdBy', '') == uid()
+        && request.resource.data.get('createdAt', request.time) is timestamp
+        && request.resource.data.keys().hasAll([
+          'admissionNumber', 'studentUid', 'createdBy', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'admissionNumber', 'studentUid', 'createdBy', 'createdAt'
+        ]);
+
+      allow update, delete:
         if false;
     }
 
@@ -436,8 +541,12 @@ service cloud.firestore {
         && studentPortalOpen()
         && uid() == studentId;
 
-      allow update, delete:
+      allow update:
         if isFounder();
+
+      // Student records are retained; account closure is a trusted workflow.
+      allow delete:
+        if false;
     }
 
 
@@ -588,17 +697,10 @@ service cloud.firestore {
     // ============================================================
 
     match /withdrawals/{withdrawalId} {
-
-      allow get, list:
-        if isFounder();
-
-      allow create, update:
-        if isFounder();
-
-      allow delete:
-        if false;
+      allow get, list: if isFounder();
+      // Withdrawal lifecycle changes are performed by audited callable functions.
+      allow create, update, delete: if false;
     }
-
 
     match /withdrawalRequests/{requestId} {
 
@@ -615,7 +717,7 @@ service cloud.firestore {
         if false;
 
       allow update, delete:
-        if isFounder();
+        if false;
     }
 
 
@@ -696,14 +798,13 @@ service cloud.firestore {
 
     match /audit_logs/{logId} {
 
-      allow read, create:
+      // Historical audit records are read-only. New security evidence is
+      // written by the trusted edge collector, never by browser clients.
+      allow read:
         if isFounder();
 
-      allow update:
+      allow create, update, delete:
         if false;
-
-      allow delete:
-        if isFounder();
     }
 
 
@@ -1685,8 +1786,12 @@ service cloud.firestore {
 
     match /settings/{settingsId} {
 
-      allow read, write:
+      allow read:
         if isFounder();
+
+      // Retired client-managed security preferences are no longer writable.
+      allow write:
+        if isFounder() && settingsId != 'security' && settingsId != 'monetization' && settingsId != 'sparkAI';
     }
 
     match /platformSettings/{settingsId} {
@@ -1694,8 +1799,9 @@ service cloud.firestore {
       allow read:
         if isFounder();
 
+      // Earnings policy is updated only by trusted callable functions.
       allow write:
-        if isFounder();
+        if isFounder() && settingsId != 'earnings';
     }
 
 

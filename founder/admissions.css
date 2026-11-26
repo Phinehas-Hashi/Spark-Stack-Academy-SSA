@@ -136,3 +136,16 @@ tbody tr:hover { background: #fbfcff; }
     .students-table { padding: 12px; }
     .table-header { align-items: flex-start; flex-direction: column; }
 }
+
+/* Obsidian Imperial admissions refinement */
+:root{--ad-primary:#D6B779;--ad-primary-soft:rgba(214,183,121,.12);--ad-success:#45B88A;--ad-success-soft:rgba(69,184,138,.12);--ad-danger:#D87870;--ad-danger-soft:rgba(216,120,112,.12);--ad-warning:#D6B779;--ad-warning-soft:rgba(214,183,121,.12);--ad-text:#E7E2D5;--ad-muted:#A7A294;--ad-border:rgba(214,183,121,.18);--ad-surface:#1B1A17;--ad-page:#11110F}
+.hero-content h1{font-family:Manrope,sans-serif;letter-spacing:-.04em}.hero-badge{background:rgba(214,183,121,.12)!important;color:#D6B779!important}
+.admissions-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:12px;margin:0 0 16px;padding:14px;background:#1B1A17;border:1px solid rgba(214,183,121,.16);border-radius:14px}
+.admissions-toolbar label{display:flex;flex-direction:column;gap:7px;color:#A7A294;font-size:11px;font-weight:800;letter-spacing:.04em}
+.admissions-toolbar input,.admissions-toolbar select{width:100%;min-height:42px;padding:10px 12px;border-radius:10px;background:#141411;color:#E7E2D5;border:1px solid rgba(214,183,121,.2);font:500 13px "DM Sans",sans-serif}
+.admissions-toolbar input:focus,.admissions-toolbar select:focus{outline:none;border-color:#D6B779;box-shadow:0 0 0 3px rgba(214,183,121,.1)}
+.table-header h3{font:750 1rem Manrope,sans-serif;color:#F1EBDD}.table-header span{color:#A7A294}
+.action-btn{background:#22211D!important;border-color:rgba(214,183,121,.2)!important}.action-btn.approve{color:#70CBA7!important}.action-btn.approve:hover{background:rgba(69,184,138,.12)!important;border-color:rgba(69,184,138,.35)!important}.action-btn.reject{color:#E89A92!important}.action-btn.reject:hover{background:rgba(216,120,112,.12)!important;border-color:rgba(216,120,112,.35)!important}
+.status.pending{background:rgba(214,183,121,.12)!important;color:#E7C98E!important}.status.approved{background:rgba(69,184,138,.12)!important;color:#70CBA7!important}.status.rejected{background:rgba(216,120,112,.12)!important;color:#E89A92!important}
+.email-link{color:#D6B779!important}.applicant-cell strong{color:#F1EBDD!important}.applicant-cell span{color:#A7A294!important}
+@media(max-width:650px){.admissions-toolbar{grid-template-columns:1fr}.main-content{gap:14px}}

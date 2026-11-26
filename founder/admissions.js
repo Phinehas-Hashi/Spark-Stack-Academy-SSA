@@ -1,6 +1,6 @@
 /* SSA FOUNDER OS — ADMISSIONS MANAGEMENT */
-import { db } from "../js/firebase.js";
-import { collection, getDocs, doc, updateDoc, getDoc, serverTimestamp, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { auth, db } from "../js/firebase.js";
+import { collection, doc, updateDoc, serverTimestamp, onSnapshot, query, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const applicationsTable = $("applicationsTable");
@@ -12,6 +12,8 @@ const applicationTotal = $("applicationTotal");
 const refreshBtn = $("refreshAdmissions");
 let applications = [];
 let unsubscribe = null;
+const searchInput = $("admissionsSearch");
+const statusFilter = $("admissionsStatus");
 
 const escapeHTML = (value = "") => String(value).replace(/[&<>'"]/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[char]));
 const normalizeStatus = status => String(status || "Pending").toLowerCase();
@@ -28,63 +30,101 @@ function updateStats() {
 }
 
 function renderApplications() {
-    if (!applications.length) { applicationsTable.innerHTML=`<tr><td colspan="6"><div class="empty-state"><strong>No applications found</strong><span>New applications will appear here automatically.</span></div></td></tr>`; return; }
-    applicationsTable.innerHTML=applications.map(app=>{
+    const search=String(searchInput?.value||"").trim().toLowerCase();
+    const filter=String(statusFilter?.value||"all").toLowerCase();
+    const visible=applications.filter(app=>{
+        const status=normalizeStatus(app.status);
+        const matchesStatus=filter==="all"||status===filter;
+        const haystack=[app.name,app.email,app.course,app.phone].filter(Boolean).join(" ").toLowerCase();
+        return matchesStatus&&(!search||haystack.includes(search));
+    });
+    if (!visible.length) {
+        const message=applications.length?"No applications match these filters.":"New applications will appear here automatically.";
+        applicationsTable.innerHTML=`<tr><td colspan="6"><div class="empty-state"><strong>No applications found</strong><span>${escapeHTML(message)}</span></div></td></tr>`;
+        return;
+    }
+    applicationsTable.innerHTML=visible.map(app=>{
         const status=normalizeStatus(app.status), pending=status==="pending";
-        return `<tr><td><div class="applicant-cell"><strong>${escapeHTML(app.name||"Unknown")}</strong><span>${escapeHTML(app.phone||"No phone")}</span></div></td><td>${escapeHTML(app.course||"—")}</td><td><a class="email-link" href="mailto:${escapeHTML(app.email||"")}">${escapeHTML(app.email||"—")}</a></td><td><span class="status ${status}">${escapeHTML(app.status||"Pending")}</span></td><td>${formatDate(app.createdAt)}</td><td><div class="action-buttons">${pending?`<button class="action-btn approve" data-action="approve" data-id="${escapeHTML(app.id)}">✓</button><button class="action-btn reject" data-action="reject" data-id="${escapeHTML(app.id)}">×</button>`:`<span class="action-complete">Processed</span>`}</div></td></tr>`;
+        return `<tr>
+          <td><div class="applicant-cell"><strong>${escapeHTML(app.name||"Unknown")}</strong><span>${escapeHTML(app.phone||"No phone")}</span></div></td>
+          <td>${escapeHTML(app.course||"—")}</td>
+          <td><a class="email-link" href="mailto:${escapeHTML(app.email||"")}">${escapeHTML(app.email||"—")}</a></td>
+          <td><span class="status ${escapeHTML(status)}">${escapeHTML(app.status||"Pending")}</span></td>
+          <td>${formatDate(app.createdAt)}</td>
+          <td><div class="action-buttons">${pending?`<button class="action-btn approve" aria-label="Approve ${escapeHTML(app.name||"applicant")}" title="Approve" data-action="approve" data-id="${escapeHTML(app.id)}">✓</button><button class="action-btn reject" aria-label="Reject ${escapeHTML(app.name||"applicant")}" title="Reject" data-action="reject" data-id="${escapeHTML(app.id)}">×</button>`:`<span class="action-complete">Processed</span>`}</div></td>
+        </tr>`;
     }).join("");
 }
-
 function subscribeApplications() {
     unsubscribe?.();
     const q=query(collection(db,"applications"),orderBy("createdAt","desc"));
     unsubscribe=onSnapshot(q,snapshot=>{ applications=snapshot.docs.map(item=>({id:item.id,...item.data()})); updateStats(); renderApplications(); setLoading(false); },error=>{ console.error("Admissions listener failed:",error); applicationsTable.innerHTML=`<tr><td colspan="6"><div class="empty-state error"><strong>Unable to load applications</strong><span>Check your connection or Firestore permissions.</span></div></td></tr>`; setLoading(false); });
 }
 
-async function generateAdmissionNumber() {
+function generateAdmissionNumber() {
     const year=new Date().getFullYear();
-    const snapshot=await getDocs(query(collection(db,"students"),where("admissionNumber","!=","Pending")));
-    return `SSA-${year}-${String(snapshot.size+1).padStart(4,"0")}`;
+    const suffix=crypto.randomUUID().replaceAll("-","").slice(0,8).toUpperCase();
+    return `SSA-${year}-${suffix}`;
 }
 
 async function approveApplication(id) {
     const application=applications.find(app=>app.id===id);
     if (!application || normalizeStatus(application.status)!=="pending") return;
-    if (!application.studentUid) throw new Error("This application is missing its student account. Ask the applicant to sign up again.");
-    if (!application.email) throw new Error("This application has no email address.");
-
-    const confirmed=await (window.ssaConfirm ? window.ssaConfirm(`Approve ${application.name||"this applicant"}? Their existing signup account will become an active student and receive an admission number.`,{title:"Approve admission",confirmText:"Approve student",cancelText:"Keep pending"}) : Promise.resolve(false));
+    if (!application.studentUid) return window.showFounderToast?.("This application is missing its student account. Ask the applicant to sign up again.","error");
+    if (!application.email) return window.showFounderToast?.("This application has no email address.","error");
+    const confirmed=await (window.ssaConfirm ? window.ssaConfirm(
+      `Approve ${application.name||"this applicant"}? Their existing account will be activated and assigned a unique admission number.`,
+      {title:"Approve admission",confirmText:"Approve student",cancelText:"Keep pending"}
+    ) : Promise.resolve(false));
     if (!confirmed) return;
 
-    const button=document.querySelector(`.approve[data-id="${CSS.escape(id)}"]`); if(button) button.disabled=true;
+    const button=document.querySelector(`.approve[data-id="${CSS.escape(id)}"]`);
+    if(button) button.disabled=true;
     try {
+        const admissionNo=generateAdmissionNumber();
+        const approvedAt=serverTimestamp();
         const studentRef=doc(db,"students",application.studentUid);
         const userRef=doc(db,"users",application.studentUid);
-        const [studentSnap,userSnap]=await Promise.all([getDoc(studentRef),getDoc(userRef)]);
-        if (!studentSnap.exists()) throw new Error("Student profile was not found.");
+        const applicationRef=doc(db,"applications",id);
+        const numberRef=doc(db,"admissionNumbers",admissionNo);
+        const founderUid=auth.currentUser?.uid;
+        if(!founderUid) throw new Error("Founder session expired. Sign in again.");
 
-        const admissionNo=await generateAdmissionNumber();
-        const approvedAt=serverTimestamp();
-        await updateDoc(studentRef,{ admissionNumber:admissionNo, admissionNo, username:admissionNo, status:"Active", onboardingStatus:"approved", approvedAt, approvedBy:"founder" });
-        if (userSnap.exists()) await updateDoc(userRef,{ status:"active", admissionNumber:admissionNo, admissionNo, verified:true, approvedAt });
-        await updateDoc(doc(db,"applications",id),{ status:"Approved", admissionNo, studentUid:application.studentUid, processedAt:approvedAt });
+        await runTransaction(db,async transaction=>{
+            const [applicationSnap,studentSnap,userSnap,numberSnap]=await Promise.all([
+                transaction.get(applicationRef),transaction.get(studentRef),transaction.get(userRef),transaction.get(numberRef)
+            ]);
+            if(!applicationSnap.exists()||normalizeStatus(applicationSnap.data().status)!=="pending") throw new Error("This application has already been processed.");
+            if(!studentSnap.exists()) throw new Error("Student profile was not found.");
+            if(!userSnap.exists()) throw new Error("The student's Academy account is missing. Do not approve until the account is repaired.");
+            if(numberSnap.exists()) throw new Error("Admission number collision. Refresh and try again.");
 
+            transaction.set(numberRef,{admissionNumber:admissionNo,studentUid:application.studentUid,createdBy:founderUid,createdAt:serverTimestamp()});
+            transaction.update(studentRef,{admissionNumber:admissionNo,admissionNo,username:admissionNo,status:"Active",onboardingStatus:"approved",approvedAt,approvedBy:founderUid});
+            transaction.update(userRef,{status:"active",active:true,admissionNumber:admissionNo,admissionNo,verified:true,approvedAt,approvedBy:founderUid});
+            transaction.update(applicationRef,{status:"Approved",admissionNo,studentUid:application.studentUid,processedAt:approvedAt,processedBy:founderUid});
+        });
+        window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Admission approved"});
         window.showFounderToast?.(`Admission approved — ${admissionNo}`,"success");
     } catch(error) {
         console.error("Approval failed:",error);
         window.showFounderToast?.(error.message||"Approval failed.","error");
     } finally { if(button) button.disabled=false; }
 }
-
 async function rejectApplication(id) {
     const application=applications.find(app=>app.id===id);
     if (!application || normalizeStatus(application.status)!=="pending") return;
-    const confirmed=await (window.ssaConfirm ? window.ssaConfirm(`Reject ${application.name||"this application"}?`,{title:"Reject application",confirmText:"Reject application",cancelText:"Keep pending",danger:true}) : Promise.resolve(false));
+    const rawReason=await window.ssaPrompt?.("Provide a reason for rejecting this application.",{title:"Rejection reason",confirmText:"Continue",type:"text"});
+    const reason=String(rawReason||"").trim().slice(0,500);
+    if(!reason) return window.showFounderToast?.("A rejection reason is required.","error");
+    const confirmed=await (window.ssaConfirm ? window.ssaConfirm(`Reject ${application.name||"this application"}? The reason will be saved with the application.`,{title:"Reject application",confirmText:"Reject application",cancelText:"Keep pending",danger:true}) : Promise.resolve(false));
     if (!confirmed) return;
-    try { await updateDoc(doc(db,"applications",id),{status:"Rejected",processedAt:serverTimestamp()}); window.showFounderToast?.("Application rejected.","success"); }
+    try { await updateDoc(doc(db,"applications",id),{status:"Rejected",rejectionReason:reason,processedAt:serverTimestamp(),processedBy:auth.currentUser?.uid||""}); window.showFounderToast?.("Application rejected.","success"); }
     catch(error){ console.error("Rejection failed:",error); window.showFounderToast?.(error.message||"Unable to reject application.","error"); }
 }
 
 document.addEventListener("click",event=>{ const button=event.target.closest("[data-action]"); if(!button)return; if(button.dataset.action==="approve") approveApplication(button.dataset.id); if(button.dataset.action==="reject") rejectApplication(button.dataset.id); });
-refreshBtn?.addEventListener("click",async()=>{ setLoading(true); try { await getDocs(collection(db,"applications")); } catch(error) { console.error(error); window.showFounderToast?.(error.message||"Refresh failed.","error"); setLoading(false); } });
+searchInput?.addEventListener("input",renderApplications);
+statusFilter?.addEventListener("change",renderApplications);
+refreshBtn?.addEventListener("click",()=>{ setLoading(true); subscribeApplications(); });
 subscribeApplications();

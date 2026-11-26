@@ -1,6 +1,6 @@
 import "../../js/ui-runtime.js";
 import { auth, db } from "../../js/firebase.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { onAuthStateChanged, signOut, multiFactor, TotpMultiFactorGenerator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const componentCache = new Map();
@@ -15,6 +15,7 @@ function ensureFounderShell(){
   document.body.classList.add("founder-shell-ready");
   loadCSS("founder-unified.css");
   loadCSS("founder-complete.css");
+  loadCSS("founder-imperial.css");
   if(!document.getElementById("sidebarOverlay")){
     const overlay=document.createElement("div"); overlay.id="sidebarOverlay"; overlay.className="sidebar-overlay"; document.body.appendChild(overlay);
   }
@@ -71,16 +72,37 @@ function setupTopbar(){
 
 function loadFounder(){
   onAuthStateChanged(auth,async user=>{
-    if(!user){window.location.href="../login.html";return;}
-    listenToNotifications(user.uid); loadTopNotifications(user.uid);
+    if(!user){sessionStorage.removeItem("founderProfile");window.location.replace("../login.html");return;}
     try{
-      const cached=sessionStorage.getItem("founderProfile"); if(cached){updateFounderUI(JSON.parse(cached));return;}
-      const snapshot=await getDoc(doc(db,"founder",user.uid)); if(!snapshot.exists()) return;
-      const founder=snapshot.data(); sessionStorage.setItem("founderProfile",JSON.stringify(founder)); updateFounderUI(founder);
-    }catch(error){console.error("Founder profile error:",error);}
+      // Never trust cached profile data for authorization. Read the current
+      // Founder record on every page load and require every status flag.
+      const snapshot=await getDoc(doc(db,"founder",user.uid));
+      if(!snapshot.exists()) throw new Error("Founder profile not found.");
+      const founder=snapshot.data();
+      if(founder.role!=="founder"||founder.status!=="active"||founder.active===false||founder.verified===false){
+        throw new Error("Founder account is not active and verified.");
+      }
+      const currentPage=window.location.pathname.split("/").pop()||"dashboard.html";
+      const isSecurityPage=currentPage==="security.html";
+      const hasTotp=multiFactor(user).enrolledFactors.some(f=>f.factorId===TotpMultiFactorGenerator.FACTOR_ID);
+      const tokenResult=await user.getIdTokenResult();
+      const mfaVerified=tokenResult.claims.firebase?.sign_in_second_factor==="totp";
+      if(!isSecurityPage&&(!user.emailVerified||!hasTotp||!mfaVerified)){
+        window.location.replace("security.html");
+        return;
+      }
+      sessionStorage.setItem("founderProfile",JSON.stringify(founder));
+      updateFounderUI(founder);
+      listenToNotifications(user.uid); loadTopNotifications(user.uid);
+    }catch(error){
+      window.ssaSecuritySignal?.("portal_access_denied", { portal: "founder", code: "founder_authorization_failed" });
+      console.error("Founder authorization failed:",error);
+      sessionStorage.removeItem("founderProfile");
+      try{await signOut(auth);}catch{}
+      window.location.replace("../login.html");
+    }
   });
 }
-
 function updateFounderUI(founder){
   const name=founder.name||"Founder", role=founder.role||"Founder";
   const profileName=document.getElementById("profileName"), avatar=document.getElementById("profileAvatar"), profileRole=document.getElementById("profileRole"), ai=document.getElementById("aiStatusText");

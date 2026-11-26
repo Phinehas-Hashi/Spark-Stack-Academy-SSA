@@ -2,8 +2,8 @@
 // SPARK STACK ACADEMY — ACADEMY PROFILE
 // ===================================
 
-import { db, storage } from "../../js/firebase.js";
-import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db, storage } from "../js/firebase.js";
+import { doc, getDoc, setDoc, serverTimestamp, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 console.log("🏫 Academy Profile Loaded");
@@ -56,7 +56,7 @@ async function uploadSelectedImages(){
         const input=document.getElementById(inputId);
         const file=input?.files?.[0];
         if(!file) continue;
-        if(!file.type.startsWith("image/")) throw new Error(`${field} must be an image.`);
+        if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type)) throw new Error(`${field} must be a JPEG, PNG, WebP or GIF image.`);
         if(file.size > 5*1024*1024) throw new Error(`${field} is larger than 5MB.`);
         const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"-");
         const storageRef=ref(storage,`academy-profile/${field}-${Date.now()}-${safeName}`);
@@ -105,7 +105,7 @@ imageFields.forEach(([inputId,previewId])=>{
     input?.addEventListener("change",()=>{
         const file=input.files?.[0];
         if(!file || !preview) return;
-        if(!file.type.startsWith("image/")){ notify("Please select an image file.","error"); input.value=""; return; }
+        if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type)){ notify("Use a JPEG, PNG, WebP or GIF image. SVG uploads are disabled.","error"); input.value=""; return; }
         if(file.size>5*1024*1024){ notify("Image must be 5MB or smaller.","error"); input.value=""; return; }
         preview.src=URL.createObjectURL(file); preview.classList.add("has-image");
     });
@@ -122,15 +122,19 @@ document.getElementById("resetProfileBtn")?.addEventListener("click",async()=>{
 });
 
 async function loadStatistics(){
-    try{
-        const [students,instructors,courses,certificates]=await Promise.all([
-            getDocs(collection(db,"students")),getDocs(collection(db,"instructors")),getDocs(collection(db,"courses")),getDocs(collection(db,"certificates"))
-        ]);
-        document.getElementById("totalStudents").textContent=students.size.toLocaleString();
-        document.getElementById("totalInstructors").textContent=instructors.size.toLocaleString();
-        document.getElementById("totalCourses").textContent=courses.size.toLocaleString();
-        document.getElementById("totalCertificates").textContent=certificates.size.toLocaleString();
-    }catch(error){ console.error("Statistics Error:",error); notify("Unable to load academy statistics.","error"); }
+    const targets=[["totalStudents","students"],["totalInstructors","instructors"],["totalCourses","courses"],["totalCertificates","certificates"]];
+    await Promise.all(targets.map(async ([elementId,path])=>{
+        const element=document.getElementById(elementId);
+        if(!element)return;
+        element.textContent="—";
+        try{
+            const result=await getCountFromServer(collection(db,path));
+            element.textContent=Number(result.data().count||0).toLocaleString();
+        }catch(error){
+            console.error("Count query failed for "+path+":",error);
+            element.textContent="Unavailable";
+        }
+    }));
 }
 
 window.addEventListener("DOMContentLoaded",()=>{ loadProfile(); loadStatistics(); });

@@ -974,3 +974,19 @@ REDUCED MOTION
 }
 
 }
+/* Obsidian Imperial instructor admissions refinements */
+.page-hero h1,.panel-header h2{font-family:Manrope,sans-serif;letter-spacing:-.035em}
+.page-hero::before{background:rgba(214,183,121,.1)!important}
+.hero-badge{background:rgba(214,183,121,.12)!important;border-color:rgba(214,183,121,.22)!important;color:#D6B779!important}
+.filter-btn{background:#201F1B!important;border-color:rgba(214,183,121,.16)!important;color:#B9B2A4!important}
+.filter-btn:hover,.filter-btn.active{background:rgba(214,183,121,.14)!important;border-color:rgba(214,183,121,.35)!important;color:#E7C98E!important;box-shadow:none!important}
+.instructor-search{display:flex;flex-direction:column;gap:6px;min-width:min(260px,100%);margin-left:auto;color:#A7A294;font-size:10px;font-weight:800;letter-spacing:.05em}
+.instructor-search input{min-height:36px;padding:8px 11px;border:1px solid rgba(214,183,121,.2);border-radius:9px;background:#141411;color:#E7E2D5;font:500 11px "DM Sans",sans-serif}
+.instructor-search input:focus{outline:none;border-color:#D6B779;box-shadow:0 0 0 3px rgba(214,183,121,.1)}
+.instructor-avatar{background:linear-gradient(135deg,#D6B779,#806B42)!important;color:#171613!important;box-shadow:none!important}
+.instructor-info strong{color:#F1EBDD!important}.instructor-info span{color:#A7A294!important}.email-link{color:#D6B779!important}
+.status.pending_review{background:rgba(214,183,121,.12)!important;color:#E7C98E!important;border-color:rgba(214,183,121,.2)!important}
+.status.active{background:rgba(69,184,138,.12)!important;color:#70CBA7!important;border-color:rgba(69,184,138,.2)!important}
+.status.rejected{background:rgba(216,120,112,.12)!important;color:#E89A92!important;border-color:rgba(216,120,112,.2)!important}
+.action-btn.approve{background:rgba(69,184,138,.1)!important;color:#70CBA7!important;border-color:rgba(69,184,138,.2)!important}.action-btn.reject{background:rgba(216,120,112,.1)!important;color:#E89A92!important;border-color:rgba(216,120,112,.2)!important}
+@media(max-width:700px){.instructor-search{width:100%;margin:0}.panel-header{gap:14px}}

@@ -6,7 +6,7 @@
   <title>Analytics | Spark Stack Academy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="analytics.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 <link rel="stylesheet" href="founder-unified.css">
@@ -28,15 +28,16 @@
         </label>
       </section>
 
+      <div id="analyticsDataStatus" class="analytics-data-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="analyticsDataStatusText">Connecting to Academy data…</span></div>
       <section class="metric-grid">
         <article class="metric-card"><span>Total learners</span><strong id="analyticsStudents">0</strong><small id="studentTrend">Loading live data…</small></article>
         <article class="metric-card"><span>Enrollments</span><strong id="analyticsEnrollments">0</strong><small>Across all courses</small></article>
-        <article class="metric-card"><span>Conversion</span><strong id="analyticsConversion">—</strong><small>Enrollments per learner</small></article>
+        <article class="metric-card"><span>Conversion</span><strong id="analyticsConversion">—</strong><small>Enrollment-to-learner ratio</small></article>
         <article class="metric-card"><span>Recorded revenue</span><strong id="analyticsRevenue">KSh 0</strong><small id="revenueTrend">Selected reporting period</small></article>
       </section>
 
       <section class="analytics-grid">
-        <article class="panel wide"><div class="panel-heading"><div><span class="eyebrow">REVENUE MOMENTUM</span><h2>Revenue over time</h2></div><strong id="chartTotal">KSh 0</strong></div><div class="chart" id="revenueBars" aria-label="Revenue bar chart"></div></article>
+        <article class="panel wide"><div class="panel-heading"><div><span class="eyebrow">REVENUE MOMENTUM</span><h2>Revenue over time</h2></div><strong id="chartTotal">KSh 0</strong></div><div class="chart" id="revenueBars" role="img" aria-label="Daily recorded revenue chart"></div><div class="chart-caption" id="revenueChartCaption">Daily totals for the selected reporting period</div></article>
         <article class="panel"><div class="panel-heading"><div><span class="eyebrow">CATALOG HEALTH</span><h2>Course performance</h2></div></div><div class="ranked-list" id="coursePerformance"><p class="empty">Loading courses…</p></div></article>
         <article class="panel"><div class="panel-heading"><div><span class="eyebrow">ACADEMY PULSE</span><h2>Founder brief</h2></div></div><p class="brief" id="analyticsBrief">Reading your academy data…</p><a class="panel-link" href="spark-ai.html">Ask Spark AI <i data-lucide="arrow-up-right"></i></a></article>
         <article class="panel"><div class="panel-heading"><div><span class="eyebrow">OPERATIONS</span><h2>At a glance</h2></div></div><dl class="operation-list"><div><dt>Active courses</dt><dd id="analyticsCourses">0</dd></div><div><dt>Instructors</dt><dd id="analyticsInstructors">0</dd></div><div><dt>Certificates issued</dt><dd id="analyticsCertificates">0</dd></div></dl></article>

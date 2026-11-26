@@ -2006,3 +2006,20 @@ body{
     }
 
 }
+/* Obsidian Imperial — payments and gateway management */
+:root{--primary:#d6b779;--primary-light:#e7d19e;--secondary:#a88a4d;--accent:#c5a96d;--success:#45b88a;--warning:#d6b779;--danger:#d97770;--background:#11110f;--surface:#1b1a17;--border:rgba(214,183,121,.2);--text:#e7e2d5;--muted:#aaa394;--shadow:0 16px 38px rgba(0,0,0,.24)}
+body{background:radial-gradient(circle at 8% 0%,rgba(214,183,121,.09),transparent 32%),linear-gradient(145deg,#11110f,#171612 60%,#11110f)!important;color:#e7e2d5}
+.glass-card,.provider-card,.gateway-card,.receipt-preview,.receipt-actions,.settings-card,.transactions-section{background:linear-gradient(145deg,#201f1b,#191815)!important;border:1px solid var(--border)!important;box-shadow:var(--shadow)!important;color:#e7e2d5!important}
+h1,h2,h3,h4,strong,label,.section-title,.provider-top{color:#e7e2d5}
+p,small,.muted,.form-group label,.setting-item span{color:#aaa394}
+input,select,textarea{background:#11110f!important;color:#e7e2d5!important;border:1px solid #514632!important}
+input:focus,select:focus,textarea:focus{border-color:#d6b779!important;box-shadow:0 0 0 3px rgba(214,183,121,.12)!important}
+button.primary-btn,.primary-btn{background:linear-gradient(135deg,#d6b779,#a88a4d)!important;color:#171612!important}
+button.secondary-btn,.secondary-btn,.table-action{background:#292722!important;color:#e7e2d5!important;border:1px solid var(--border)!important}
+button:hover,.table-action:hover{filter:brightness(1.08)}
+.status.connected,.status.success{background:rgba(69,184,138,.14)!important;color:#79d8aa!important}
+.status.pending,.status.warning{background:rgba(214,183,121,.14)!important;color:#e5ca8e!important}
+.status.failed,.status.error{background:rgba(217,119,112,.14)!important;color:#efaaa2!important}
+table th{color:#d6b779!important}table td{color:#e7e2d5!important;border-color:var(--border)!important}
+.receipt-paper{background:#f7f3e9!important;color:#242019!important}
+.receipt-paper *{color:#242019!important}
