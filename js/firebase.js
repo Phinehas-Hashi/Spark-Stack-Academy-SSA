@@ -7,6 +7,7 @@ import "./security-config.js";
 import { installSecurityTelemetry } from "./security-telemetry.js";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
@@ -23,6 +24,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const appCheck = window.SSA_RECAPTCHA_V3_SITE_KEY
+    ? initializeAppCheck(app, { provider: new ReCaptchaV3Provider(window.SSA_RECAPTCHA_V3_SITE_KEY), isTokenAutoRefreshEnabled: true })
+    : null;
 const db = getFirestore(app);
 const auth = getAuth(app);
 installSecurityTelemetry(auth);
@@ -32,4 +36,4 @@ setPersistence(auth, browserLocalPersistence).catch(error => {
     console.error("Firebase Auth persistence:", error);
 });
 
-export { app, auth, db, storage };
+export { app, auth, db, storage, appCheck };
