@@ -1324,6 +1324,74 @@ exports.saveMarketplacePricing = onCall(async request => {
   return { success: true, pricingStatus: "proposed", prices };
 });
 
+exports.saveFounderMonetizationSettings = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data?.settings;
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new HttpsError("invalid-argument", "Monetization settings are required.");
+  }
+  const numeric = [
+    "courseFee","registrationFee","examinationFee","certificateFee",
+    "premiumMonthly","premiumQuarterly","premiumYearly","instructorCommission",
+    "platformCommission","maxDiscount","couponExpiry","minimumWithdrawal",
+    "withdrawalFeePercent","vatRate","decimalPlaces"
+  ];
+  const boolean = [
+    "enablePremium","premiumCertificates","enableMpesa","enableCards","enablePaypal",
+    "enableBank","enableInstructorEarnings","automaticPayouts","allowCoupons",
+    "allowScholarships","enableWithdrawals","withdrawalApproval","enableRevenueDashboard",
+    "trackStudentPurchases","trackInstructorRevenue","monthlyRevenueReports","enablePayments",
+    "allowRefunds"
+  ];
+  const textFields = ["withdrawalTime","billingCycle","invoicePrefix","currency","currencySymbol"];
+  const settings = {};
+  for (const key of numeric) {
+    const value = Number(input[key]);
+    if (!Number.isFinite(value) || value < 0 || value > 100000000) {
+      throw new HttpsError("invalid-argument", "Invalid numeric monetization value: " + key);
+    }
+    settings[key] = value;
+  }
+  for (const key of boolean) settings[key] = input[key] === true;
+  for (const key of textFields) settings[key] = safeText(input[key]).slice(0, 40);
+  if (settings.instructorCommission + settings.platformCommission !== 100) {
+    throw new HttpsError("invalid-argument", "Instructor and platform shares must total 100%.");
+  }
+  if (settings.withdrawalFeePercent > 100 || settings.maxDiscount > 100 || settings.vatRate > 100
+      || settings.decimalPlaces > 4 || settings.couponExpiry > 3650) {
+    throw new HttpsError("invalid-argument", "One or more percentage or range settings are invalid.");
+  }
+  if (!["KES","USD","EUR","GBP"].includes(settings.currency)) {
+    throw new HttpsError("invalid-argument", "Unsupported platform currency.");
+  }
+  if (!["Monthly","Quarterly","Yearly"].includes(settings.billingCycle)) {
+    throw new HttpsError("invalid-argument", "Unsupported billing cycle.");
+  }
+  if (settings.automaticPayouts) {
+    throw new HttpsError("failed-precondition", "Automatic payouts are not enabled for production. Keep this setting disabled until payout reconciliation is deployed.");
+  }
+  const now = Timestamp.now();
+  const batch = db.batch();
+  batch.set(db.doc("settings/monetization"), { ...settings, updatedAt: now, updatedBy: founder.uid }, { merge: true });
+  batch.set(db.doc("platformSettings/earnings"), {
+    minimumWithdrawal: settings.minimumWithdrawal,
+    withdrawalFeePercent: settings.withdrawalFeePercent,
+    withdrawalsEnabled: settings.enableWithdrawals,
+    withdrawalApproval: settings.withdrawalApproval,
+    withdrawalProcessingTime: settings.withdrawalTime,
+    updatedAt: now,
+    updatedBy: founder.uid
+  }, { merge: true });
+  batch.set(db.collection("audit_logs").doc(), {
+    action: "founder_monetization_settings_updated",
+    actorId: founder.uid,
+    changedFields: [...numeric, ...boolean, ...textFields],
+    createdAt: now
+  });
+  await batch.commit();
+  return { success: true, updatedAt: now.toMillis() };
+});
+
 exports.founderReviewWithdrawal = onCall(async request => {
   const founder = await requireFounder(request);
   const withdrawalId = safeText(request.data?.withdrawalId);
