@@ -327,6 +327,7 @@ async function completeInstitutionOnboardingPayment(paymentDoc, payment, metadat
   const institutionRef = db.doc("institutions/" + payment.institutionId);
   const applicationRef = db.doc("institutionApplications/" + payment.applicationId);
   const userRef = db.doc("users/" + payment.ownerUid);
+  const ownerMembershipRef = db.doc("institutions/" + payment.institutionId + "/members/" + payment.ownerUid);
   await db.runTransaction(async transaction => {
     const [institutionSnap, paymentSnap] = await Promise.all([
       transaction.get(institutionRef), transaction.get(paymentDoc.ref)
@@ -344,6 +345,16 @@ async function completeInstitutionOnboardingPayment(paymentDoc, payment, metadat
       paidAmount: Number(metadata.Amount),
       paidPhoneNumber: String(metadata.PhoneNumber),
       verifiedAt: now, updatedAt: now
+    }, { merge: true });
+    transaction.set(ownerMembershipRef, {
+      uid: payment.ownerUid,
+      institutionId: payment.institutionId,
+      memberType: "institution_owner",
+      role: "institution_owner",
+      status: "active",
+      verified: true,
+      activatedAt: now,
+      updatedAt: now
     }, { merge: true });
     transaction.set(institutionRef, {
       status: "active",
@@ -1883,6 +1894,22 @@ exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, asyn
         updatedAt: now
       }, { merge: true });
 
+      // Canonical owner membership is the tenant authorization record.
+      // A pre-activation payment requirement keeps this membership pending.
+      transaction.set(db.doc(`institutions/${applicationId}/members/${ownerUid}`), {
+        uid: ownerUid,
+        institutionId: applicationId,
+        memberType: "institution_owner",
+        role: "institution_owner",
+        status: requiresPaymentBeforeActivation ? "pending_verification" : "active",
+        verified: !requiresPaymentBeforeActivation,
+        email: application.ownerEmail,
+        fullName: application.ownerName,
+        createdAt: institutionSnap.exists ? (institutionSnap.data().createdAt || now) : now,
+        updatedAt: now,
+        ...(requiresPaymentBeforeActivation ? {} : { activatedAt: now })
+      }, { merge: true });
+
       transaction.update(applicationRef, {
         status: requiresPaymentBeforeActivation ? "approved_awaiting_payment" : "approved",
         reviewedAt: now,
@@ -2035,8 +2062,17 @@ exports.createInstitutionTeamAccount = onCall(async request => {
         createdAt: Timestamp.now(), createdBy: callerUid
       });
       transaction.create(memberRef, {
-        uid: created.uid, email, fullName, role, status: "active",
-        createdAt: Timestamp.now(), createdBy: callerUid
+        uid: created.uid,
+        institutionId,
+        email,
+        fullName,
+        memberType: role === "instructor" ? "instructor" : "institution_admin",
+        role,
+        status: "active",
+        verified: true,
+        createdAt: Timestamp.now(),
+        createdBy: callerUid,
+        updatedAt: Timestamp.now()
       });
       transaction.update(institutionRef, {
         usage: { ...(freshInstitution.data().usage || {}), [limitKey]: role === "institution_admin" ? members.size + 2 : members.size + 1 },
