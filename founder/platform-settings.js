@@ -428,7 +428,7 @@ function setPlatformStatus(message,isError=false){const box=$("platformSettingsS
 onAuthStateChanged(auth,async user=>{
  if(!user){window.location.replace("../login.html");return;}
  try{await requireVerifiedFounder();founderReady=true;await loadPlatformSettings();setPlatformStatus("Founder session verified · Platform settings loaded");}
- catch(error){console.error("[Founder Platform Settings] Access check failed:",error);setPlatformStatus(error.message||"Founder access denied",true);alert(error.message||"Founder authorization failed.");window.location.replace("security.html");}
+ catch(error){console.error("[Founder Platform Settings] Access check failed:",error);setPlatformStatus(error.message||"Founder access denied",true);alert(error.message||"Founder authorization failed.");// Keep the current Founder page open; show the access/data error in place.}
 });
 
 
