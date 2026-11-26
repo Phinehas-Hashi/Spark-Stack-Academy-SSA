@@ -2,7 +2,7 @@ import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc,
-  addDoc, serverTimestamp, runTransaction
+  collection, serverTimestamp, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
@@ -112,11 +112,10 @@ async function action(id, type) {
   if (!window.SSAOnlineActionGuard?.requireOnline("Processing an instructor payout")) return;
   if (financeSecurity.treasuryLocked) throw new Error("Treasury is locked. Unlock it before processing payouts.");
 
-  const ref = doc(db, "withdrawalRequests", id);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) throw new Error("Payout request no longer exists.");
-
-  const row = snap.data();
+  const payoutRef = doc(db, "withdrawalRequests", id);
+  const snapshot = await getDoc(payoutRef);
+  if (!snapshot.exists()) throw new Error("Payout request no longer exists.");
+  const row = snapshot.data();
   const current = String(row.status || "pending").toLowerCase();
   if (["approve", "reject"].includes(type) && current !== "pending") throw new Error("Only pending requests can be reviewed.");
   if (type === "paid" && current !== "approved") throw new Error("Only approved requests can be marked paid.");
@@ -128,7 +127,7 @@ async function action(id, type) {
   let reviewReason = "";
   if (type === "reject") {
     const rawReason = await window.ssaPrompt?.("Provide a reason for rejecting this payout request.", { title: "Reject payout", confirmText: "Continue", placeholder: "Explain why this payout cannot proceed..." });
-    reviewReason = String(rawReason || "").trim().slice(0,500);
+    reviewReason = String(rawReason || "").trim().slice(0, 500);
     if (!reviewReason) throw new Error("A rejection reason is required.");
   }
   const confirmMessage = type === "paid"
@@ -140,57 +139,55 @@ async function action(id, type) {
     ? await window.ssaConfirm(confirmMessage, { title: type === "paid" ? "Confirm settlement" : type === "approve" ? "Approve payout" : "Reject payout", confirmText: type === "paid" ? "Mark paid" : type === "approve" ? "Approve" : "Reject", cancelText: "Cancel", danger: type === "reject" })
     : window.confirm(confirmMessage);
   if (!confirmed) return;
-  const status = type === "approve" ? "approved" : type === "reject" ? "rejected" : "paid";
+
   const treasuryRef = doc(db, "finance", "treasury");
+  const walletRef = doc(db, "instructorWallets", row.instructorId || "");
+  const ledgerRef = doc(collection(db, "financeTransactions"));
+  const transactionId = `PAY-${Date.now()}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;
 
-  if (status === "paid") {
-    await runTransaction(db, async tx => {
-      const walletRef = doc(db, "instructorWallets", row.instructorId);
-      const [requestSnap, treasurySnap, walletSnap] = await Promise.all([tx.get(ref), tx.get(treasuryRef), tx.get(walletRef)]);
-      if (!requestSnap.exists()) throw new Error("Payout request no longer exists.");
-      if (!treasurySnap.exists()) throw new Error("Treasury is not initialized.");
-      if (!walletSnap.exists()) throw new Error("Instructor wallet is missing. Reconcile the wallet before paying this request.");
+  await runTransaction(db, async tx => {
+    const latestSnap = await tx.get(payoutRef);
+    if (!latestSnap.exists()) throw new Error("Payout request no longer exists.");
+    const latest = latestSnap.data();
+    const latestStatus = String(latest.status || "pending").toLowerCase();
 
-      const latest = requestSnap.data();
-      if (String(latest.status || "pending").toLowerCase() !== "approved") throw new Error("This payout is no longer approved for settlement.");
-      if (latest.instructorId !== row.instructorId) throw new Error("Payout owner changed. Refresh and review again.");
+    if (type === "approve" || type === "reject") {
+      if (latestStatus !== "pending") throw new Error("This payout request has already been reviewed.");
+      tx.update(payoutRef, {
+        status: type === "approve" ? "approved" : "rejected",
+        reviewedBy: me.uid,
+        reviewedAt: serverTimestamp(),
+        reviewReason: type === "reject" ? reviewReason : "",
+        updatedAt: serverTimestamp()
+      });
+      return;
+    }
 
-      const treasuryBalance = Number(treasurySnap.data().balance || 0);
-      const walletBalance = Number(walletSnap.data().balance || 0);
-      if (String(walletSnap.data().status || "active").toLowerCase() !== "active") throw new Error("This instructor wallet is restricted and cannot be paid.");
-      if (treasuryBalance < amount) throw new Error(`Insufficient treasury funds. Available: ${money(treasuryBalance)}.`);
-      if (walletBalance < amount) throw new Error(`Insufficient instructor wallet balance. Available: ${money(walletBalance)}.`);
+    if (type !== "paid" || latestStatus !== "approved") throw new Error("Only approved requests can be settled.");
+    if (latest.instructorId !== row.instructorId) throw new Error("Payout owner changed. Refresh and review again.");
 
-      tx.update(ref, { status:"paid", walletBalanceDebited:true, paidBy:me.uid, paidAt:serverTimestamp(), updatedAt:serverTimestamp() });
-      tx.update(treasuryRef, { balance:treasuryBalance - amount, updatedAt:serverTimestamp() });
-      tx.update(walletRef, { balance:walletBalance - amount, totalPaid:Number(walletSnap.data().totalPaid||0)+amount, updatedAt:serverTimestamp() });
+    const [treasurySnap, walletSnap] = await Promise.all([tx.get(treasuryRef), tx.get(walletRef)]);
+    if (!treasurySnap.exists()) throw new Error("Treasury is not initialized.");
+    if (!walletSnap.exists()) throw new Error("Instructor wallet is missing. Reconcile the wallet before paying this request.");
+
+    const treasuryBalance = Number(treasurySnap.data().balance || 0);
+    const walletBalance = Number(walletSnap.data().balance || 0);
+    if (String(walletSnap.data().status || "active").toLowerCase() !== "active") throw new Error("This instructor wallet is restricted and cannot be paid.");
+    if (treasuryBalance < amount) throw new Error(`Insufficient treasury funds. Available: ${money(treasuryBalance)}.`);
+    if (walletBalance < amount) throw new Error(`Insufficient instructor wallet balance. Available: ${money(walletBalance)}.`);
+
+    tx.update(payoutRef, { status:"paid", walletBalanceDebited:true, paidBy:me.uid, paidAt:serverTimestamp(), updatedAt:serverTimestamp() });
+    tx.update(treasuryRef, { balance:treasuryBalance-amount, updatedAt:serverTimestamp() });
+    tx.update(walletRef, { balance:walletBalance-amount, totalPaid:Number(walletSnap.data().totalPaid||0)+amount, updatedAt:serverTimestamp() });
+    tx.set(ledgerRef, {
+      transactionId, type:"withdrawal", from:"Academy Treasury",
+      to:row.instructorId || "Instructor", amount, status:"completed",
+      payoutRequestId:id, approvedBy:me.uid, createdAt:serverTimestamp()
     });
-  } else {
-    await updateDoc(ref, {
-      status,
-      reviewedBy: me.uid,
-      reviewedAt: serverTimestamp(),
-      reviewReason,
-      updatedAt: serverTimestamp()
-    });
-  }
+  });
 
-  if (status === "approved" || status === "paid") {
-    await addDoc(collection(db, "financeTransactions"), {
-      transactionId: `PAY-${Date.now()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`,
-      type: "withdrawal",
-      from: "Academy Treasury",
-      to: row.instructorId || "Instructor",
-      amount,
-      status: status === "paid" ? "completed" : "approved",
-      payoutRequestId: id,
-      approvedBy: me.uid,
-      createdAt: serverTimestamp()
-    });
-  }
-
-  window.ssaSecuritySignal?.("founder_action", { portal: "founder", note: `Payout request ${status}` });
-  toast(`Payout ${status}.`);
+  window.ssaSecuritySignal?.("founder_action", { portal:"founder", note:`Payout request ${type === "paid" ? "settled" : type === "approve" ? "approved" : "rejected"}` });
+  toast(`Payout ${type === "paid" ? "paid" : type === "approve" ? "approved" : "rejected"}.`);
 }
 
 function watch() {
