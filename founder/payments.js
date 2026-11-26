@@ -30,6 +30,8 @@ import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/fireb
 const reviewManualPayment = httpsCallable(paymentFunctions, "reviewStudentManualPayment");
 const getManualSettings = httpsCallable(paymentFunctions, "getManualMpesaSettings");
 const saveManualSettings = httpsCallable(paymentFunctions, "saveManualMpesaSettings");
+const getGatewaySettings = httpsCallable(paymentFunctions, "getFounderPaymentGatewaySettings");
+const saveGatewaySettings = httpsCallable(paymentFunctions, "saveFounderPaymentGatewaySettings");
 
 
 import {
@@ -243,212 +245,44 @@ timeStyle:"short"
 =================================== */
 
 async function loadGatewaySettings(){
-
-try{
-
-const snapshot =
-await getDocs(gatewaysRef);
-
-snapshot.forEach((docSnap)=>{
-
-const gateway = docSnap.data();
-
-if(
-gateway.provider ===
-gatewayProvider.value
-){
-
-gatewayEnvironment.value =
-gateway.environment || "sandbox";
-
-callbackUrl.value =
-gateway.callbackUrl || "";
-
-webhookUrl.value =
-gateway.webhookUrl || "";
-
-gatewayStatus.textContent =
-gateway.enabled ?
-"🟢 Connected" :
-"🔴 Disabled";
-
-lastGatewaySync.textContent =
-gateway.lastSync ?
-formatDate(
-gateway.lastSync.toDate()
-)
-:
-"Never";
-
+ try{
+  const result=await getGatewaySettings();
+  const gateways=result.data?.gateways||[];
+  const gateway=gateways.find(item=>item.provider===gatewayProvider.value);
+  gatewayEnvironment.value=gateway?.environment||"sandbox";
+  callbackUrl.value=gateway?.callbackUrl||"";
+  webhookUrl.value=gateway?.webhookUrl||"";
+  gatewayStatus.textContent=gateway?.enabled?"Configured":"Disabled";
+  lastGatewaySync.textContent=gateway?.lastSync?.toDate?formatDate(gateway.lastSync.toDate()):"Never";
+ }catch(error){console.error("Gateway settings load failed:",error);gatewayStatus.textContent="Unavailable — Founder access required";}
 }
-
-});
-
-}
-
-catch(error){
-
-console.error(
-"Gateway Load Error:",
-error
-);
-
-}
-
-}
-
 
 /* ===================================
    SAVE GATEWAY
 =================================== */
-
-document
-
-.getElementById("saveGateway")
-
-?.addEventListener(
-
-"click",
-
-saveGatewayConfiguration
-
-);
-
+document.getElementById("saveGateway")?.addEventListener("click",saveGatewayConfiguration);
 async function saveGatewayConfiguration(){
-
-try{
-
-const gatewayDoc =
-doc(
-db,
-"payment_gateways",
-gatewayProvider.value
-);
-
-await setDoc(
-
-gatewayDoc,
-
-{
-
-provider:
-gatewayProvider.value,
-
-environment:
-gatewayEnvironment.value,
-
-callbackUrl:
-callbackUrl.value.trim(),
-
-webhookUrl:
-webhookUrl.value.trim(),
-
-enabled:true,
-
-lastSync:new Date()
-
-},
-
-{merge:true}
-
-);
-
-gatewayStatus.textContent =
-"🟢 Connected";
-
-lastGatewaySync.textContent =
-formatDate(new Date());
-
-alert(
-"Gateway configuration saved."
-);
-
+ const button=document.getElementById("saveGateway");if(button)button.disabled=true;
+ try{
+  const result=await saveGatewaySettings({provider:gatewayProvider.value,environment:gatewayEnvironment.value,callbackUrl:callbackUrl.value.trim(),webhookUrl:webhookUrl.value.trim(),enabled:true});
+  gatewayStatus.textContent=result.data?.enabled?"Configured":"Disabled";lastGatewaySync.textContent=formatDate(new Date());
+  showToast("Gateway configuration saved and audit-logged. Live checkout activation remains separate.","success");
+ }catch(error){console.error(error);showToast(error.message||"Unable to save gateway.","error");}
+ finally{if(button)button.disabled=false;}
 }
-
-catch(error){
-
-console.error(error);
-
-alert(
-"Unable to save gateway."
-);
-
-}
-
-}
-
-
-/* ===================================
-   PROVIDER TOGGLES
-=================================== */
-
-const providerButtons=[
-
-"Mpesa",
-"Cards",
-"Bank",
-"Paypal"
-
-];
-
-providerButtons.forEach((name)=>{
-
-const button =
-document.getElementById(
-`toggle${name}`
-);
-
-button?.addEventListener(
-
-"click",
-
-async()=>{
-
-const enabled =
-!button.classList.contains("active");
-
-button.classList.toggle(
-"active",
-enabled
-);
-
-button.textContent =
-enabled ? "ON" : "OFF";
-
-try{
-
-await setDoc(
-
-doc(
-db,
-"payment_gateways",
-name.toLowerCase()
-),
-
-{
-
-enabled
-
-},
-
-{merge:true}
-
-);
-
-}
-
-catch(error){
-
-console.error(error);
-
-}
-
-}
-
-);
-
+const providerButtons=["Mpesa","Cards","Bank","Paypal"];
+providerButtons.forEach(name=>{
+ const button=document.getElementById("toggle"+name);
+ button?.addEventListener("click",async()=>{
+  const enabled=!button.classList.contains("active");button.disabled=true;
+  try{
+   await saveGatewaySettings({provider:name.toLowerCase(),enabled,environment:gatewayEnvironment.value,callbackUrl:callbackUrl.value.trim(),webhookUrl:webhookUrl.value.trim()});
+   button.classList.toggle("active",enabled);button.textContent=enabled?"ON":"OFF";
+   showToast(enabled?"Provider configuration enabled. Checkout remains separate.":"Provider configuration disabled.","success");
+  }catch(error){showToast(error.message||"Provider setting could not be saved.","error");}
+  finally{button.disabled=false;}
+ });
 });
-
 
 /* ===================================
    TEST CONNECTION
