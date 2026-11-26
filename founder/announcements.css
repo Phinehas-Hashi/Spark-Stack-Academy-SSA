@@ -18,3 +18,5 @@ body{background:radial-gradient(circle at 10% 0%,rgba(214,183,121,.08),transpare
 .empty-state{background:#1b1a17!important;border-color:var(--border)!important;color:var(--muted)!important}
 .announcement-card{border-left:3px solid #d6b779!important}
 @media(max-width:600px){.main-content{padding:14px!important}.section-card,.page-header{padding:17px!important}.announcement-actions{flex-wrap:wrap}}
+
+.announcement-delivery-note{padding:14px 18px;border:1px solid rgba(214,183,121,.28);border-radius:14px;background:#29251b;color:#c8c0ad;line-height:1.6;font-size:.86rem}.announcement-delivery-note strong{color:#e5ca8e}
