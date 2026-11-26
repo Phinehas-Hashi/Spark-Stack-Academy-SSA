@@ -82,18 +82,50 @@ service cloud.firestore {
       return isStudent() || isInstructor();
     }
 
-    function institutionMember(institutionId) {
+    // Canonical tenant authorization: a membership is scoped to one
+    // institution and is provisioned only by trusted server workflows.
+    function canonicalInstitutionMember(institutionId) {
+      let memberPath = /databases/$(database)/documents/institutions/$(institutionId)/members/$(uid());
+      return signedIn()
+        && exists(memberPath)
+        && get(memberPath).data.get('uid', uid()) == uid()
+        && get(memberPath).data.get('institutionId', institutionId) == institutionId
+        && get(memberPath).data.get('status', '') == 'active'
+        && get(memberPath).data.get('verified', false) == true;
+    }
+
+    // Temporary, tightly constrained compatibility for already-provisioned
+    // legacy accounts. New client-created profiles cannot set institutionId
+    // or institutionRole; the legacy path can be removed after migration.
+    function legacyInstitutionMember(institutionId) {
       return signedIn()
         && userExists()
         && userData().get('institutionId', '') == institutionId
         && userData().get('status', '') == 'active'
         && userData().get('active', false) == true
-        && userData().get('verified', false) == true;
+        && userData().get('verified', false) == true
+        && userData().get('role', '') in ['institution', 'institution_owner', 'institution_admin', 'instructor'];
+    }
+
+    function institutionMember(institutionId) {
+      return canonicalInstitutionMember(institutionId)
+        || legacyInstitutionMember(institutionId);
     }
 
     function institutionOwner(institutionId) {
-      return institutionMember(institutionId)
-        && userData().get('institutionRole', '') == 'owner';
+      let memberPath = /databases/$(database)/documents/institutions/$(institutionId)/members/$(uid());
+      return (canonicalInstitutionMember(institutionId)
+          && get(memberPath).data.get('role', '') in ['institution_owner', 'owner'])
+        || (legacyInstitutionMember(institutionId)
+          && userData().get('institutionRole', '') == 'owner');
+    }
+
+    function institutionManager(institutionId) {
+      let memberPath = /databases/$(database)/documents/institutions/$(institutionId)/members/$(uid());
+      return (canonicalInstitutionMember(institutionId)
+          && get(memberPath).data.get('role', '') in ['institution_owner', 'owner', 'institution_admin', 'department_manager'])
+        || (legacyInstitutionMember(institutionId)
+          && userData().get('institutionRole', '') in ['owner', 'institution_admin']);
     }
 
     function publicCourse(courseId) {
@@ -230,22 +262,33 @@ service cloud.firestore {
       allow create:
         if signedIn()
         && uid() == userId
+        && request.resource.data.keys().hasOnly([
+          'uid', 'fullName', 'email', 'role', 'bio', 'expertise',
+          'profilePhoto', 'active', 'verified', 'status', 'provider',
+          'createdAt', 'lastLogin'
+        ])
+        && request.resource.data.keys().hasAll([
+          'uid', 'fullName', 'email', 'role', 'active',
+          'verified', 'status', 'createdAt'
+        ])
+        && request.resource.data.uid == uid()
+        && request.resource.data.fullName is string
+        && request.resource.data.fullName.size() >= 2
+        && request.resource.data.email is string
+        && request.resource.data.active == true
+        && request.resource.data.verified == false
+        && request.resource.data.createdAt is timestamp
         && (
           (
-            request.resource.data.get('role', 'student') == 'student'
-            && request.resource.data.get('status', 'pending_admission') == 'pending_admission'
-            && request.resource.data.get('active', true) == true
-            && request.resource.data.get('verified', false) == false
+            request.resource.data.role == 'student'
+            && request.resource.data.status == 'pending_admission'
           )
           ||
           (
-            request.resource.data.get('role', '') == 'instructor'
-            && request.resource.data.get('status', 'pending_review') == 'pending_review'
-            && request.resource.data.get('active', true) == true
-            && request.resource.data.get('verified', false) == false
+            request.resource.data.role == 'instructor'
+            && request.resource.data.status == 'pending_review'
           )
-        )
-        && request.resource.data.get('uid', uid()) == uid();
+        );
 
       // ----------------------------------------------------------
       // SELF PROFILE UPDATE
@@ -1986,9 +2029,14 @@ service cloud.firestore {
       allow create, update, delete: if false;
 
       match /members/{memberId} {
-        allow get: if institutionMember(institutionId)
-          && (uid() == memberId || institutionOwner(institutionId));
-        allow list: if institutionOwner(institutionId);
+        // Members may inspect their own membership (including pending or
+        // suspended state); managers may list members in their own tenant.
+        allow get: if signedIn()
+          && (
+            uid() == memberId
+            || institutionManager(institutionId)
+          );
+        allow list: if institutionManager(institutionId);
         allow create, update, delete: if false;
       }
     }
@@ -2058,11 +2106,8 @@ service cloud.firestore {
     match /institutionPayments/{paymentId} {
       allow get, list: if staff()
         || (
-          signedIn()
-          && userExists()
-          && userData().get('institutionId', '') == resource.data.get('institutionId', '')
-          && userData().get('active', false) == true
-          && userData().get('status', '') == 'active'
+          resource.data.get('institutionId', '') is string
+          && institutionManager(resource.data.institutionId)
         );
       allow create, update, delete: if false;
     }
