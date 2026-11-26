@@ -95,6 +95,8 @@ async function handleEvent(request, env) {
     return json({ error: "Rate limit exceeded." }, 429, allowedOrigin(request, env));
   }
 
+  const declaredLength = Number(request.headers.get("Content-Length") || 0);
+  if (declaredLength > 8192) return json({ error: "Request too large." }, 413, allowedOrigin(request, env));
   let body;
   try { body = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400, allowedOrigin(request, env)); }
   const eventType = String(body.event || "");
@@ -107,6 +109,9 @@ async function handleEvent(request, env) {
   catch { return json({ error: "Invalid identity token." }, 401, allowedOrigin(request, env)); }
   if (!identity && !["login_failed", "mfa_failed"].includes(eventType)) {
     return json({ error: "Authentication required for this event." }, 401, allowedOrigin(request, env));
+  }
+  if (eventType === "founder_control_changed" && (portal !== "founder" || !(await isFounder(identity, env)))) {
+    return json({ error: "Verified Founder identity required for this event." }, 403, allowedOrigin(request, env));
   }
 
   await insertEvent(env.DB, {
