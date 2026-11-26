@@ -367,7 +367,18 @@ async function migrateLegacyCurriculum() {
     }
     for (const item of lessonsById.values()) {
         const target = doc(db, "courses", courseId, "courseLessons", item.id);
-        if (!(await getDoc(target)).exists()) pending.push({ target, data: item.data() });
+        if (!(await getDoc(target)).exists()) {
+            const data = item.data();
+            pending.push({
+                target,
+                data: {
+                    ...data,
+                    courseId,
+                    moduleId: data.moduleId || data.moduleID || "",
+                    isPreview: data.isPreview === true
+                }
+            });
+        }
     }
     for (let offset = 0; offset < pending.length; offset += 450) {
         const batch = writeBatch(db);
@@ -1660,6 +1671,8 @@ async function saveLesson(
             resources,
 
             videoUrl,
+
+            isPreview: false,
 
             youtubeId:
                 extractYouTubeId(
