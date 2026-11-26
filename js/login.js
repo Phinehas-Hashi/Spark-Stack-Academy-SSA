@@ -120,8 +120,11 @@ async function resolveUserProfile(user) {
         founderDocExists: Boolean(founderData),
         founderRoleMatches: founderData?.role === "founder",
         founderStatus: typeof founderData?.status === "string" ? founderData.status : "missing-or-non-string",
+        founderStatusType: typeof founderData?.status,
         founderActive: typeof founderData?.active === "boolean" ? founderData.active : "missing-or-non-boolean",
+        founderActiveType: typeof founderData?.active,
         founderVerified: typeof founderData?.verified === "boolean" ? founderData.verified : "missing-or-non-boolean",
+        founderVerifiedType: typeof founderData?.verified,
         usersDocExists: userSnap.exists(),
         usersRole: typeof userData?.role === "string" ? userData.role : "missing"
     };
@@ -222,8 +225,12 @@ async function finishSignIn(user) {
 
     if (!decision.allowed) {
         const diagnosticCode = profile.failureCode || null;
+        const diagnostic = profile.diagnostics || {};
+        const diagnosticDetails = diagnosticCode
+            ? ` | document=${diagnostic.founderDocExists ? "found" : "missing"}; roleMatch=${diagnostic.founderRoleMatches}; status=${JSON.stringify(diagnostic.founderStatus)} (type=${diagnostic.founderStatusType || "unknown"}); active=${JSON.stringify(diagnostic.founderActive)} (type=${diagnostic.founderActiveType || "unknown"}); verified=${JSON.stringify(diagnostic.founderVerified)} (type=${diagnostic.founderVerifiedType || "unknown"})`
+            : "";
         const message = diagnosticCode
-            ? `${decision.message} [${diagnosticCode}]`
+            ? `${decision.message} [${diagnosticCode}${diagnosticDetails}]`
             : decision.message;
         await rejectSession(message);
         return;
