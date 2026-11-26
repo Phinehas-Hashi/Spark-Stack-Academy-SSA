@@ -1,0 +1,46 @@
+name: Founder security syntax checks
+
+on:
+  pull_request:
+    paths:
+      - "founder/**"
+      - "js/**"
+      - "security-worker/**"
+      - "firestore.rules"
+      - ".github/workflows/founder-security-syntax.yml"
+  push:
+    branches: [main]
+    paths:
+      - "founder/**"
+      - "js/**"
+      - "security-worker/**"
+      - "firestore.rules"
+
+jobs:
+  javascript-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check changed security and Founder modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            founder/command-center.js
+            founder/dashboard.js
+            founder/js/founder-app.js
+            founder/js/founder-dashboard.js
+            founder/security.js
+            js/firebase.js
+            js/login.js
+            js/security-config.js
+            js/security-telemetry.js
+            security-worker/src/index.js
+          )
+          for file in "${files[@]}"; do
+            echo "Checking ${file}"
+            node --input-type=module --check < "${file}"
+          done
