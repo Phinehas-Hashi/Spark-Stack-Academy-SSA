@@ -28,10 +28,6 @@ async function verifyFounder(user){
   if(!snap.exists()||profile.role!=="founder"||profile.status!=="active"||profile.active===false||profile.verified===false){
     throw new Error("Active Founder authorization required.");
   }
-  const token=await user.getIdTokenResult();
-  if(token.claims.firebase?.sign_in_second_factor!=="totp"){
-    throw new Error("Complete Founder authenticator verification first.");
-  }
 }
 async function loadCertificateSettings(){
   const snapshot=await getDoc(certificateRef);
