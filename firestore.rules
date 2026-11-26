@@ -697,17 +697,10 @@ service cloud.firestore {
     // ============================================================
 
     match /withdrawals/{withdrawalId} {
-
-      allow get, list:
-        if isFounder();
-
-      allow create, update:
-        if isFounder();
-
-      allow delete:
-        if false;
+      allow get, list: if isFounder();
+      // Withdrawal lifecycle changes are performed by audited callable functions.
+      allow create, update, delete: if false;
     }
-
 
     match /withdrawalRequests/{requestId} {
 
@@ -724,7 +717,7 @@ service cloud.firestore {
         if false;
 
       allow update, delete:
-        if isFounder();
+        if false;
     }
 
 
@@ -1798,13 +1791,13 @@ service cloud.firestore {
 
       // Retired client-managed security preferences are no longer writable.
       allow write:
-        if isFounder() && settingsId != 'security';
+        if isFounder() && settingsId != 'security' && settingsId != 'monetization';
     }
 
     match /platformSettings/{settingsId} {
 
       allow read:
-        if isFounder();
+        if isFounder() && settingsId != 'earnings';
 
       allow write:
         if isFounder();
