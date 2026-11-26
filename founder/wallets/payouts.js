@@ -2,7 +2,7 @@ import { auth, db } from "../../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc,
-  collection, serverTimestamp, runTransaction
+  serverTimestamp, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
