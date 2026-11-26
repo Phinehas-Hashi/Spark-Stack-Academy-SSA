@@ -1,6 +1,6 @@
 // Spark Stack Academy — secure login and role routing
 import { auth, db } from "./firebase.js";
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, browserLocalPersistence, browserSessionPersistence, setPersistence, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, browserLocalPersistence, browserSessionPersistence, setPersistence, sendPasswordResetEmail, signOut, getMultiFactorResolver, TotpMultiFactorGenerator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
@@ -19,6 +19,7 @@ const resetEmail = $("resetEmail");
 const sendResetBtn = $("sendReset");
 const cancelResetBtn = $("cancelReset");
 const scrollBtn = $("scrollTopBtn");
+let activeMfaResolver = null;
 
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
@@ -126,8 +127,8 @@ async function resolveUserProfile(user) {
                 fullName: founderData.fullName || founderData.name || userData?.fullName || user.displayName || "Founder",
                 email: founderData.email || user.email || userData?.email || "",
                 role: "founder",
-                active: founderData.active !== false && founderData.status === "active",
-                verified: founderData.verified !== false
+                active: founderData.active === true && founderData.status === "active",
+                verified: founderData.verified === true
             }
         };
     }
@@ -183,6 +184,57 @@ function getAccessDecision(profile) {
     if (role === "admin" && data.active !== false) return { allowed: true };
 
     return { allowed: false, message: "This account is not authorised to access an Academy portal." };
+}
+
+function showTotpChallenge(error) {
+    let resolver;
+    try { resolver = getMultiFactorResolver(auth, error); }
+    catch { return rejectSession("Additional sign-in verification is required but could not be started."); }
+    const hint = resolver.hints.find(item => item.factorId === TotpMultiFactorGenerator.FACTOR_ID);
+    if (!hint) return rejectSession("This account requires a second factor that this login page cannot currently verify. Contact the Founder.");
+    activeMfaResolver = resolver;
+    hideLoader();
+    setButtonsDisabled(true);
+    let modal = document.getElementById("founderMfaChallenge");
+    if (!modal) {
+        modal = document.createElement("section");
+        modal.id = "founderMfaChallenge";
+        modal.className = "auth-loader active";
+        modal.setAttribute("role", "dialog");
+        modal.setAttribute("aria-modal", "true");
+        modal.setAttribute("aria-labelledby", "founderMfaTitle");
+        modal.innerHTML = '<div class="loader-box" style="max-width:430px"><h2 id="founderMfaTitle">Founder verification</h2><p>Enter the current six-digit code from your authenticator app to complete sign-in.</p><label for="founderMfaCode" style="display:block;text-align:left;margin:18px 0 7px">Authenticator code</label><input id="founderMfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(214,183,121,.45);background:#171612;color:#fff;font-size:1.2rem;letter-spacing:.25em;text-align:center"><p id="founderMfaError" role="alert" style="color:#d87870;min-height:20px"></p><button type="button" id="founderMfaVerify" class="primary-btn" style="width:100%">Verify and continue</button><button type="button" id="founderMfaCancel" class="google-btn" style="width:100%;margin-top:10px">Cancel sign-in</button></div>';
+        document.body.appendChild(modal);
+        document.getElementById("founderMfaCode").addEventListener("input", event => { event.target.value = event.target.value.replace(/\\D/g, "").slice(0,6); });
+        document.getElementById("founderMfaCancel").addEventListener("click", async () => {
+            activeMfaResolver = null;
+            modal.remove();
+            await rejectSession("Sign-in verification was cancelled.");
+        });
+        document.getElementById("founderMfaVerify").addEventListener("click", async () => {
+            const code = document.getElementById("founderMfaCode").value.trim();
+            const errorBox = document.getElementById("founderMfaError");
+            const button = document.getElementById("founderMfaVerify");
+            if (!/^\\d{6}$/.test(code)) { errorBox.textContent = "Enter the six-digit code."; return; }
+            button.disabled = true;
+            button.textContent = "Verifying…";
+            errorBox.textContent = "";
+            try {
+                const assertion = TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code);
+                const credential = await activeMfaResolver.resolveSignIn(assertion);
+                activeMfaResolver = null;
+                modal.remove();
+                await finishSignIn(credential.user);
+            } catch (mfaError) {
+                console.error("[SSA AUTH] MFA verification failed", mfaError.code || mfaError.message);
+                errorBox.textContent = mfaError.code === "auth/invalid-verification-code" ? "Code is incorrect or expired. Try the newest code." : "Verification failed. Try again.";
+                button.disabled = false;
+                button.textContent = "Verify and continue";
+            }
+        });
+    }
+    modal.classList.add("active");
+    document.getElementById("founderMfaCode")?.focus();
 }
 
 async function finishSignIn(user) {
@@ -304,6 +356,7 @@ loginForm?.addEventListener("submit", async event => {
         const credential = await signInWithEmailAndPassword(auth, email, password);
         await finishSignIn(credential.user);
     } catch (error) {
+        if (error.code === "auth/multi-factor-auth-required") { showTotpChallenge(error); return; }
         console.error("[SSA AUTH] LOGIN FAILED", error.code || error.message);
         hideLoader();
         setButtonsDisabled(false);
@@ -328,6 +381,7 @@ googleLoginBtn?.addEventListener("click", async () => {
         // type and approval workflow are respected. Login never auto-registers.
         await finishSignIn(result.user);
     } catch (error) {
+        if (error.code === "auth/multi-factor-auth-required") { showTotpChallenge(error); return; }
         console.error("[SSA AUTH] GOOGLE LOGIN FAILED", error.code || error.message);
         hideLoader();
         setButtonsDisabled(false);
