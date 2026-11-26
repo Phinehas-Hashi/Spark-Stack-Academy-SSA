@@ -14,12 +14,10 @@ import {
 collection,
 doc,
 getDoc,
-getDocs,
 query,
 orderBy,
 limit,
-onSnapshot,
-setDoc
+onSnapshot
 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -122,12 +120,6 @@ document.getElementById("lastBackup");
 
 const transactionsRef =
 collection(db,"payments");
-
-const gatewaysRef =
-collection(db,"payment_gateways");
-
-const settingsRef =
-doc(db,"system","payment_settings");
 
 
 /* ===================================
