@@ -3,7 +3,7 @@ import {
   signInWithEmailAndPassword, sendPasswordResetEmail, signOut,
   setPersistence, browserLocalPersistence, browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDocFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const form = $("privilegedLoginForm");
@@ -35,7 +35,10 @@ function friendlyAuthError(error) {
 // The canonical Founder record is checked first. If it exists, it is
 // authoritative: a stale users/{uid} document cannot change its role.
 async function resolvePrivilegedAccess(uid) {
-  const founderSnapshot = await getDoc(doc(db, "founder", uid));
+  const founderRef = doc(db, "founder", uid);
+  // Bypass any local Firestore cache so Founder authorization is evaluated
+  // against the current server document.
+  const founderSnapshot = await getDocFromServer(founderRef);
   if (founderSnapshot.exists()) {
     const founder = founderSnapshot.data();
     const checks = [
@@ -53,7 +56,13 @@ async function resolvePrivilegedAccess(uid) {
         const actualValue = actual === undefined ? "<missing>" : JSON.stringify(actual);
         return `${field}: expected ${JSON.stringify(expected)}, received ${actualValue} (${actualType})`;
       }).join("; ");
-      console.error("[SSA FOUNDER PROFILE CHECK]", details);
+      console.error("[SSA FOUNDER PROFILE CHECK]", {
+        path: founderSnapshot.ref.path,
+        exists: founderSnapshot.exists(),
+        fromCache: founderSnapshot.metadata.fromCache,
+        fieldNames: Object.keys(founder),
+        details
+      });
       return {
         allowed:false,
         reason:`Founder profile verification failed: ${details}. Correct these exact fields in founder/{your-auth-uid}, then retry.`
