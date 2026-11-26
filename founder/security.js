@@ -2,7 +2,7 @@ import { auth, db } from "../../js/firebase.js";
 import {
   EmailAuthProvider, GoogleAuthProvider, TotpMultiFactorGenerator,
   multiFactor, reauthenticateWithCredential, reauthenticateWithPopup,
-  updatePassword, signOut, sendEmailVerification
+  updatePassword, signOut, sendEmailVerification, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -172,4 +172,8 @@ $("copySecretBtn")?.addEventListener("click", async () => {
 $("changePasswordBtn")?.addEventListener("click", changeFounderPassword);
 $("signOutBtn")?.addEventListener("click", signOutDevice);
 $("totpCode")?.addEventListener("input", event => { event.target.value = event.target.value.replace(/\D/g, "").slice(0, 6); });
-initialize();
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.replace("../login.html"); return; }
+  founderUser = user;
+  await initialize();
+});
