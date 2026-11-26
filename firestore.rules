@@ -1286,6 +1286,7 @@ service cloud.firestore {
           && nestedParentCourse().get('instructorId', '') == uid();
       }
       allow get, list: if staff() || ownsNestedCourse()
+        || institutionManagesCourse(courseId)
         || (isStudent() && studentPortalOpen()
           && (publicCourse(courseId) || activeCourseEnrollment(courseId)));
       allow create: if staff()
@@ -1310,6 +1311,7 @@ service cloud.firestore {
           && nestedParentCourse().get('instructorId', '') == uid();
       }
       allow get, list: if staff() || ownsNestedCourse()
+        || institutionManagesCourse(courseId)
         || (isStudent() && studentPortalOpen()
           && (activeCourseEnrollment(courseId)
             || (resource.data.get('isPreview', false) == true && publicCourse(courseId))));
@@ -1427,6 +1429,8 @@ service cloud.firestore {
 
     match /assignments/{assignmentId} {
       allow get, list: if staff()
+        || (resource.data.get('courseId', '') is string
+          && institutionManagesCourse(resource.data.courseId))
         || (isStudent() && studentPortalOpen()
           && resource.data.get('status', 'published') in ['published', 'active']
           && resource.data.get('courseId', '') is string
