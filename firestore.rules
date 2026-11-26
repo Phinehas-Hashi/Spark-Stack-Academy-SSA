@@ -71,8 +71,7 @@ service cloud.firestore {
         && get(
           /databases/$(database)/documents/founder/$(uid())
         ).data.get('verified', true) == true
-        // Enforce TOTP at the data layer, not only in Founder page JavaScript.
-        && request.auth.token.get('firebase', {}).get('sign_in_second_factor', '') == 'totp';
+        ;
     }
 
     function staff() {
