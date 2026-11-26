@@ -189,7 +189,7 @@
     try{
       await probe("https://www.gstatic.com/generate_204?ssa_ping="+Date.now(),5000,"no-cors");
       lastLatencyMs=performance.now()-started;lastCheckedAt=Date.now();
-      try{firestoreReachable=await probe("https://firestore.googleapis.com/v1/projects/spark-stack-academy/databases/(default)/documents",5000);}catch(_){firestoreReachable=false;}
+      try{firestoreReachable=await probe("https://firestore.googleapis.com/v1/projects/spark-stack-academy-ssa/databases/(default)/documents",5000);}catch(_){firestoreReachable=false;}
       const weak=lastLatencyMs>=1800||Number(connection?.rtt||0)>=1200;
       if(recoveryVisible&&firestoreReachable!==true){
         setState("weak","Internet is available; Academy data service is not verified");

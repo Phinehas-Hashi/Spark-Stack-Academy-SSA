@@ -2,7 +2,11 @@ import { auth } from "../../js/firebase.js";
 import { createUserWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-const submitInstitutionApplication = httpsCallable(getFunctions(), "submitInstitutionApplication");
+const EXPECTED_FIREBASE_PROJECT_ID = "spark-stack-academy-ssa";
+const functions = getFunctions(auth.app, "us-central1");
+const submitInstitutionApplication = httpsCallable(functions, "submitInstitutionApplication");
+
+console.info("[SSA INSTITUTION REGISTRATION] Firebase project:", auth.app.options.projectId);
 
 const form = document.getElementById("institutionRegistrationForm");
 const button = document.getElementById("submitInstitutionApplication");
@@ -31,6 +35,9 @@ form?.addEventListener("submit", async event => {
   report("Submitting your application securely…");
   let createdUser = null;
   try {
+    if (auth.app.options.projectId !== EXPECTED_FIREBASE_PROJECT_ID) {
+      throw new Error("Institution registration is connected to an unexpected Firebase project. Refresh the page and contact support if this continues.");
+    }
     const email = value("email").toLowerCase();
     const credential = await createUserWithEmailAndPassword(auth, email, value("password"));
     createdUser = credential.user;
@@ -52,7 +59,11 @@ form?.addEventListener("submit", async event => {
     const country = form.elements.namedItem("country");
     if (country) country.value = "Kenya";
   } catch (error) {
-    console.error("Institution application submission failed:", error);
+    console.error("Institution application submission failed:", {
+      code: error.code || "unknown",
+      message: error.message || String(error),
+      firebaseProjectId: auth.app.options.projectId
+    });
     if (createdUser) {
       try { await signOut(auth); } catch (signOutError) { console.error("Sign-out after failed application:", signOutError); }
     }

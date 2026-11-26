@@ -2,7 +2,7 @@
 
 ## Project decision
 
-The existing Firebase project is `spark-stack-academy`. It is treated as production because the repository's `.firebaserc` maps the default alias to that project.
+The production Firebase project is `spark-stack-academy-ssa`. The repository's `.firebaserc` maps the default alias to this project.
 
 ## Mandatory safety rule
 
@@ -20,7 +20,7 @@ The repository's `firebase.json` configures local emulators:
 - Storage: `127.0.0.1:9199`
 - Emulator UI: `127.0.0.1:4000`
 
-The emulator uses the project ID `spark-stack-academy` locally; it does not connect to or modify the live project when the application is correctly configured to use emulator endpoints.
+The emulator uses the isolated demo project ID `demo-spark-stack-academy-ssa-tests` locally; it does not connect to or modify the live project.
 
 ## Start local emulators
 
@@ -28,7 +28,7 @@ Install Node.js 20 or later, Firebase CLI, and the repository dependencies. From
 
 ```bash
 npm install --prefix functions
-firebase emulators:start --project spark-stack-academy
+firebase emulators:start --project demo-spark-stack-academy-ssa-tests
 ```
 
 If the Firebase CLI is not installed:
