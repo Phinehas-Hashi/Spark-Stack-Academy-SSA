@@ -95,7 +95,6 @@ service cloud.firestore {
         && userData().get('institutionRole', '') == 'owner';
     }
 
-    // Course visibility and learner entitlement checks.
     function publicCourse(courseId) {
       return courseId is string
         && exists(/databases/$(database)/documents/courses/$(courseId))
@@ -111,30 +110,24 @@ service cloud.firestore {
       let legacyPath = /databases/$(database)/documents/students/$(uid())/enrollments/$(courseId);
       return courseId is string
         && (
-          (
-            exists(canonicalPath)
+          (exists(canonicalPath)
             && get(canonicalPath).data.get('courseId', '') == courseId
-            && (get(canonicalPath).data.get('userId', '') == uid()
-              || get(canonicalPath).data.get('studentId', '') == uid())
+            && (get(canonicalPath).data.get('userId', '') == uid() || get(canonicalPath).data.get('studentId', '') == uid())
             && get(canonicalPath).data.get('status', '') in ['active', 'approved', 'completed', 'paid']
             && (get(canonicalPath).data.get('paymentStatus', '') in ['paid', 'free']
               || get(canonicalPath).data.get('institutionId', '') != ''
-              || get(canonicalPath).data.get('status', '') == 'paid')
-          )
-          || (
-            exists(legacyPath)
+              || get(canonicalPath).data.get('status', '') == 'paid'))
+          || (exists(legacyPath)
             && get(legacyPath).data.get('courseId', courseId) == courseId
             && get(legacyPath).data.get('status', '') in ['active', 'approved', 'completed', 'paid']
             && (get(legacyPath).data.get('paymentStatus', '') in ['paid', 'free']
               || get(legacyPath).data.get('institutionId', '') != ''
-              || get(legacyPath).data.get('status', '') == 'paid')
-          )
+              || get(legacyPath).data.get('status', '') == 'paid'))
         );
     }
 
     function instructorOwnsCourse(courseId) {
-      return isInstructor()
-        && instructorPortalOpen()
+      return isInstructor() && instructorPortalOpen()
         && courseId is string
         && exists(/databases/$(database)/documents/courses/$(courseId))
         && get(/databases/$(database)/documents/courses/$(courseId)).data.instructorId == uid();
@@ -142,9 +135,7 @@ service cloud.firestore {
 
     function studentCanReadLesson() {
       let courseId = resource.data.get('courseId', resource.data.get('courseID', ''));
-      return isStudent()
-        && studentPortalOpen()
-        && courseId is string
+      return isStudent() && studentPortalOpen() && courseId is string
         && (activeCourseEnrollment(courseId)
           || (resource.data.get('isPreview', false) == true && publicCourse(courseId)));
     }
@@ -468,23 +459,18 @@ service cloud.firestore {
 
     match /studentSettings/{userId} {
       allow get: if isStudent() && studentPortalOpen() && uid() == userId;
-
-      allow create:
-        if isStudent() && studentPortalOpen() && uid() == userId
+      allow create: if isStudent() && studentPortalOpen() && uid() == userId
         && request.resource.data.keys().hasOnly(['notifications', 'learning', 'updatedAt'])
         && request.resource.data.notifications is map
         && request.resource.data.learning is map
         && request.resource.data.notifications.keys().hasOnly(['announcements', 'courses', 'assignments', 'payments', 'messages'])
         && request.resource.data.learning.keys().hasOnly(['rememberLesson', 'reminders', 'captions']);
-
-      allow update:
-        if isStudent() && studentPortalOpen() && uid() == userId
+      allow update: if isStudent() && studentPortalOpen() && uid() == userId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notifications', 'learning', 'updatedAt'])
         && request.resource.data.notifications is map
         && request.resource.data.learning is map
         && request.resource.data.notifications.keys().hasOnly(['announcements', 'courses', 'assignments', 'payments', 'messages'])
         && request.resource.data.learning.keys().hasOnly(['rememberLesson', 'reminders', 'captions']);
-
       allow delete: if false;
       allow list: if staff();
     }
@@ -1123,14 +1109,17 @@ service cloud.firestore {
     // ============================================================
 
     match /enrollments/{enrollmentId} {
-
-      allow get:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && (
-            (resource == null && enrollmentId.matches('^' + uid() + '_.+
+      allow get: if staff()
+        || (isStudent() && studentPortalOpen()
+          && ((resource == null && enrollmentId.matches('^' + uid() + '_.+$'))
+            || (resource != null && (resource.data.get('studentId', '') == uid()
+              || resource.data.get('userId', '') == uid()))))
+        || (isInstructor() && instructorPortalOpen()
+          && resource != null && resource.data.instructorId == uid());
+      allow list: if staff()
+        || (isStudent() && studentPortalOpen()
+          && (resource.data.get('studentId', '') == uid() || resource.data.get('userId', '') == uid()))
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
 
       // Paid enrollments are trusted backend records.
       // Free courses may be enrolled by an active student, but
@@ -1146,23 +1135,16 @@ service cloud.firestore {
           && enrollmentId == uid() + '_' + request.resource.data.courseId
           && request.resource.data.status == 'active'
           && request.resource.data.paymentStatus == 'free'
-          && request.resource.data.keys().hasOnly([
-            'userId', 'courseId', 'courseTitle', 'paymentStatus', 'status',
-            'progress', 'completedLessons', 'enrolledAt', 'updatedAt'
-          ])
+          && request.resource.data.keys().hasOnly(['userId', 'courseId', 'courseTitle', 'paymentStatus', 'status', 'progress', 'completedLessons', 'enrolledAt', 'updatedAt'])
           && request.resource.data.progress == 0
           && request.resource.data.completedLessons is list
           && request.resource.data.completedLessons.size() == 0
           && publicCourse(request.resource.data.courseId)
           && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
-          && (
-            get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('isFree', false) == true
-            || (
-              get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.keys().hasAny(['price'])
+          && (get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('isFree', false) == true
+            || (get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.keys().hasAny(['price'])
               && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.price is number
-              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.price <= 0
-            )
-          )
+              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.price <= 0))
         );
 
       // Students may update ONLY harmless learning-progress fields.
@@ -1218,14 +1200,12 @@ service cloud.firestore {
     // ============================================================
 
     match /assignments/{assignmentId} {
-      allow get, list:
-        if staff()
+      allow get, list: if staff()
         || (isStudent() && studentPortalOpen()
           && resource.data.get('status', 'published') in ['published', 'active']
           && resource.data.get('courseId', '') is string
           && activeCourseEnrollment(resource.data.courseId))
-        || (isInstructor() && instructorPortalOpen()
-          && resource.data.instructorId == uid());
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
 
       allow create:
         if staff()
@@ -1309,29 +1289,21 @@ service cloud.firestore {
     // ============================================================
 
     match /courseModules/{moduleId} {
-      allow get, list:
-        if staff()
+      allow get, list: if staff()
         || (isStudent() && studentPortalOpen()
           && publicCourse(resource.data.get('courseId', resource.data.get('courseID', ''))))
-        || (isInstructor() && instructorPortalOpen()
-          && resource.data.instructorId == uid());
-
-      allow create:
-        if staff()
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
+      allow create: if staff()
         || (isInstructor() && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
           && instructorOwnsCourse(request.resource.data.get('courseId', request.resource.data.get('courseID', ''))));
-
-      allow update:
-        if staff()
+      allow update: if staff()
         || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
           && request.resource.data.get('courseId', resource.data.get('courseId', '')) == resource.data.get('courseId', '')
           && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
-
-      allow delete:
-        if staff()
+      allow delete: if staff()
         || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
@@ -1343,30 +1315,22 @@ service cloud.firestore {
     // ============================================================
 
     match /courseLessons/{lessonId} {
-      allow get, list:
-        if staff()
+      allow get, list: if staff()
         || (isStudent() && studentPortalOpen() && studentCanReadLesson())
-        || (isInstructor() && instructorPortalOpen()
-          && resource.data.instructorId == uid());
-
-      allow create:
-        if staff()
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
+      allow create: if staff()
         || (isInstructor() && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
           && instructorOwnsCourse(request.resource.data.get('courseId', request.resource.data.get('courseID', '')))
           && request.resource.data.get('isPreview', false) is bool);
-
-      allow update:
-        if staff()
+      allow update: if staff()
         || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
           && request.resource.data.get('courseId', resource.data.get('courseId', '')) == resource.data.get('courseId', '')
           && request.resource.data.get('isPreview', false) is bool
           && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
-
-      allow delete:
-        if staff()
+      allow delete: if staff()
         || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
@@ -1378,31 +1342,23 @@ service cloud.firestore {
     // ============================================================
 
     match /quizzes/{quizId} {
-      allow get, list:
-        if staff()
+      allow get, list: if staff()
         || (isStudent() && studentPortalOpen()
           && resource.data.get('courseId', '') is string
           && activeCourseEnrollment(resource.data.courseId)
           && resource.data.get('status', 'draft') in ['published', 'active'])
-        || (isInstructor() && instructorPortalOpen()
-          && resource.data.instructorId == uid());
-
-      allow create:
-        if staff()
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
+      allow create: if staff()
         || (isInstructor() && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
           && instructorOwnsCourse(request.resource.data.get('courseId', '')));
-
-      allow update:
-        if staff()
+      allow update: if staff()
         || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
           && request.resource.data.courseId == resource.data.courseId
           && instructorOwnsCourse(resource.data.get('courseId', '')));
-
-      allow delete:
-        if staff()
+      allow delete: if staff()
         || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && instructorOwnsCourse(resource.data.get('courseId', '')));
@@ -1806,8 +1762,7 @@ service cloud.firestore {
             && chatMember(chatId)
           );
 
-        allow create:
-          if activePortalUser()
+        allow create: if activePortalUser()
           && chatMember(chatId)
           && request.resource.data.senderId == uid()
           && request.resource.data.text is string
@@ -1821,846 +1776,7 @@ service cloud.firestore {
               && request.resource.data.attachment.get('path', '') is string
               && request.resource.data.attachment.get('size', 0) is number
               && request.resource.data.attachment.get('size', 0) < 10485760));
-
         allow update: if false;
-
-        allow delete:
-          if isFounder();
-      }
-    }
-
-
-    // ============================================================
-    // INSTITUTION WORKSPACES
-    // Workspace metadata is readable by verified members.
-    // Membership provisioning is restricted to trusted functions.
-    // ============================================================
-
-    match /institutions/{institutionId} {
-      allow get: if institutionMember(institutionId) || staff();
-      allow list: if staff();
-      allow create, update, delete: if false;
-
-      match /members/{memberId} {
-        allow get: if institutionMember(institutionId)
-          && (uid() == memberId || institutionOwner(institutionId));
-        allow list: if institutionOwner(institutionId);
-        allow create, update, delete: if false;
-      }
-    }
-
-    // ============================================================
-    // INSTITUTION APPLICATIONS
-    // Applicants can submit and read only their own pending request.
-    // Review and approval are reserved for trusted staff tooling.
-    // ============================================================
-
-    match /institutionApplications/{applicationId} {
-      allow create:
-        if signedIn()
-        && uid() == applicationId
-        && request.resource.data.institutionOwnerUid == uid()
-        && request.resource.data.status == 'pending_review'
-        && request.resource.data.source == 'institution_registration'
-        && request.resource.data.keys().hasOnly([
-          'institutionOwnerUid',
-          'institutionName',
-          'institutionType',
-          'country',
-          'website',
-          'learnerRange',
-          'institutionPhone',
-          'ownerName',
-          'ownerEmail',
-          'ownerPosition',
-          'status',
-          'submittedAt',
-          'source'
-        ])
-        && request.resource.data.institutionName is string
-        && request.resource.data.institutionName.size() >= 2
-        && request.resource.data.institutionName.size() <= 120
-        && request.resource.data.ownerName is string
-        && request.resource.data.ownerName.size() >= 2
-        && request.resource.data.ownerEmail is string
-        && request.resource.data.country is string
-        && request.resource.data.institutionPhone is string
-        && request.resource.data.ownerPosition is string
-        && request.resource.data.institutionType is string
-        && request.resource.data.learnerRange is string;
-
-      allow get:
-        if signedIn()
-        && (
-          uid() == applicationId
-          || staff()
-        );
-
-      allow list:
-        if staff();
-
-      // Applicant cannot change the application or self-approve.
-      allow update, delete:
-        if false;
-    }
-
-
-    // ============================================================
-    // INSTITUTION PAYMENT RECORDS
-    // Payment records are server-written; only authorised staff
-    // and the associated institution's active members may read.
-    // ============================================================
-
-    match /institutionPayments/{paymentId} {
-      allow get, list: if staff()
-        || (
-          signedIn()
-          && userExists()
-          && userData().get('institutionId', '') == resource.data.get('institutionId', '')
-          && userData().get('active', false) == true
-          && userData().get('status', '') == 'active'
-        );
-      allow create, update, delete: if false;
-    }
-
-    // ============================================================
-    // UNIFIED MARKETPLACE CATALOGUE
-    // Course listings are staff-managed and must match a published
-    // course in the same atomic batch/transaction.
-    // ============================================================
-    function courseIsPublishedAfter(courseId) {
-      let coursePath = /databases/$(database)/documents/courses/$(courseId);
-      return existsAfter(coursePath)
-        && (
-          getAfter(coursePath).data.get('published', false) == true
-          || getAfter(coursePath).data.get('status', '') == 'published'
-        )
-        && getAfter(coursePath).data.get('status', '') != 'deleted'
-        && getAfter(coursePath).data.get('reviewStatus', '') == 'approved'
-        && getAfter(coursePath).data.get('marketplaceVisibility', 'public') != 'hidden';
-    }
-
-    match /marketplaceItems/{itemId} {
-      allow get, list: if resource.data.get('status', '') == 'published';
-
-      allow create, update:
-        if staff()
-        && request.resource.data.get('productType', '') == 'course'
-        && request.resource.data.get('sourceCollection', '') == 'courses'
-        && request.resource.data.get('sourceId', '') is string
-        && itemId == 'course_' + request.resource.data.sourceId
-        && request.resource.data.get('status', '') == 'published'
-        && request.resource.data.get('published', false) == true
-        && courseIsPublishedAfter(request.resource.data.sourceId);
-
-      allow delete:
-        if staff()
-        && resource.data.get('productType', '') == 'course'
-        && resource.data.get('sourceCollection', '') == 'courses'
-        && resource.data.get('sourceId', '') is string
-        && itemId == 'course_' + resource.data.sourceId
-        && !courseIsPublishedAfter(resource.data.sourceId);
-    }
-
-    // ============================================================
-    // DEFAULT DENY
-    // ============================================================
-
-    match /{document=**} {
-      allow read, write:
-        if false;
-    }
-  }
-}))
-            || (resource != null && (
-              resource.data.get('studentId', '') == uid()
-              || resource.data.get('userId', '') == uid()
-            ))
-          )
-        )
-        || (isInstructor() && instructorPortalOpen()
-          && resource != null && resource.data.instructorId == uid());
-
-      allow list:
-        if staff()
-        || (isStudent() && studentPortalOpen()
-          && (resource.data.get('studentId', '') == uid()
-            || resource.data.get('userId', '') == uid()))
-        || (isInstructor() && instructorPortalOpen()
-          && resource.data.instructorId == uid());
-
-      // Paid enrollments are trusted backend records.
-      // Free courses may be enrolled by an active student, but
-      // the course itself must be free so the browser cannot
-      // bypass payment by changing client-side course data.
-      allow create:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && request.resource.data.userId == uid()
-          && request.resource.data.courseId is string
-          && request.resource.data.status == 'active'
-          && request.resource.data.paymentStatus == 'free'
-          && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
-          && (
-            get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('isFree', false) == true
-            || (
-              get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) is number
-              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) <= 0
-            )
-          )
-        );
-
-      // Students may update ONLY harmless learning-progress fields.
-      // They cannot alter payment, owner, course, status or identity.
-      allow update:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && (
-            resource.data.get('studentId', '') == uid()
-            || resource.data.get('userId', '') == uid()
-          )
-          // Preserve ownership and entitlement fields, including legacy records
-          // where one optional identity field is absent.
-          && request.resource.data.get('studentId', '') == resource.data.get('studentId', '')
-          && request.resource.data.get('userId', '') == resource.data.get('userId', '')
-          && request.resource.data.get('courseId', '') == resource.data.get('courseId', '')
-          && request.resource.data.get('paymentStatus', '') == resource.data.get('paymentStatus', '')
-          && request.resource.data.get('status', '') == resource.data.get('status', '')
-          && request.resource.data.diff(resource.data)
-               .affectedKeys()
-               .hasOnly([
-                 'progress',
-                 'completedLessons',
-                 'lastLessonId',
-                 'lastAccessedAt',
-                 'updatedAt'
-               ])
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
-          && request.resource.data.diff(resource.data)
-               .affectedKeys()
-               .hasOnly([
-                 'progress',
-                 'grade',
-                 'feedback',
-                 'updatedAt'
-               ])
-        );
-
-      allow delete:
-        if isFounder();
-    }
-
-
-    // ============================================================
-    // ASSIGNMENTS
-    // ============================================================
-
-    match /assignments/{assignmentId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && resource.data.get('status', 'published') in ['published', 'pending', 'active']
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
-
-      allow create:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && request.resource.data.instructorId == uid()
-          && request.resource.data.courseId is string
-          && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
-          && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.instructorId == uid()
-        );
-
-      allow update:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
-          && request.resource.data.courseId is string
-          && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
-          && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.instructorId == uid()
-        );
-
-      allow delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-        );
-    }
-
-
-    // ============================================================
-    // PRIVATE STUDENT COURSE NOTES
-    // ============================================================
-    match /courseNotes/{noteId} {
-      allow get:
-        if isStudent()
-        && studentPortalOpen()
-        && (resource == null || resource.data.userId == uid());
-
-      allow list:
-        if false;
-
-      allow create:
-        if isStudent()
-        && studentPortalOpen()
-        && request.resource.data.userId == uid()
-        && request.resource.data.courseId is string
-        && request.resource.data.lessonId is string
-        && request.resource.data.notes is string
-        && request.resource.data.notes.size() <= 10000
-        && request.resource.data.keys().hasOnly([
-          'userId', 'courseId', 'lessonId', 'notes', 'updatedAt'
-        ]);
-
-      allow update:
-        if isStudent()
-        && studentPortalOpen()
-        && resource.data.userId == uid()
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.courseId == resource.data.courseId
-        && request.resource.data.lessonId == resource.data.lessonId
-        && request.resource.data.notes is string
-        && request.resource.data.notes.size() <= 10000
-        && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['notes', 'updatedAt']);
-
-      allow delete:
-        if false;
-    }
-
-
-    // ============================================================
-    // COURSE MODULES
-    // ============================================================
-
-    match /courseModules/{moduleId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
-
-      allow create:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && request.resource.data.instructorId == uid()
-        );
-
-      allow update, delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
-        );
-    }
-
-
-    // ============================================================
-    // COURSE LESSONS
-    // ============================================================
-
-    match /courseLessons/{lessonId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
-
-      allow create:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && request.resource.data.instructorId == uid()
-        );
-
-      allow update, delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
-        );
-    }
-
-
-    // ============================================================
-    // QUIZZES
-    // ============================================================
-
-    match /quizzes/{quizId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
-
-      allow create:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && request.resource.data.instructorId == uid()
-        );
-
-      allow update, delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
-        );
-    }
-
-
-    // ============================================================
-    // QUIZ QUESTIONS — ANSWER KEYS ARE INSTRUCTOR-ONLY
-    // Students must receive sanitized question payloads from a trusted
-    // server endpoint; never expose correctAnswer through direct reads.
-    // ============================================================
-
-    match /quizQuestions/{questionId} {
-      allow get, list:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-        );
-
-      allow create:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && request.resource.data.instructorId == uid()
-          && request.resource.data.quizId is string
-          && exists(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId))
-          && get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.instructorId == uid()
-        );
-
-      allow update:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid()
-          && request.resource.data.quizId == resource.data.quizId
-          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
-          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
-        );
-
-      allow delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
-          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
-        );
-    }
-
-
-    // ============================================================
-    // SUBMISSIONS
-    // ============================================================
-
-    match /submissions/{submissionId} {
-
-      // Instructors access submissions only through an assignment they own.
-      // The assignmentId equality in instructor queries lets Firestore prove
-      // that every returned submission belongs to this instructor's assignment.
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && resource.data.studentId == uid()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.assignmentId is string
-          && exists(/databases/$(database)/documents/assignments/$(resource.data.assignmentId))
-          && get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.instructorId == uid()
-        );
-
-      // Students may submit only against an existing published assignment.
-      // Grade fields and instructor ownership fields cannot be supplied by clients.
-      allow create:
-        if isStudent()
-        && studentPortalOpen()
-        && request.resource.data.studentId == uid()
-        && request.resource.data.assignmentId is string
-        && exists(/databases/$(database)/documents/assignments/$(request.resource.data.assignmentId))
-        && get(/databases/$(database)/documents/assignments/$(request.resource.data.assignmentId)).data.get('status', 'published') in ['published', 'pending']
-        && request.resource.data.status in ['submitted', 'resubmitted']
-        && request.resource.data.content is string
-        && request.resource.data.content.size() > 0
-        && request.resource.data.content.size() <= 20000
-        && request.resource.data.keys().hasOnly([
-          'assignmentId', 'userId', 'studentId', 'studentName',
-          'studentEmail', 'content', 'notes', 'status',
-          'submittedAt', 'updatedAt'
-        ]);
-
-      allow update:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && resource.data.studentId == uid()
-          && request.resource.data.studentId == uid()
-          && request.resource.data.assignmentId == resource.data.assignmentId
-          && !(resource.data.get('status', '') in ['graded', 'reviewed', 'returned'])
-          && request.resource.data.status in ['submitted', 'resubmitted']
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'content', 'notes', 'status', 'submittedAt', 'updatedAt'
-          ])
-          && request.resource.data.content is string
-          && request.resource.data.content.size() > 0
-          && request.resource.data.content.size() <= 20000
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.assignmentId is string
-          && exists(/databases/$(database)/documents/assignments/$(resource.data.assignmentId))
-          && get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.instructorId == uid()
-          && request.resource.data.assignmentId == resource.data.assignmentId
-          && request.resource.data.studentId == resource.data.studentId
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'score', 'grade', 'maxScore', 'feedback', 'instructorFeedback',
-            'status', 'gradedAt', 'reviewedAt', 'updatedAt'
-          ])
-          && request.resource.data.status in ['graded', 'reviewed']
-          && request.resource.data.score is number
-          && request.resource.data.grade is number
-          && request.resource.data.maxScore is number
-          && request.resource.data.maxScore == get(/databases/$(database)/documents/assignments/$(resource.data.assignmentId)).data.get('maxScore', 100)
-          && request.resource.data.score >= 0
-          && request.resource.data.score <= request.resource.data.maxScore
-          && request.resource.data.grade == request.resource.data.score
-          && request.resource.data.feedback is string
-          && request.resource.data.feedback.size() <= 5000
-          && request.resource.data.instructorFeedback == request.resource.data.feedback
-        );
-
-      allow delete:
-        if staff();
-    }
-
-
-    // ============================================================
-    // QUIZ SUBMISSIONS
-    // ============================================================
-
-    match /quizSubmissions/{submissionId} {
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && resource.data.studentId == uid()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-        );
-
-      // Student attempts are created once. Their score fields are still
-      // client-generated in the current player and require server grading
-      // before they can be treated as authoritative.
-      allow create:
-        if isStudent()
-        && studentPortalOpen()
-        && request.resource.data.studentId == uid()
-        && request.resource.data.quizId is string
-        && exists(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId))
-        && get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.get('status', 'draft') in ['published', 'active']
-        && request.resource.data.instructorId == get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.instructorId
-        && request.resource.data.keys().hasOnly([
-          'studentId', 'quizId', 'courseId', 'instructorId',
-          'attemptNumber', 'answers', 'score', 'correct', 'total',
-          'passed', 'completed', 'status', 'xpEarned', 'submittedAt'
-        ]);
-
-      // Student attempts cannot be edited after creation. Only the owning
-      // instructor can update review and grade fields.
-      allow update:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-          && resource.data.quizId is string
-          && exists(/databases/$(database)/documents/quizzes/$(resource.data.quizId))
-          && get(/databases/$(database)/documents/quizzes/$(resource.data.quizId)).data.instructorId == uid()
-          && request.resource.data.instructorId == resource.data.instructorId
-          && request.resource.data.quizId == resource.data.quizId
-          && request.resource.data.studentId == resource.data.studentId
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'answers', 'score', 'totalMarks', 'percentage', 'status',
-            'result', 'instructorFeedback', 'gradedBy', 'gradedAt',
-            'reviewedAt', 'updatedAt'
-          ])
-          && request.resource.data.status == 'graded'
-          && request.resource.data.answers is list
-          && request.resource.data.score is number
-          && request.resource.data.totalMarks is number
-          && request.resource.data.totalMarks > 0
-          && request.resource.data.score >= 0
-          && request.resource.data.score <= request.resource.data.totalMarks
-          && request.resource.data.percentage is number
-          && request.resource.data.percentage >= 0
-          && request.resource.data.percentage <= 100
-          && request.resource.data.result in ['passed', 'failed']
-          && request.resource.data.instructorFeedback is string
-          && request.resource.data.instructorFeedback.size() <= 5000
-          && request.resource.data.gradedBy == uid()
-        );
-
-      allow delete:
-        if staff();
-    }
-
-
-    // ============================================================
-    // CERTIFICATES
-    // ============================================================
-
-    match /certificates/{certificateId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && resource.data.studentId == uid()
-        );
-
-      allow create, update, delete:
-        if staff();
-    }
-
-
-    // ============================================================
-    // FOUNDER SETTINGS
-    // ============================================================
-
-    match /settings/{settingsId} {
-
-      allow read, write:
-        if isFounder();
-    }
-
-    match /platformSettings/{settingsId} {
-
-      allow read:
-        if isFounder();
-
-      allow write:
-        if isFounder();
-    }
-
-
-    // ============================================================
-    // CHAT ROOMS
-    // ============================================================
-
-    function chatMember(chatId) {
-      return signedIn()
-        && exists(
-          /databases/$(database)/documents/chats/$(chatId)
-        )
-        && (
-          get(
-            /databases/$(database)/documents/chats/$(chatId)
-          ).data.get('memberIds', []).hasAny([uid()])
-          ||
-          get(
-            /databases/$(database)/documents/chats/$(chatId)
-          ).data.get('participants', []).hasAny([uid()])
-        );
-    }
-
-    function validChatMembers() {
-      let ids = request.resource.data.get('memberIds', []);
-      let participants = request.resource.data.get('participants', []);
-      let members = ids.size() == 2 ? ids : participants;
-
-      return members.size() == 2
-        && members[0] != members[1]
-        && members.hasAny([uid()])
-        && exists(/databases/$(database)/documents/users/$(members[0]))
-        && exists(/databases/$(database)/documents/users/$(members[1]))
-        && (
-          // Student <-> instructor
-          (
-            role() == 'student'
-            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'student'
-            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'instructor'
-          )
-          || (
-            role() == 'student'
-            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'student'
-            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'instructor'
-          )
-          // Instructor <-> student/admin
-          || (
-            role() == 'instructor'
-            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'instructor'
-            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') in ['student', 'admin']
-          )
-          || (
-            role() == 'instructor'
-            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'instructor'
-            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') in ['student', 'admin']
-          )
-          // Admin <-> instructor/founder
-          || (
-            role() == 'admin'
-            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'admin'
-            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') in ['instructor', 'founder']
-          )
-          || (
-            role() == 'admin'
-            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'admin'
-            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') in ['instructor', 'founder']
-          )
-          // Founder <-> permitted portal/admin roles
-          || (
-            role() == 'founder'
-            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') == 'founder'
-            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') in ['student', 'instructor', 'admin']
-          )
-          || (
-            role() == 'founder'
-            && get(/databases/$(database)/documents/users/$(members[1])).data.get('role', '') == 'founder'
-            && get(/databases/$(database)/documents/users/$(members[0])).data.get('role', '') in ['student', 'instructor', 'admin']
-          )
-        );
-    }
-
-
-    match /chats/{chatId} {
-
-      allow get:
-        if staff()
-        || (
-          activePortalUser()
-          && (
-            resource.data.get('memberIds', []).hasAny([uid()])
-            ||
-            resource.data.get('participants', []).hasAny([uid()])
-          )
-        );
-
-      allow list:
-        if staff()
-        || (
-          activePortalUser()
-          && (
-            resource.data.get('memberIds', []).hasAny([uid()])
-            ||
-            resource.data.get('participants', []).hasAny([uid()])
-          )
-        );
-
-      allow create:
-        if (
-          staff()
-          || activePortalUser()
-        )
-        && validChatMembers();
-
-      allow update:
-        if staff()
-        || (
-          activePortalUser()
-          && chatMember(chatId)
-          && request.resource.data.get('memberIds', [])
-               == resource.data.get('memberIds', [])
-          && request.resource.data.get('participants', [])
-               == resource.data.get('participants', [])
-        );
-
-      allow delete:
-        if isFounder();
-
-
-      // ==========================================================
-      // CHAT MESSAGES
-      // ==========================================================
-
-      match /messages/{messageId} {
-
-        allow get, list:
-          if staff()
-          || (
-            activePortalUser()
-            && chatMember(chatId)
-          );
-
-        allow create:
-          if activePortalUser()
-          && chatMember(chatId)
-          && request.resource.data.senderId == uid();
-
-        allow update:
-          if activePortalUser()
-          && chatMember(chatId)
-          && resource.data.senderId == uid();
 
         allow delete:
           if isFounder();
