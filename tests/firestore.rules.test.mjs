@@ -291,6 +291,30 @@ test("an institution owner can list only their own institution members", async (
 });
 
 
+test("an institution moderator can view the member directory but cannot write memberships", async () => {
+  await seed(async db => {
+    await setDoc(doc(db, "institutions/college-mod"), { institutionId: "college-mod", status: "active" });
+    await setDoc(doc(db, "institutions/college-mod/members/mod-1"), institutionMember("mod-1", "college-mod", "institution_moderator"));
+    await setDoc(doc(db, "institutions/college-mod/members/student-1"), institutionMember("student-1", "college-mod", "student"));
+  });
+  const db = testEnv.authenticatedContext("mod-1").firestore();
+  const result = await assertSucceeds(getDocs(collection(db, "institutions/college-mod/members")));
+  assert.equal(result.size, 2);
+  await assertFails(setDoc(doc(db, "institutions/college-mod/members/new-user"), institutionMember("new-user", "college-mod", "student")));
+});
+
+test("an institution student cannot list other institution members", async () => {
+  await seed(async db => {
+    await setDoc(doc(db, "institutions/college-student"), { institutionId: "college-student", status: "active" });
+    await setDoc(doc(db, "institutions/college-student/members/student-2"), institutionMember("student-2", "college-student", "student"));
+    await setDoc(doc(db, "institutions/college-student/members/student-3"), institutionMember("student-3", "college-student", "student"));
+  });
+  const db = testEnv.authenticatedContext("student-2").firestore();
+  await assertFails(getDocs(collection(db, "institutions/college-student/members")));
+  await assertSucceeds(getDoc(doc(db, "institutions/college-student/members/student-2")));
+  await assertFails(getDoc(doc(db, "institutions/college-student/members/student-3")));
+});
+
 test("institution shared files are writable only by managers in that tenant", async () => {
   await seed(async db => {
     await setDoc(doc(db, "institutions/college-a"), { institutionId: "college-a", status: "active" });
