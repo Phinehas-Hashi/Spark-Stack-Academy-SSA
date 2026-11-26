@@ -140,8 +140,9 @@ async function action(id, type) {
     : window.confirm(confirmMessage);
   if (!confirmed) return;
 
+  if (type === "paid" && !row.instructorId) throw new Error("Payout request has no instructor wallet owner.");
   const treasuryRef = doc(db, "finance", "treasury");
-  const walletRef = doc(db, "instructorWallets", row.instructorId || "");
+  const walletRef = type === "paid" ? doc(db, "instructorWallets", row.instructorId) : null;
   const ledgerRef = doc(collection(db, "financeTransactions"));
   const transactionId = `PAY-${Date.now()}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;
 
