@@ -696,14 +696,13 @@ service cloud.firestore {
 
     match /audit_logs/{logId} {
 
-      allow read, create:
+      // Historical audit records are read-only. New security evidence is
+      // written by the trusted edge collector, never by browser clients.
+      allow read:
         if isFounder();
 
-      allow update:
+      allow create, update, delete:
         if false;
-
-      allow delete:
-        if isFounder();
     }
 
 
@@ -1685,8 +1684,12 @@ service cloud.firestore {
 
     match /settings/{settingsId} {
 
-      allow read, write:
+      allow read:
         if isFounder();
+
+      // Retired client-managed security preferences are no longer writable.
+      allow write:
+        if isFounder() && settingsId != 'security';
     }
 
     match /platformSettings/{settingsId} {
