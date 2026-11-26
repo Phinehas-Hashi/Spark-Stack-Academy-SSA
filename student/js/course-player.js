@@ -233,7 +233,8 @@ async function loadAssignments() {
     try {
         const snapshot = await getDocs(query(
             collection(db, "assignments"),
-            where("status", "in", ["published", "pending", "active"])
+            where("courseId", "==", courseId),
+            where("status", "in", ["published", "active"])
         ));
         assignments = snapshot.docs.map(item => ({ id: item.id, ...(item.data() || {}) }))
             .filter(item => item.courseId === courseId && item.published !== false && ["published", "pending", "active"].includes(String(item.status || "published").toLowerCase()))

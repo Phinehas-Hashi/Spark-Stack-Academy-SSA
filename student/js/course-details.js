@@ -36,7 +36,6 @@ let lessons = [];
 function isCourseFree(courseData) {
     if (!courseData) return false;
     if (courseData.isFree === true) return true;
-    if (!Object.prototype.hasOwnProperty.call(courseData, "price")) return true;
     return typeof courseData.price === "number" && courseData.price <= 0;
 }
 
@@ -198,22 +197,16 @@ async function loadCourse() {
         );
 
 
+        const enrollment = currentUser
+            ? await checkEnrollment()
+            : false;
+
         await loadModules();
-        await loadLessons();
+        await loadLessons(Boolean(enrollment));
 
         renderCourse();
 
-
-        if (currentUser) {
-
-            await checkEnrollment();
-
-        } else {
-
-            setGuestState();
-
-        }
-
+        if (!currentUser) setGuestState();
 
         showContent();
 
@@ -271,17 +264,16 @@ async function loadModules() {
     }
 }
 
-async function loadLessons() {
-    const lessonQueries = [
-        query(
-            collection(db, "courseLessons"),
-            where("courseId", "==", courseId)
-        ),
-        query(
-            collection(db, "courseLessons"),
-            where("courseID", "==", courseId)
-        )
-    ];
+async function loadLessons(hasEnrollment = false) {
+    const lessonQueries = hasEnrollment
+        ? [
+            query(collection(db, "courseLessons"), where("courseId", "==", courseId)),
+            query(collection(db, "courseLessons"), where("courseID", "==", courseId))
+        ]
+        : [
+            query(collection(db, "courseLessons"), where("courseId", "==", courseId), where("isPreview", "==", true)),
+            query(collection(db, "courseLessons"), where("courseID", "==", courseId), where("isPreview", "==", true))
+        ];
 
     const results = await Promise.allSettled(
         lessonQueries.map(lessonQuery => getDocs(lessonQuery))

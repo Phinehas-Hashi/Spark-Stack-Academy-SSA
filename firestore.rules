@@ -50,7 +50,8 @@ service cloud.firestore {
     function isAdmin() {
       return userExists()
         && role() == 'admin'
-        && userData().get('active', true) == true;
+        && userData().get('active', false) == true
+        && userData().get('status', '') == 'active';
     }
 
     function isFounder() {
@@ -92,6 +93,57 @@ service cloud.firestore {
     function institutionOwner(institutionId) {
       return institutionMember(institutionId)
         && userData().get('institutionRole', '') == 'owner';
+    }
+
+    function publicCourse(courseId) {
+      return courseId is string
+        && exists(/databases/$(database)/documents/courses/$(courseId))
+        && get(/databases/$(database)/documents/courses/$(courseId)).data.get('published', false) == true
+        && get(/databases/$(database)/documents/courses/$(courseId)).data.get('status', '') == 'published'
+        && get(/databases/$(database)/documents/courses/$(courseId)).data.get('reviewStatus', '') == 'approved'
+        && get(/databases/$(database)/documents/courses/$(courseId)).data.get('marketplaceVisibility', 'public') != 'hidden'
+        && get(/databases/$(database)/documents/courses/$(courseId)).data.get('deletedAt', null) == null;
+    }
+
+    function activeCourseEnrollment(courseId) {
+      let canonicalPath = /databases/$(database)/documents/enrollments/$(uid() + '_' + courseId);
+      let legacyPath = /databases/$(database)/documents/students/$(uid())/enrollments/$(courseId);
+      return courseId is string
+        && (
+          (exists(canonicalPath)
+            && get(canonicalPath).data.get('courseId', '') == courseId
+            && (get(canonicalPath).data.get('userId', '') == uid() || get(canonicalPath).data.get('studentId', '') == uid())
+            && get(canonicalPath).data.get('status', '') in ['active', 'approved', 'completed', 'paid']
+            && (get(canonicalPath).data.get('paymentStatus', '') in ['paid', 'free']
+              || get(canonicalPath).data.get('institutionId', '') != ''
+              || get(canonicalPath).data.get('status', '') == 'paid'))
+          || (exists(legacyPath)
+            && get(legacyPath).data.get('courseId', courseId) == courseId
+            && get(legacyPath).data.get('status', '') in ['active', 'approved', 'completed', 'paid']
+            && (get(legacyPath).data.get('paymentStatus', '') in ['paid', 'free']
+              || get(legacyPath).data.get('institutionId', '') != ''
+              || get(legacyPath).data.get('status', '') == 'paid'))
+        );
+    }
+
+    function instructorOwnsCourse(courseId) {
+      return isInstructor() && instructorPortalOpen()
+        && courseId is string
+        && exists(/databases/$(database)/documents/courses/$(courseId))
+        && get(/databases/$(database)/documents/courses/$(courseId)).data.instructorId == uid();
+    }
+
+    function studentCanReadLesson() {
+      let courseId = resource.data.get('courseId', resource.data.get('courseID', ''));
+      return isStudent() && studentPortalOpen() && courseId is string
+        && (activeCourseEnrollment(courseId)
+          || (resource.data.get('isPreview', false) == true && publicCourse(courseId)));
+    }
+
+    function studentCanReadModule() {
+      let courseId = resource.data.get('courseId', resource.data.get('courseID', ''));
+      return isStudent() && studentPortalOpen() && courseId is string
+        && (publicCourse(courseId) || activeCourseEnrollment(courseId));
     }
 
 
@@ -228,8 +280,14 @@ service cloud.firestore {
                'instructorStatus',
                'instructorDisabledAt',
                'lastLogin',
+               'online',
+               'lastSeen',
                'updatedAt'
              ])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['online'])
+          || request.resource.data.online is bool)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastSeen'])
+          || request.resource.data.lastSeen is timestamp)
 
       // Staff may activate a student account only as part of admission approval.
       || (
@@ -408,14 +466,21 @@ service cloud.firestore {
     // ============================================================
 
     match /studentSettings/{userId} {
-
-      allow get, write:
-        if isStudent()
-        && studentPortalOpen()
-        && uid() == userId;
-
-      allow list:
-        if staff();
+      allow get: if isStudent() && studentPortalOpen() && uid() == userId;
+      allow create: if isStudent() && studentPortalOpen() && uid() == userId
+        && request.resource.data.keys().hasOnly(['notifications', 'learning', 'updatedAt'])
+        && request.resource.data.notifications is map
+        && request.resource.data.learning is map
+        && request.resource.data.notifications.keys().hasOnly(['announcements', 'courses', 'assignments', 'payments', 'messages'])
+        && request.resource.data.learning.keys().hasOnly(['rememberLesson', 'reminders', 'captions']);
+      allow update: if isStudent() && studentPortalOpen() && uid() == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notifications', 'learning', 'updatedAt'])
+        && request.resource.data.notifications is map
+        && request.resource.data.learning is map
+        && request.resource.data.notifications.keys().hasOnly(['announcements', 'courses', 'assignments', 'payments', 'messages'])
+        && request.resource.data.learning.keys().hasOnly(['rememberLesson', 'reminders', 'captions']);
+      allow delete: if false;
+      allow list: if staff();
     }
 
 
@@ -1008,36 +1073,52 @@ service cloud.firestore {
       // Only the public course metadata is exposed; write access remains restricted.
       allow get:
         if staff()
-        || (isStudent() && studentPortalOpen())
-        || (isInstructor() && instructorPortalOpen())
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid())
         || (resource.data.get('institutionId', '') != ''
           && institutionMember(resource.data.institutionId))
-        || (
-          resource.data.get('published', false) == true
-          && resource.data.get('status', '') == 'published'
-          && resource.data.get('reviewStatus', '') == 'approved'
-          && resource.data.get('marketplaceVisibility', 'public') != 'hidden'
-          && resource.data.get('deletedAt', null) == null
-        );
+        || publicCourse(courseId);
 
-      // Keep collection queries limited to authenticated portal roles/staff.
+      // Instructors can query only their own courses. Student marketplace
+      // discovery uses marketplaceItems; public course details use direct get.
       allow list:
         if staff()
-        || (isStudent() && studentPortalOpen())
-        || (isInstructor() && instructorPortalOpen())
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid())
         || (resource.data.get('institutionId', '') != ''
           && institutionMember(resource.data.institutionId));
 
       allow create:
         if staff()
         || (isInstructor() && instructorPortalOpen()
-          && request.resource.data.instructorId == uid());
+          && request.resource.data.instructorId == uid()
+          && request.resource.data.get('published', false) == false
+          && request.resource.data.get('status', 'draft') in ['draft', 'pending_review']
+          && request.resource.data.get('reviewStatus', 'draft') != 'approved'
+          && request.resource.data.get('marketplaceVisibility', 'hidden') == 'hidden');
 
       allow update:
         if staff()
         || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid());
+          && request.resource.data.instructorId == uid()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'isFree', 'price', 'discountPrice', 'duration', 'updatedAt',
+            'status', 'reviewStatus', 'reviewRouting', 'reviewRequestedAt',
+            'marketplaceVisibility'
+          ])
+          && request.resource.data.get('published', false) == resource.data.get('published', false)
+          && (request.resource.data.get('status', resource.data.get('status', 'draft'))
+            == resource.data.get('status', 'draft')
+            || (request.resource.data.get('status', '') == 'pending_review'
+              && request.resource.data.get('reviewStatus', '') == 'awaiting_admin_review'
+              && request.resource.data.get('marketplaceVisibility', '') == 'hidden'))
+          && (request.resource.data.get('reviewStatus', resource.data.get('reviewStatus', ''))
+            == resource.data.get('reviewStatus', '')
+            || request.resource.data.get('reviewStatus', '') == 'awaiting_admin_review')
+          && (request.resource.data.get('marketplaceVisibility', resource.data.get('marketplaceVisibility', 'hidden'))
+            == resource.data.get('marketplaceVisibility', 'hidden')
+            || request.resource.data.get('marketplaceVisibility', '') == 'hidden'));
 
       // Instructors retain deletion access to their own course records.
       // Founder moderation uses a soft-delete Cloud Function to preserve history.
@@ -1052,22 +1133,17 @@ service cloud.firestore {
     // ============================================================
 
     match /enrollments/{enrollmentId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && (
-            resource.data.get('studentId', '') == uid()
-            || resource.data.get('userId', '') == uid()
-          )
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-          && resource.data.instructorId == uid()
-        );
+      allow get: if staff()
+        || (isStudent() && studentPortalOpen()
+          && ((resource == null && enrollmentId.matches('^' + uid() + '_.+$'))
+            || (resource != null && (resource.data.get('studentId', '') == uid()
+              || resource.data.get('userId', '') == uid()))))
+        || (isInstructor() && instructorPortalOpen()
+          && resource != null && resource.data.instructorId == uid());
+      allow list: if staff()
+        || (isStudent() && studentPortalOpen()
+          && (resource.data.get('studentId', '') == uid() || resource.data.get('userId', '') == uid()))
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
 
       // Paid enrollments are trusted backend records.
       // Free courses may be enrolled by an active student, but
@@ -1080,16 +1156,19 @@ service cloud.firestore {
           && studentPortalOpen()
           && request.resource.data.userId == uid()
           && request.resource.data.courseId is string
+          && enrollmentId == uid() + '_' + request.resource.data.courseId
           && request.resource.data.status == 'active'
           && request.resource.data.paymentStatus == 'free'
+          && request.resource.data.keys().hasOnly(['userId', 'courseId', 'courseTitle', 'paymentStatus', 'status', 'progress', 'completedLessons', 'enrolledAt', 'updatedAt'])
+          && request.resource.data.progress == 0
+          && request.resource.data.completedLessons is list
+          && request.resource.data.completedLessons.size() == 0
+          && publicCourse(request.resource.data.courseId)
           && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
-          && (
-            get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('isFree', false) == true
-            || (
-              get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) is number
-              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) <= 0
-            )
-          )
+          && (get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('isFree', false) == true
+            || (get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.keys().hasAny(['price'])
+              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.price is number
+              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.price <= 0))
         );
 
       // Students may update ONLY harmless learning-progress fields.
@@ -1145,18 +1224,12 @@ service cloud.firestore {
     // ============================================================
 
     match /assignments/{assignmentId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-          && resource.data.get('status', 'published') in ['published', 'pending', 'active']
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
+      allow get, list: if staff()
+        || (isStudent() && studentPortalOpen()
+          && resource.data.get('status', 'published') in ['published', 'active']
+          && resource.data.get('courseId', '') is string
+          && activeCourseEnrollment(resource.data.courseId))
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
 
       allow create:
         if staff()
@@ -1165,6 +1238,7 @@ service cloud.firestore {
           && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
           && request.resource.data.courseId is string
+          && instructorOwnsCourse(request.resource.data.courseId)
           && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
           && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.instructorId == uid()
         );
@@ -1176,7 +1250,9 @@ service cloud.firestore {
           && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
+          && request.resource.data.courseId == resource.data.courseId
           && request.resource.data.courseId is string
+          && instructorOwnsCourse(resource.data.courseId)
           && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
           && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.instructorId == uid()
         );
@@ -1237,34 +1313,24 @@ service cloud.firestore {
     // ============================================================
 
     match /courseModules/{moduleId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
-
-      allow create:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
+      allow get, list: if staff()
+        || (isStudent() && studentPortalOpen() && studentCanReadModule())
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
+      allow create: if staff()
+        || (isInstructor() && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
-        );
-
-      allow update, delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
+          && instructorOwnsCourse(request.resource.data.get('courseId', request.resource.data.get('courseID', ''))));
+      allow update: if staff()
+        || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
-        );
+          && request.resource.data.get('courseId', resource.data.get('courseId', '')) == resource.data.get('courseId', '')
+          && request.resource.data.get('courseID', resource.data.get('courseID', '')) == resource.data.get('courseID', '')
+          && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
+      allow delete: if staff()
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+          && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
     }
 
 
@@ -1273,34 +1339,26 @@ service cloud.firestore {
     // ============================================================
 
     match /courseLessons/{lessonId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
-
-      allow create:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
+      allow get, list: if staff()
+        || (isStudent() && studentPortalOpen() && studentCanReadLesson())
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
+      allow create: if staff()
+        || (isInstructor() && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
-        );
-
-      allow update, delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
+          && instructorOwnsCourse(request.resource.data.get('courseId', request.resource.data.get('courseID', '')))
+          && request.resource.data.get('isPreview', false) is bool);
+      allow update: if staff()
+        || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
-        );
+          && request.resource.data.get('courseId', resource.data.get('courseId', '')) == resource.data.get('courseId', '')
+          && request.resource.data.get('courseID', resource.data.get('courseID', '')) == resource.data.get('courseID', '')
+          && request.resource.data.get('isPreview', false) is bool
+          && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
+      allow delete: if staff()
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+          && instructorOwnsCourse(resource.data.get('courseId', resource.data.get('courseID', ''))));
     }
 
 
@@ -1309,34 +1367,26 @@ service cloud.firestore {
     // ============================================================
 
     match /quizzes/{quizId} {
-
-      allow get, list:
-        if staff()
-        || (
-          isStudent()
-          && studentPortalOpen()
-        )
-        || (
-          isInstructor()
-          && instructorPortalOpen()
-        );
-
-      allow create:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
+      allow get, list: if staff()
+        || (isStudent() && studentPortalOpen()
+          && resource.data.get('courseId', '') is string
+          && activeCourseEnrollment(resource.data.courseId)
+          && resource.data.get('status', 'draft') in ['published', 'active'])
+        || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
+      allow create: if staff()
+        || (isInstructor() && instructorPortalOpen()
           && request.resource.data.instructorId == uid()
-        );
-
-      allow update, delete:
-        if staff()
-        || (
-          isInstructor()
-          && instructorPortalOpen()
+          && instructorOwnsCourse(request.resource.data.get('courseId', '')));
+      allow update: if staff()
+        || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
           && request.resource.data.instructorId == uid()
-        );
+          && request.resource.data.courseId == resource.data.courseId
+          && instructorOwnsCourse(resource.data.get('courseId', '')));
+      allow delete: if staff()
+        || (isInstructor() && instructorPortalOpen()
+          && resource.data.instructorId == uid()
+          && instructorOwnsCourse(resource.data.get('courseId', '')));
     }
 
 
@@ -1706,14 +1756,24 @@ service cloud.firestore {
 
       allow update:
         if staff()
-        || (
-          activePortalUser()
-          && chatMember(chatId)
-          && request.resource.data.get('memberIds', [])
-               == resource.data.get('memberIds', [])
-          && request.resource.data.get('participants', [])
-               == resource.data.get('participants', [])
-        );
+        || (activePortalUser() && chatMember(chatId)
+          && request.resource.data.get('memberIds', []) == resource.data.get('memberIds', [])
+          && request.resource.data.get('participants', []) == resource.data.get('participants', [])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'lastMessage', 'lastSenderId', 'lastMessageAt', 'updatedAt', 'lastReadAt', 'typing'
+          ])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastSenderId'])
+            || request.resource.data.lastSenderId == uid())
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastMessage'])
+            || (request.resource.data.lastMessage is string && request.resource.data.lastMessage.size() <= 4000))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['typing'])
+            || (request.resource.data.typing.get('uid', '') == uid()
+              && request.resource.data.typing.get('status', false) is bool
+              && request.resource.data.typing.get('updatedAt', request.time) is timestamp))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastReadAt'])
+            || (request.resource.data.lastReadAt is map
+              && request.resource.data.lastReadAt.diff(resource.data.get('lastReadAt', {})).affectedKeys().hasOnly([uid()])
+              && request.resource.data.lastReadAt.get(uid(), null) is timestamp)));
 
       allow delete:
         if isFounder();
@@ -1732,15 +1792,21 @@ service cloud.firestore {
             && chatMember(chatId)
           );
 
-        allow create:
-          if activePortalUser()
+        allow create: if activePortalUser()
           && chatMember(chatId)
-          && request.resource.data.senderId == uid();
-
-        allow update:
-          if activePortalUser()
-          && chatMember(chatId)
-          && resource.data.senderId == uid();
+          && request.resource.data.senderId == uid()
+          && request.resource.data.text is string
+          && request.resource.data.text.size() <= 4000
+          && request.resource.data.seen == false
+          && request.resource.data.keys().hasOnly(['senderId', 'text', 'timestamp', 'seen', 'attachment'])
+          && (!request.resource.data.keys().hasAny(['attachment'])
+            || (request.resource.data.attachment is map
+              && request.resource.data.attachment.keys().hasOnly(['name', 'path', 'size', 'type', 'url'])
+              && request.resource.data.attachment.get('name', '') is string
+              && request.resource.data.attachment.get('path', '') is string
+              && request.resource.data.attachment.get('size', 0) is number
+              && request.resource.data.attachment.get('size', 0) < 10485760));
+        allow update: if false;
 
         allow delete:
           if isFounder();

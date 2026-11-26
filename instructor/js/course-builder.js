@@ -1207,6 +1207,9 @@ async function saveModule(
 
             status,
 
+            isPreview:
+                $("lessonIsPreview").checked === true,
+
             order:
                 existing?.order ??
                 modules.length,
@@ -1455,6 +1458,9 @@ function openLessonModal(
 
     $("lessonStatus").value =
         lesson?.status || "draft";
+
+    $("lessonIsPreview").checked =
+        lesson?.isPreview === true;
 
 
     showModal(
