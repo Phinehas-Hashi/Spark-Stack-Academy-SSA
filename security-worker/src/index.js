@@ -2,7 +2,7 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 
 const EVENT_TYPES = new Set([
   "login_failed", "mfa_failed", "portal_session_start",
-  "portal_access_denied", "suspicious_action", "account_lockout", "founder_control_changed"
+  "portal_access_denied", "suspicious_action", "account_lockout", "founder_control_changed", "founder_action"
 ]);
 const PORTALS = new Set(["login", "student", "instructor", "admin", "institution", "founder"]);
 const SEVERITY = {
@@ -13,6 +13,7 @@ const SEVERITY = {
   suspicious_action: "high",
   account_lockout: "high",
   founder_control_changed: "medium",
+  founder_action: "info",
 };
 const JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"));
 
