@@ -632,3 +632,17 @@ font-size:1.6rem;
 }
 
 }
+
+/* Obsidian Imperial — Academy identity workspace */
+:root{--bg:#11110f;--card:#1b1a17;--border:rgba(214,183,121,.2);--primary:#d6b779;--secondary:#a88a4d;--success:#45b88a;--text:#e7e2d5;--muted:#aaa394;--radius:18px;--shadow:0 14px 36px rgba(0,0,0,.24)}
+body{background:radial-gradient(circle at 12% 0%,rgba(214,183,121,.08),transparent 34%),#11110f!important;color:var(--text)!important}
+.glass-card,.stat-card,.upload-box{background:linear-gradient(145deg,#201f1b,#191815)!important;border:1px solid var(--border)!important;color:var(--text)!important;box-shadow:var(--shadow)!important}
+.page-header h1,.section-card h2,.stat-card h3,.stat-card strong{color:var(--text)!important}
+.page-header p,.input-group label,.upload-box label,.stat-card span{color:var(--muted)!important}
+.input-group input,.input-group select,.input-group textarea,.upload-box input{background:#11110f!important;color:var(--text)!important;border:1px solid #514632!important}
+.input-group input:focus,.input-group select:focus,.input-group textarea:focus{border-color:#d6b779!important;box-shadow:0 0 0 3px rgba(214,183,121,.12)!important}
+.upload-box img{border-color:rgba(214,183,121,.3)!important;background:#11110f!important}
+.primary-btn,.save-btn{background:linear-gradient(135deg,#d6b779,#a88a4d)!important;color:#171612!important;border:0!important}
+.secondary-btn{background:#22211d!important;color:#e7e2d5!important;border:1px solid var(--border)!important}
+.profile-grid,.form-grid{min-width:0}
+@media(max-width:768px){.main-content{padding:16px!important}.section-card,.page-header{padding:18px!important}.profile-grid{grid-template-columns:1fr!important}}
