@@ -126,6 +126,17 @@ service cloud.firestore {
           && userData().get('institutionRole', '') in ['owner', 'institution_admin']);
     }
 
+    function institutionMemberDirectoryViewer(institutionId) {
+      let memberPath = /databases/$(database)/documents/institutions/$(institutionId)/members/$(uid());
+      return (canonicalInstitutionMember(institutionId)
+          && get(memberPath).data.get('role', '') in [
+            'institution_owner', 'owner', 'institution_admin',
+            'institution_moderator', 'department_manager'
+          ])
+        || (legacyInstitutionMember(institutionId)
+          && userData().get('institutionRole', '') in ['owner', 'institution_admin']);
+    }
+
     function institutionApplicant(institutionId) {
       let memberPath = /databases/$(database)/documents/institutions/$(institutionId)/members/$(uid());
       return signedIn()
@@ -2060,8 +2071,8 @@ service cloud.firestore {
 
       match /members/{memberId} {
         allow get: if signedIn()
-          && (uid() == memberId || institutionManager(institutionId));
-        allow list: if institutionManager(institutionId);
+          && (uid() == memberId || institutionMemberDirectoryViewer(institutionId));
+        allow list: if institutionMemberDirectoryViewer(institutionId);
         allow create, update, delete: if false;
       }
     }
