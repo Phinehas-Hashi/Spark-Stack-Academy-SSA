@@ -190,7 +190,7 @@ async function cancelMaintenance() {
 async function loadSecurityIncidents() {
   const list = $("securityIncidentList");
   if (!list) return;
-  const base = String(window.SSA_SECURITY_API_BASE || "").replace(/\\/$/, "");
+  const base = String(window.SSA_SECURITY_API_BASE || "").replace(/\/$/, "");
   if (!base) { list.textContent = "Security edge collector is not configured. Deploy security-worker and set its URL in js/security-config.js."; return; }
   try {
     const token = await state.user.getIdToken();
