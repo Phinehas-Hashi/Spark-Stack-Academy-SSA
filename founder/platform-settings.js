@@ -407,6 +407,8 @@ themeColor:"#3b82f6"
 
 };
 
+// Legacy browser preferences are not enforcement controls. Do not persist or import them.
+["sessionTimeout","maxLoginAttempts","passwordExpiry","twoFactor","loginTracking","securityAlerts"].forEach(key=>delete defaultSettings[key]);
 
 console.log("⚙️ Platform Settings Initialized");
 /* ===================================
@@ -801,18 +803,7 @@ instructorEarnings.checked,
 
 
 /* ---------- SECURITY ---------- */
-
-sessionTimeout:
-Number(sessionTimeout.value),
-
-maxLoginAttempts:
-Number(maxLoginAttempts.value),
-
-passwordExpiry:
-Number(passwordExpiry.value),
-
-
-
+// Authentication and security telemetry are configured in Firebase and the Security Center.
 
 /* ---------- NOTIFICATIONS ---------- */
 
@@ -974,7 +965,6 @@ async function exportPlatformSettings(){
 
 try{
 await requireVerifiedFounder();
-await requireVerifiedFounder();
 
 const snapshot =
 await getDoc(settingsRef);
@@ -1098,10 +1088,9 @@ merge:true
 );
 
 populateSettings(data);
-
-alert(
-"✅ Settings imported successfully."
-);
+window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Platform settings imported"});
+setPlatformStatus("Platform settings imported successfully");
+alert("Settings imported successfully.");
 
 }
 
@@ -1149,13 +1138,10 @@ serverTimestamp()
 
 );
 
-populateSettings(
-defaultSettings
-);
-
-alert(
-"Platform restored to defaults."
-);
+populateSettings(defaultSettings);
+window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Platform settings restored to defaults"});
+setPlatformStatus("Platform settings restored to defaults");
+alert("Platform restored to defaults.");
 
 }
 
@@ -1222,10 +1208,9 @@ serverTimestamp()
 );
 
 maintenanceMode.checked = true;
-
-alert(
-"Platform has been disabled."
-);
+window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Platform maintenance mode enabled"});
+setPlatformStatus("Maintenance mode enabled");
+alert("Platform maintenance mode has been enabled.");
 
 }
 
@@ -1273,13 +1258,10 @@ serverTimestamp()
 
 );
 
-populateSettings(
-defaultSettings
-);
-
-alert(
-"System reset completed."
-);
+populateSettings(defaultSettings);
+window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Platform settings reset"});
+setPlatformStatus("System settings reset");
+alert("System reset completed.");
 
 }
 
