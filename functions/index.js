@@ -2291,6 +2291,7 @@ exports.createInstitutionTeamAccount = onCall(async request => {
   }
 
   let created;
+  let provisioned = false;
   try {
     created = await adminAuth.createUser({
       email, password, displayName: fullName, emailVerified: false, disabled: false
@@ -2350,15 +2351,16 @@ exports.createInstitutionTeamAccount = onCall(async request => {
         updatedAt: now
       });
     });
+    provisioned = true;
 
     await db.collection("audit_logs").add({
       action: "institution_member_account_created", actorId: manager.uid,
       targetId: created.uid, targetEmail: email, targetName: fullName,
       institutionId: manager.institutionId, memberRole: role, createdAt: now
-    });
+    }).catch(error => console.error("Institution member audit write failed:", error));
     return { success: true, uid: created.uid, role, institutionId: manager.institutionId };
   } catch (error) {
-    if (created) await adminAuth.deleteUser(created.uid).catch(() => {});
+    if (created && !provisioned) await adminAuth.deleteUser(created.uid).catch(() => {});
     if (error instanceof HttpsError) throw error;
     console.error("createInstitutionTeamAccount failed:", error);
     throw new HttpsError("internal", "The institution member account could not be created.");
