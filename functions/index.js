@@ -2383,9 +2383,12 @@ exports.updateInstitutionMember = onCall(async request => {
   let changes = {};
 
   await db.runTransaction(async transaction => {
-    const [memberSnap, institutionSnap] = await Promise.all([
+    const activeMembersQuery = db.collection("institutions").doc(manager.institutionId)
+      .collection("members").where("status", "==", "active");
+    const [memberSnap, institutionSnap, activeMembersSnap] = await Promise.all([
       transaction.get(memberRef),
-      transaction.get(db.doc("institutions/" + manager.institutionId))
+      transaction.get(db.doc("institutions/" + manager.institutionId)),
+      transaction.get(activeMembersQuery)
     ]);
     if (!memberSnap.exists) throw new HttpsError("not-found", "Institution member not found.");
     if (!institutionSnap.exists || institutionSnap.data().status !== "active") {
@@ -2420,6 +2423,29 @@ exports.updateInstitutionMember = onCall(async request => {
         updatedAt: now, updatedBy: manager.uid,
         ...(status === "revoked" ? { revokedAt: now, revokedBy: manager.uid } : {})
       };
+    }
+
+    const bucketForRole = value => value === "student" ? "students"
+      : value === "instructor" ? "instructors"
+      : INSTITUTION_LEADERSHIP_ROLES.includes(value) ? "adminAccounts" : null;
+    const oldBucket = bucketForRole(currentRole);
+    const targetRole = action === "change_role" ? nextRole : currentRole;
+    const newBucket = bucketForRole(targetRole);
+    const targetStatus = action === "revoke" ? "revoked"
+      : action === "set_status" ? nextStatus : safeText(previous.status);
+    const counts = { students: 0, instructors: 0, adminAccounts: 0 };
+    activeMembersSnap.forEach(item => {
+      const bucket = bucketForRole(safeText(item.data().role));
+      if (bucket) counts[bucket] += 1;
+    });
+    const limits = institutionSnap.data().limits || {};
+    const defaults = { students: 5000, instructors: 20, adminAccounts: 10 };
+    if (targetStatus === "active" && newBucket
+        && (previous.status !== "active" || oldBucket !== newBucket)) {
+      const effectiveCount = counts[newBucket] - (previous.status === "active" && oldBucket === newBucket ? 1 : 0);
+      if (effectiveCount >= Number(limits[newBucket] ?? defaults[newBucket])) {
+        throw new HttpsError("resource-exhausted", "Institution capacity reached for " + newBucket + ".");
+      }
     }
     transaction.update(memberRef, changes);
   });
