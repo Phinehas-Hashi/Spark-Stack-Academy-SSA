@@ -1372,9 +1372,25 @@ exports.createInstitutionCourse = onCall(async request => {
   if (!Number.isFinite(price) || price < 0 || price > 10000000) throw new HttpsError("invalid-argument", "Enter a valid course price.");
   if (!["KES", "USD", "EUR", "GBP"].includes(currency)) throw new HttpsError("invalid-argument", "Unsupported course currency.");
   if (instructorId) {
-    const instructorSnap = await db.doc("users/" + instructorId).get();
+    const [instructorSnap, instructorMembershipSnap] = await Promise.all([
+      db.doc("users/" + instructorId).get(),
+      db.doc("institutions/" + member.institutionId + "/members/" + instructorId).get()
+    ]);
     const instructor = instructorSnap.exists ? instructorSnap.data() : {};
-    if (instructor.role !== "instructor" || instructor.institutionId !== member.institutionId || instructor.status !== "active" || instructor.active !== true || instructor.verified !== true) {
+    const instructorMembership = instructorMembershipSnap.exists ? instructorMembershipSnap.data() : {};
+    const canonicalInstructor = instructorMembershipSnap.exists
+      && instructorMembership.institutionId === member.institutionId
+      && instructorMembership.uid === instructorId
+      && instructorMembership.memberType === "instructor"
+      && instructorMembership.role === "instructor"
+      && instructorMembership.status === "active"
+      && instructorMembership.verified === true;
+    const legacyInstructor = instructor.role === "instructor"
+      && instructor.institutionId === member.institutionId
+      && instructor.status === "active"
+      && instructor.active === true
+      && instructor.verified === true;
+    if (!canonicalInstructor && !legacyInstructor) {
       throw new HttpsError("failed-precondition", "The selected instructor is not an active verified member of this institution.");
     }
   }
