@@ -20,10 +20,10 @@ service firebase.storage {
         ).data.get('status', '') == 'active'
         && firestore.get(
           /databases/(default)/documents/founder/$(request.auth.uid)
-        ).data.get('active', true) == true
+        ).data.get('active', false) == true
         && firestore.get(
           /databases/(default)/documents/founder/$(request.auth.uid)
-        ).data.get('verified', true) == true;
+        ).data.get('verified', false) == true;
     }
 
     function isChatParticipant(chatId) {
@@ -40,6 +40,24 @@ service firebase.storage {
             /databases/(default)/documents/chats/$(chatId)
           ).data.get('memberIds', []).hasAny([request.auth.uid])
         );
+    }
+
+    function hasActiveInstitutionMembership(institutionId) {
+      let memberPath = /databases/(default)/documents/institutions/$(institutionId)/members/$(request.auth.uid);
+      return signedIn()
+        && firestore.exists(memberPath)
+        && firestore.get(memberPath).data.get('uid', request.auth.uid) == request.auth.uid
+        && firestore.get(memberPath).data.get('institutionId', institutionId) == institutionId
+        && firestore.get(memberPath).data.get('status', '') == 'active'
+        && firestore.get(memberPath).data.get('verified', false) == true;
+    }
+
+    function managesInstitution(institutionId) {
+      let memberPath = /databases/(default)/documents/institutions/$(institutionId)/members/$(request.auth.uid);
+      return hasActiveInstitutionMembership(institutionId)
+        && firestore.get(memberPath).data.get('role', '') in [
+          'institution_owner', 'owner', 'institution_admin', 'department_manager'
+        ];
     }
 
     function isActiveInstructor(instructorId) {
@@ -71,6 +89,29 @@ service firebase.storage {
       allow read: if isChatParticipant(chatId);
       allow write: if isChatParticipant(chatId)
         && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Institution-owned files are tenant-scoped. Active members may read
+    // shared files; only institution managers may publish or replace them.
+    match /institution-files/{institutionId}/shared/{fileName} {
+      allow read: if hasActiveInstitutionMembership(institutionId);
+      allow create, update: if managesInstitution(institutionId)
+        && request.resource.size <= 20 * 1024 * 1024
+        && request.resource.contentType.matches('(image/.*|application/pdf|video/.*)');
+      allow delete: if managesInstitution(institutionId);
+    }
+
+    // Personal institutional member files are private to the member and
+    // authorised institution managers.
+    match /institution-files/{institutionId}/members/{memberUid}/{fileName} {
+      allow read: if hasActiveInstitutionMembership(institutionId)
+        && (request.auth.uid == memberUid || managesInstitution(institutionId));
+      allow create, update: if hasActiveInstitutionMembership(institutionId)
+        && request.auth.uid == memberUid
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('(image/.*|application/pdf)');
+      allow delete: if managesInstitution(institutionId)
+        || (hasActiveInstitutionMembership(institutionId) && request.auth.uid == memberUid);
     }
 
     function isActiveStudent(studentId) {
