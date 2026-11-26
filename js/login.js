@@ -226,6 +226,7 @@ function showTotpChallenge(error) {
                 modal.remove();
                 await finishSignIn(credential.user);
             } catch (mfaError) {
+                window.ssaSecuritySignal?.("mfa_failed", { portal: "login", code: mfaError.code || "mfa_failed" });
                 console.error("[SSA AUTH] MFA verification failed", mfaError.code || mfaError.message);
                 errorBox.textContent = mfaError.code === "auth/invalid-verification-code" ? "Code is incorrect or expired. Try the newest code." : "Verification failed. Try again.";
                 button.disabled = false;
@@ -357,6 +358,7 @@ loginForm?.addEventListener("submit", async event => {
         await finishSignIn(credential.user);
     } catch (error) {
         if (error.code === "auth/multi-factor-auth-required") { showTotpChallenge(error); return; }
+        window.ssaSecuritySignal?.("login_failed", { portal: "login", code: error.code || "unknown" });
         console.error("[SSA AUTH] LOGIN FAILED", error.code || error.message);
         hideLoader();
         setButtonsDisabled(false);
@@ -382,6 +384,7 @@ googleLoginBtn?.addEventListener("click", async () => {
         await finishSignIn(result.user);
     } catch (error) {
         if (error.code === "auth/multi-factor-auth-required") { showTotpChallenge(error); return; }
+        if (error.code !== "auth/popup-closed-by-user") window.ssaSecuritySignal?.("login_failed", { portal: "login", code: error.code || "google_login_failed" });
         console.error("[SSA AUTH] GOOGLE LOGIN FAILED", error.code || error.message);
         hideLoader();
         setButtonsDisabled(false);
