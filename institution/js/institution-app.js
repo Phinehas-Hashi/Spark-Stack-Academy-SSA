@@ -6,7 +6,7 @@ import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/
 const LOGIN_PAGE = "../login.html";
 const ALLOWED_ROLES = new Set([
   "institution_applicant", "institution", "institution_owner", "institution_admin",
-  "institution_moderator", "institution_staff", "department_manager", "instructor", "student"
+  "institution_moderator", "institution_staff", "department_manager", "instructor"
 ]);
 const sidebar = document.getElementById("institutionSidebar");
 const topbar = document.getElementById("institutionTopbar");
@@ -128,6 +128,11 @@ function setupTeamForm() {
   if (!canManage) {
     form.hidden = true;
     return;
+  }
+  if (membershipRole !== "institution_owner" && membershipRole !== "owner") {
+    ["institution_moderator", "department_manager", "institution_admin"].forEach(value => {
+      form.querySelector('option[value="' + value + '"]')?.remove();
+    });
   }
   form.addEventListener("submit", async event => {
     event.preventDefault();
@@ -339,6 +344,12 @@ async function boot() {
         denyAccess(profile, user, "canonical_institution_membership_missing_or_inactive");
         return;
       }
+      const membershipRole = canonicalAllowed ? safeText(membership.role) : safeText(profile.institutionRole);
+      if (!["institution_owner", "owner", "institution_admin", "institution_moderator",
+        "department_manager", "institution_staff", "instructor"].includes(membershipRole)) {
+        denyAccess(profile, user, "membership_role_has_no_institution_portal_access");
+        return;
+      }
 
       currentInstitutionId = institutionId;
       currentProfile = profile;
@@ -359,7 +370,11 @@ async function boot() {
         || profile.name || user.displayName || "Your institution";
       setInstitutionName(name);
       setupTeamForm();
-      await loadInstitutionTeam();
+      const canViewDirectory = ["institution_owner", "owner", "institution_admin",
+        "institution_moderator", "department_manager"].includes(currentMembership.role);
+      const teamPanel = document.querySelector(".team-management");
+      if (teamPanel && !canViewDirectory) teamPanel.hidden = true;
+      if (canViewDirectory) await loadInstitutionTeam();
       document.documentElement.dataset.institutionPortalReady = "true";
       document.documentElement.dataset.institutionPortalMode = "active";
       window.dispatchEvent(new CustomEvent("ssa-institution-context-ready", { detail: window.SSAInstitutionContext }));
