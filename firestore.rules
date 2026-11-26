@@ -337,6 +337,20 @@ service cloud.firestore {
         )
       )
 
+      // Founder may edit an instructor's public profile fields, but not login identity.
+      || (
+        isFounder()
+        && resource.data.get('role', '') == 'instructor'
+        && request.resource.data.get('role', '') == 'instructor'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'fullName', 'expertise', 'bio', 'updatedAt'
+        ])
+        && request.resource.data.get('fullName', '') is string
+        && request.resource.data.fullName.size() > 0
+        && request.resource.data.get('expertise', '') is string
+        && request.resource.data.get('updatedAt', request.time) is timestamp
+      )
+
       // Founder may suspend or restore an approved instructor account.
       || (
         isFounder()
