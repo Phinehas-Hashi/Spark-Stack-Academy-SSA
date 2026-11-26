@@ -308,6 +308,35 @@ service cloud.firestore {
         ])
       )
 
+      // Founder may suspend or restore an existing student account.
+      || (
+        isFounder()
+        && resource.data.get('role', '') == 'student'
+        && request.resource.data.get('role', '') == 'student'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'active', 'suspensionReason', 'suspendedAt', 'suspendedBy', 'updatedAt'
+        ])
+        && (
+          (
+            request.resource.data.get('status', '') == 'suspended'
+            && request.resource.data.get('active', true) == false
+            && request.resource.data.get('suspensionReason', '') is string
+            && request.resource.data.suspensionReason.size() > 0
+            && request.resource.data.get('suspendedBy', '') == uid()
+            && request.resource.data.get('suspendedAt', request.time) is timestamp
+          )
+          ||
+          (
+            resource.data.get('status', '') == 'suspended'
+            && request.resource.data.get('status', '') == 'active'
+            && request.resource.data.get('active', false) == true
+            && request.resource.data.get('suspensionReason', '') == ''
+            && request.resource.data.get('suspendedBy', null) == null
+            && request.resource.data.get('suspendedAt', null) == null
+          )
+        )
+      )
+
       // Founder may approve/reject instructors only.
       || (
         isFounder()
