@@ -2427,7 +2427,7 @@ exports.updateInstitutionMember = onCall(async request => {
   const userRef = db.doc("users/" + memberUid);
   if (action === "change_role") {
     const profileSnap = await userRef.get();
-    if (profileSnap.exists()) {
+    if (profileSnap.exists) {
       const globalRole = nextRole === "student" ? "student"
         : nextRole === "instructor" ? "instructor" : nextRole;
       await userRef.set({
