@@ -115,30 +115,52 @@ async function resolveUserProfile(user) {
     ]);
     const userData = userSnap.exists() ? userSnap.data() : null;
 
-    if (founderSnap.exists() && founderSnap.data().role === "founder") {
-        const founderData = founderSnap.data();
+    const founderData = founderSnap.exists() ? founderSnap.data() : null;
+    const founderDiagnostics = {
+        founderDocExists: Boolean(founderData),
+        founderRoleMatches: founderData?.role === "founder",
+        founderStatus: typeof founderData?.status === "string" ? founderData.status : "missing-or-non-string",
+        founderActive: typeof founderData?.active === "boolean" ? founderData.active : "missing-or-non-boolean",
+        founderVerified: typeof founderData?.verified === "boolean" ? founderData.verified : "missing-or-non-boolean",
+        usersDocExists: userSnap.exists(),
+        usersRole: typeof userData?.role === "string" ? userData.role : "missing"
+    };
+
+    if (founderData && founderData.role === "founder") {
+        const active = founderData.active !== false && founderData.status === "active";
+        const verified = founderData.verified !== false;
         return {
             userRef,
             source: "founder",
+            diagnostics: founderDiagnostics,
+            failureCode: !active
+                ? (founderData.active === false ? "FOUNDER_ACTIVE_FALSE" : "FOUNDER_STATUS_NOT_ACTIVE")
+                : (!verified ? "FOUNDER_NOT_VERIFIED" : null),
             userData: {
                 ...(userData || {}),
                 uid: user.uid,
                 fullName: founderData.fullName || founderData.name || userData?.fullName || user.displayName || "Founder",
                 email: founderData.email || user.email || userData?.email || "",
                 role: "founder",
-                active: founderData.active !== false && founderData.status === "active",
-                verified: founderData.verified !== false
+                active,
+                verified
             }
         };
     }
 
-    if (!userData) return { userRef, userData: null, source: "missing" };
+    if (!userData) return { userRef, userData: null, source: "missing", diagnostics: founderDiagnostics };
 
     // A users document cannot grant Founder access by itself.
     if (userData.role === "founder") {
-        return { userRef, userData: { ...userData, active: false }, source: "invalid-founder" };
+        return {
+            userRef,
+            userData: { ...userData, active: false },
+            source: "invalid-founder",
+            diagnostics: founderDiagnostics,
+            failureCode: founderData ? "FOUNDER_ROLE_MISMATCH" : "FOUNDER_DOC_MISSING"
+        };
     }
-    return { userRef, userData, source: "users" };
+    return { userRef, userData, source: "users", diagnostics: founderDiagnostics };
 }
 
 function getAccessDecision(profile) {
@@ -193,11 +215,17 @@ async function finishSignIn(user) {
         source: profile.source,
         role: profile.userData?.role || "missing",
         accessGranted: decision.allowed,
+        failureCode: profile.failureCode || null,
+        diagnostics: profile.diagnostics || null,
         projectId: auth.app.options.projectId
     });
 
     if (!decision.allowed) {
-        await rejectSession(decision.message);
+        const diagnosticCode = profile.failureCode || null;
+        const message = diagnosticCode
+            ? `${decision.message} [${diagnosticCode}]`
+            : decision.message;
+        await rejectSession(message);
         return;
     }
 
