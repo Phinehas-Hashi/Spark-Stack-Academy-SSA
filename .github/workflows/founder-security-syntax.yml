@@ -47,6 +47,7 @@ jobs:
             institution/js/register.js
             institution/js/institution-app.js
             institution/js/institution-courses.js
+            institution/js/members.js
             functions/index.js
             founder/courses.js
             founder/certificates.js
