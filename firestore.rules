@@ -1791,7 +1791,7 @@ service cloud.firestore {
 
       // Retired client-managed security preferences are no longer writable.
       allow write:
-        if isFounder() && settingsId != 'security' && settingsId != 'monetization';
+        if isFounder() && settingsId != 'security' && settingsId != 'monetization' && settingsId != 'sparkAI';
     }
 
     match /platformSettings/{settingsId} {
