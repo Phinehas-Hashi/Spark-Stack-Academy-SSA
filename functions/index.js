@@ -130,6 +130,135 @@ async function requireInstitutionReviewer(request) {
 
 
 // ============================================================
+// INSTITUTION APPLICATION — TRUSTED PROVISIONING
+// Creates the application, restricted provisional workspace,
+// global applicant profile and pending owner membership atomically.
+// ============================================================
+
+exports.submitInstitutionApplication = onCall(async request => {
+  const uid = request.auth?.uid;
+  const email = safeText(request.auth?.token?.email).toLowerCase();
+  if (!uid || !email) {
+    throw new HttpsError("unauthenticated", "Sign in with a valid email before submitting an institution application.");
+  }
+
+  const data = request.data || {};
+  const institutionName = safeText(data.institutionName);
+  const institutionType = safeText(data.institutionType);
+  const country = safeText(data.country);
+  const website = safeText(data.website);
+  const learnerRange = safeText(data.learnerRange);
+  const institutionPhone = safeText(data.institutionPhone);
+  const ownerName = safeText(data.ownerName);
+  const ownerPosition = safeText(data.ownerPosition);
+
+  if (institutionName.length < 2 || institutionName.length > 120
+    || ownerName.length < 2 || ownerName.length > 120
+    || !institutionType || institutionType.length > 80
+    || !country || country.length > 80
+    || !institutionPhone || institutionPhone.length > 40
+    || !ownerPosition || ownerPosition.length > 80
+    || !learnerRange || learnerRange.length > 80
+    || website.length > 240
+    || (website && !/^https?:\/\//i.test(website))) {
+    throw new HttpsError("invalid-argument", "Complete the institution details with valid values before submitting.");
+  }
+
+  const applicationRef = db.doc("institutionApplications/" + uid);
+  const institutionRef = db.doc("institutions/" + uid);
+  const userRef = db.doc("users/" + uid);
+  const membershipRef = db.doc("institutions/" + uid + "/members/" + uid);
+  const now = Timestamp.now();
+
+  try {
+    await db.runTransaction(async transaction => {
+      const [applicationSnap, institutionSnap, userSnap] = await Promise.all([
+        transaction.get(applicationRef),
+        transaction.get(institutionRef),
+        transaction.get(userRef)
+      ]);
+      if (applicationSnap.exists || institutionSnap.exists) {
+        throw new HttpsError("already-exists", "An institution application or workspace already exists for this account.");
+      }
+      if (userSnap.exists) {
+        throw new HttpsError("already-exists", "This Academy account already has a profile. Sign in and contact the Academy team to link an institution application.");
+      }
+
+      transaction.create(userRef, {
+        uid,
+        email,
+        fullName: ownerName,
+        name: ownerName,
+        displayName: ownerName,
+        role: "institution_applicant",
+        status: "pending_review",
+        active: false,
+        verified: false,
+        createdAt: now,
+        updatedAt: now
+      });
+
+      transaction.create(applicationRef, {
+        institutionOwnerUid: uid,
+        institutionName,
+        institutionType,
+        country,
+        website,
+        learnerRange,
+        institutionPhone,
+        ownerName,
+        ownerEmail: email,
+        ownerPosition,
+        status: "pending_review",
+        submittedAt: now,
+        source: "institution_registration"
+      });
+
+      transaction.create(institutionRef, {
+        institutionId: uid,
+        legalName: institutionName,
+        institutionName,
+        institutionType,
+        country,
+        website,
+        contactPhone: institutionPhone,
+        ownerUid: uid,
+        ownerName,
+        ownerEmail: email,
+        estimatedLearnerRange: learnerRange,
+        status: "provisional",
+        workspaceStage: "provisional",
+        verificationStatus: "pending_review",
+        limits: { instructors: 0, courses: 0, students: 0, adminAccounts: 0 },
+        usage: { instructors: 0, courses: 0, students: 0, adminAccounts: 0 },
+        subscription: { plan: "none", status: "not_started" },
+        createdAt: now,
+        updatedAt: now
+      });
+
+      transaction.create(membershipRef, {
+        uid,
+        institutionId: uid,
+        memberType: "institution_owner",
+        role: "institution_owner",
+        status: "pending_verification",
+        verified: false,
+        email,
+        fullName: ownerName,
+        createdAt: now,
+        updatedAt: now
+      });
+    });
+
+    return { success: true, applicationId: uid, institutionId: uid, status: "pending_review", workspaceStatus: "provisional" };
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    console.error("submitInstitutionApplication failed:", error);
+    throw new HttpsError("internal", "The institution application could not be saved. Check the application status before retrying.");
+  }
+});
+
+// ============================================================
 // DARAJA — INSTITUTION ONBOARDING COLLECTION
 // STK callbacks are independently verified using STK Query.
 // ============================================================
