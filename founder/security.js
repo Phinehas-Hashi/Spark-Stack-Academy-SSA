@@ -30,7 +30,7 @@ async function verifyFounder(user) {
   const snap = await getDoc(doc(db, "founder", user.uid));
   if (!snap.exists()) throw new Error("Founder profile does not exist.");
   const profile = snap.data();
-  if (profile.role !== "founder" || profile.status !== "active" || profile.active !== true || profile.verified !== true) {
+  if (profile.role !== "founder" || profile.status !== "active" || profile.active === false || profile.verified === false) {
     throw new Error("Founder account is not fully active and verified.");
   }
   return profile;
