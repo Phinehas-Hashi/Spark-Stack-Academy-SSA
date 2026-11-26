@@ -8,7 +8,7 @@ database_name = "ssa-security-events"
 database_id = "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID"
 
 [vars]
-FIREBASE_PROJECT_ID = "spark-stack-academy"
+FIREBASE_PROJECT_ID = "spark-stack-academy-ssa"
 ALLOWED_ORIGINS = "https://phinehas-hashi.github.io"
 
 [triggers]
