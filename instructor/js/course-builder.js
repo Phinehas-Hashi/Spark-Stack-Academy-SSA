@@ -1291,11 +1291,7 @@ async function deleteModule(
 
 
         await deleteDoc(
-            doc(
-                db,
-                "courseModules",
-                id
-            )
+            doc(db, "courses", courseId, "courseModules", id)
         );
 
 
