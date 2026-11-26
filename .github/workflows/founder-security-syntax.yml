@@ -40,6 +40,7 @@ jobs:
             founder/instructors.js
             functions/index.js
             founder/courses.js
+            founder/certificates.js
             founder/instructor-admissions.js
             founder/wallets/payouts.js
             js/firebase.js
