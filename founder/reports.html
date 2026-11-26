@@ -1,1 +1,37 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Critical Reports | Founder OS</title><link rel="stylesheet" href="founder-unified.css"><style>body{background:#f6f8fc;color:#0f172a;font-family:Inter,Poppins,system-ui}.page{max-width:1200px;margin:auto;padding:32px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:24px;box-shadow:0 12px 35px rgba(15,23,42,.06)}.report{padding:16px;border:1px solid #e2e8f0;border-radius:16px;margin-top:12px}.critical{border-left:4px solid #dc2626}.system{border-left:4px solid #2563eb}.report strong,.report span{display:block}.report span{margin-top:5px;color:#64748b;font-size:12px}.report p{line-height:1.6}</style></head><body><main class="page"><section class="card"><small>FOUNDER INTELLIGENCE</small><h1>Critical & System Reports</h1><p>Only critical safety/security reports and system-level reports appear here.</p><div id="reports">Loading…</div></section></main><script type="module" src="reports.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Founder critical reports and security incidents">
+<title>Critical Reports | Spark Stack Academy Founder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="founder-unified.css">
+<link rel="stylesheet" href="founder-imperial.css">
+<link rel="stylesheet" href="reports.css">
+</head>
+<body>
+<div class="dashboard-layout">
+<aside id="sidebarContainer"></aside>
+<div id="sidebarOverlay"></div>
+<main class="main-content">
+<header id="topbarContainer"></header>
+<section class="reports-hero">
+<div><span class="eyebrow">FOUNDER INTELLIGENCE</span><h1>Critical &amp; System Reports</h1><p>Review platform incidents, safety reports and security signals. Location data is approximate and attribution is limited to verified account metadata.</p></div>
+<div class="report-hero-metric"><span>Loaded reports</span><strong id="reportCount">—</strong></div>
+</section>
+<div id="reportsDataStatus" class="reports-data-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="reportsDataStatusText">Verifying Founder access…</span></div>
+<section class="reports-controls">
+<input id="reportSearch" type="search" placeholder="Search report, actor, category or location…" autocomplete="off" aria-label="Search reports">
+<select id="reportPriority" aria-label="Filter report priority"><option value="all">All priorities</option><option value="critical">Critical</option><option value="high">High</option><option value="normal">Normal</option></select>
+<select id="reportStatus" aria-label="Filter report status"><option value="all">All statuses</option><option value="pending">Pending</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option></select>
+</section>
+<section id="reports" class="reports-list" aria-live="polite"><div class="empty">Loading verified reports…</div></section>
+</main>
+</div>
+<script type="module" src="./js/founder-app.js"></script>
+<script type="module" src="reports.js"></script>
+</body>
+</html>
