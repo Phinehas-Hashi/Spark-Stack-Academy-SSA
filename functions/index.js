@@ -2346,6 +2346,15 @@ exports.createInstitutionTeamAccount = onCall(async request => {
         createdAt: now, createdBy: manager.uid, updatedAt: now,
         provisionedBy: manager.uid
       });
+      if (role === "student") {
+        transaction.create(db.doc("students/" + created.uid), {
+          uid: created.uid, name: fullName, email, role: "student",
+          status: "Active", onboardingStatus: "institution_enrolled",
+          admissionNumber: "Pending", level: 1, xp: 0, streak: 0, badges: [],
+          stats: { coursesEnrolled: 0, lessonsCompleted: 0, progress: 0, certificates: 0 },
+          institutionId: manager.institutionId, createdAt: now
+        });
+      }
       transaction.update(institutionRef, {
         ["usage." + bucket]: counts[bucket] + 1,
         updatedAt: now
