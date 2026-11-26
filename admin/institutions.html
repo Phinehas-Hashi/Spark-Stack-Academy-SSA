@@ -1,1 +1,83 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Institution Applications | Spark Stack Academy</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/admin-core.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/responsive.css"><link rel="stylesheet" href="css/institutions.css"><script src="https://unpkg.com/lucide@latest"></script></head><body><div class="admin-app"><aside id="adminSidebar" class="admin-sidebar"></aside><div id="sidebarOverlay" class="sidebar-overlay"></div><main class="admin-main"><header id="adminTopbar" class="admin-topbar"></header><section class="admin-page institutions-page"><div class="page-header"><div><span class="page-eyebrow">INSTITUTION MANAGEMENT</span><h1>Institution Applications</h1><p>Review institution applications and activate verified workspaces.</p></div><button id="refreshApplications" class="refresh-button" type="button"><i data-lucide="refresh-cw"></i> Refresh</button></div><section class="institution-summary"><article><span>Pending review</span><strong id="pendingCount">—</strong></article><article><span>Approved</span><strong id="approvedCount">—</strong></article><article><span>Rejected</span><strong id="rejectedCount">—</strong></article></section><div class="application-toolbar"><div><h2>Applications queue</h2><p>Only pending applications can be actioned.</p></div><label class="filter-label">Filter <select id="applicationFilter"><option value="pending_review">Pending review</option><option value="approved">Approved / active</option><option value="approved_awaiting_payment">Awaiting payment</option><option value="rejected">Rejected</option><option value="all">All applications</option></select></label></div><div id="applicationMessage" class="application-message" role="status" aria-live="polite"></div><div id="applicationsList" class="applications-list"><div class="application-empty">Loading institution applications…</div></div></section></main></div><script type="module" src="js/institutions.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#081c3a">
+  <title>Institution Applications | Spark Stack Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin-core.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/institutions.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="admin-app">
+    <aside id="adminSidebar" class="admin-sidebar"></aside>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <main class="admin-main">
+      <header id="adminTopbar" class="admin-topbar"></header>
+      <section class="admin-page institutions-page">
+        <div class="applications-hero">
+          <div class="applications-hero-copy">
+            <span class="page-eyebrow"><i data-lucide="building-2"></i> INSTITUTION MANAGEMENT</span>
+            <h1>Institution applications</h1>
+            <p>Review new institution requests, verify their details and manage workspace activation.</p>
+            <div class="hero-context"><span class="hero-live-dot"></span> Application review workspace <span class="hero-context-divider"></span> Secure administration</div>
+          </div>
+          <button id="refreshApplications" class="refresh-button" type="button"><i data-lucide="refresh-cw"></i><span>Refresh queue</span></button>
+          <div class="hero-decoration" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+
+        <section class="institution-summary" aria-label="Application overview">
+          <article class="summary-card summary-pending">
+            <div class="summary-top"><span>Awaiting review</span><span class="summary-icon"><i data-lucide="inbox"></i></span></div>
+            <strong id="pendingCount">—</strong><small>Applications requiring a decision</small>
+          </article>
+          <article class="summary-card summary-approved">
+            <div class="summary-top"><span>Approved</span><span class="summary-icon"><i data-lucide="badge-check"></i></span></div>
+            <strong id="approvedCount">—</strong><small>Approved or awaiting onboarding payment</small>
+          </article>
+          <article class="summary-card summary-rejected">
+            <div class="summary-top"><span>Declined</span><span class="summary-icon"><i data-lucide="file-x"></i></span></div>
+            <strong id="rejectedCount">—</strong><small>Applications not approved</small>
+          </article>
+        </section>
+
+        <section class="queue-panel">
+          <div class="queue-heading">
+            <div>
+              <span class="section-kicker">REVIEW CENTRE</span>
+              <h2>Applications queue</h2>
+              <p>Open an application to review the submitted institution and contact information.</p>
+            </div>
+            <div class="queue-security"><i data-lucide="shield-check"></i><span>Restricted admin access</span></div>
+          </div>
+          <div class="application-toolbar">
+            <label class="application-search" for="applicationSearch">
+              <i data-lucide="search"></i>
+              <input id="applicationSearch" type="search" placeholder="Search institution, contact or email…" autocomplete="off">
+            </label>
+            <label class="filter-label"><span>Application status</span><select id="applicationFilter">
+              <option value="pending_review">Pending review</option>
+              <option value="approved">Approved / active</option>
+              <option value="approved_awaiting_payment">Awaiting payment</option>
+              <option value="rejected">Rejected</option>
+              <option value="all">All applications</option>
+            </select></label>
+          </div>
+          <div id="applicationMessage" class="application-message" role="status" aria-live="polite"></div>
+          <div id="applicationsList" class="applications-list" aria-live="polite">
+            <div class="application-empty"><span class="empty-icon"><i data-lucide="loader-circle"></i></span><strong>Loading applications</strong><span>Retrieving the latest institution submissions…</span></div>
+          </div>
+        </section>
+        <p class="applications-footnote"><i data-lucide="lock"></i> Approval and rejection decisions are recorded through the Academy administration service.</p>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="js/institutions.js"></script>
+</body>
+</html>
