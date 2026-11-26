@@ -40,3 +40,10 @@ body,.main-content{background:#11110F!important;color:#E7E2D5!important}.page-he
 thead th{background:#24221D!important;color:#D6B779!important;border-color:rgba(214,183,121,.14)!important}tbody td{color:#DCD6C9!important;border-color:rgba(214,183,121,.1)!important}tbody tr:hover{background:rgba(214,183,121,.045)!important}
 .instructor-avatar{background:linear-gradient(135deg,#D6B779,#806B42)!important;color:#171613!important}.instructor-specialization{color:#A7A294!important}.status.active{background:rgba(69,184,138,.12)!important;color:#70CBA7!important}.status.suspended{background:rgba(216,120,112,.12)!important;color:#E89A92!important}.status.pending_review{background:rgba(214,183,121,.12)!important;color:#E7C98E!important}.status.rejected{background:rgba(216,120,112,.12)!important;color:#E89A92!important}
 .action-btn{background:#24221D!important;color:#D6B779!important;border-color:rgba(214,183,121,.18)!important}.action-btn:hover{background:rgba(214,183,121,.12)!important;color:#E7C98E!important}
+
+.instructors-data-status{display:flex;align-items:center;gap:10px;margin:0 0 16px;padding:11px 14px;border:1px solid rgba(214,183,121,.17);border-radius:12px;background:rgba(214,183,121,.055);color:#B9B2A4;font-size:.78rem}
+.instructors-data-status .status-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#D6B779;box-shadow:0 0 0 4px rgba(214,183,121,.1)}
+.instructors-data-status.is-ready .status-dot{background:#45B88A;box-shadow:0 0 0 4px rgba(69,184,138,.1)}
+.instructors-data-status.has-error{border-color:rgba(216,120,112,.28);background:rgba(216,120,112,.07);color:#E8A29A}
+.instructors-data-status.has-error .status-dot{background:#D87870;box-shadow:0 0 0 4px rgba(216,120,112,.1)}
+.action-btn:focus-visible,.primary-btn:focus-visible,.secondary-btn:focus-visible,.page-btn:focus-visible{outline:3px solid rgba(214,183,121,.32);outline-offset:2px}
