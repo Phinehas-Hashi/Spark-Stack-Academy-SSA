@@ -155,15 +155,23 @@ service cloud.firestore {
             && get(canonicalPath).data.get('courseId', '') == courseId
             && (get(canonicalPath).data.get('userId', '') == uid() || get(canonicalPath).data.get('studentId', '') == uid())
             && get(canonicalPath).data.get('status', '') in ['active', 'approved', 'completed', 'paid']
-            && (get(canonicalPath).data.get('paymentStatus', '') in ['paid', 'free']
-              || get(canonicalPath).data.get('institutionId', '') != ''
-              || get(canonicalPath).data.get('status', '') == 'paid'))
+            && (
+              get(canonicalPath).data.get('paymentStatus', '') in ['paid', 'free']
+              || (get(canonicalPath).data.get('institutionId', '') is string
+                && get(canonicalPath).data.get('institutionId', '') != ''
+                && institutionMember(get(canonicalPath).data.institutionId))
+              || get(canonicalPath).data.get('status', '') == 'paid'
+            ))
           || (exists(legacyPath)
             && get(legacyPath).data.get('courseId', courseId) == courseId
             && get(legacyPath).data.get('status', '') in ['active', 'approved', 'completed', 'paid']
-            && (get(legacyPath).data.get('paymentStatus', '') in ['paid', 'free']
-              || get(legacyPath).data.get('institutionId', '') != ''
-              || get(legacyPath).data.get('status', '') == 'paid'))
+            && (
+              get(legacyPath).data.get('paymentStatus', '') in ['paid', 'free']
+              || (get(legacyPath).data.get('institutionId', '') is string
+                && get(legacyPath).data.get('institutionId', '') != ''
+                && institutionMember(get(legacyPath).data.institutionId))
+              || get(legacyPath).data.get('status', '') == 'paid'
+            ))
         );
     }
 
