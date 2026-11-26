@@ -23,8 +23,7 @@ service firebase.storage {
         ).data.get('active', true) == true
         && firestore.get(
           /databases/(default)/documents/founder/$(request.auth.uid)
-        ).data.get('verified', true) == true
-        && request.auth.token.get('firebase', {}).get('sign_in_second_factor', '') == 'totp';
+        ).data.get('verified', true) == true;
     }
 
     function isChatParticipant(chatId) {

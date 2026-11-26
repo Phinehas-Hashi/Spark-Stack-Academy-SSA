@@ -45,10 +45,10 @@ async function verifyFirebaseToken(request, env) {
     algorithms: ["RS256"],
   });
   if (!payload.sub || !payload.user_id) throw new Error("Invalid Firebase identity token.");
-  return { uid: payload.sub, email: typeof payload.email === "string" ? payload.email : "", secondFactor: payload.firebase?.sign_in_second_factor || "" };
+  return { uid: payload.sub, email: typeof payload.email === "string" ? payload.email : "" };
 }
 async function isFounder(identity, env) {
-  if (!identity || identity.secondFactor !== "totp") return false;
+  if (!identity) return false;
   const url = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/founder/${encodeURIComponent(identity.uid)}`;
   const response = await fetch(url, { headers: { Authorization: `Bearer ${identity.token}` } });
   if (!response.ok) return false;

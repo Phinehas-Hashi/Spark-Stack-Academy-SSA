@@ -1,5 +1,5 @@
 import { auth, db, appCheck } from "../../js/firebase.js";
-import { onAuthStateChanged, multiFactor, TotpMultiFactorGenerator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const money = new Intl.NumberFormat("en-KE", { style:"currency", currency:"KES", maximumFractionDigits:0 });
@@ -84,7 +84,7 @@ function bindActions(){bind("manageStudentsBtn","students.html");bind("manageIns
 function listen(path,callback){return onSnapshot(collection(db,path),callback,error=>console.error(`Founder ${path} listener failed`,error));}
 function loadProfile(user){getDoc(doc(db,"founder",user.uid)).then(s=>{const p=s.exists()?s.data():{};const name=p.fullName||p.name||user.displayName||"Founder";text("founderName",name.split(" ")[0]);text("founderDisplayName",name);text("founderEmail",p.email||user.email||"—");text("founderAvatar",name.charAt(0).toUpperCase());}).catch(console.warn);}
 
-onAuthStateChanged(auth,user=>{if(user){loadProfile(user);const hasTotp=multiFactor(user).enrolledFactors.some(f=>f.factorId===TotpMultiFactorGenerator.FACTOR_ID);text("founderSecurityStatus",hasTotp&&user.emailVerified?(appCheck?"MFA + App Check":"MFA active"):"Action required");}});
+onAuthStateChanged(auth,user=>{if(user){loadProfile(user);text("founderSecurityStatus",user.emailVerified?(appCheck?"App Check active":"Email verified"):"Email verification needed");}});
 listen("users",snap=>{
   const docs=snap.docs.map(d=>({id:d.id,...d.data()}));
   state.students=docs.filter(d=>d.role==="student").length;

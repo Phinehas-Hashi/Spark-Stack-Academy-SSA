@@ -36,11 +36,6 @@ async function requireFounder(request) {
       || data.active === false || data.verified === false) {
     throw new HttpsError("permission-denied", "Only the active, verified Founder Super Admin can perform this operation.");
   }
-  // Callable endpoints are privileged too: require a Firebase session that
-  // completed the configured TOTP second factor, not merely an enrolled factor.
-  if (request.auth.token?.firebase?.sign_in_second_factor !== "totp") {
-    throw new HttpsError("permission-denied", "Complete Founder authenticator verification before using privileged operations.");
-  }
   return { uid, data };
 }
 

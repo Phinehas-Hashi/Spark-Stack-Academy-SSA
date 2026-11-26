@@ -2,23 +2,11 @@
 
 This branch adds the client-side MFA flow, strict Founder page gate, read-only historical audit view, and an optional Cloudflare D1 incident collector. The controls are not fully active until the external configuration below is completed.
 
-## 1. Enable Firebase TOTP MFA
+## 1. Founder sign-in and identity checks
 
-The web implementation uses Firebase Authentication's TOTP multi-factor APIs (the repository currently loads Firebase JS SDK 10.12.2).
+Founder sign-in does not require TOTP or another multi-factor challenge. After Firebase Authentication succeeds, the portal verifies the Founder document, role, active status and email-verification state. Firestore, Storage and privileged callable operations apply the same Founder authorization checks at their respective boundaries.
 
-1. Open Firebase Console for project `spark-stack-academy`.
-2. Upgrade/enable Identity Platform if the console requires it for MFA.
-3. Open Authentication > Settings / Multi-factor authentication.
-4. Enable TOTP as a second-factor provider.
-5. Confirm the Academy production domain is in Authorized domains.
-6. Ensure the Founder account has a verified email address.
-7. Sign in as Founder and open Founder > Security.
-8. Enrol an authenticator using the setup key, then verify with the current six-digit code.
-9. Sign out and sign in again to verify the MFA challenge is required.
-
-Do not treat the UI as proof that MFA is enabled. Confirm the factor is present in Firebase Authentication for the Founder user. Keep recovery access to the authenticator; the current first release does not yet implement a separate recovery-code service.
-
-Official Firebase guide: https://firebase.google.com/docs/auth/web/totp-mfa
+An authenticator already enrolled on a Firebase user is managed in Firebase Authentication / Identity Platform. Repository changes do not remove factors from live user records. Use a trusted Firebase Admin operation to remove a factor from a specific account only after verifying the account owner and intended UID.
 
 ## 2. Deploy the security edge collector
 

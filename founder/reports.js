@@ -67,8 +67,6 @@ async function verifyFounder(user){
   const snap=await getDoc(doc(db,"founder",user.uid));
   const profile=snap.exists()?snap.data():{};
   if(!snap.exists()||profile.role!=="founder"||profile.status!=="active"||profile.active===false||profile.verified===false)throw new Error("Active Founder authorization required.");
-  const token=await user.getIdTokenResult();
-  if(token.claims.firebase?.sign_in_second_factor!=="totp")throw new Error("Complete Founder authenticator verification first.");
 }
 onAuthStateChanged(auth,async user=>{
   if(!user){window.ssaSecuritySignal?.("access_denied",{portal:"founder",note:"Unauthenticated access to critical reports"});location.replace("../login.html");return;}
