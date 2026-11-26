@@ -343,22 +343,24 @@ function renderCourseHeader() {
 
 async function migrateLegacyCurriculum() {
     // Preserve legacy top-level records; copy only when the nested ID is absent.
-    const moduleQueries = [
-        query(collection(db, "courseModules"), where("courseId", "==", courseId), where("instructorId", "==", instructor.uid)),
-        query(collection(db, "courseModules"), where("courseID", "==", courseId), where("instructorId", "==", instructor.uid))
-    ];
-    const lessonQueries = [
-        query(collection(db, "courseLessons"), where("courseId", "==", courseId), where("instructorId", "==", instructor.uid)),
-        query(collection(db, "courseLessons"), where("courseID", "==", courseId), where("instructorId", "==", instructor.uid))
-    ];
+    // Filter by instructor in Firestore so the legacy collection rules can
+    // authorize the query; select this course locally to avoid extra indexes.
+    const moduleQueries = [query(collection(db, "courseModules"), where("instructorId", "==", instructor.uid))];
+    const lessonQueries = [query(collection(db, "courseLessons"), where("instructorId", "==", instructor.uid))];
     const [moduleResults, lessonResults] = await Promise.all([
         Promise.all(moduleQueries.map(getDocs)),
         Promise.all(lessonQueries.map(getDocs))
     ]);
     const modulesById = new Map();
     const lessonsById = new Map();
-    moduleResults.forEach(result => result.docs.forEach(item => modulesById.set(item.id, item)));
-    lessonResults.forEach(result => result.docs.forEach(item => lessonsById.set(item.id, item)));
+    moduleResults.forEach(result => result.docs.forEach(item => {
+        const data = item.data();
+        if ((data.courseId || data.courseID) === courseId) modulesById.set(item.id, item);
+    }));
+    lessonResults.forEach(result => result.docs.forEach(item => {
+        const data = item.data();
+        if ((data.courseId || data.courseID) === courseId) lessonsById.set(item.id, item);
+    }));
 
     const pending = [];
     for (const item of modulesById.values()) {
