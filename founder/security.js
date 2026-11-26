@@ -106,6 +106,7 @@ async function confirmTotpEnrollment() {
     await founderUser.reload();
     founderUser = auth.currentUser;
     renderIdentity(founderUser);
+    await loadRecentSecurityEvents(founderUser);
     $("totpSecret").value = "";
     $("totpCode").value = "";
     notify("Authenticator enrolled successfully. Future sign-ins will require the second factor.");
@@ -146,6 +147,40 @@ async function signOutDevice() {
   await signOut(auth);
   sessionStorage.removeItem("founderProfile");
   window.location.replace("../login.html");
+}
+
+async function loadRecentSecurityEvents(user) {
+  const container = $("securityActivity");
+  const base = String(window.SSA_SECURITY_API_BASE || "").replace(/\\/$/, "");
+  if (!base) {
+    container.innerHTML = '<p class="security-empty">Edge incident collection is not configured yet. Deploy the security Worker and set its URL in js/security-config.js.</p>';
+    return;
+  }
+  try {
+    const token = await user.getIdToken();
+    const response = await fetch(`${base}/v1/incidents`, { headers: { authorization: `Bearer ${token}` }, cache: "no-store" });
+    if (!response.ok) throw new Error(response.status === 403 ? "Founder access was not accepted by the incident service." : "Incident service is unavailable.");
+    const payload = await response.json();
+    const events = Array.isArray(payload.events) ? payload.events.slice(0, 8) : [];
+    container.replaceChildren();
+    if (!events.length) {
+      const empty = document.createElement("p"); empty.className = "security-empty"; empty.textContent = "No events have been recorded by the edge collector."; container.appendChild(empty); return;
+    }
+    events.forEach(event => {
+      const row = document.createElement("article"); row.className = "security-event-row";
+      const title = document.createElement("strong"); title.textContent = String(event.event_type || "Security event").replaceAll("_", " ");
+      const meta = document.createElement("small");
+      const place = [event.city, event.region, event.country].filter(Boolean).join(", ") || "Location unavailable";
+      const actor = event.actor_email || event.actor_uid || "Unattributed";
+      const time = event.occurred_at ? new Date(event.occurred_at).toLocaleString() : "Time unavailable";
+      meta.textContent = `${time} · ${place} · ${actor}`;
+      const detail = document.createElement("span"); detail.textContent = `${String(event.severity || "info").toUpperCase()} · ${event.source || "unknown source"} · ${event.portal || "unknown portal"}`;
+      row.append(title, meta, detail); container.appendChild(row);
+    });
+  } catch (error) {
+    console.warn("[Founder Security] Incident feed unavailable:", error);
+    container.innerHTML = '<p class="security-empty">Could not load the incident feed. Confirm the Worker deployment, origin allowlist and D1 binding.</p>';
+  }
 }
 
 async function initialize() {
