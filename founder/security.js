@@ -2,7 +2,7 @@ import { auth, db } from "../../js/firebase.js";
 import {
   EmailAuthProvider, GoogleAuthProvider, TotpMultiFactorGenerator,
   multiFactor, reauthenticateWithCredential, reauthenticateWithPopup,
-  updatePassword, signOut, sendEmailVerification, onAuthStateChanged
+  updatePassword, signOut, sendEmailVerification, onAuthStateChanged, getMultiFactorResolver
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -36,26 +36,41 @@ async function verifyFounder(user) {
   return profile;
 }
 
+async function resolveReauthenticationMfa(error) {
+  const resolver = getMultiFactorResolver(auth, error);
+  const hint = resolver.hints.find(item => item.factorId === TotpMultiFactorGenerator.FACTOR_ID);
+  if (!hint) throw new Error("A supported authenticator factor is required to reauthenticate.");
+  const rawCode = await window.ssaPrompt?.("Enter the current six-digit authenticator code.", { title: "Confirm founder identity", confirmText: "Verify code", type: "text", placeholder: "000000" });
+  const code = String(rawCode || "").replace(/\\D/g, "").slice(0,6);
+  if (!/^\\d{6}$/.test(code)) throw new Error("A valid six-digit authenticator code is required.");
+  const assertion = TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code);
+  await resolver.resolveSignIn(assertion);
+}
+
 async function reauthenticateFounder(password) {
   const user = auth.currentUser;
   if (!user) throw new Error("Founder session expired. Sign in again.");
   const providers = user.providerData.map(item => item.providerId);
   if (providers.includes("password")) {
     if (!password) throw new Error("Enter your current password to continue.");
-    await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+    try { await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password)); }
+    catch (error) { if (error.code === "auth/multi-factor-auth-required") await resolveReauthenticationMfa(error); else throw error; }
   } else if (providers.includes("google.com")) {
-    await reauthenticateWithPopup(user, new GoogleAuthProvider());
+    try { await reauthenticateWithPopup(user, new GoogleAuthProvider()); }
+    catch (error) { if (error.code === "auth/multi-factor-auth-required") await resolveReauthenticationMfa(error); else throw error; }
   } else {
     throw new Error("This sign-in provider needs a supported reauthentication flow. Sign in again before continuing.");
   }
 }
 
-function renderIdentity(user) {
+async function renderIdentity(user) {
+  const tokenResult = await user.getIdTokenResult();
+  const mfaVerified = tokenResult.claims.firebase?.sign_in_second_factor === "totp";
   const factors = multiFactor(user).enrolledFactors;
   const hasTotp = factors.some(factor => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID);
   $("emailVerifyNotice").hidden = user.emailVerified;
   $("mfaMetric").textContent = hasTotp ? "Enabled" : "Not enabled";
-  $("mfaMetricNote").textContent = hasTotp ? "Authenticator factor enrolled" : "Founder setup required";
+  $("mfaMetricNote").textContent = hasTotp ? (mfaVerified ? "Second factor verified for this session" : "Enrolled — sign in again with your code") : "Founder setup required";
   $("emailMetric").textContent = user.emailVerified ? "Verified" : "Unverified";
   $("emailMetricNote").textContent = user.email || "No email available";
   $("sessionEmail").textContent = user.email || "—";
@@ -64,14 +79,16 @@ function renderIdentity(user) {
   $("sessionRefresh").textContent = user.metadata.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleString() : "Unavailable";
   $("sessionMetric").textContent = "Authenticated";
   $("sessionMetricNote").textContent = user.metadata.lastSignInTime ? "Signed in " + new Date(user.metadata.lastSignInTime).toLocaleString() : "Current browser session";
-  $("securityPosture").textContent = hasTotp && user.emailVerified ? "MFA protected" : "Action required";
-  $("mfaStatusTitle").textContent = hasTotp ? "Authenticator protection is active" : "Authenticator protection is not enabled";
-  $("mfaStatusText").textContent = hasTotp ? "Firebase Authentication has an enrolled TOTP factor for this account." : "Set up a TOTP authenticator to add a second sign-in factor.";
-  $("mfaStatusBadge").textContent = hasTotp ? "ENABLED" : "NOT ENABLED";
-  $("mfaStatusBadge").classList.toggle("enabled", hasTotp);
+  $("securityPosture").textContent = hasTotp && mfaVerified && user.emailVerified ? "MFA protected" : "Action required";
+  $("mfaStatusTitle").textContent = hasTotp ? (mfaVerified ? "Authenticator sign-in verified" : "Authenticator enrolled — sign-in required") : "Authenticator protection is not enabled";
+  $("mfaStatusText").textContent = hasTotp ? (mfaVerified ? "This Firebase session was authenticated with the TOTP second factor." : "This session was created before TOTP verification. Sign out and sign in again to complete the second factor.") : "Set up a TOTP authenticator to add a second sign-in factor.";
+  $("mfaStatusBadge").textContent = hasTotp ? (mfaVerified ? "VERIFIED" : "SIGN IN AGAIN") : "NOT ENABLED";
+  $("mfaStatusBadge").classList.toggle("enabled", hasTotp && mfaVerified);
   $("mfaSetup").hidden = true;
   $("mfaReauth").hidden = hasTotp;
   $("mfaEnabled").hidden = !hasTotp;
+  $("mfaEnabledText").textContent = mfaVerified ? "This session completed Firebase TOTP verification. Keep access to your authenticator app." : "Your factor is enrolled, but this session has not completed second-factor verification. Sign out and sign in again to unlock Founder operations.";
+  $("completeMfaLoginBtn").hidden = !hasTotp || mfaVerified;
   $("startMfaBtn").hidden = hasTotp || !user.emailVerified;
   $("mfaReauth").hidden = hasTotp || !user.emailVerified;
 }
@@ -106,7 +123,7 @@ async function confirmTotpEnrollment() {
     pendingTotpSecret = null;
     await founderUser.reload();
     founderUser = auth.currentUser;
-    renderIdentity(founderUser);
+    await renderIdentity(founderUser);
     await loadRecentSecurityEvents(founderUser);
     $("totpSecret").value = "";
     $("totpCode").value = "";
@@ -200,7 +217,7 @@ async function initialize() {
 
 $("startMfaBtn")?.addEventListener("click", startTotpEnrollment);
 $("sendVerifyEmailBtn")?.addEventListener("click", async () => { try { await sendEmailVerification(founderUser); notify("Verification email sent. Check your inbox."); } catch (error) { notify(error.message || "Could not send verification email.", "error"); } });
-$("refreshEmailBtn")?.addEventListener("click", async () => { try { await founderUser.reload(); founderUser = auth.currentUser; renderIdentity(founderUser); notify(founderUser.emailVerified ? "Email verified. You can now enable authenticator protection." : "Email verification is not confirmed yet. Open the email link first.", founderUser.emailVerified ? "success" : "error"); } catch (error) { notify(error.message || "Could not refresh account status.", "error"); } });
+$("refreshEmailBtn")?.addEventListener("click", async () => { try { await founderUser.reload(); founderUser = auth.currentUser; await renderIdentity(founderUser); notify(founderUser.emailVerified ? "Email verified. You can now enable authenticator protection." : "Email verification is not confirmed yet. Open the email link first.", founderUser.emailVerified ? "success" : "error"); } catch (error) { notify(error.message || "Could not refresh account status.", "error"); } });
 $("verifyTotpBtn")?.addEventListener("click", confirmTotpEnrollment);
 $("copySecretBtn")?.addEventListener("click", async () => {
   if (!$("totpSecret")?.value) return;
@@ -209,6 +226,7 @@ $("copySecretBtn")?.addEventListener("click", async () => {
 });
 $("changePasswordBtn")?.addEventListener("click", changeFounderPassword);
 $("signOutBtn")?.addEventListener("click", signOutDevice);
+$("completeMfaLoginBtn")?.addEventListener("click", signOutDevice);
 $("totpCode")?.addEventListener("input", event => { event.target.value = event.target.value.replace(/\D/g, "").slice(0, 6); });
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.replace("../login.html"); return; }
