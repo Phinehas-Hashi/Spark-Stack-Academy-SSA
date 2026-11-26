@@ -75,8 +75,16 @@ async function loadInstitutionTeam() {
       list.append(empty);
       return;
     }
+    const counts = { student: 0, instructor: 0, institution_admin: 0, institution_moderator: 0, staff: 0 };
     snap.forEach(memberDoc => {
       const member = memberDoc.data();
+      if (member.status === "active") {
+        if (member.role === "student") counts.student += 1;
+        else if (member.role === "instructor") counts.instructor += 1;
+        else if (member.role === "institution_admin" || member.role === "institution_owner" || member.role === "owner") counts.institution_admin += 1;
+        else if (member.role === "institution_moderator") counts.institution_moderator += 1;
+        else counts.staff += 1;
+      }
       const row = document.createElement("div");
       row.className = "team-member";
       const identity = document.createElement("div");
@@ -86,9 +94,25 @@ async function loadInstitutionTeam() {
       email.textContent = member.email || "";
       identity.append(name, email);
       const role = document.createElement("em");
-      role.textContent = member.role === "institution_admin" ? "Administrator" : "Instructor";
+      const roleLabels = {
+        institution_owner: "Owner", owner: "Owner", institution_admin: "Administrator",
+        institution_moderator: "Moderator", department_manager: "Department manager",
+        institution_staff: "Other staff", instructor: "Instructor", student: "Student"
+      };
+      role.textContent = roleLabels[member.role] || "Member";
       row.append(identity, role);
       list.append(row);
+    });
+    const metricValues = {
+      dashboardStudentCount: counts.student,
+      dashboardInstructorCount: counts.instructor,
+      dashboardAdminCount: counts.institution_admin,
+      dashboardModeratorCount: counts.institution_moderator,
+      dashboardStaffCount: counts.staff
+    };
+    Object.entries(metricValues).forEach(([id, value]) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value.toLocaleString();
     });
   } catch (error) {
     console.error("Institution team loading failed:", error);
