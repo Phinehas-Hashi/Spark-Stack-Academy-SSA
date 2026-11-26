@@ -92,6 +92,7 @@ function loadFounder(){
       updateFounderUI(founder);
       listenToNotifications(user.uid); loadTopNotifications(user.uid);
     }catch(error){
+      window.ssaSecuritySignal?.("portal_access_denied", { portal: "founder", code: "founder_authorization_failed" });
       console.error("Founder authorization failed:",error);
       sessionStorage.removeItem("founderProfile");
       try{await signOut(auth);}catch{}
