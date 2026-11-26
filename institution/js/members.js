@@ -167,8 +167,9 @@ function init(contextValue) {
   setupForm();
   const pageTitle = document.querySelector(".topbar-left strong");
   if (pageTitle) pageTitle.textContent = "People & access";
+  const activeMemberHref = requestedRole ? "members.html?role=" + requestedRole : "members.html";
   document.querySelectorAll(".navigation .nav-link").forEach(link => {
-    link.classList.toggle("active", (link.getAttribute("href") || "").startsWith("members.html"));
+    link.classList.toggle("active", link.getAttribute("href") === activeMemberHref);
   });
   ["memberSearch","roleFilter","statusFilter"].forEach(id=>$(id).addEventListener(id==="memberSearch"?"input":"change",renderTable));
   loadMembers();
