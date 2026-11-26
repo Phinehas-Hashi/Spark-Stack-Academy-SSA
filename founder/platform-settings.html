@@ -21,7 +21,7 @@ href="https://fonts.gstatic.com"
 crossorigin>
 
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
 rel="stylesheet">
 
 
@@ -99,6 +99,7 @@ security, admissions, students and platform rules.
 =================================== -->
 
 
+<div id="platformSettingsStatus" class="platform-settings-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="platformSettingsStatusText">Checking Founder access…</span></div>
 <section class="section-card glass-card">
 
 
@@ -704,7 +705,7 @@ type="checkbox">
 <div class="input-group">
 
 <label>
-Session Timeout (Minutes)
+Session Timeout (not currently enforced)
 </label>
 
 
@@ -722,7 +723,7 @@ value="30">
 <div class="input-group">
 
 <label>
-Maximum Login Attempts
+Login Attempt Limit (not currently enforced)
 </label>
 
 
@@ -740,7 +741,7 @@ value="5">
 <div class="input-group">
 
 <label>
-Password Expiry Days
+Password Expiry (not currently enforced)
 </label>
 
 
@@ -765,7 +766,7 @@ value="90">
 <div class="toggle-item">
 
 <span>
-Two Factor Authentication
+Founder TOTP MFA (enforced by Firebase)
 </span>
 
 
@@ -800,7 +801,7 @@ checked>
 <div class="toggle-item">
 
 <span>
-Enable Security Alerts
+Security alert routing (managed separately)
 </span>
 
 
