@@ -1324,6 +1324,55 @@ exports.saveMarketplacePricing = onCall(async request => {
   return { success: true, pricingStatus: "proposed", prices };
 });
 
+exports.saveFounderSparkAISettings = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data?.settings;
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new HttpsError("invalid-argument", "Spark AI settings are required.");
+  }
+  const provider = safeText(input.aiProvider).toLowerCase();
+  const model = safeText(input.aiModel).trim().slice(0, 120);
+  const endpoint = safeText(input.apiEndpoint).trim();
+  const temperature = Number(input.temperature);
+  const maxTokens = Number(input.maxTokens);
+  const rateLimit = Number(input.rateLimit);
+  const conversationLimit = Number(input.conversationLimit);
+  if (provider !== "groq") throw new HttpsError("invalid-argument", "Only the configured Groq provider is currently supported.");
+  if (endpoint && endpoint !== "https://api.groq.com/openai/v1") {
+    throw new HttpsError("invalid-argument", "Only the verified Groq API endpoint is allowed.");
+  }
+  if (!model || !Number.isFinite(temperature) || temperature < 0 || temperature > 2
+      || !Number.isInteger(maxTokens) || maxTokens < 1 || maxTokens > 32768
+      || !Number.isInteger(rateLimit) || rateLimit < 1 || rateLimit > 10000
+      || !Number.isInteger(conversationLimit) || conversationLimit < 1 || conversationLimit > 1000) {
+    throw new HttpsError("invalid-argument", "One or more Spark AI settings are outside the permitted range.");
+  }
+  const settings = {
+    aiProvider: provider, aiModel: model,
+    apiEndpoint: "https://api.groq.com/openai/v1",
+    temperature, maxTokens, rateLimit, conversationLimit,
+    systemPrompt: safeText(input.systemPrompt).slice(0, 12000),
+    aiPersonality: safeText(input.aiPersonality).slice(0, 2000),
+    defaultLanguage: safeText(input.defaultLanguage).slice(0, 40),
+    responseStyle: safeText(input.responseStyle).slice(0, 40),
+    enableStreaming: input.enableStreaming === true,
+    enableMemory: input.enableMemory === true,
+    enableWeb: input.enableWeb === true,
+    enableCode: input.enableCode === true,
+    enableImages: input.enableImages === true,
+    updatedAt: Timestamp.now(), updatedBy: founder.uid
+  };
+  const batch = db.batch();
+  batch.set(db.doc("settings/sparkAI"), settings, { merge: true });
+  batch.set(db.collection("audit_logs").doc(), {
+    action: "founder_spark_ai_settings_updated", actorId: founder.uid,
+    changedFields: Object.keys(settings).filter(key => key !== "updatedAt"),
+    createdAt: settings.updatedAt
+  });
+  await batch.commit();
+  return { success: true };
+});
+
 exports.founderManageAnnouncement = onCall(async request => {
   const founder = await requireFounder(request);
   const action = safeText(request.data?.action).toLowerCase();
