@@ -35,6 +35,7 @@ let currentFilter = "all";
 let unsubscribe = null;
 let founderUser = null;
 let founderVerified = false;
+const searchInput = $("instructorSearch");
 
 const escapeHTML = (value = "") =>
     String(value).replace(/[&<>'"]/g, char => ({
@@ -144,11 +145,11 @@ async function verifyFounder(user) {
 
     const profile = snapshot.data() || {};
 
-    if (profile.role && profile.role !== "founder") {
+    if (profile.role !== "founder") {
         throw new Error("Founder access required.");
     }
 
-    if (profile.status && profile.status !== "active") {
+    if (profile.status !== "active" || profile.active === false || profile.verified === false) {
         throw new Error("Founder account is not active.");
     }
 
@@ -199,12 +200,12 @@ function renderTable() {
         return;
     }
 
+    const search=String(searchInput?.value||"").trim().toLowerCase();
     const filtered = instructors.filter(instructor => {
-
         const status = normalizeStatus(instructor.status);
-
-        return currentFilter === "all"
-            || status === currentFilter;
+        const matchesStatus = currentFilter === "all" || status === currentFilter;
+        const haystack = [instructor.fullName,instructor.name,instructor.email,instructor.expertise,instructor.uid,instructor.id].filter(Boolean).join(" ").toLowerCase();
+        return matchesStatus && (!search || haystack.includes(search));
     });
 
     if (!filtered.length) {
@@ -474,6 +475,7 @@ async function approveInstructor(uid) {
             }
         );
 
+        window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Instructor application approved"});
         showToast(
             `${name} has been approved as an instructor.`,
             "success"
@@ -527,16 +529,15 @@ async function rejectInstructor(uid) {
     if (typeof window.ssaPrompt === "function") {
 
         reason = await window.ssaPrompt(
-            "Why are you rejecting this instructor application?",
+            "Provide a reason for rejecting this instructor application.",
             {
                 title: "Reject instructor",
-                placeholder: "Optional rejection reason..."
+                confirmText: "Continue",
+                placeholder: "Explain what needs to be addressed..."
             }
         );
 
-        if (reason === null) {
-            return;
-        }
+        if (reason === null) return;
 
     } else {
 
@@ -547,9 +548,12 @@ async function rejectInstructor(uid) {
             ) ?? "";
     }
 
+    reason = String(reason || "").trim().slice(0,500);
+    if (!reason) { showToast("A rejection reason is required.","error"); return; }
+
     const confirmed = window.ssaConfirm
         ? await window.ssaConfirm(
-            `Reject ${name}? The instructor will remain blocked from the Instructor Portal.`,
+            `Reject ${name}? The reason will be saved with the application and the account will remain blocked from the Instructor Portal.`,
             {
                 title: "Reject instructor",
                 confirmText: "Reject instructor",
@@ -587,8 +591,7 @@ async function rejectInstructor(uid) {
 
                 rejectedAt: serverTimestamp(),
 
-                rejectionReason:
-                    String(reason || "").trim(),
+                rejectionReason: reason,
 
                 approvedBy: null,
                 approvedByEmail: null,
@@ -598,6 +601,7 @@ async function rejectInstructor(uid) {
             }
         );
 
+        window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Instructor application rejected"});
         showToast(
             `${name}'s instructor application was rejected.`,
             "success"
@@ -654,13 +658,15 @@ document.addEventListener("click", event => {
     const uid = action.dataset.id;
 
     if (action.dataset.action === "approve") {
-        approveInstructor(uid);
+        approveInstructor(uid).catch(error=>showToast(error.message||"Approval failed.","error"));
     }
 
     if (action.dataset.action === "reject") {
-        rejectInstructor(uid);
+        rejectInstructor(uid).catch(error=>showToast(error.message||"Rejection failed.","error"));
     }
 });
+
+searchInput?.addEventListener("input",renderTable);
 
 refreshBtn?.addEventListener("click", async () => {
 
