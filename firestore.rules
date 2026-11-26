@@ -67,10 +67,10 @@ service cloud.firestore {
         ).data.get('status', '') == 'active'
         && get(
           /databases/$(database)/documents/founder/$(uid())
-        ).data.get('active', true) == true
+        ).data.get('active', false) == true
         && get(
           /databases/$(database)/documents/founder/$(uid())
-        ).data.get('verified', true) == true
+        ).data.get('verified', false) == true
         ;
     }
 
