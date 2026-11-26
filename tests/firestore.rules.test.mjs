@@ -106,14 +106,38 @@ test("an institution member can read only their own tenant and its courses", asy
     await setDoc(doc(db, "courses/course-b"), {
       title: "B course", institutionId: "college-b", published: false, status: "draft"
     });
+    await setDoc(doc(db, "courses/course-a/courseModules/module-a"), {
+      courseId: "course-a", title: "Module A"
+    });
+    await setDoc(doc(db, "courses/course-b/courseModules/module-b"), {
+      courseId: "course-b", title: "Module B"
+    });
+    await setDoc(doc(db, "courses/course-a/courseLessons/lesson-a"), {
+      courseId: "course-a", moduleId: "module-a", title: "Lesson A", isPreview: false
+    });
+    await setDoc(doc(db, "courses/course-b/courseLessons/lesson-b"), {
+      courseId: "course-b", moduleId: "module-b", title: "Lesson B", isPreview: false
+    });
+    await setDoc(doc(db, "assignments/assignment-a"), {
+      courseId: "course-a", instructorId: "instructor-a", status: "published"
+    });
+    await setDoc(doc(db, "assignments/assignment-b"), {
+      courseId: "course-b", instructorId: "instructor-b", status: "published"
+    });
   });
 
   const dbA = testEnv.authenticatedContext("owner-a").firestore();
   await assertSucceeds(getDoc(doc(dbA, "institutions/college-a")));
   await assertSucceeds(getDoc(doc(dbA, "institutions/college-a/members/owner-a")));
   await assertSucceeds(getDoc(doc(dbA, "courses/course-a")));
+  await assertSucceeds(getDoc(doc(dbA, "courses/course-a/courseModules/module-a")));
+  await assertSucceeds(getDoc(doc(dbA, "courses/course-a/courseLessons/lesson-a")));
+  await assertSucceeds(getDoc(doc(dbA, "assignments/assignment-a")));
   await assertFails(getDoc(doc(dbA, "institutions/college-b")));
   await assertFails(getDoc(doc(dbA, "courses/course-b")));
+  await assertFails(getDoc(doc(dbA, "courses/course-b/courseModules/module-b")));
+  await assertFails(getDoc(doc(dbA, "courses/course-b/courseLessons/lesson-b")));
+  await assertFails(getDoc(doc(dbA, "assignments/assignment-b")));
 });
 
 test("a provisional applicant can read only their own restricted workspace", async () => {
