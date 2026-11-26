@@ -1,8 +1,10 @@
 // ===================================
 // SPARK AI SETTINGS
 // ===================================
-import { db } from "../../js/firebase.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { app, db } from "../js/firebase.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+const saveSparkAISettings = httpsCallable(getFunctions(app), "saveFounderSparkAISettings");
 
 const settingsRef = doc(db, "settings", "sparkAI");
 const $ = id => document.getElementById(id);
@@ -75,7 +77,7 @@ function collectSettings() {
         rateLimit: rateLimitValue,
         conversationLimit: conversationLimitValue,
         // API keys are intentionally never stored in Firestore. They belong in a server-side secret store.
-        updatedAt: serverTimestamp()
+        /* updatedAt is assigned by the trusted server */
     };
 }
 
@@ -83,7 +85,7 @@ async function saveSettings() {
     const button = $("saveAISettingsBtn");
     try {
         setBusy(button, true, "Saving...");
-        await setDoc(settingsRef, collectSettings(), { merge: true });
+        await saveSparkAISettings({ settings: collectSettings() });
         toast("Spark AI settings saved.");
     } catch (error) {
         console.error("Spark AI settings save failed:", error);
@@ -97,7 +99,8 @@ async function testConnection() {
     const button = $("testConnectionBtn");
     const provider = $("aiProvider").value;
     const key = $("apiKey").value.trim();
-    const endpoint = $("apiEndpoint").value.trim() || "https://api.groq.com/openai/v1";
+    const endpoint = "https://api.groq.com/openai/v1";
+    $("apiEndpoint").value = endpoint;
     const model = $("aiModel").value.trim() || "llama-3.3-70b-versatile";
     if (!key) return toast("Enter an API key first.", "error");
     if (provider !== "groq") return toast("Connection testing currently supports Groq only.", "error");
@@ -111,8 +114,10 @@ async function testConnection() {
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(payload?.error?.message || `API request failed (${response.status}).`);
         toast("Groq API connection is working.");
+        $("apiKey").value = "";
     } catch (error) {
         console.error("Spark AI connection test failed:", error);
+        $("apiKey").value = "";
         toast(error.message || "Network error while testing the API.", "error");
     } finally {
         setBusy(button, false);
