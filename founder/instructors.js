@@ -1,15 +1,169 @@
-import { db } from "../js/firebase.js";
-import { collection,onSnapshot,addDoc,doc,updateDoc,serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-const $=id=>document.getElementById(id);const esc=v=>String(v??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));const toast=(m,t="success")=>window.showFounderToast?.(m,t)||window.showToast?.(m,t);let instructors=[],users=[],editingId=null,page=1;const size=10;
-function normalize(item){return{id:item.id,name:item.name||item.fullName||"Unnamed Instructor",email:item.email||"",phone:item.phone||"",specialization:item.specialization||item.expertise||"",bio:item.bio||"",status:item.status||"active",courses:item.courses||[],createdAt:item.createdAt,source:item.source||"instructors"};}
-function merged(){const map=new Map(instructors.map(i=>[i.id,normalize(i)]));users.filter(u=>u.role==="instructor").forEach(u=>{if(map.has(u.id))map.set(u.id,{...map.get(u.id),...normalize({...u,source:"users"})});else map.set(u.id,normalize({...u,source:"users"}));});return [...map.values()];}
-function stats(){const all=merged(),active=all.filter(i=>String(i.status).toLowerCase()==="active").length,suspended=all.filter(i=>String(i.status).toLowerCase()==="suspended").length;$("instructorCount")&&($("instructorCount").textContent=all.length);$("activeInstructorCount")&&($("activeInstructorCount").textContent=active);$("suspendedInstructorCount")&&($("suspendedInstructorCount").textContent=suspended);$("newInstructorCount")&&($("newInstructorCount").textContent=all.filter(i=>{const d=new Date(i.createdAt?.toDate?i.createdAt.toDate():i.createdAt||0),n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).length);$("assignedCourseCount")&&($("assignedCourseCount").textContent=all.reduce((n,i)=>n+(Array.isArray(i.courses)?i.courses.length:0),0));$("managedStudentCount")&&($("managedStudentCount").textContent=all.reduce((n,i)=>n+Number(i.studentsCount??i.studentCount??0),0));$("instructorTotal")&&($("instructorTotal").textContent=`${all.length} Instructor${all.length===1?"":"s"}`);}
-function filtered(){const all=merged(),q=String($("instructorSearch")?.value||"").toLowerCase().trim(),spec=$("specializationFilter")?.value||"",status=$("statusFilter")?.value||"";const out=all.filter(i=>(!q||[i.name,i.email,i.phone,i.specialization,i.bio].join(" ").toLowerCase().includes(q))&&(!spec||i.specialization===spec)&&(!status||String(i.status).toLowerCase()===status));const sort=$("sortInstructors")?.value||"newest";out.sort((a,b)=>sort==="name"?a.name.localeCompare(b.name):sort==="oldest"?new Date(a.createdAt?.toDate?a.createdAt.toDate():a.createdAt||0)-new Date(b.createdAt?.toDate?b.createdAt.toDate():b.createdAt||0):new Date(b.createdAt?.toDate?b.createdAt.toDate():b.createdAt||0)-new Date(a.createdAt?.toDate?a.createdAt.toDate():a.createdAt||0));return out;}
-function render(){const body=$("instructorsTableBody");if(!body)return;const rows=filtered(),pages=Math.max(1,Math.ceil(rows.length/size));page=Math.min(page,pages);const slice=rows.slice((page-1)*size,page*size);if(!slice.length)body.innerHTML='<tr><td colspan="8" class="empty-state"><div class="empty-content"><div class="empty-icon">👨‍🏫</div><h3>No instructors found</h3><p>Approved instructor accounts will appear here.</p></div></td></tr>';else body.innerHTML=slice.map(i=>`<tr><td><div class="instructor-info"><div class="instructor-avatar">${esc(i.name.charAt(0).toUpperCase())}</div><div class="instructor-details"><span class="instructor-name">${esc(i.name)}</span><span class="instructor-specialization">${esc(i.specialization||"No specialization")}</span></div></div></td><td>${esc(i.specialization||"—")}</td><td>${Array.isArray(i.courses)?i.courses.length:0}</td><td>${Number(i.studentsCount??i.studentCount??0)}</td><td>${esc(i.email||"—")}</td><td><span class="status ${esc(String(i.status).toLowerCase())}">${esc(i.status)}</span></td><td>${i.createdAt?.toDate?i.createdAt.toDate().toLocaleDateString():i.createdAt?new Date(i.createdAt).toLocaleDateString():"—"}</td><td><div class="action-buttons"><button class="action-btn view-instructor" data-id="${esc(i.id)}" title="View"><i data-lucide="eye"></i></button><button class="action-btn edit-instructor" data-id="${esc(i.id)}" title="Edit"><i data-lucide="pencil"></i></button><button class="action-btn delete-instructor" data-id="${esc(i.id)}" title="Suspend/restore"><i data-lucide="user-x"></i></button></div></td></tr>`).join("");$("pageInfo")&&($("pageInfo").textContent=`Page ${page} of ${pages}`);$("prevPage")&&($("prevPage").disabled=page<=1);$("nextPage")&&($("nextPage").disabled=page>=pages);window.lucide?.createIcons();}
-function refresh(){stats();const select=$("specializationFilter");if(select){const cur=select.value,vals=[...new Set(merged().map(i=>i.specialization).filter(Boolean))].sort();select.innerHTML='<option value="">All Specializations</option>'+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");if(vals.includes(cur))select.value=cur;}render();}
-onSnapshot(collection(db,"instructors"),snap=>{instructors=snap.docs.map(d=>({id:d.id,...d.data()}));refresh();},err=>{console.error(err);toast("Instructor records could not be loaded.","error")});onSnapshot(collection(db,"users"),snap=>{users=snap.docs.map(d=>({id:d.id,...d.data()}));refresh();},err=>console.error("Instructor user sync failed",err));
-function close(){ $("instructorModal")?.classList.remove("active");document.body.classList.remove("modal-open");editingId=null;}
-function open(i){editingId=i?.id||null;const form=$("instructorForm");if(!form)return;form.reset();$("instructorName").value=i?.name||"";$("instructorEmail").value=i?.email||"";$("instructorPhone").value=i?.phone||"";$("instructorSpecialization").value=i?.specialization||"";$("instructorBio").value=i?.bio||"";$("instructorStatus").value=String(i?.status||"active").toLowerCase();$("instructorModal")?.classList.add("active");document.body.classList.add("modal-open");$("instructorName")?.focus();}
-$("addInstructorBtn")?.addEventListener("click",()=>open());$("closeInstructorModal")?.addEventListener("click",close);$("instructorModal")?.addEventListener("click",e=>{if(e.target===$("instructorModal"))close();});$("instructorForm")?.addEventListener("submit",async e=>{e.preventDefault();const data={name:$("instructorName")?.value.trim(),email:$("instructorEmail")?.value.trim(),phone:$("instructorPhone")?.value.trim(),specialization:$("instructorSpecialization")?.value.trim(),bio:$("instructorBio")?.value.trim(),status:$("instructorStatus")?.value||"active",role:"instructor",updatedAt:serverTimestamp()};try{if(editingId)await updateDoc(doc(db,"instructors",editingId),data);else await addDoc(collection(db,"instructors"),{...data,createdAt:serverTimestamp(),courses:[]});close();toast(editingId?"Instructor updated successfully.":"Instructor added successfully.");}catch(err){toast(err.message||"Unable to save instructor.","error");}});
-$("instructorsTableBody")?.addEventListener("click",async e=>{const b=e.target.closest("button[data-id]");if(!b)return;const i=merged().find(x=>x.id===b.dataset.id);if(!i)return;if(b.classList.contains("view-instructor")){location.href=`instructors-profile.html?id=${encodeURIComponent(i.id)}`;return;}if(b.classList.contains("edit-instructor"))return open(i);const suspended=String(i.status).toLowerCase()==="suspended";const ok=await window.ssaConfirm?.(`${suspended?"Restore":"Suspend"} ${i.name}?`,{title:suspended?"Restore instructor":"Suspend instructor",confirmText:suspended?"Restore":"Suspend",tone:suspended?"info":"danger"});if(!ok)return;try{await updateDoc(doc(db,"instructors",i.id),{status:suspended?"active":"suspended",updatedAt:serverTimestamp()});toast(suspended?"Instructor restored.":"Instructor suspended.");}catch(err){toast(err.message||"Unable to update instructor.","error");}});
-["instructorSearch","specializationFilter","statusFilter","sortInstructors"].forEach(id=>$(id)?.addEventListener("input",()=>{page=1;render()}));["specializationFilter","statusFilter","sortInstructors"].forEach(id=>$(id)?.addEventListener("change",()=>{page=1;render()}));$("refreshInstructors")?.addEventListener("click",refresh);$("prevPage")?.addEventListener("click",()=>{if(page>1){page--;render()}});$("nextPage")?.addEventListener("click",()=>{if(page<Math.ceil(filtered().length/size)){page++;render()}});$("exportInstructorsBtn")?.addEventListener("click",()=>{const rows=[["Name","Email","Phone","Specialization","Status"],...filtered().map(i=>[i.name,i.email,i.phone,i.specialization,i.status])];const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="ssa-instructors.csv";a.click();});
+import { auth, db } from "../js/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  collection, onSnapshot, doc, getDoc, runTransaction, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const toast = (message,type="success") => window.showFounderToast?.(message,type) || window.showToast?.(message,type);
+let users = [], profiles = [], page = 1, stopUsers = null, stopProfiles = null;
+const pageSize = 10;
+
+function normalizeStatus(value) {
+  const status = String(value || "pending_review").toLowerCase();
+  return ["active","suspended","inactive","pending_review","rejected"].includes(status) ? status : "pending_review";
+}
+function allInstructors() {
+  const profileMap = new Map(profiles.map(p => [p.uid || p.id, p]));
+  return users.filter(user => user.role === "instructor").map(user => {
+    const profile = profileMap.get(user.uid || user.id) || {};
+    return {
+      id: user.id, uid: user.uid || user.id,
+      name: profile.name || profile.fullName || user.fullName || user.name || "Unnamed Instructor",
+      email: user.email || profile.email || "",
+      phone: profile.phone || user.phone || "",
+      specialization: profile.expertise || profile.specialization || user.expertise || "Not specified",
+      bio: profile.bio || user.bio || "",
+      courses: Array.isArray(profile.courses) ? profile.courses : Array.isArray(user.courses) ? user.courses : [],
+      studentsCount: Number(profile.studentsCount ?? profile.studentCount ?? user.studentsCount ?? 0),
+      rating: Number(profile.rating || user.rating || 0),
+      createdAt: user.createdAt || profile.createdAt || null,
+      status: normalizeStatus(user.status),
+      active: user.active !== false,
+      verified: user.verified === true
+    };
+  });
+}
+function stats() {
+  const items=allInstructors();
+  const active=items.filter(i=>i.status==="active"&&i.active).length;
+  const suspended=items.filter(i=>i.status==="suspended"||!i.active).length;
+  const now=new Date();
+  const fresh=items.filter(i=>{const d=i.createdAt?.toDate?i.createdAt.toDate():new Date(i.createdAt||0);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
+  $("instructorCount").textContent=items.length;
+  $("activeInstructorCount").textContent=active;
+  $("suspendedInstructorCount").textContent=suspended;
+  $("newInstructorCount").textContent=fresh;
+  $("assignedCourseCount").textContent=items.reduce((n,i)=>n+i.courses.length,0);
+  $("managedStudentCount").textContent=items.reduce((n,i)=>n+i.studentsCount,0);
+  $("instructorTotal").textContent=items.length+" Instructor"+(items.length===1?"":"s");
+}
+function filtered() {
+  const term=String($("instructorSearch")?.value||"").trim().toLowerCase();
+  const specialization=$("specializationFilter")?.value||"";
+  const status=$("statusFilter")?.value||"";
+  const result=allInstructors().filter(i=>
+    (!term||[i.name,i.email,i.phone,i.specialization,i.bio].join(" ").toLowerCase().includes(term))
+    &&(!specialization||i.specialization===specialization)
+    &&(!status||i.status===status)
+  );
+  const sort=$("sortInstructors")?.value||"newest";
+  result.sort((a,b)=>{
+    const ta=a.createdAt?.toDate?a.createdAt.toDate().getTime():new Date(a.createdAt||0).getTime();
+    const tb=b.createdAt?.toDate?b.createdAt.toDate().getTime():new Date(b.createdAt||0).getTime();
+    return sort==="name"?a.name.localeCompare(b.name):sort==="oldest"?ta-tb:tb-ta;
+  });
+  return result;
+}
+function render() {
+  const body=$("instructorsTableBody"); if(!body)return;
+  const result=filtered(), pages=Math.max(1,Math.ceil(result.length/pageSize));
+  page=Math.min(page,pages);
+  const slice=result.slice((page-1)*pageSize,page*pageSize);
+  if(!slice.length) {
+    body.innerHTML='<tr><td colspan="8" class="empty-state"><div class="empty-content"><div class="empty-icon">👨‍🏫</div><h3>No instructor accounts found</h3><p>Approved instructors appear here. Pending applications are reviewed separately.</p></div></td></tr>';
+  } else {
+    body.innerHTML=slice.map(i=>{
+      const pending=i.status==="pending_review";
+      const suspended=i.status==="suspended"||!i.active;
+      const action=pending
+        ? '<button class="action-btn review-instructor" data-id="'+esc(i.id)+'" title="Review application"><i data-lucide="clipboard-check"></i></button>'
+        : '<button class="action-btn toggle-instructor" data-id="'+esc(i.id)+'" title="'+(suspended?"Restore account":"Suspend account")+'"><i data-lucide="'+(suspended?"user-check":"user-x")+'"></i></button>';
+      return '<tr>'+
+        '<td><div class="instructor-info"><div class="instructor-avatar">'+esc(i.name.charAt(0).toUpperCase())+'</div><div class="instructor-details"><span class="instructor-name">'+esc(i.name)+'</span><span class="instructor-specialization">'+esc(i.specialization)+'</span></div></div></td>'+
+        '<td>'+esc(i.specialization)+'</td><td>'+i.courses.length+'</td><td>'+i.studentsCount+'</td>'+
+        '<td>'+esc(i.email||"—")+'</td><td><span class="status '+esc(i.status)+'">'+esc(i.status.replaceAll("_"," "))+'</span></td>'+
+        '<td>'+(i.createdAt?.toDate?i.createdAt.toDate().toLocaleDateString():i.createdAt?new Date(i.createdAt).toLocaleDateString():"—")+'</td>'+
+        '<td><div class="action-buttons"><button class="action-btn view-instructor" data-id="'+esc(i.id)+'" title="View profile"><i data-lucide="eye"></i></button><button class="action-btn edit-instructor" data-id="'+esc(i.id)+'" title="Edit profile"><i data-lucide="pencil"></i></button>'+action+'</div></td></tr>';
+    }).join("");
+  }
+  $("pageInfo").textContent="Page "+page+" of "+pages;
+  $("prevPage").disabled=page<=1; $("nextPage").disabled=page>=pages;
+  window.lucide?.createIcons();
+}
+function refresh() {
+  stats();
+  const select=$("specializationFilter"), current=select?.value||"";
+  if(select) {
+    const values=[...new Set(allInstructors().map(i=>i.specialization).filter(x=>x&&x!=="Not specified"))].sort();
+    select.innerHTML='<option value="">All Specializations</option>'+values.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join("");
+    if(values.includes(current))select.value=current;
+  }
+  render();
+}
+async function verifyFounder(user) {
+  const snap=await getDoc(doc(db,"founder",user.uid));
+  const profile=snap.exists()?snap.data():{};
+  if(!snap.exists()||profile.role!=="founder"||profile.status!=="active"||profile.active===false||profile.verified===false)throw new Error("Active Founder authorization required.");
+  const token=await user.getIdTokenResult();
+  if(token.claims.firebase?.sign_in_second_factor!=="totp")throw new Error("Complete Founder authenticator verification first.");
+}
+async function setInstructorAccess(instructor) {
+  const suspended=instructor.status!=="suspended"&&instructor.active;
+  if(!suspended&&instructor.status!=="suspended")return toast("Only active or suspended instructors can be changed here.","warning");
+  const raw=await window.ssaPrompt?.(suspended?"Provide a reason for suspending this instructor.":"Provide a reason for restoring this instructor.",{title:suspended?"Suspend instructor":"Restore instructor",confirmText:"Continue",placeholder:suspended?"Reason for suspension…":"Reason for restoration…"});
+  const reason=String(raw||"").trim().slice(0,500);
+  if(!reason)return toast("A reason is required for this access change.","warning");
+  const confirmed=await window.ssaConfirm?.((suspended?"Suspend ":"Restore ")+instructor.name+"? This will update the actual login account.",{title:suspended?"Confirm suspension":"Confirm restoration",confirmText:suspended?"Suspend account":"Restore account",cancelText:"Cancel",tone:suspended?"danger":"info"});
+  if(!confirmed)return;
+  const userRef=doc(db,"users",instructor.uid),profileRef=doc(db,"instructors",instructor.uid);
+  await runTransaction(db,async tx=>{
+    const [userSnap,profileSnap]=await Promise.all([tx.get(userRef),tx.get(profileRef)]);
+    if(!userSnap.exists()||userSnap.data().role!=="instructor")throw new Error("Instructor login profile is missing or invalid.");
+    const latest=normalizeStatus(userSnap.data().status);
+    if(suspended&&latest!=="active")throw new Error("Instructor is no longer active.");
+    if(!suspended&&latest!=="suspended")throw new Error("Instructor is no longer suspended.");
+    const next=suspended?"suspended":"active";
+    tx.update(userRef,{status:next,active:!suspended,suspensionReason:suspended?reason:"",suspendedAt:suspended?serverTimestamp():null,suspendedBy:suspended?auth.currentUser.uid:null,updatedAt:serverTimestamp()});
+    tx.set(profileRef,{uid:instructor.uid,status:next,active:!suspended,suspensionReason:suspended?reason:"",suspendedAt:suspended?serverTimestamp():null,suspendedBy:suspended?auth.currentUser.uid:null,updatedAt:serverTimestamp()},{merge:true});
+  });
+  window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:suspended?"Instructor account suspended":"Instructor account restored"});
+  toast(suspended?"Instructor suspended.":"Instructor restored.");
+}
+function exportInstructors() {
+  const rows=[["Name","Email","Phone","Specialization","Status"],...filtered().map(i=>[i.name,i.email,i.phone,i.specialization,i.status])];
+  const csv=rows.map(row=>row.map(value=>'"'+String(value??"").replaceAll('"','""')+'"').join(",")).join("\n");
+  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  const a=document.createElement("a");a.href=url;a.download="ssa-instructors.csv";a.click();URL.revokeObjectURL(url);
+  window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Instructor directory exported"});
+}
+
+$("addInstructorBtn")?.addEventListener("click",()=>{window.location.href="instructor-admissions.html";});
+$("instructorsTableBody")?.addEventListener("click",async event=>{
+  const button=event.target.closest("button[data-id]");if(!button)return;
+  const instructor=allInstructors().find(item=>item.id===button.dataset.id);if(!instructor)return;
+  if(button.classList.contains("view-instructor")){window.location.href="instructors-profile.html?id="+encodeURIComponent(instructor.uid);return;}
+  if(button.classList.contains("edit-instructor")){window.location.href="instructors-profile.html?id="+encodeURIComponent(instructor.uid)+"&edit=1";return;}
+  if(button.classList.contains("review-instructor")){window.location.href="instructor-admissions.html";return;}
+  if(button.classList.contains("toggle-instructor")){try{await setInstructorAccess(instructor);}catch(error){console.error(error);toast(error.message||"Unable to change instructor access.","error");}}
+});
+["instructorSearch","specializationFilter","statusFilter","sortInstructors"].forEach(id=>$(id)?.addEventListener("input",()=>{page=1;render();}));
+["specializationFilter","statusFilter","sortInstructors"].forEach(id=>$(id)?.addEventListener("change",()=>{page=1;render();}));
+$("refreshInstructors")?.addEventListener("click",refresh);
+$("prevPage")?.addEventListener("click",()=>{if(page>1){page--;render();}});
+$("nextPage")?.addEventListener("click",()=>{if(page<Math.ceil(filtered().length/pageSize)){page++;render();}});
+$("exportInstructorBtn")?.addEventListener("click",async()=>{
+  const confirmed=await window.ssaConfirm?.("This export contains instructor personal information. Store it securely.",{title:"Export instructor directory",confirmText:"Export CSV",cancelText:"Cancel"});
+  if(confirmed)exportInstructors();
+});
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.replace("../login.html");return;}
+  try{
+    await verifyFounder(user);
+    stopUsers=onSnapshot(collection(db,"users"),snapshot=>{users=snapshot.docs.map(d=>({id:d.id,...d.data()}));refresh();},error=>{console.error(error);toast("Instructor account directory could not be loaded.","error");});
+    stopProfiles=onSnapshot(collection(db,"instructors"),snapshot=>{profiles=snapshot.docs.map(d=>({id:d.id,...d.data()}));refresh();},error=>{console.error(error);toast("Instructor profile records could not be loaded.","error");});
+  }catch(error){console.error(error);toast(error.message||"Founder authorization failed.","error");window.location.replace("security.html");}
+});
+window.addEventListener("beforeunload",()=>{stopUsers?.();stopProfiles?.();});
