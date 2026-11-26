@@ -35,6 +35,7 @@ jobs:
             founder/js/founder-dashboard.js
             founder/security.js
             founder/admissions.js
+            founder/analytics.js
             founder/instructor-admissions.js
             founder/wallets/payouts.js
             js/firebase.js
