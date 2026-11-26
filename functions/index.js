@@ -1324,6 +1324,46 @@ exports.saveMarketplacePricing = onCall(async request => {
   return { success: true, pricingStatus: "proposed", prices };
 });
 
+exports.getFounderPaymentGatewaySettings = onCall(async request => {
+  await requireFounder(request);
+  const snapshot = await db.collection("payment_gateways").get();
+  return { gateways: snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) };
+});
+
+exports.saveFounderPaymentGatewaySettings = onCall(async request => {
+  const founder = await requireFounder(request);
+  const input = request.data || {};
+  const provider = safeText(input.provider).toLowerCase();
+  const allowed = ["mpesa","cards","bank","paypal"];
+  if (!allowed.includes(provider)) throw new HttpsError("invalid-argument","Unsupported payment provider.");
+  const environment = safeText(input.environment).toLowerCase();
+  if (!["sandbox","production"].includes(environment)) throw new HttpsError("invalid-argument","Invalid gateway environment.");
+  const validateEndpoint = value => {
+    const raw = safeText(value).trim();
+    if (!raw) return "";
+    let parsed;
+    try { parsed = new URL(raw); } catch { throw new HttpsError("invalid-argument","Gateway URLs must be valid HTTPS URLs."); }
+    if (parsed.protocol !== "https:") throw new HttpsError("invalid-argument","Gateway URLs must use HTTPS.");
+    return parsed.toString().slice(0, 500);
+  };
+  const ref = db.doc("payment_gateways/" + provider);
+  const now = Timestamp.now();
+  const enabled = input.enabled === true;
+  await db.runTransaction(async tx => {
+    tx.set(ref, {
+      provider, environment,
+      callbackUrl: validateEndpoint(input.callbackUrl),
+      webhookUrl: validateEndpoint(input.webhookUrl),
+      enabled, lastSync: now, updatedAt: now, updatedBy: founder.uid
+    }, { merge: true });
+    tx.set(db.collection("audit_logs").doc(), {
+      action: "founder_payment_gateway_updated", actorId: founder.uid,
+      targetId: provider, enabled, environment, createdAt: now
+    });
+  });
+  return { success: true, provider, enabled };
+});
+
 exports.saveFounderSparkAISettings = onCall(async request => {
   const founder = await requireFounder(request);
   const input = request.data?.settings;
