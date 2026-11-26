@@ -11,6 +11,7 @@ on:
       - "tests/**"
       - "package.json"
       - "firestore.rules"
+      - "storage.rules"
       - ".github/workflows/founder-security-syntax.yml"
   push:
     branches: [main]
@@ -81,4 +82,4 @@ jobs:
       - name: Install test dependencies
         run: npm install --no-audit --no-fund
       - name: Run Firestore rules tests in isolated emulator
-        run: npx firebase emulators:exec --only firestore --project demo-spark-stack-academy-tenant-tests "npm run test:rules"
+        run: npx firebase emulators:exec --only firestore,storage --project demo-spark-stack-academy-tenant-tests "npm run test:rules"
