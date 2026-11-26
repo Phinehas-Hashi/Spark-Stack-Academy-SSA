@@ -12,7 +12,8 @@ import {
   getDoc,
   getDocs,
   serverTimestamp,
-  setDoc
+  setDoc,
+  writeBatch
 } from "firebase/firestore";
 import { ref, uploadBytes } from "firebase/storage";
 
@@ -69,6 +70,74 @@ test("a student can create only the permitted pending student profile", async ()
     verified: false,
     status: "pending_admission",
     provider: "email",
+    createdAt: serverTimestamp(),
+    lastLogin: serverTimestamp()
+  }));
+});
+
+test("the complete student signup batch can create its user, student and application records", async () => {
+  const db = testEnv.authenticatedContext("student-signup-1").firestore();
+  const batch = writeBatch(db);
+  const now = serverTimestamp();
+
+  batch.set(doc(db, "users/student-signup-1"), {
+    uid: "student-signup-1",
+    fullName: "Batch Student",
+    email: "batch-student@example.test",
+    role: "student",
+    bio: "",
+    expertise: "",
+    profilePhoto: "",
+    active: true,
+    verified: false,
+    status: "pending_admission",
+    provider: "email",
+    createdAt: now,
+    lastLogin: now
+  });
+  batch.set(doc(db, "students/student-signup-1"), {
+    uid: "student-signup-1",
+    name: "Batch Student",
+    email: "batch-student@example.test",
+    role: "student",
+    status: "Pending",
+    onboardingStatus: "awaiting_admission",
+    admissionNumber: "Pending",
+    level: 1,
+    xp: 0,
+    streak: 0,
+    badges: [],
+    stats: { coursesEnrolled: 0, lessonsCompleted: 0, progress: 0, certificates: 0 },
+    createdAt: now
+  });
+  batch.set(doc(db, "applications/application-signup-1"), {
+    studentUid: "student-signup-1",
+    name: "Batch Student",
+    email: "batch-student@example.test",
+    phone: "",
+    course: "",
+    role: "student",
+    status: "Pending",
+    source: "signup",
+    createdAt: now
+  });
+
+  await assertSucceeds(batch.commit());
+});
+
+test("an instructor can create only a pending instructor profile", async () => {
+  const db = testEnv.authenticatedContext("instructor-signup-1").firestore();
+  await assertSucceeds(setDoc(doc(db, "users/instructor-signup-1"), {
+    uid: "instructor-signup-1",
+    fullName: "Pending Instructor",
+    email: "instructor@example.test",
+    role: "instructor",
+    bio: "A short biography",
+    expertise: "Design",
+    profilePhoto: "",
+    active: true,
+    verified: false,
+    status: "pending_review",
     createdAt: serverTimestamp(),
     lastLogin: serverTimestamp()
   }));
