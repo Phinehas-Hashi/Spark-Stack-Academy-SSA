@@ -1797,10 +1797,11 @@ service cloud.firestore {
     match /platformSettings/{settingsId} {
 
       allow read:
-        if isFounder() && settingsId != 'earnings';
-
-      allow write:
         if isFounder();
+
+      // Earnings policy is updated only by trusted callable functions.
+      allow write:
+        if isFounder() && settingsId != 'earnings';
     }
 
 
