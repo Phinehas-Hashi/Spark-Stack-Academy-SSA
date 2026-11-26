@@ -2465,12 +2465,18 @@ exports.updateInstitutionMember = onCall(async request => {
   if (action === "change_role") {
     const profileSnap = await userRef.get();
     if (profileSnap.exists) {
+      const existingGlobalRole = safeText(profileSnap.data().role).toLowerCase();
+      const protectedPlatformRoles = ["founder", "admin", "administrator", "moderator", "finance"];
       const globalRole = nextRole === "student" ? "student"
         : nextRole === "instructor" ? "instructor" : nextRole;
-      await userRef.set({
-        role: globalRole, institutionRole: nextRole,
-        institutionId: manager.institutionId, updatedAt: now
-      }, { merge: true }).catch(error => {
+      const profilePatch = {
+        institutionRole: nextRole,
+        institutionId: manager.institutionId,
+        updatedAt: now
+      };
+      // Institution role changes must never overwrite a separate platform role.
+      if (!protectedPlatformRoles.includes(existingGlobalRole)) profilePatch.role = globalRole;
+      await userRef.set(profilePatch, { merge: true }).catch(error => {
         console.error("Institution member global routing profile update failed:", error);
       });
     }
