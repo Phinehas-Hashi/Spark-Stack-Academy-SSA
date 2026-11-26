@@ -1324,6 +1324,68 @@ exports.saveMarketplacePricing = onCall(async request => {
   return { success: true, pricingStatus: "proposed", prices };
 });
 
+exports.founderManageAnnouncement = onCall(async request => {
+  const founder = await requireFounder(request);
+  const action = safeText(request.data?.action).toLowerCase();
+  const id = safeText(request.data?.announcementId);
+  const now = Timestamp.now();
+  if (action === "create") {
+    const input = request.data?.announcement || {};
+    const title = safeText(input.title).trim().slice(0, 140);
+    const message = safeText(input.message).trim().slice(0, 12000);
+    const category = safeText(input.category).slice(0, 60);
+    const audience = safeText(input.audience).slice(0, 40);
+    const status = safeText(input.status).toLowerCase();
+    if (!title || !message || !["draft","published"].includes(status)) {
+      throw new HttpsError("invalid-argument", "Provide a title, message and valid publication status.");
+    }
+    const docRef = db.collection("announcements").doc();
+    await db.runTransaction(async tx => {
+      tx.create(docRef, {
+        title, message, category, audience, status,
+        publishDate: input.publishDate ? Timestamp.fromDate(new Date(input.publishDate)) : null,
+        expiryDate: input.expiryDate ? Timestamp.fromDate(new Date(input.expiryDate)) : null,
+        pinned: input.pinned === true, important: input.important === true,
+        push: input.push === true, email: input.email === true, popup: input.popup === true,
+        createdAt: now, createdBy: founder.uid, updatedAt: now
+      });
+      tx.set(db.collection("audit_logs").doc(), {
+        action: "founder_announcement_created", actorId: founder.uid,
+        targetId: docRef.id, status, createdAt: now
+      });
+    });
+    return { success: true, announcementId: docRef.id };
+  }
+  if (!id) throw new HttpsError("invalid-argument", "Announcement ID is required.");
+  const ref = db.doc("announcements/" + id);
+  if (action === "pin") {
+    const pinned = request.data?.pinned === true;
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new HttpsError("not-found", "Announcement not found.");
+      tx.update(ref, { pinned, updatedAt: now, updatedBy: founder.uid });
+      tx.set(db.collection("audit_logs").doc(), {
+        action: pinned ? "founder_announcement_pinned" : "founder_announcement_unpinned",
+        actorId: founder.uid, targetId: id, createdAt: now
+      });
+    });
+    return { success: true, pinned };
+  }
+  if (action === "delete") {
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new HttpsError("not-found", "Announcement not found.");
+      tx.update(ref, { status: "archived", archivedAt: now, archivedBy: founder.uid, updatedAt: now });
+      tx.set(db.collection("audit_logs").doc(), {
+        action: "founder_announcement_archived", actorId: founder.uid,
+        targetId: id, createdAt: now
+      });
+    });
+    return { success: true, archived: true };
+  }
+  throw new HttpsError("invalid-argument", "Unsupported announcement action.");
+});
+
 exports.saveFounderMonetizationSettings = onCall(async request => {
   const founder = await requireFounder(request);
   const input = request.data?.settings;
