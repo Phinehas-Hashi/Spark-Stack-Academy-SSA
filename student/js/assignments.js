@@ -50,7 +50,7 @@ async function loadAssignments(uid) {
             return;
         }
 
-        const [assignmentResults, submissionResult] = await Promise.all([
+        const [assignmentResults, submissionSnapshot] = await Promise.all([
             Promise.all([...courseIds].map(courseId => getDocs(query(
                 collection(db, "assignments"),
                 where("courseId", "==", courseId),
@@ -63,22 +63,17 @@ async function loadAssignments(uid) {
         ]);
 
         submissionByAssignment = new Map();
-
-        if (submissionResult.status === "fulfilled") {
-            submissionResult.value.forEach(submissionDoc => {
-                const data = submissionDoc.data();
-                const assignmentId = data.assignmentId || inferAssignmentId(submissionDoc.id, uid);
-                if (assignmentId) submissionByAssignment.set(assignmentId, data);
-            });
-        } else {
-            console.warn("Student submissions could not be loaded:", submissionResult.reason);
-        }
+        submissionSnapshot.forEach(submissionDoc => {
+            const data = submissionDoc.data();
+            const assignmentId = data.assignmentId || inferAssignmentId(submissionDoc.id, uid);
+            if (assignmentId) submissionByAssignment.set(assignmentId, data);
+        });
 
         assignments = [];
         assignmentResults.forEach(snapshot => snapshot.forEach(assignmentDoc => {
             const data = assignmentDoc.data();
             const status = String(data.status || "published").toLowerCase();
-            const isStudentVisible = ["published", "pending", "active"].includes(status);
+            const isStudentVisible = ["published", "active"].includes(status);
             if (!isStudentVisible || data.published === false) return;
             if (!data.courseId || !courseIds.has(String(data.courseId))) return;
 
