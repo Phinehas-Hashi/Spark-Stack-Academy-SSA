@@ -17,7 +17,8 @@ service firebase.storage {
         ).data.get('role', '') == 'founder'
         && firestore.get(
           /databases/(default)/documents/founder/$(request.auth.uid)
-        ).data.get('status', '') == 'active';
+        ).data.get('status', '') == 'active'
+        && request.auth.token.get('firebase', {}).get('sign_in_second_factor', '') == 'totp';
     }
 
     function isChatParticipant(chatId) {
