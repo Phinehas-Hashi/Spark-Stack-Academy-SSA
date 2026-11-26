@@ -109,7 +109,8 @@ function setupTeamForm() {
       fullName: String(values.get("fullName") || "").trim(),
       email: String(values.get("email") || "").trim(),
       role: String(values.get("role") || ""),
-      temporaryPassword: String(values.get("temporaryPassword") || "")
+      temporaryPassword: String(values.get("temporaryPassword") || ""),
+      institutionId: currentInstitutionId
     };
     button.disabled = true;
     message.className = "team-message";
