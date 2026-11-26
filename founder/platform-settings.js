@@ -3,7 +3,8 @@
    PLATFORM SETTINGS
 =================================== */
 
-import { db } from "../../js/firebase.js";
+import { auth, db } from "../js/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
 
@@ -412,15 +413,29 @@ console.log("⚙️ Platform Settings Initialized");
    LOAD PLATFORM SETTINGS
 =================================== */
 
-document.addEventListener(
-"DOMContentLoaded",
-loadPlatformSettings
-);
+let founderReady=false;
+async function requireVerifiedFounder(){
+ const user=auth.currentUser;
+ if(!user)throw new Error("Sign in as Founder first.");
+ const profileSnap=await getDoc(doc(db,"founder",user.uid));
+ const profile=profileSnap.exists()?profileSnap.data():{};
+ if(!profileSnap.exists()||profile.role!=="founder"||profile.status!=="active"||profile.active===false||profile.verified===false)throw new Error("Active Founder authorization required.");
+ const token=await user.getIdTokenResult();
+ if(token.claims.firebase?.sign_in_second_factor!=="totp")throw new Error("Complete Founder authenticator verification first.");
+ return user;
+}
+function setPlatformStatus(message,isError=false){const box=$("platformSettingsStatus"),label=$("platformSettingsStatusText");if(!box||!label)return;box.classList.toggle("has-error",isError);box.classList.toggle("is-ready",!isError);label.textContent=message;}
+onAuthStateChanged(auth,async user=>{
+ if(!user){window.location.replace("../login.html");return;}
+ try{await requireVerifiedFounder();founderReady=true;await loadPlatformSettings();setPlatformStatus("Founder session verified · Platform settings loaded");}
+ catch(error){console.error("[Founder Platform Settings] Access check failed:",error);setPlatformStatus(error.message||"Founder access denied",true);alert(error.message||"Founder authorization failed.");window.location.replace("security.html");}
+});
 
 
 async function loadPlatformSettings(){
 
 try{
+await requireVerifiedFounder();
 
 const snapshot =
 await getDoc(settingsRef);
@@ -585,8 +600,15 @@ data.maxLoginAttempts ?? 5;
 passwordExpiry.value =
 data.passwordExpiry ?? 90;
 
-twoFactor.checked =
-data.twoFactor ?? false;
+twoFactor.checked = true;
+twoFactor.disabled = true;
+sessionTimeout.disabled = true;
+maxLoginAttempts.disabled = true;
+passwordExpiry.disabled = true;
+loginTracking.disabled = true;
+securityAlerts.disabled = true;
+loginTracking.checked = false;
+securityAlerts.checked = false;
 
 loginTracking.checked =
 data.loginTracking ?? true;
@@ -707,6 +729,8 @@ saveSettings
 async function saveSettings(){
 
 try{
+await requireVerifiedFounder();
+if(!window.SSAOnlineActionGuard?.requireOnline("Saving platform settings"))return;
 
 const settings={
 
@@ -787,14 +811,7 @@ Number(maxLoginAttempts.value),
 passwordExpiry:
 Number(passwordExpiry.value),
 
-twoFactor:
-twoFactor.checked,
 
-loginTracking:
-loginTracking.checked,
-
-securityAlerts:
-securityAlerts.checked,
 
 
 /* ---------- NOTIFICATIONS ---------- */
@@ -899,7 +916,8 @@ new Date().toLocaleString(),
 
 
 updatedAt:
-serverTimestamp()
+serverTimestamp(),
+updatedBy:auth.currentUser.uid
 
 };
 
@@ -919,9 +937,9 @@ updatedAt:serverTimestamp()
 {merge:true}
 );
 
-alert(
-"✅ Platform settings saved successfully."
-);
+window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Platform settings updated"});
+setPlatformStatus("Platform settings saved successfully");
+alert("Platform settings saved successfully.");
 
 console.log(
 "Platform settings updated."
@@ -955,6 +973,8 @@ exportPlatformSettings
 async function exportPlatformSettings(){
 
 try{
+await requireVerifiedFounder();
+await requireVerifiedFounder();
 
 const snapshot =
 await getDoc(settingsRef);
@@ -994,7 +1014,7 @@ link.download =
 
 link.click();
 
-URL.revokeObjectURL(url);
+setTimeout(()=>URL.revokeObjectURL(url),1000);
 
 console.log(
 "Settings exported."
@@ -1046,12 +1066,16 @@ if(!file) return;
 
 try{
 
-const text =
-await file.text();
-
-const data =
-JSON.parse(text);
-
+await requireVerifiedFounder();
+if(file.size>1024*1024)throw new Error("Settings file exceeds the 1 MB import limit.");
+const text = await file.text();
+const imported = JSON.parse(text);
+if(!imported || typeof imported!=="object" || Array.isArray(imported))throw new Error("Invalid settings file.");
+const allowedKeys=Object.keys(defaultSettings);
+const data=Object.fromEntries(Object.entries(imported).filter(([key])=>allowedKeys.includes(key)));
+if(!Object.keys(data).length)throw new Error("No supported settings were found in this file.");
+const confirmed=await window.ssaConfirm?.("Import the supported platform settings from this file? Unsupported and security-sensitive fields will be ignored.",{title:"Import platform settings",confirmText:"Import settings",cancelText:"Cancel"});
+if(!confirmed)return;
 await setDoc(
 
 settingsRef,
@@ -1103,10 +1127,8 @@ resetSettings.addEventListener(
 "click",
 async()=>{
 
-const confirmReset =
-confirm(
-"Restore default platform settings?"
-);
+await requireVerifiedFounder();
+const confirmReset = window.ssaConfirm ? await window.ssaConfirm("Restore the editable platform preferences to their defaults?",{title:"Restore defaults",confirmText:"Restore defaults",cancelText:"Cancel",tone:"danger"}) : false;
 
 if(!confirmReset) return;
 
@@ -1155,9 +1177,8 @@ clearCache.addEventListener(
 "click",
 ()=>{
 
-localStorage.clear();
-
-sessionStorage.clear();
+for(const key of Object.keys(localStorage)){if(/^(ssa|spark-stack|sparkstack)[.:_-]/i.test(key))localStorage.removeItem(key);}
+for(const key of Object.keys(sessionStorage)){if(/^(ssa|spark-stack|sparkstack)[.:_-]/i.test(key))sessionStorage.removeItem(key);}
 
 alert(
 "Cache cleared successfully."
@@ -1175,10 +1196,9 @@ disablePlatform.addEventListener(
 "click",
 async()=>{
 
-const confirmDisable =
-confirm(
-"Disable the academy platform?"
-);
+await requireVerifiedFounder();
+if(!window.SSAOnlineActionGuard?.requireOnline("Disabling the platform"))return;
+const confirmDisable = window.ssaConfirm ? await window.ssaConfirm("Enable maintenance mode and mark the platform as disabled? This may interrupt learner and instructor access if the portals enforce this setting.",{title:"Disable platform",confirmText:"Enable maintenance mode",cancelText:"Cancel",tone:"danger"}) : false;
 
 if(!confirmDisable) return;
 
@@ -1227,10 +1247,9 @@ resetSystem.addEventListener(
 "click",
 async()=>{
 
-const confirmReset =
-confirm(
-"This will reset ALL platform settings. Continue?"
-);
+await requireVerifiedFounder();
+if(!window.SSAOnlineActionGuard?.requireOnline("Resetting platform settings"))return;
+const confirmReset = window.ssaConfirm ? await window.ssaConfirm("This will replace all editable platform preferences with defaults. This action cannot be undone.",{title:"Reset system settings",confirmText:"Reset settings",cancelText:"Cancel",tone:"danger"}) : false;
 
 if(!confirmReset) return;
 
