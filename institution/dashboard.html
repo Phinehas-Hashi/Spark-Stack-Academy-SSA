@@ -35,10 +35,12 @@
 
       <div class="section-heading"><div><span class="eyebrow">AT A GLANCE</span><h2>Institution overview</h2></div><span class="muted">Live data connection pending</span></div>
       <section class="metrics-grid">
-        <article class="metric-card"><span class="metric-icon blue"><i data-lucide="users"></i></span><div><span>Learners</span><strong>—</strong><small>Awaiting data connection</small></div></article>
-        <article class="metric-card"><span class="metric-icon violet"><i data-lucide="graduation-cap"></i></span><div><span>Instructors</span><strong>—</strong><small>Awaiting data connection</small></div></article>
-        <article class="metric-card"><span class="metric-icon gold"><i data-lucide="book-open"></i></span><div><span>Programmes</span><strong>—</strong><small>Awaiting data connection</small></div></article>
-        <article class="metric-card"><span class="metric-icon green"><i data-lucide="chart-no-axes-combined"></i></span><div><span>Learning activity</span><strong>—</strong><small>Awaiting data connection</small></div></article>
+        <article class="metric-card"><span class="metric-icon blue"><i data-lucide="users"></i></span><div><span>Learners</span><strong id="dashboardStudentCount">—</strong><small>Institution members</small></div></article>
+        <article class="metric-card"><span class="metric-icon violet"><i data-lucide="graduation-cap"></i></span><div><span>Instructors</span><strong id="dashboardInstructorCount">—</strong><small>Teaching team</small></div></article>
+        <article class="metric-card"><span class="metric-icon gold"><i data-lucide="shield-check"></i></span><div><span>Administrators</span><strong id="dashboardAdminCount">—</strong><small>Institution leadership</small></div></article>
+        <article class="metric-card"><span class="metric-icon cyan"><i data-lucide="user-check"></i></span><div><span>Moderators</span><strong id="dashboardModeratorCount">—</strong><small>Moderation team</small></div></article>
+        <article class="metric-card"><span class="metric-icon green"><i data-lucide="briefcase-business"></i></span><div><span>Other staff</span><strong id="dashboardStaffCount">—</strong><small>Operational members</small></div></article>
+        <article class="metric-card"><span class="metric-icon slate"><i data-lucide="book-open"></i></span><div><span>Programmes</span><strong>—</strong><small>Course catalogue</small></div></article>
       </section>
 
       <div class="section-heading"><div><span class="eyebrow">PLAN ALLOCATION</span><h2>Workspace limits</h2></div><span class="muted">Maximum capacity for your institution</span></div>
@@ -54,10 +56,10 @@
       <section class="team-management" id="team">
         <form id="teamAccountForm" class="team-form">
           <h3>Add an instructor or institution administrator</h3>
-          <p>Only the verified institution owner can create team accounts. The account limits are enforced by the server.</p>
+          <p>Only the institution owner or an authorised administrator can create permitted member accounts. Leadership roles remain owner-controlled; capacity is enforced by the server.</p>
           <label>Full name<input name="fullName" required minlength="2" maxlength="100" autocomplete="name"></label>
           <label>Work email<input name="email" type="email" required autocomplete="email"></label>
-          <label>Account type<select name="role" required><option value="instructor">Instructor (maximum 20)</option><option value="institution_admin">Institution administrator (maximum 10 including owner; 9 additional)</option></select></label>
+          <label>Account type<select name="role" required><option value="student">Student</option><option value="instructor">Instructor</option><option value="institution_staff">Other staff</option><option value="institution_moderator">Moderator</option><option value="department_manager">Department manager</option><option value="institution_admin">Institution administrator</option></select></label>
           <label>Temporary password<input name="temporaryPassword" type="password" required minlength="12" autocomplete="new-password"><small>At least 12 characters. Share it securely and ask the new member to change it after sign-in.</small></label>
           <button type="submit" id="createTeamAccountBtn">Create team account</button>
           <p id="teamAccountMessage" class="team-message" role="status" aria-live="polite"></p>
@@ -67,9 +69,9 @@
 
       <div class="section-heading"><div><span class="eyebrow">WORKSPACE</span><h2>Institution services</h2></div></div>
       <section class="services-grid">
-        <a class="service-card" href="#learners"><span class="service-icon blue"><i data-lucide="users"></i></span><strong>Learner management</strong><p>Organise learner access, enrolments and learning progress.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
+        <a class="service-card" href="members.html"><span class="service-icon blue"><i data-lucide="users"></i></span><strong>Learner management</strong><p>Organise learner access, enrolments and learning progress.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
         <a class="service-card" href="#programmes"><span class="service-icon violet"><i data-lucide="book-open-check"></i></span><strong>Courses & programmes</strong><p>Coordinate institution programmes and course approvals.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
-        <a class="service-card" href="#instructors"><span class="service-icon gold"><i data-lucide="presentation"></i></span><strong>Instructor coordination</strong><p>Manage teaching teams and programme assignments.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
+        <a class="service-card" href="members.html?role=instructor"><span class="service-icon gold"><i data-lucide="presentation"></i></span><strong>Instructor coordination</strong><p>Manage teaching teams and programme assignments.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
         <a class="service-card" href="#billing"><span class="service-icon green"><i data-lucide="wallet"></i></span><strong>Billing & subscriptions</strong><p>Review subscription information and institution billing.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
         <a class="service-card" href="#reports"><span class="service-icon cyan"><i data-lucide="file-chart-column"></i></span><strong>Reports & analytics</strong><p>Track institutional learning and operational outcomes.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
         <a class="service-card" href="#settings"><span class="service-icon slate"><i data-lucide="settings"></i></span><strong>Institution settings</strong><p>Maintain your institution profile and workspace preferences.</p><span class="service-link">Open workspace <i data-lucide="arrow-up-right"></i></span></a>
