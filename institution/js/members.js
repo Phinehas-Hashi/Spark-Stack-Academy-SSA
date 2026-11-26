@@ -159,6 +159,9 @@ function setupForm() {
 function init(contextValue) {
   if(context) return;
   context=contextValue;
+  currentUid = context.profile?.uid || auth.currentUser?.uid || currentUid;
+  const requestedRole = new URLSearchParams(window.location.search).get("role");
+  if (requestedRole && $("roleFilter").querySelector('option[value="'+requestedRole+'"]')) $("roleFilter").value = requestedRole;
   setupForm();
   ["memberSearch","roleFilter","statusFilter"].forEach(id=>$(id).addEventListener(id==="memberSearch"?"input":"change",renderTable));
   loadMembers();
