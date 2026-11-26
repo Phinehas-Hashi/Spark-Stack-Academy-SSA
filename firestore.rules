@@ -136,6 +136,16 @@ service cloud.firestore {
         && get(memberPath).data.get('verified', true) == false;
     }
 
+    function institutionManagesCourse(courseId) {
+      let coursePath = /databases/$(database)/documents/courses/$(courseId);
+      return signedIn()
+        && courseId is string
+        && exists(coursePath)
+        && get(coursePath).data.get('institutionId', '') is string
+        && get(coursePath).data.get('institutionId', '') != ''
+        && institutionManager(get(coursePath).data.institutionId);
+    }
+
     function publicCourse(courseId) {
       return courseId is string
         && exists(/databases/$(database)/documents/courses/$(courseId))
