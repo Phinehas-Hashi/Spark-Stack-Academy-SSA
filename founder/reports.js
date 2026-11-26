@@ -90,7 +90,7 @@ onAuthStateChanged(auth,async user=>{
   }catch(error){
     console.error("[Founder Reports] Access check failed:",error);
     setStatus(error.message||"Founder access denied",true);
-    location.replace("security.html");
+    // Keep the current Founder page open; show the access/data error in place.
   }
 });
 window.addEventListener("beforeunload",()=>state.unsubscribe?.());
