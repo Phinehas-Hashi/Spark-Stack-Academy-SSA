@@ -72,7 +72,8 @@ function renderIdentity(user) {
   $("mfaSetup").hidden = true;
   $("mfaReauth").hidden = hasTotp;
   $("mfaEnabled").hidden = !hasTotp;
-  $("startMfaBtn").hidden = hasTotp;
+  $("startMfaBtn").hidden = hasTotp || !user.emailVerified;
+  $("mfaReauth").hidden = hasTotp || !user.emailVerified;
 }
 
 async function startTotpEnrollment() {
@@ -198,6 +199,7 @@ async function initialize() {
 
 $("startMfaBtn")?.addEventListener("click", startTotpEnrollment);
 $("sendVerifyEmailBtn")?.addEventListener("click", async () => { try { await sendEmailVerification(founderUser); notify("Verification email sent. Check your inbox."); } catch (error) { notify(error.message || "Could not send verification email.", "error"); } });
+$("refreshEmailBtn")?.addEventListener("click", async () => { try { await founderUser.reload(); founderUser = auth.currentUser; renderIdentity(founderUser); notify(founderUser.emailVerified ? "Email verified. You can now enable authenticator protection." : "Email verification is not confirmed yet. Open the email link first.", founderUser.emailVerified ? "success" : "error"); } catch (error) { notify(error.message || "Could not refresh account status.", "error"); } });
 $("verifyTotpBtn")?.addEventListener("click", confirmTotpEnrollment);
 $("copySecretBtn")?.addEventListener("click", async () => {
   if (!$("totpSecret")?.value) return;
