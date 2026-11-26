@@ -341,46 +341,46 @@ function renderCourseHeader() {
 // LOAD MODULES
 // ============================================================
 
+async function migrateLegacyCurriculum() {
+    // Preserve legacy top-level records; copy only when the nested ID is absent.
+    const moduleQueries = [
+        query(collection(db, "courseModules"), where("courseId", "==", courseId)),
+        query(collection(db, "courseModules"), where("courseID", "==", courseId))
+    ];
+    const lessonQueries = [
+        query(collection(db, "courseLessons"), where("courseId", "==", courseId)),
+        query(collection(db, "courseLessons"), where("courseID", "==", courseId))
+    ];
+    const [moduleResults, lessonResults] = await Promise.all([
+        Promise.all(moduleQueries.map(getDocs)),
+        Promise.all(lessonQueries.map(getDocs))
+    ]);
+    const modulesById = new Map();
+    const lessonsById = new Map();
+    moduleResults.forEach(result => result.docs.forEach(item => modulesById.set(item.id, item)));
+    lessonResults.forEach(result => result.docs.forEach(item => lessonsById.set(item.id, item)));
+
+    const pending = [];
+    for (const item of modulesById.values()) {
+        const target = doc(db, "courses", courseId, "courseModules", item.id);
+        if (!(await getDoc(target)).exists()) pending.push({ target, data: item.data() });
+    }
+    for (const item of lessonsById.values()) {
+        const target = doc(db, "courses", courseId, "courseLessons", item.id);
+        if (!(await getDoc(target)).exists()) pending.push({ target, data: item.data() });
+    }
+    for (let offset = 0; offset < pending.length; offset += 450) {
+        const batch = writeBatch(db);
+        pending.slice(offset, offset + 450).forEach(({ target, data }) => batch.set(target, data));
+        await batch.commit();
+    }
+}
+
 async function loadModules() {
-
-    const ref =
-        collection(
-            db,
-            "courseModules"
-        );
-
-
-    const q =
-        query(
-            ref,
-            where(
-                "courseId",
-                "==",
-                courseId
-            )
-        );
-
-
-    const snapshot =
-        await getDocs(q);
-
-
-    modules =
-        snapshot.docs
-            .map(item => ({
-
-                id: item.id,
-
-                ...item.data()
-
-            }))
-            .sort(
-                sortByOrder
-            );
-
-
+    await migrateLegacyCurriculum();
+    const snapshot = await getDocs(collection(db, "courses", courseId, "courseModules"));
+    modules = snapshot.docs.map(item => ({ id: item.id, ...item.data() })).sort(sortByOrder);
     await loadLessons();
-
 }
 
 
@@ -389,51 +389,12 @@ async function loadModules() {
 // ============================================================
 
 async function loadLessons() {
-
     if (!modules.length) {
-
         lessons = [];
-
         return;
-
     }
-
-
-    const ref =
-        collection(
-            db,
-            "courseLessons"
-        );
-
-
-    const q =
-        query(
-            ref,
-            where(
-                "courseId",
-                "==",
-                courseId
-            )
-        );
-
-
-    const snapshot =
-        await getDocs(q);
-
-
-    lessons =
-        snapshot.docs
-            .map(item => ({
-
-                id: item.id,
-
-                ...item.data()
-
-            }))
-            .sort(
-                sortByOrder
-            );
-
+    const snapshot = await getDocs(collection(db, "courses", courseId, "courseLessons"));
+    lessons = snapshot.docs.map(item => ({ id: item.id, ...item.data() })).sort(sortByOrder);
 }
 
 // ============================================================
@@ -1224,11 +1185,7 @@ async function saveModule(
 
             await updateDoc(
 
-                doc(
-                    db,
-                    "courseModules",
-                    editingModuleId
-                ),
+                doc(db, "courses", courseId, "courseModules", editingModuleId),
 
                 data
 
@@ -1238,10 +1195,7 @@ async function saveModule(
 
             await addDoc(
 
-                collection(
-                    db,
-                    "courseModules"
-                ),
+                collection(db, "courses", courseId, "courseModules"),
 
                 {
 
@@ -1330,11 +1284,7 @@ async function deleteModule(
         ) {
 
             await deleteDoc(
-                doc(
-                    db,
-                    "courseLessons",
-                    lesson.id
-                )
+                doc(db, "courses", courseId, "courseLessons", lesson.id)
             );
 
         }
@@ -1502,7 +1452,7 @@ async function reorderContent(kind, id, direction) {
         const collectionName = kind === "module" ? "courseModules" : "courseLessons";
         const batch = writeBatch(db);
         reordered.forEach((entry, position) => {
-            batch.update(doc(db, collectionName, entry.id), {
+            batch.update(doc(db, "courses", courseId, collectionName, entry.id), {
                 order: position,
                 updatedAt: serverTimestamp()
             });
@@ -1741,11 +1691,7 @@ async function saveLesson(
 
             await updateDoc(
 
-                doc(
-                    db,
-                    "courseLessons",
-                    editingLessonId
-                ),
+                doc(db, "courses", courseId, "courseLessons", editingLessonId),
 
                 data
 
@@ -1755,10 +1701,7 @@ async function saveLesson(
 
             await addDoc(
 
-                collection(
-                    db,
-                    "courseLessons"
-                ),
+                collection(db, "courses", courseId, "courseLessons"),
 
                 {
 
@@ -1817,7 +1760,7 @@ async function duplicateLesson(id) {
     const { id: ignoredId, createdAt: ignoredCreatedAt, updatedAt: ignoredUpdatedAt, ...copy } = source;
     const siblingCount = lessons.filter(item => item.moduleId === source.moduleId).length;
     try {
-        await addDoc(collection(db, "courseLessons"), {
+        await addDoc(collection(db, "courses", courseId, "courseLessons"), {
             ...copy,
             title: `${source.title || "Lesson"} (Copy)`,
             status: "draft",
@@ -1857,11 +1800,7 @@ async function deleteLesson(
     try {
 
         await deleteDoc(
-            doc(
-                db,
-                "courseLessons",
-                id
-            )
+            doc(db, "courses", courseId, "courseLessons", id)
         );
 
 
