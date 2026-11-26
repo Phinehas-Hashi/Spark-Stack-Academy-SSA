@@ -2402,7 +2402,7 @@ exports.updateInstitutionMember = onCall(async request => {
       throw new HttpsError("permission-denied", "The institution owner cannot be changed from the member directory.");
     }
     if (manager.role !== "institution_owner" && manager.role !== "owner"
-        && INSTITUTION_ADMIN_ROLES.includes(currentRole)) {
+        && ["institution_admin", "institution_moderator", "department_manager"].includes(currentRole)) {
       throw new HttpsError("permission-denied", "Only the institution owner can manage another administrator.");
     }
 
