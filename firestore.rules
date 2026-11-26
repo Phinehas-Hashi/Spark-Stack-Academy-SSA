@@ -376,6 +376,9 @@ service cloud.firestore {
         && request.resource.data.studentUid.size() > 0
         && request.resource.data.get('createdBy', '') == uid()
         && request.resource.data.get('createdAt', request.time) is timestamp
+        && request.resource.data.keys().hasAll([
+          'admissionNumber', 'studentUid', 'createdBy', 'createdAt'
+        ])
         && request.resource.data.keys().hasOnly([
           'admissionNumber', 'studentUid', 'createdBy', 'createdAt'
         ]);
