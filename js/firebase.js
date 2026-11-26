@@ -24,9 +24,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const appCheck = window.SSA_RECAPTCHA_V3_SITE_KEY
-    ? initializeAppCheck(app, { provider: new ReCaptchaV3Provider(window.SSA_RECAPTCHA_V3_SITE_KEY), isTokenAutoRefreshEnabled: true })
-    : null;
+let appCheck = null;
+try {
+    if (window.SSA_RECAPTCHA_V3_SITE_KEY) {
+        appCheck = initializeAppCheck(app, { provider: new ReCaptchaV3Provider(window.SSA_RECAPTCHA_V3_SITE_KEY), isTokenAutoRefreshEnabled: true });
+    }
+} catch (error) {
+    console.error("[SSA SECURITY] App Check initialization failed; configure the reCAPTCHA site key before enforcing App Check.", error);
+}
 const db = getFirestore(app);
 const auth = getAuth(app);
 installSecurityTelemetry(auth);
