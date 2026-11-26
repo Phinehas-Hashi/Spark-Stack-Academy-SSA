@@ -1,5 +1,6 @@
 import { auth, db } from "../js/firebase.js";
-import { collection,onSnapshot,doc,updateDoc,serverTimestamp,runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { collection,onSnapshot,doc,updateDoc,serverTimestamp,runTransaction,getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const $=id=>document.getElementById(id); const esc=v=>String(v??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
 let students=[],editingId=null,page=1;const size=10;let stop=null;
 const time=v=>v?.toMillis?v.toMillis():v?.toDate?v.toDate().getTime():new Date(v||0).getTime()||0;
@@ -64,4 +65,15 @@ $("studentsTableBody")?.addEventListener("click",async e=>{
 });
 ["studentSearch","courseFilter","statusFilter","sortStudents"].forEach(id=>$(id)?.addEventListener("input",()=>{page=1;render()}));$("courseFilter")?.addEventListener("change",()=>{page=1;render()});$("statusFilter")?.addEventListener("change",()=>{page=1;render()});$("sortStudents")?.addEventListener("change",()=>{page=1;render()});$("refreshStudents")?.addEventListener("click",subscribe);$("prevPage")?.addEventListener("click",()=>{if(page>1){page--;render()}});$("nextPage")?.addEventListener("click",()=>{if(page<Math.ceil(filtered().length/size)){page++;render()}});
 $("exportStudentsBtn")?.addEventListener("click",async()=>{const confirmed=await window.ssaConfirm?.("This CSV contains student personal information. Store it securely and do not share it publicly.",{title:"Export student data",confirmText:"Export CSV",cancelText:"Cancel"});if(!confirmed)return;window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Student directory exported"});const rows=[["Name","Email","Phone","Course","Status","Admission Number"],...filtered().map(s=>[s.name||s.fullName||"",s.email||"",s.phone||"",s.courseName||s.course||"",s.status||"",s.admissionNumber||""])];const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="spark-stack-students.csv";a.click();});
-window.addEventListener("beforeunload",()=>stop?.());subscribe();
+window.addEventListener("beforeunload",()=>stop?.());
+onAuthStateChanged(auth,async user=>{
+ if(!user){window.location.replace("../login.html");return;}
+ try{
+  const profileSnap=await getDoc(doc(db,"founder",user.uid));
+  const profile=profileSnap.exists()?profileSnap.data():{};
+  if(!profileSnap.exists()||profile.role!=="founder"||profile.status!=="active"||profile.active===false||profile.verified===false)throw new Error("Active Founder authorization required.");
+  const token=await user.getIdTokenResult();
+  if(token.claims.firebase?.sign_in_second_factor!=="totp"){window.location.replace("security.html");return;}
+  subscribe();
+ }catch(error){console.error("[Founder Students] Access check failed:",error);toast(error.message||"Founder authorization failed.","error");window.location.replace("../login.html");}
+});
