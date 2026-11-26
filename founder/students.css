@@ -2069,3 +2069,18 @@ box-shadow:
 
 
 }
+/* Obsidian Imperial student directory refinements */
+:root{--primary:#D6B779;--primary-dark:#806B42;--success:#45B88A;--danger:#D87870;--warning:#D6B779;--purple:#B49BCB;--cyan:#D6B779;--bg:#11110F;--surface:#1B1A17;--surface-light:#22211D;--text:#E7E2D5;--muted:#A7A294;--border:rgba(214,183,121,.17)}
+.bg-orb{opacity:.1!important}.orb-1,.orb-2,.orb-3{background:#806B42!important}
+.page-hero h1,.table-header h3,.modal-header h3{font-family:Manrope,sans-serif;letter-spacing:-.035em;color:#F1EBDD!important}.hero-badge{background:rgba(214,183,121,.12)!important;color:#D6B779!important}
+.primary-btn{background:linear-gradient(135deg,#D6B779,#B89552)!important;color:#191711!important}.secondary-btn{background:#22211D!important;color:#D6B779!important;border:1px solid rgba(214,183,121,.2)!important}
+.stat-card,.glass-card,.students-table,.filter-bar{background:linear-gradient(145deg,#22211D,#1B1A17)!important;border-color:rgba(214,183,121,.17)!important;box-shadow:0 16px 42px rgba(0,0,0,.2)!important}
+.stat-icon.cyan,.stat-icon.green,.stat-icon.blue,.stat-icon.purple,.stat-icon.red,.stat-icon.gold{background:rgba(214,183,121,.12)!important;color:#D6B779!important}
+.stat-card h2,.student-details strong{color:#F1EBDD!important}.stat-top span,.stat-card small,.student-details small{color:#A7A294!important}
+.search-box,.filter-right select{background:#141411!important;border-color:rgba(214,183,121,.2)!important;color:#E7E2D5!important}.search-box input{color:#E7E2D5!important}.search-box:focus-within,.filter-right select:focus{border-color:#D6B779!important;box-shadow:0 0 0 3px rgba(214,183,121,.1)!important}
+thead{background:#24221D!important}th{color:#D6B779!important;border-color:rgba(214,183,121,.15)!important}td{color:#DCD6C9!important;border-color:rgba(214,183,121,.1)!important}tbody tr:hover{background:rgba(214,183,121,.045)!important}
+.student-avatar{background:linear-gradient(135deg,#D6B779,#806B42)!important;color:#171613!important}.status-badge.active{background:rgba(69,184,138,.12)!important;color:#70CBA7!important}.status-badge.graduated{background:rgba(214,183,121,.12)!important;color:#E7C98E!important}.status-badge.suspended{background:rgba(216,120,112,.12)!important;color:#E89A92!important}
+.progress-bar{background:rgba(231,226,213,.1)!important}.progress-fill{background:linear-gradient(90deg,#806B42,#D6B779)!important}
+.action-btn{background:#24221D!important;color:#D6B779!important;border:1px solid rgba(214,183,121,.17)!important}.action-btn:hover{background:rgba(214,183,121,.12)!important;color:#E7C98E!important}
+.modal-content{background:#1B1A17!important;border:1px solid rgba(214,183,121,.22)!important;color:#E7E2D5!important}.modal-header{border-color:rgba(214,183,121,.15)!important}.modal-header button{background:#24221D!important;color:#D6B779!important}
+.modal-content input{background:#141411!important;border:1px solid rgba(214,183,121,.2)!important;color:#E7E2D5!important}.modal-content input[readonly]{opacity:.7}.readonly-email{display:block;color:#A7A294;font-size:12px}.readonly-email input{display:block;width:100%;margin-top:7px;padding:12px;border-radius:10px}.readonly-email small{display:block;margin-top:5px}.form-security-note{padding:10px 12px;border:1px solid rgba(214,183,121,.16);border-radius:10px;background:rgba(214,183,121,.07);color:#D6B779;font-size:11px;line-height:1.5}
