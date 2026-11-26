@@ -4,7 +4,10 @@ import { doc, getDoc, getDocFromServer, collection, getDocs, query, orderBy } fr
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const LOGIN_PAGE = "../login.html";
-const ALLOWED_ROLES = new Set(["institution_applicant", "institution", "institution_owner", "institution_admin"]);
+const ALLOWED_ROLES = new Set([
+  "institution_applicant", "institution", "institution_owner", "institution_admin",
+  "institution_moderator", "institution_staff", "department_manager", "instructor", "student"
+]);
 const sidebar = document.getElementById("institutionSidebar");
 const topbar = document.getElementById("institutionTopbar");
 const overlay = document.getElementById("sidebarOverlay");
@@ -12,6 +15,8 @@ const functions = getFunctions();
 const createTeamAccount = httpsCallable(functions, "createInstitutionTeamAccount");
 let currentInstitutionId = null;
 let currentProfile = null;
+let currentMembership = null;
+let currentInstitution = null;
 
 async function loadComponent(target, path) {
   if (!target) throw new Error("Institution portal shell container is missing.");
@@ -94,8 +99,9 @@ async function loadInstitutionTeam() {
 function setupTeamForm() {
   const form = document.getElementById("teamAccountForm");
   if (!form) return;
-  const isOwner = currentProfile?.role === "institution" && currentProfile?.institutionRole === "owner";
-  if (!isOwner) {
+  const membershipRole = currentMembership?.role || currentProfile?.institutionRole || "";
+  const canManage = ["institution_owner", "owner", "institution_admin"].includes(membershipRole);
+  if (!canManage) {
     form.hidden = true;
     return;
   }
@@ -278,17 +284,61 @@ async function boot() {
         denyAccess(profile, user, "role_or_approval_check_failed");
         return;
       }
-      const institutionId = profile.institutionId;
-      currentInstitutionId = institutionId || null;
-      if (institutionId) {
-        const institutionSnapshot = await getDoc(doc(db, "institutions", institutionId));
-        if (institutionSnapshot.exists()) renderInstitutionQuotas(institutionSnapshot.data());
+
+      // institutionId is routing context only. The canonical membership record
+      // below is the actual authorization grant for this exact tenant.
+      const requestedInstitutionId = new URLSearchParams(window.location.search).get("institutionId");
+      const institutionId = String(requestedInstitutionId || profile.institutionId || "").trim();
+      if (!institutionId) {
+        denyAccess(profile, user, "institution_context_missing");
+        return;
       }
-      const name = profile.institutionName || profile.organizationName || profile.displayName || profile.name || user.displayName || "Your institution";
+      const [institutionSnapshot, membershipSnapshot] = await Promise.all([
+        getDocFromServer(doc(db, "institutions", institutionId)),
+        getDocFromServer(doc(db, "institutions", institutionId, "members", user.uid))
+      ]);
+      if (!institutionSnapshot.exists() || institutionSnapshot.data().status !== "active") {
+        denyAccess(profile, user, "institution_not_active");
+        return;
+      }
+      const institution = institutionSnapshot.data();
+      const membership = membershipSnapshot.exists() ? membershipSnapshot.data() : {};
+      const canonicalAllowed = membershipSnapshot.exists()
+        && membership.uid === user.uid
+        && membership.institutionId === institutionId
+        && membership.status === "active"
+        && membership.verified === true;
+      const legacyAllowed = profile.institutionId === institutionId
+        && ["institution", "institution_owner", "institution_admin"].includes(role)
+        && profile.status === "active" && profile.active === true && profile.verified === true;
+      if (!canonicalAllowed && !legacyAllowed) {
+        denyAccess(profile, user, "canonical_institution_membership_missing_or_inactive");
+        return;
+      }
+
+      currentInstitutionId = institutionId;
+      currentProfile = profile;
+      currentMembership = canonicalAllowed ? membership : {
+        uid: user.uid, institutionId, role: profile.institutionRole || "institution_owner",
+        memberType: profile.institutionRole || "institution_owner",
+        status: "active", verified: true, legacy: true
+      };
+      currentInstitution = institution;
+      window.SSAInstitutionContext = {
+        institutionId, profile, membership: currentMembership, institution,
+        canManageMembers: ["institution_owner", "owner", "institution_admin"].includes(currentMembership.role),
+        isOwner: ["institution_owner", "owner"].includes(currentMembership.role)
+      };
+      renderInstitutionQuotas(institution);
+      const name = institution.institutionName || institution.legalName
+        || profile.institutionName || profile.organizationName || profile.displayName
+        || profile.name || user.displayName || "Your institution";
       setInstitutionName(name);
       setupTeamForm();
       await loadInstitutionTeam();
       document.documentElement.dataset.institutionPortalReady = "true";
+      document.documentElement.dataset.institutionPortalMode = "active";
+      window.dispatchEvent(new CustomEvent("ssa-institution-context-ready", { detail: window.SSAInstitutionContext }));
       window.lucide?.createIcons();
     } catch (error) {
       console.error("Institution profile verification failed:", error);
