@@ -1350,11 +1350,17 @@ async function requireActiveInstitutionMember(request) {
   if (!canonicalAllowed && !legacyAllowed) {
     throw new HttpsError("permission-denied", "An active, verified membership in this institution is required.");
   }
-  return {
-    uid, profile, membership,
-    institutionId,
-    institutionRole: canonicalAllowed ? safeText(membership.role) : safeText(profile.institutionRole)
-  };
+  const institutionRole = canonicalAllowed
+    ? safeText(membership.role)
+    : safeText(profile.institutionRole);
+  const managerRoles = ["institution_owner", "owner", "institution_admin", "department_manager"];
+  if (canonicalAllowed && !managerRoles.includes(institutionRole)) {
+    throw new HttpsError("permission-denied", "Your institution membership does not include course-management permissions.");
+  }
+  if (legacyAllowed && !["owner", "institution_admin"].includes(institutionRole)) {
+    throw new HttpsError("permission-denied", "Your legacy institution role does not include course-management permissions.");
+  }
+  return { uid, profile, membership, institutionId, institutionRole };
 }
 
 exports.createInstitutionCourse = onCall(async request => {
