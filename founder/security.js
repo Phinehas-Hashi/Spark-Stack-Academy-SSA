@@ -41,8 +41,8 @@ async function resolveReauthenticationMfa(error) {
   const hint = resolver.hints.find(item => item.factorId === TotpMultiFactorGenerator.FACTOR_ID);
   if (!hint) throw new Error("A supported authenticator factor is required to reauthenticate.");
   const rawCode = await window.ssaPrompt?.("Enter the current six-digit authenticator code.", { title: "Confirm founder identity", confirmText: "Verify code", type: "text", placeholder: "000000" });
-  const code = String(rawCode || "").replace(/\\D/g, "").slice(0,6);
-  if (!/^\\d{6}$/.test(code)) throw new Error("A valid six-digit authenticator code is required.");
+  const code = String(rawCode || "").replace(/\D/g, "").slice(0,6);
+  if (!/^\d{6}$/.test(code)) throw new Error("A valid six-digit authenticator code is required.");
   const assertion = TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code);
   await resolver.resolveSignIn(assertion);
 }
