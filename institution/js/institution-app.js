@@ -4,7 +4,7 @@ import { doc, getDoc, getDocFromServer, collection, getDocs, query, orderBy } fr
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const LOGIN_PAGE = "../login.html";
-const ALLOWED_ROLES = new Set(["institution", "institution_owner", "institution_admin"]);
+const ALLOWED_ROLES = new Set(["institution_applicant", "institution", "institution_owner", "institution_admin"]);
 const sidebar = document.getElementById("institutionSidebar");
 const topbar = document.getElementById("institutionTopbar");
 const overlay = document.getElementById("sidebarOverlay");
@@ -217,6 +217,61 @@ async function boot() {
       const profile = snapshot.data();
       currentProfile = profile;
       const role = String(profile.role || "").trim().toLowerCase();
+
+      if (role === "institution_applicant") {
+        if (profile.status !== "pending_review" || profile.active !== false || profile.verified !== false) {
+          denyAccess(profile, user, "invalid_provisional_applicant_state");
+          return;
+        }
+        const provisionalId = user.uid;
+        const [institutionSnapshot, membershipSnapshot] = await Promise.all([
+          getDoc(doc(db, "institutions", provisionalId)),
+          getDoc(doc(db, "institutions", provisionalId, "members", user.uid))
+        ]);
+        if (!institutionSnapshot.exists() || !membershipSnapshot.exists()) {
+          denyAccess(profile, user, "provisional_workspace_missing");
+          return;
+        }
+        const institution = institutionSnapshot.data();
+        const membership = membershipSnapshot.data();
+        if (institution.ownerUid !== user.uid
+          || institution.status !== "provisional"
+          || membership.uid !== user.uid
+          || membership.status !== "pending_verification"
+          || membership.verified !== false) {
+          denyAccess(profile, user, "provisional_workspace_owner_check_failed");
+          return;
+        }
+
+        currentInstitutionId = provisionalId;
+        currentProfile = profile;
+        setInstitutionName(institution.institutionName || institution.legalName || profile.fullName || "Your institution");
+        const welcome = document.querySelector(".welcome-panel");
+        const notice = document.createElement("section");
+        notice.className = "notice-panel";
+        const icon = document.createElement("span");
+        icon.textContent = "!";
+        const copy = document.createElement("div");
+        const heading = document.createElement("strong");
+        heading.textContent = "Provisional workspace · Verification pending";
+        const paragraph = document.createElement("p");
+        paragraph.textContent = "Your institution application has been received. You can sign in to check this restricted workspace while the Academy verifies your organisation. Staff management, student records, course publishing and billing remain locked until approval.";
+        copy.append(heading, paragraph);
+        notice.append(icon, copy);
+        welcome?.insertAdjacentElement("afterend", notice);
+
+        document.querySelectorAll("#limits, .team-management, .services-grid, .module-grid").forEach(node => node.hidden = true);
+        document.querySelectorAll(".section-heading").forEach(node => node.hidden = true);
+        sidebar?.querySelectorAll("a").forEach(link => {
+          const href = (link.getAttribute("href") || "").split("#")[0];
+          if (!href.endsWith("dashboard.html")) link.hidden = true;
+        });
+        document.documentElement.dataset.institutionPortalReady = "true";
+        document.documentElement.dataset.institutionPortalMode = "provisional";
+        window.lucide?.createIcons();
+        return;
+      }
+
       const approved = profile.status === "active" && profile.active === true && profile.verified === true;
       if (!ALLOWED_ROLES.has(role) || !approved) {
         denyAccess(profile, user, "role_or_approval_check_failed");
