@@ -137,6 +137,14 @@ service cloud.firestore {
           && userData().get('institutionRole', '') in ['owner', 'institution_admin']);
     }
 
+    function institutionFinanceViewer(institutionId) {
+      let memberPath = /databases/$(database)/documents/institutions/$(institutionId)/members/$(uid());
+      return (canonicalInstitutionMember(institutionId)
+          && get(memberPath).data.get('role', '') in ['institution_owner', 'owner', 'institution_admin'])
+        || (legacyInstitutionMember(institutionId)
+          && userData().get('institutionRole', '') in ['owner', 'institution_admin']);
+    }
+
     function institutionApplicant(institutionId) {
       let memberPath = /databases/$(database)/documents/institutions/$(institutionId)/members/$(uid());
       return signedIn()
@@ -2102,7 +2110,7 @@ service cloud.firestore {
     match /institutionPayments/{paymentId} {
       allow get, list: if staff()
         || (resource.data.get('institutionId', '') is string
-          && institutionManager(resource.data.institutionId));
+          && institutionFinanceViewer(resource.data.institutionId));
       allow create, update, delete: if false;
     }
 
