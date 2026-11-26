@@ -1088,13 +1088,34 @@ service cloud.firestore {
       allow create:
         if staff()
         || (isInstructor() && instructorPortalOpen()
-          && request.resource.data.instructorId == uid());
+          && request.resource.data.instructorId == uid()
+          && request.resource.data.get('published', false) == false
+          && request.resource.data.get('status', 'draft') in ['draft', 'pending_review']
+          && request.resource.data.get('reviewStatus', 'draft') != 'approved'
+          && request.resource.data.get('marketplaceVisibility', 'hidden') == 'hidden');
 
       allow update:
         if staff()
         || (isInstructor() && instructorPortalOpen()
           && resource.data.instructorId == uid()
-          && request.resource.data.instructorId == uid());
+          && request.resource.data.instructorId == uid()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'isFree', 'price', 'discountPrice', 'duration', 'updatedAt',
+            'status', 'reviewStatus', 'reviewRouting', 'reviewRequestedAt',
+            'marketplaceVisibility'
+          ])
+          && request.resource.data.get('published', false) == resource.data.get('published', false)
+          && (request.resource.data.get('status', resource.data.get('status', 'draft'))
+            == resource.data.get('status', 'draft')
+            || (request.resource.data.get('status', '') == 'pending_review'
+              && request.resource.data.get('reviewStatus', '') == 'awaiting_admin_review'
+              && request.resource.data.get('marketplaceVisibility', '') == 'hidden'))
+          && (request.resource.data.get('reviewStatus', resource.data.get('reviewStatus', ''))
+            == resource.data.get('reviewStatus', '')
+            || request.resource.data.get('reviewStatus', '') == 'awaiting_admin_review')
+          && (request.resource.data.get('marketplaceVisibility', resource.data.get('marketplaceVisibility', 'hidden'))
+            == resource.data.get('marketplaceVisibility', 'hidden')
+            || request.resource.data.get('marketplaceVisibility', '') == 'hidden'));
 
       // Instructors retain deletion access to their own course records.
       // Founder moderation uses a soft-delete Cloud Function to preserve history.
