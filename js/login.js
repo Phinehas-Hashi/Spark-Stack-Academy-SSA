@@ -1,7 +1,7 @@
 // Spark Stack Academy — secure login and role routing
 import { auth, db } from "./firebase.js";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, browserLocalPersistence, browserSessionPersistence, setPersistence, sendPasswordResetEmail, signOut, getMultiFactorResolver, TotpMultiFactorGenerator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc, getDocFromServer, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const loginForm = $("loginForm");
@@ -112,7 +112,7 @@ async function resolveUserProfile(user) {
     const userRef = doc(db, "users", user.uid);
     const [userSnap, founderSnap] = await Promise.all([
         getDoc(userRef),
-        getDoc(doc(db, "founder", user.uid))
+        getDocFromServer(doc(db, "founder", user.uid))
     ]);
     const userData = userSnap.exists() ? userSnap.data() : null;
 
@@ -134,7 +134,9 @@ async function resolveUserProfile(user) {
                 roleMatched: true,
                 statusActive: founderData.status === "active",
                 activeField: founderData.active === true,
-                verifiedField: founderData.verified === true
+                verifiedField: founderData.verified === true,
+                observedStatus: JSON.stringify(founderData.status ?? null),
+                observedStatusType: typeof founderData.status
             },
             userData: {
                 ...(userData || {}),
@@ -285,7 +287,7 @@ async function finishSignIn(user) {
             ? profile.diagnostic?.code || "FOUNDER_ACCESS_REJECTED"
             : null;
         const userMessage = diagnosticCode
-            ? `${decision.message} Diagnostic: ${diagnosticCode}. Please share this code with support.`
+            ? `${decision.message} Diagnostic: ${diagnosticCode}. Observed status: ${profile.diagnostic?.observedStatus ?? "unavailable"}. Please share this code with support.`
             : decision.message;
         await rejectSession(userMessage);
         return;
