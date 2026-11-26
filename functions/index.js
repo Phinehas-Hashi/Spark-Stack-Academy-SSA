@@ -2461,10 +2461,15 @@ exports.updateInstitutionMember = onCall(async request => {
       await userRef.set({
         role: globalRole, institutionRole: nextRole,
         institutionId: manager.institutionId, updatedAt: now
-      }, { merge: true });
+      }, { merge: true }).catch(error => {
+        console.error("Institution member global routing profile update failed:", error);
+      });
     }
   }
-  const usage = await refreshInstitutionPeopleUsage(manager.institutionId);
+  const usage = await refreshInstitutionPeopleUsage(manager.institutionId).catch(error => {
+    console.error("Institution member usage refresh failed:", error);
+    return null;
+  });
   await db.collection("audit_logs").add({
     action: "institution_member_" + action,
     actorId: manager.uid, targetId: memberUid,
@@ -2474,7 +2479,7 @@ exports.updateInstitutionMember = onCall(async request => {
     previousStatus: safeText(previous.status),
     nextStatus: action === "revoke" ? "revoked" : action === "set_status" ? nextStatus : safeText(previous.status),
     createdAt: now
-  });
+  }).catch(error => console.error("Institution member change audit write failed:", error));
   return { success: true, memberUid, changes, usage };
 });
 
