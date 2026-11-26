@@ -140,6 +140,12 @@ service cloud.firestore {
           || (resource.data.get('isPreview', false) == true && publicCourse(courseId)));
     }
 
+    function studentCanReadModule() {
+      let courseId = resource.data.get('courseId', resource.data.get('courseID', ''));
+      return isStudent() && studentPortalOpen() && courseId is string
+        && (publicCourse(courseId) || activeCourseEnrollment(courseId));
+    }
+
 
     // ============================================================
     // PLATFORM CONTROL
@@ -280,6 +286,8 @@ service cloud.firestore {
              ])
         && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['online'])
           || request.resource.data.online is bool)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastSeen'])
+          || request.resource.data.lastSeen is timestamp)
 
       // Staff may activate a student account only as part of admission approval.
       || (
@@ -1311,8 +1319,7 @@ service cloud.firestore {
 
     match /courseModules/{moduleId} {
       allow get, list: if staff()
-        || (isStudent() && studentPortalOpen()
-          && publicCourse(resource.data.get('courseId', resource.data.get('courseID', ''))))
+        || (isStudent() && studentPortalOpen() && studentCanReadModule())
         || (isInstructor() && instructorPortalOpen() && resource.data.instructorId == uid());
       allow create: if staff()
         || (isInstructor() && instructorPortalOpen()
@@ -1764,7 +1771,12 @@ service cloud.firestore {
             || (request.resource.data.lastMessage is string && request.resource.data.lastMessage.size() <= 4000))
           && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['typing'])
             || (request.resource.data.typing.get('uid', '') == uid()
-              && request.resource.data.typing.get('status', false) is bool)));
+              && request.resource.data.typing.get('status', false) is bool
+              && request.resource.data.typing.get('updatedAt', request.time) is timestamp))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastReadAt'])
+            || (request.resource.data.lastReadAt is map
+              && request.resource.data.lastReadAt.diff(resource.data.get('lastReadAt', {})).affectedKeys().hasOnly([uid()])
+              && request.resource.data.lastReadAt.get(uid(), null) is timestamp)));
 
       allow delete:
         if isFounder();
