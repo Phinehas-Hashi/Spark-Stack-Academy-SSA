@@ -43,6 +43,7 @@ jobs:
             founder/certificates.js
             founder/platform-settings.js
             founder/notifications.js
+            founder/reports.js
             founder/instructor-admissions.js
             founder/wallets/payouts.js
             js/firebase.js
