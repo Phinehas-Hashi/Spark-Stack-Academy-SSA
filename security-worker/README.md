@@ -17,7 +17,7 @@ Unauthenticated events are limited to login/MFA failures. The Worker rate-limits
 1. Create a Cloudflare D1 database named `ssa-security-events`.
 2. Run `schema.sql` against that database.
 3. Put the database ID into `wrangler.toml`.
-4. Set `FIREBASE_PROJECT_ID=spark-stack-academy`.
+4. Set `FIREBASE_PROJECT_ID=spark-stack-academy-ssa`.
 5. Set `ALLOWED_ORIGINS` to the exact deployed Academy origins (comma-separated). Add the production custom domain only if one is configured.
 6. Deploy with Wrangler from this directory: `npx wrangler deploy`.
 7. Confirm `GET /health` returns `{"status":"ok","service":"ssa-security-edge"}`.
