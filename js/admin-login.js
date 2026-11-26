@@ -38,13 +38,28 @@ async function resolvePrivilegedAccess(uid) {
   const founderSnapshot = await getDoc(doc(db, "founder", uid));
   if (founderSnapshot.exists()) {
     const founder = founderSnapshot.data();
-    const valid = founder.role === "founder" &&
-      founder.active === true &&
-      founder.status === "active" &&
-      founder.verified === true;
-    return valid
-      ? { allowed:true, role:"founder", destination:"founder/dashboard.html" }
-      : { allowed:false, reason:"The Founder profile exists but is not fully active and verified. Contact platform support." };
+    const checks = [
+      ["role", founder.role, "founder"],
+      ["active", founder.active, true],
+      ["status", founder.status, "active"],
+      ["verified", founder.verified, true]
+    ];
+    const failed = checks.filter(([, actual, expected]) => actual !== expected);
+    if (failed.length) {
+      // The user has authenticated successfully. Report only the exact
+      // authorization fields that failed; never expose the full document.
+      const details = failed.map(([field, actual, expected]) => {
+        const actualType = actual === null ? "null" : typeof actual;
+        const actualValue = actual === undefined ? "<missing>" : JSON.stringify(actual);
+        return `${field}: expected ${JSON.stringify(expected)}, received ${actualValue} (${actualType})`;
+      }).join("; ");
+      console.error("[SSA FOUNDER PROFILE CHECK]", details);
+      return {
+        allowed:false,
+        reason:`Founder profile verification failed: ${details}. Correct these exact fields in founder/{your-auth-uid}, then retry.`
+      };
+    }
+    return { allowed:true, role:"founder", destination:"founder/dashboard.html" };
   }
 
   const userSnapshot = await getDoc(doc(db, "users", uid));
