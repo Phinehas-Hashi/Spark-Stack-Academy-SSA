@@ -115,10 +115,10 @@ async function togglePin(id, current) {
 }
 
 async function removeAnnouncement(id) {
-  const confirmed = await (window.ssaConfirm?.("Delete this announcement? This cannot be undone.", {
-    title: "Delete announcement",
-    confirmText: "Delete",
-    cancelText: "Keep announcement",
+  const confirmed = await (window.ssaConfirm?.("Archive this announcement? It will be retained for audit history and removed from active publishing.", {
+    title: "Archive announcement",
+    confirmText: "Archive",
+    cancelText: "Keep active",
     tone: "danger",
     icon: "🗑"
   }) ?? false);
@@ -126,7 +126,7 @@ async function removeAnnouncement(id) {
 
   try {
     await manageAnnouncement({ action: "delete", announcementId: id });
-    window.ssaToast?.("Announcement deleted.", "success");
+    window.ssaToast?.("Announcement archived. The record was retained for audit history.", "success");
   } catch (error) {
     console.error("Delete failed:", error);
     window.ssaToast?.("Unable to delete announcement.", "error");
