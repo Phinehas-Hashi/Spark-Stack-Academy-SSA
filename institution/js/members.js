@@ -165,6 +165,11 @@ function init(contextValue) {
   const requestedRole = new URLSearchParams(window.location.search).get("role");
   if (requestedRole && $("roleFilter").querySelector('option[value="'+requestedRole+'"]')) $("roleFilter").value = requestedRole;
   setupForm();
+  const pageTitle = document.querySelector(".topbar-left strong");
+  if (pageTitle) pageTitle.textContent = "People & access";
+  document.querySelectorAll(".navigation .nav-link").forEach(link => {
+    link.classList.toggle("active", (link.getAttribute("href") || "").startsWith("members.html"));
+  });
   ["memberSearch","roleFilter","statusFilter"].forEach(id=>$(id).addEventListener(id==="memberSearch"?"input":"change",renderTable));
   loadMembers();
   window.lucide?.createIcons();
