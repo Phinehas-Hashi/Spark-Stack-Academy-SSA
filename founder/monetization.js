@@ -1,5 +1,9 @@
-import { db } from "../js/firebase.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { app, db } from "../js/firebase.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const functions = getFunctions(app);
+const saveSettingsCallable = httpsCallable(functions, "saveFounderMonetizationSettings");
 
 const ref = doc(db, "settings", "monetization");
 const earningsRef = doc(db, "platformSettings", "earnings");
@@ -21,14 +25,21 @@ const defaults = {
 };
 
 const fields = [
-  "courseFee","registrationFee","examinationFee","certificateFee","premiumMonthly","premiumQuarterly","premiumYearly",
-  "instructorCommission","platformCommission","maxDiscount","couponExpiry","minimumWithdrawal","withdrawalFee",
-  "withdrawalTime","vatRate","billingCycle","invoicePrefix","defaultCurrency","currencySymbol","decimalPlaces"
+  ["defaultCourseFee","courseFee"],["registrationFee","registrationFee"],["examFee","examinationFee"],["certificateFee","certificateFee"],
+  ["premiumMonthly","premiumMonthly"],["premiumQuarterly","premiumQuarterly"],["premiumYearly","premiumYearly"],
+  ["instructorShare","instructorCommission"],["platformCommission","platformCommission"],["maxDiscount","maxDiscount"],
+  ["couponExpiry","couponExpiry"],["minimumWithdrawal","minimumWithdrawal"],["withdrawalFee","withdrawalFeePercent"],
+  ["withdrawalTime","withdrawalTime"],["vatRate","vatRate"],["billingCycle","billingCycle"],["invoicePrefix","invoicePrefix"],
+  ["defaultCurrency","currency"],["currencySymbol","currencySymbol"],["decimalPlaces","decimalPlaces"]
 ];
 const checks = [
-  "enablePremium","premiumCertificates","enableMpesa","enableCards","enablePaypal","enableBank","enableInstructorEarnings",
-  "automaticPayouts","enableCoupons","scholarships","enableWithdrawals","withdrawalApproval","enableRevenueDashboard",
-  "trackStudentPurchases","trackInstructorRevenue","monthlyRevenueReports"
+  ["enablePremium","enablePremium"],["premiumCertificates","premiumCertificates"],["enableMpesa","enableMpesa"],
+  ["enableCards","enableCards"],["enablePaypal","enablePaypal"],["enableBank","enableBank"],
+  ["enableInstructorEarnings","enableInstructorEarnings"],["automaticPayouts","automaticPayouts"],
+  ["enableCoupons","allowCoupons"],["scholarships","allowScholarships"],["enableWithdrawals","enableWithdrawals"],
+  ["withdrawalApproval","withdrawalApproval"],["enableRevenueDashboard","enableRevenueDashboard"],
+  ["trackStudentPurchases","trackStudentPurchases"],["trackInstructorRevenue","trackInstructorRevenue"],
+  ["monthlyRevenueReports","monthlyRevenueReports"],["enablePayments","enablePayments"],["allowRefunds","allowRefunds"]
 ];
 
 function setValue(id, value) { if ($(id)) $(id).value = value ?? ""; }
@@ -40,21 +51,20 @@ function populate(data) {
   ["totalRevenue","monthlyRevenue","todayRevenue","pendingWithdrawals"].forEach(id => {
     if ($(id)) $(id).textContent = `${currency} ${Number(d[id] || 0).toLocaleString()}`;
   });
-  fields.forEach(id => setValue(id, d[id]));
+  fields.forEach(([id,key]) => setValue(id, d[key]));
   setValue("defaultCurrency", currency);
-  checks.forEach(id => setChecked(id, d[id]));
+  checks.forEach(([id,key]) => setChecked(id, d[key]));
 }
 
 function readForm() {
   const data = {};
-  fields.forEach(id => {
+  fields.forEach(([id,key]) => {
     const el = $(id);
     if (!el) return;
-    data[id] = el.type === "number" ? Number(el.value || 0) : el.value;
+    data[key] = el.type === "number" ? Number(el.value || 0) : el.value;
   });
-  checks.forEach(id => { if ($(id)) data[id] = $(id).checked; });
+  checks.forEach(([id,key]) => { if ($(id)) data[key] = $(id).checked; });
   data.currency = $("defaultCurrency")?.value || "KES";
-  data.withdrawalFeePercent = Number($("withdrawalFee")?.value || 0);
   return data;
 }
 
@@ -62,9 +72,7 @@ async function load() {
   try {
     const snap = await getDoc(ref);
     if (!snap.exists()) {
-      const initial = { ...defaults, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
-      await setDoc(ref, initial);
-      populate(initial);
+      populate(defaults);
       return;
     }
     populate(snap.data());
@@ -84,20 +92,16 @@ async function save() {
     window.showFounderToast?.("Check withdrawal values.", "error");
     return;
   }
+  const button = $("saveMonetization");
+  if (button) button.disabled = true;
   try {
-    await setDoc(ref, { ...data, updatedAt: serverTimestamp() }, { merge: true });
-    await setDoc(earningsRef, {
-      minimumWithdrawal: data.minimumWithdrawal,
-      withdrawalFeePercent: data.withdrawalFeePercent,
-      withdrawalsEnabled: data.enableWithdrawals,
-      withdrawalApproval: data.withdrawalApproval,
-      withdrawalProcessingTime: data.withdrawalTime,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    window.showFounderToast?.("Monetization settings saved successfully.", "success");
+    await saveSettingsCallable({ settings: data });
+    window.showFounderToast?.("Monetization settings saved and audit-logged.", "success");
   } catch (error) {
     console.error("Monetization save failed:", error);
-    window.showFounderToast?.("Failed to save monetization settings.", "error");
+    window.showFounderToast?.(error.message || "Failed to save monetization settings.", "error");
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 
