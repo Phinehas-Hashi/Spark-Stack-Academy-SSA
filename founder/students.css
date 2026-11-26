@@ -2084,3 +2084,14 @@ thead{background:#24221D!important}th{color:#D6B779!important;border-color:rgba(
 .action-btn{background:#24221D!important;color:#D6B779!important;border:1px solid rgba(214,183,121,.17)!important}.action-btn:hover{background:rgba(214,183,121,.12)!important;color:#E7C98E!important}
 .modal-content{background:#1B1A17!important;border:1px solid rgba(214,183,121,.22)!important;color:#E7E2D5!important}.modal-header{border-color:rgba(214,183,121,.15)!important}.modal-header button{background:#24221D!important;color:#D6B779!important}
 .modal-content input{background:#141411!important;border:1px solid rgba(214,183,121,.2)!important;color:#E7E2D5!important}.modal-content input[readonly]{opacity:.7}.readonly-email{display:block;color:#A7A294;font-size:12px}.readonly-email input{display:block;width:100%;margin-top:7px;padding:12px;border-radius:10px}.readonly-email small{display:block;margin-top:5px}.form-security-note{padding:10px 12px;border:1px solid rgba(214,183,121,.16);border-radius:10px;background:rgba(214,183,121,.07);color:#D6B779;font-size:11px;line-height:1.5}
+
+/* Obsidian Imperial — live status and final component polish */
+.students-data-status{display:flex;align-items:center;gap:10px;margin:0 0 16px;padding:11px 14px;border:1px solid rgba(214,183,121,.17);border-radius:12px;background:rgba(214,183,121,.055);color:#B9B2A4;font-size:.78rem}
+.students-data-status .status-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#D6B779;box-shadow:0 0 0 4px rgba(214,183,121,.1)}
+.students-data-status.is-ready .status-dot{background:#45B88A;box-shadow:0 0 0 4px rgba(69,184,138,.1)}
+.students-data-status.has-error{border-color:rgba(216,120,112,.28);background:rgba(216,120,112,.07);color:#E8A29A}
+.students-data-status.has-error .status-dot{background:#D87870;box-shadow:0 0 0 4px rgba(216,120,112,.1)}
+.page-btn:focus-visible,.action-btn:focus-visible,.primary-btn:focus-visible,.secondary-btn:focus-visible{outline:3px solid rgba(214,183,121,.32)!important;outline-offset:2px}
+.action-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.modal{background:rgba(5,5,4,.78)!important}
+.modal-content{box-shadow:0 28px 90px rgba(0,0,0,.5)!important;border-radius:20px}
