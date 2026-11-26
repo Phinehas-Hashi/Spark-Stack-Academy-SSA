@@ -26,3 +26,18 @@ canvas{max-height:340px}
 .empty-table{padding:40px!important;text-align:center;color:var(--rev-muted)!important}
 @media(max-width:1000px){.analytics-grid,.payment-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.reports-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.main-content{padding:16px!important}.page-header{align-items:flex-start;flex-direction:column;padding:22px!important}.page-header h1{font-size:1.55rem}.stats-grid{grid-template-columns:1fr}.summary-grid,.reports-grid{grid-template-columns:1fr}.header-actions{width:100%}.header-actions input{width:100%}.header-actions select{width:100%}.action-bar>*{width:100%}}
+
+
+/* Obsidian Imperial revenue surfaces */
+:root{--rev-bg:#11110f;--rev-surface:#1b1a17;--rev-border:rgba(214,183,121,.2);--rev-text:#e7e2d5;--rev-muted:#aaa394;--rev-primary:#d6b779;--rev-success:#45b88a;--rev-warning:#d6b779;--rev-danger:#d97770}
+body{background:var(--rev-bg)!important;color:var(--rev-text)!important}
+.glass-card,.stat-card,.breakdown-item,.payment-method,.growth-item{background:#1b1a17!important;border-color:var(--rev-border)!important;color:var(--rev-text)!important;box-shadow:0 12px 32px rgba(0,0,0,.22)!important}
+.page-header h1,.card-header h2,.breakdown-card h2,.payment-card h2,.growth-card h2,.section-header h2,.report-card h3,.summary-card h3{color:var(--rev-text)!important}
+.page-header p,.stat-card h4,.stat-card small,.growth-item span,.payment-method span,.breakdown-item span,.report-card p,.summary-card p{color:var(--rev-muted)!important}
+.primary-btn{background:#d6b779!important;color:#171612!important;box-shadow:none!important}
+.secondary-btn,.card-header select,.header-actions input,.header-actions select{background:#22211d!important;color:#e7e2d5!important;border:1px solid var(--rev-border)!important}
+.card-header option,.header-actions option{background:#1b1a17!important;color:#e7e2d5!important}
+.table-responsive,.table-container{background:#1b1a17!important}
+table th{color:#d6b779!important}table td{color:#e7e2d5!important;border-color:var(--rev-border)!important}
+.status{border:1px solid var(--rev-border)}
+.withdraw-action.approve{background:#234333;color:#9be0bd}.withdraw-action.reject{background:#402522;color:#f0a69a}
