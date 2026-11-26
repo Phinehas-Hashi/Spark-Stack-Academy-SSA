@@ -50,20 +50,17 @@ async function loadAssignments(uid) {
             return;
         }
 
-        const [assignmentResult, submissionResult] = await Promise.allSettled([
-            getDocs(query(
+        const [assignmentResults, submissionResult] = await Promise.all([
+            Promise.all([...courseIds].map(courseId => getDocs(query(
                 collection(db, "assignments"),
-                where("status", "in", ["published", "pending", "active"])
-            )),
+                where("courseId", "==", courseId),
+                where("status", "in", ["published", "active"])
+            )))),
             getDocs(query(
                 collection(db, "submissions"),
                 where("studentId", "==", uid)
             ))
         ]);
-
-        if (assignmentResult.status === "rejected") {
-            throw assignmentResult.reason;
-        }
 
         submissionByAssignment = new Map();
 
@@ -78,7 +75,7 @@ async function loadAssignments(uid) {
         }
 
         assignments = [];
-        assignmentResult.value.forEach(assignmentDoc => {
+        assignmentResults.forEach(snapshot => snapshot.forEach(assignmentDoc => {
             const data = assignmentDoc.data();
             const status = String(data.status || "published").toLowerCase();
             const isStudentVisible = ["published", "pending", "active"].includes(status);
@@ -90,7 +87,7 @@ async function loadAssignments(uid) {
                 ...data,
                 studentSubmission: submissionByAssignment.get(assignmentDoc.id) || null
             });
-        });
+        }));
 
         assignments.sort((a, b) => {
             const dateA = getDateValue(a.dueDate);
