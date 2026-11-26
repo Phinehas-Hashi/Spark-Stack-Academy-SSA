@@ -98,7 +98,11 @@ async function handleEvent(request, env) {
   const declaredLength = Number(request.headers.get("Content-Length") || 0);
   if (declaredLength > 8192) return json({ error: "Request too large." }, 413, allowedOrigin(request, env));
   let body;
-  try { body = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400, allowedOrigin(request, env)); }
+  try {
+    const rawBody = await request.text();
+    if (rawBody.length > 8192) return json({ error: "Request too large." }, 413, allowedOrigin(request, env));
+    body = JSON.parse(rawBody);
+  } catch { return json({ error: "Invalid JSON." }, 400, allowedOrigin(request, env)); }
   const eventType = String(body.event || "");
   const portal = String(body.portal || "login");
   if (!EVENT_TYPES.has(eventType) || !PORTALS.has(portal)) {
