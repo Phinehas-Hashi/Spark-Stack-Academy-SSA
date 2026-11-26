@@ -315,6 +315,21 @@ test("an institution student cannot list other institution members", async () =>
   await assertFails(getDoc(doc(db, "institutions/college-student/members/student-3")));
 });
 
+test("department managers cannot read institution financial records", async () => {
+  await seed(async db => {
+    await setDoc(doc(db, "institutions/college-finance"), { institutionId: "college-finance", status: "active" });
+    await setDoc(doc(db, "institutions/college-finance/members/owner-finance"), institutionMember("owner-finance", "college-finance", "institution_owner"));
+    await setDoc(doc(db, "institutions/college-finance/members/department-manager"), institutionMember("department-manager", "college-finance", "department_manager"));
+    await setDoc(doc(db, "institutionPayments/payment-finance-1"), {
+      institutionId: "college-finance", status: "paid", amount: 1000
+    });
+  });
+  const ownerDb = testEnv.authenticatedContext("owner-finance").firestore();
+  const managerDb = testEnv.authenticatedContext("department-manager").firestore();
+  await assertSucceeds(getDoc(doc(ownerDb, "institutionPayments/payment-finance-1")));
+  await assertFails(getDoc(doc(managerDb, "institutionPayments/payment-finance-1")));
+});
+
 test("institution shared files are writable only by managers in that tenant", async () => {
   await seed(async db => {
     await setDoc(doc(db, "institutions/college-a"), { institutionId: "college-a", status: "active" });
