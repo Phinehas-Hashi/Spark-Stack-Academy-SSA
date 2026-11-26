@@ -34,7 +34,9 @@ function roleBucket(role) {
 }
 function renderCounts() {
   const counts = {total:members.length,students:0,instructors:0,admins:0,moderators:0,staff:0};
-  members.forEach(member => { counts[roleBucket(safe(member.role))] += 1; });
+  members.forEach(member => {
+    if (member.status === "active") counts[roleBucket(safe(member.role))] += 1;
+  });
   $("countTotal").textContent = counts.total.toLocaleString();
   $("countStudents").textContent = counts.students.toLocaleString();
   $("countInstructors").textContent = counts.instructors.toLocaleString();
