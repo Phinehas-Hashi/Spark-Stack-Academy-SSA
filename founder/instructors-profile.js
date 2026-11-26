@@ -187,5 +187,5 @@ window.addEventListener("beforeunload",()=>{});
 onAuthStateChanged(auth,async user=>{
   if(!user){location.replace("../login.html");return;}
   try{await requireFounder(user);await loadInstructor();if(params.get("edit")==="1")showModal("editModal");}
-  catch(error){console.error("[Founder Instructor Profile]",error);toast(error.message||"Unable to load instructor profile.","error");location.replace("security.html");}
+  catch(error){console.error("[Founder Instructor Profile]",error);toast(error.message||"Unable to load instructor profile.","error");// Keep the current Founder page open; show the access/data error in place.}
 });
