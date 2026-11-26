@@ -348,8 +348,8 @@ async function migrateLegacyCurriculum() {
     const moduleQueries = [query(collection(db, "courseModules"), where("instructorId", "==", instructor.uid))];
     const lessonQueries = [query(collection(db, "courseLessons"), where("instructorId", "==", instructor.uid))];
     const [moduleResults, lessonResults] = await Promise.all([
-        Promise.all(moduleQueries.map(getDocs)),
-        Promise.all(lessonQueries.map(getDocs))
+        Promise.all(moduleQueries.map(ref => getDocs(ref))),
+        Promise.all(lessonQueries.map(ref => getDocs(ref)))
     ]);
     const modulesById = new Map();
     const lessonsById = new Map();
