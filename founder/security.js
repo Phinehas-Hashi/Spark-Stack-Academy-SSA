@@ -151,7 +151,7 @@ async function signOutDevice() {
 
 async function loadRecentSecurityEvents(user) {
   const container = $("securityActivity");
-  const base = String(window.SSA_SECURITY_API_BASE || "").replace(/\\/$/, "");
+  const base = String(window.SSA_SECURITY_API_BASE || "").replace(/\/$/, "");
   if (!base) {
     container.innerHTML = '<p class="security-empty">Edge incident collection is not configured yet. Deploy the security Worker and set its URL in js/security-config.js.</p>';
     return;
