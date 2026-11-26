@@ -1,6 +1,6 @@
 import "../../js/ui-runtime.js";
 import { auth, db } from "../../js/firebase.js";
-import { onAuthStateChanged, signOut, multiFactor, TotpMultiFactorGenerator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const componentCache = new Map();
@@ -82,12 +82,7 @@ function loadFounder(){
       if(founder.role!=="founder"||founder.status!=="active"||founder.active===false||founder.verified===false){
         throw new Error("Founder account is not active and verified.");
       }
-      const currentPage=window.location.pathname.split("/").pop()||"dashboard.html";
-      const isSecurityPage=currentPage==="security.html";
-      const hasTotp=multiFactor(user).enrolledFactors.some(f=>f.factorId===TotpMultiFactorGenerator.FACTOR_ID);
-      const tokenResult=await user.getIdTokenResult();
-      const mfaVerified=tokenResult.claims.firebase?.sign_in_second_factor==="totp";
-      if(!isSecurityPage&&(!user.emailVerified||!hasTotp||!mfaVerified)){
+      if(!user.emailVerified){
         window.location.replace("security.html");
         return;
       }
