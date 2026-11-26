@@ -2,7 +2,7 @@
 // SPARK STACK ACADEMY — ACADEMY PROFILE
 // ===================================
 
-import { db, storage } from "../../js/firebase.js";
+import { db, storage } from "../js/firebase.js";
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
