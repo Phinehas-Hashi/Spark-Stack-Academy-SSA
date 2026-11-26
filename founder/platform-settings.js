@@ -422,8 +422,6 @@ async function requireVerifiedFounder(){
  const profileSnap=await getDoc(doc(db,"founder",user.uid));
  const profile=profileSnap.exists()?profileSnap.data():{};
  if(!profileSnap.exists()||profile.role!=="founder"||profile.status!=="active"||profile.active===false||profile.verified===false)throw new Error("Active Founder authorization required.");
- const token=await user.getIdTokenResult();
- if(token.claims.firebase?.sign_in_second_factor!=="totp")throw new Error("Complete Founder authenticator verification first.");
  return user;
 }
 function setPlatformStatus(message,isError=false){const box=$("platformSettingsStatus"),label=$("platformSettingsStatusText");if(!box||!label)return;box.classList.toggle("has-error",isError);box.classList.toggle("is-ready",!isError);label.textContent=message;}
