@@ -1,15 +1,16 @@
 import { auth, db } from "../js/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, onSnapshot, doc, getDoc, runTransaction, serverTimestamp
+  collection, onSnapshot, doc, getDoc, runTransaction, serverTimestamp, query, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const toast = (message,type="success") => window.showFounderToast?.(message,type) || window.showToast?.(message,type);
-let users = [], profiles = [], page = 1, stopUsers = null, stopProfiles = null;
+let users = [], profiles = [], page = 1, stopUsers = null, stopProfiles = null, readyUsers=false, readyProfiles=false, directoryErrors=[];
 const pageSize = 10;
 
+function setDirectoryStatus(){const box=$("instructorsDataStatus"),label=$("instructorsDataStatusText");if(!box||!label)return;const ready=readyUsers&&readyProfiles&&!directoryErrors.length;box.classList.toggle("is-ready",ready);box.classList.toggle("has-error",directoryErrors.length>0);label.textContent=directoryErrors.length?`Data access issue: ${directoryErrors.join(", ")}. Directory figures may be incomplete.`:ready?"Live instructor directory connected":`Syncing instructor records… ${(readyUsers?1:0)+(readyProfiles?1:0)}/2 sources ready`;}
 function normalizeStatus(value) {
   const status = String(value || "pending_review").toLowerCase();
   return ["active","suspended","inactive","pending_review","rejected"].includes(status) ? status : "pending_review";
@@ -133,9 +134,10 @@ async function setInstructorAccess(instructor) {
 }
 function exportInstructors() {
   const rows=[["Name","Email","Phone","Specialization","Status"],...filtered().map(i=>[i.name,i.email,i.phone,i.specialization,i.status])];
-  const csv=rows.map(row=>row.map(value=>'"'+String(value??"").replaceAll('"','""')+'"').join(",")).join("\n");
-  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  const a=document.createElement("a");a.href=url;a.download="ssa-instructors.csv";a.click();URL.revokeObjectURL(url);
+  const safeCell=value=>{let text=String(value??"");if(/^[\\s\\u0000-\\u001f]*[=+@-]/.test(text))text="\'"+text;return '"' + text.replaceAll('"','""') + '"' ;};
+  const csv=rows.map(row=>row.map(safeCell).join(",")).join("\n");
+  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download="ssa-instructors.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   window.ssaSecuritySignal?.("founder_action",{portal:"founder",note:"Instructor directory exported"});
 }
 
@@ -159,11 +161,11 @@ $("exportInstructorBtn")?.addEventListener("click",async()=>{
 });
 
 onAuthStateChanged(auth,async user=>{
-  if(!user){window.location.replace("../login.html");return;}
+  if(!user){window.ssaSecuritySignal?.("access_denied",{portal:"founder",note:"Unauthenticated access to instructor directory"});window.location.replace("../login.html");return;}
   try{
     await verifyFounder(user);
-    stopUsers=onSnapshot(collection(db,"users"),snapshot=>{users=snapshot.docs.map(d=>({id:d.id,...d.data()}));refresh();},error=>{console.error(error);toast("Instructor account directory could not be loaded.","error");});
-    stopProfiles=onSnapshot(collection(db,"instructors"),snapshot=>{profiles=snapshot.docs.map(d=>({id:d.id,...d.data()}));refresh();},error=>{console.error(error);toast("Instructor profile records could not be loaded.","error");});
+    stopUsers=onSnapshot(query(collection(db,"users"),where("role","==","instructor")),snapshot=>{users=snapshot.docs.map(d=>({id:d.id,...d.data()}));readyUsers=true;directoryErrors=directoryErrors.filter(x=>x!=="user accounts");setDirectoryStatus();refresh();},error=>{console.error("[Founder Instructors] User query failed:",error);directoryErrors=[...new Set([...directoryErrors,"user accounts"])];setDirectoryStatus();window.ssaSecuritySignal?.("access_denied",{portal:"founder",note:"Instructor user query denied"});toast("Instructor account directory could not be loaded.","error");});
+    stopProfiles=onSnapshot(collection(db,"instructors"),snapshot=>{profiles=snapshot.docs.map(d=>({id:d.id,...d.data()}));readyProfiles=true;directoryErrors=directoryErrors.filter(x=>x!=="instructor profiles");setDirectoryStatus();refresh();},error=>{console.error("[Founder Instructors] Profile query failed:",error);directoryErrors=[...new Set([...directoryErrors,"instructor profiles"])];setDirectoryStatus();window.ssaSecuritySignal?.("access_denied",{portal:"founder",note:"Instructor profile query denied"});toast("Instructor profile records could not be loaded.","error");});
   }catch(error){console.error(error);toast(error.message||"Founder authorization failed.","error");window.location.replace("security.html");}
 });
 window.addEventListener("beforeunload",()=>{stopUsers?.();stopProfiles?.();});
