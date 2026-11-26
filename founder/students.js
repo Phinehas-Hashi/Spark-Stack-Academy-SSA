@@ -73,8 +73,6 @@ onAuthStateChanged(auth,async user=>{
   const profileSnap=await getDoc(doc(db,"founder",user.uid));
   const profile=profileSnap.exists()?profileSnap.data():{};
   if(!profileSnap.exists()||profile.role!=="founder"||profile.status!=="active"||profile.active===false||profile.verified===false)throw new Error("Active Founder authorization required.");
-  const token=await user.getIdTokenResult();
-  if(token.claims.firebase?.sign_in_second_factor!=="totp"){window.location.replace("security.html");return;}
   subscribe();
- }catch(error){console.error("[Founder Students] Access check failed:",error);toast(error.message||"Founder authorization failed.","error");window.location.replace("../login.html");}
+ }catch(error){console.error("[Founder Students] Access check failed:",error);toast(error.message||"Founder authorization failed.","error");}
 });
