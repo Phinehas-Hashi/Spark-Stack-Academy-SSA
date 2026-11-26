@@ -2190,96 +2190,266 @@ exports.rejectInstitutionApplication = onCall(async request => {
 
 
 
-exports.createInstitutionTeamAccount = onCall(async request => {
-  const callerUid = request.auth?.uid;
-  if (!callerUid) throw new HttpsError("unauthenticated", "Sign in to manage your institution team.");
-  const callerSnap = await db.doc(`users/${callerUid}`).get();
-  const caller = callerSnap.exists ? callerSnap.data() : {};
-  const institutionId = safeText(request.data?.institutionId || caller.institutionId);
-  const [ownerMembershipSnap, institutionSnap] = await Promise.all([
-    institutionId ? db.doc(`institutions/${institutionId}/members/${callerUid}`).get() : Promise.resolve(null),
-    institutionId ? db.doc(`institutions/${institutionId}`).get() : Promise.resolve(null)
-  ]);
-  const ownerMembership = ownerMembershipSnap?.exists ? ownerMembershipSnap.data() : {};
-  const canonicalOwner = ownerMembershipSnap?.exists
-    && ownerMembership.status === "active" && ownerMembership.verified === true
-    && ["institution_owner", "owner"].includes(safeText(ownerMembership.role));
-  const legacyOwner = caller.role === "institution" && caller.institutionRole === "owner"
-    && caller.institutionId === institutionId && caller.status === "active"
-    && caller.active === true && caller.verified === true;
-  if (!institutionId || (!canonicalOwner && !legacyOwner)) {
-    throw new HttpsError("permission-denied", "Only the verified institution owner can add team accounts.");
+// ============================================================
+// INSTITUTION PEOPLE MANAGEMENT — TENANT-SCOPED OPERATIONS
+// ============================================================
+
+const INSTITUTION_MEMBER_ROLES = [
+  "student",
+  "instructor",
+  "institution_staff",
+  "institution_moderator",
+  "department_manager",
+  "institution_admin"
+];
+const INSTITUTION_ADMIN_ROLES = ["institution_owner", "owner", "institution_admin"];
+const INSTITUTION_LEADERSHIP_ROLES = [
+  "institution_owner", "owner", "institution_admin",
+  "institution_moderator", "department_manager", "institution_staff"
+];
+
+async function requireInstitutionPeopleManager(request, institutionIdInput = "") {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in to manage institution members.");
+  const userSnap = await db.doc("users/" + uid).get();
+  const profile = userSnap.exists ? userSnap.data() : {};
+  const institutionId = safeText(institutionIdInput || profile.institutionId);
+  if (!institutionId || institutionId.length > 128) {
+    throw new HttpsError("invalid-argument", "Choose a valid institution workspace.");
   }
-  const institutionRef = db.doc(`institutions/${institutionId}`);
+  const [institutionSnap, membershipSnap] = await Promise.all([
+    db.doc("institutions/" + institutionId).get(),
+    db.doc("institutions/" + institutionId + "/members/" + uid).get()
+  ]);
+  if (!institutionSnap.exists || institutionSnap.data().status !== "active") {
+    throw new HttpsError("failed-precondition", "The institution workspace is not active.");
+  }
+  const membership = membershipSnap.exists ? membershipSnap.data() : {};
+  const canonical = membershipSnap.exists
+    && membership.uid === uid
+    && membership.institutionId === institutionId
+    && membership.status === "active"
+    && membership.verified === true;
+  const legacy = profile.institutionId === institutionId
+    && profile.status === "active" && profile.active === true && profile.verified === true
+    && ["institution", "institution_owner", "institution_admin"].includes(safeText(profile.role));
+  const role = canonical ? safeText(membership.role) : legacy ? safeText(profile.institutionRole) : "";
+  if ((!canonical && !legacy) || !INSTITUTION_ADMIN_ROLES.includes(role)) {
+    throw new HttpsError("permission-denied", "Only the active institution owner or administrator can manage members.");
+  }
+  return { uid, institutionId, role, institution: institutionSnap.data(), profile };
+}
+
+async function refreshInstitutionPeopleUsage(institutionId) {
+  const snapshot = await db.collection("institutions").doc(institutionId).collection("members")
+    .where("status", "==", "active").get();
+  const usage = { instructors: 0, students: 0, adminAccounts: 0 };
+  snapshot.forEach(memberDoc => {
+    const role = safeText(memberDoc.data().role);
+    if (role === "instructor") usage.instructors += 1;
+    else if (role === "student") usage.students += 1;
+    else if (INSTITUTION_LEADERSHIP_ROLES.includes(role)) usage.adminAccounts += 1;
+  });
+  await db.doc("institutions/" + institutionId).set({
+    usage: {
+      instructors: usage.instructors,
+      students: usage.students,
+      adminAccounts: usage.adminAccounts
+    },
+    updatedAt: Timestamp.now()
+  }, { merge: true });
+  return usage;
+}
+
+exports.createInstitutionTeamAccount = onCall(async request => {
+  const manager = await requireInstitutionPeopleManager(request, request.data?.institutionId);
   const email = safeText(request.data?.email).toLowerCase();
   const fullName = safeText(request.data?.fullName);
   const role = safeText(request.data?.role).toLowerCase();
   const password = String(request.data?.temporaryPassword || "");
-  if (!institutionId || !["institution_admin", "instructor"].includes(role)) throw new HttpsError("invalid-argument", "Choose a valid team role.");
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || fullName.length < 2 || password.length < 12) {
+
+  if (!INSTITUTION_MEMBER_ROLES.includes(role)) {
+    throw new HttpsError("invalid-argument", "Choose a supported institution member role.");
+  }
+  if (role === "institution_admin" && manager.role !== "institution_owner" && manager.role !== "owner") {
+    throw new HttpsError("permission-denied", "Only the institution owner can appoint another administrator.");
+  }
+  if (["institution_moderator", "department_manager"].includes(role)
+      && manager.role !== "institution_owner" && manager.role !== "owner") {
+    throw new HttpsError("permission-denied", "Only the institution owner can appoint moderators or department managers.");
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      || fullName.length < 2 || fullName.length > 100 || password.length < 12) {
     throw new HttpsError("invalid-argument", "Provide a valid email, full name and temporary password of at least 12 characters.");
   }
 
-  const activeInstitutionSnap = institutionSnap;
-  if (!activeInstitutionSnap?.exists || activeInstitutionSnap.data().status !== "active") throw new HttpsError("failed-precondition", "Institution workspace is not active.");
-  const institution = institutionSnap.data();
-  const limitKey = role === "instructor" ? "instructors" : "adminAccounts";
-  const roleQuery = db.collection("users").where("institutionId", "==", institutionId).where("institutionRole", "==", role);
-  const existing = await adminAuth.getUserByEmail(email).catch(error => error.code === "auth/user-not-found" ? null : Promise.reject(error));
-  if (existing) throw new HttpsError("already-exists", "An account with this email already exists.");
+  const existing = await adminAuth.getUserByEmail(email).catch(error =>
+    error.code === "auth/user-not-found" ? null : Promise.reject(error)
+  );
+  if (existing) {
+    throw new HttpsError("already-exists", "This email already has an Academy account. Existing-account invitations will be handled through the member-linking workflow.");
+  }
 
   let created;
   try {
-    created = await adminAuth.createUser({ email, password, displayName: fullName, emailVerified: false, disabled: false });
+    created = await adminAuth.createUser({
+      email, password, displayName: fullName, emailVerified: false, disabled: false
+    });
+    const now = Timestamp.now();
+    const institutionRef = db.doc("institutions/" + manager.institutionId);
+    const memberRef = db.doc("institutions/" + manager.institutionId + "/members/" + created.uid);
+    const userRef = db.doc("users/" + created.uid);
+    const memberQuery = db.collection("institutions").doc(manager.institutionId).collection("members")
+      .where("status", "==", "active");
+
     await db.runTransaction(async transaction => {
-      const [freshInstitution, members] = await Promise.all([
+      const [institutionSnap, membersSnap, existingProfile] = await Promise.all([
         transaction.get(institutionRef),
-        transaction.get(roleQuery)
+        transaction.get(memberQuery),
+        transaction.get(userRef)
       ]);
-      if (!freshInstitution.exists || freshInstitution.data().status !== "active") throw new HttpsError("failed-precondition", "Institution workspace is not active.");
-      const limits = freshInstitution.data().limits || {};
-      const max = Number(limits[limitKey] ?? (role === "instructor" ? 20 : 10));
-      const effectiveMax = role === "institution_admin" ? Math.max(0, max - 1) : max;
-      if (members.size >= effectiveMax) throw new HttpsError("resource-exhausted", `Institution limit reached: maximum ${max} ${limitKey === "instructors" ? "instructors" : "admin accounts including the owner"}.`);
-      const memberRef = db.doc(`institutions/${institutionId}/members/${created.uid}`);
-      transaction.create(db.doc(`users/${created.uid}`), {
+      if (!institutionSnap.exists || institutionSnap.data().status !== "active") {
+        throw new HttpsError("failed-precondition", "Institution workspace is not active.");
+      }
+      if (existingProfile.exists) {
+        throw new HttpsError("already-exists", "This Academy identity already has a profile. Use the existing-account invitation workflow.");
+      }
+      const limits = institutionSnap.data().limits || {};
+      const counts = { instructors: 0, students: 0, adminAccounts: 0 };
+      membersSnap.forEach(memberDoc => {
+        const memberRole = safeText(memberDoc.data().role);
+        if (memberRole === "instructor") counts.instructors += 1;
+        else if (memberRole === "student") counts.students += 1;
+        else if (INSTITUTION_LEADERSHIP_ROLES.includes(memberRole)) counts.adminAccounts += 1;
+      });
+      const bucket = role === "instructor" ? "instructors"
+        : role === "student" ? "students" : "adminAccounts";
+      const defaults = { instructors: 20, students: 5000, adminAccounts: 10 };
+      const maximum = Number(limits[bucket] ?? defaults[bucket]);
+      if (counts[bucket] >= maximum) {
+        throw new HttpsError("resource-exhausted", "Institution capacity reached for " + bucket + ".");
+      }
+
+      const globalRole = role === "student" ? "student"
+        : role === "instructor" ? "instructor" : role;
+      transaction.create(userRef, {
         uid: created.uid, email, fullName, name: fullName, displayName: fullName,
-        role: role === "instructor" ? "instructor" : "institution_admin",
-        institutionRole: role, institutionId, institutionName: institution.institutionName,
+        role: globalRole, institutionRole: role, institutionId: manager.institutionId,
+        institutionName: manager.institution.institutionName || manager.institution.legalName || "",
         status: "active", active: true, verified: true,
-        createdAt: Timestamp.now(), createdBy: callerUid
+        createdAt: now, createdBy: manager.uid, updatedAt: now
       });
       transaction.create(memberRef, {
-        uid: created.uid,
-        institutionId,
-        email,
-        fullName,
-        memberType: role === "instructor" ? "instructor" : "institution_admin",
-        role,
-        status: "active",
-        verified: true,
-        createdAt: Timestamp.now(),
-        createdBy: callerUid,
-        updatedAt: Timestamp.now()
+        uid: created.uid, institutionId: manager.institutionId, email, fullName,
+        memberType: role, role, status: "active", verified: true,
+        createdAt: now, createdBy: manager.uid, updatedAt: now,
+        provisionedBy: manager.uid
       });
       transaction.update(institutionRef, {
-        usage: { ...(freshInstitution.data().usage || {}), [limitKey]: role === "institution_admin" ? members.size + 2 : members.size + 1 },
-        updatedAt: Timestamp.now()
+        ["usage." + bucket]: counts[bucket] + 1,
+        updatedAt: now
       });
     });
+
     await db.collection("audit_logs").add({
-      action: "institution_team_account_created", actorId: callerUid,
+      action: "institution_member_account_created", actorId: manager.uid,
       targetId: created.uid, targetEmail: email, targetName: fullName,
-      institutionId, memberRole: role, createdAt: Timestamp.now()
+      institutionId: manager.institutionId, memberRole: role, createdAt: now
     });
-    return { success: true, uid: created.uid, role };
+    return { success: true, uid: created.uid, role, institutionId: manager.institutionId };
   } catch (error) {
     if (created) await adminAuth.deleteUser(created.uid).catch(() => {});
     if (error instanceof HttpsError) throw error;
     console.error("createInstitutionTeamAccount failed:", error);
-    throw new HttpsError("internal", "The team account could not be created.");
+    throw new HttpsError("internal", "The institution member account could not be created.");
   }
 });
+
+exports.updateInstitutionMember = onCall(async request => {
+  const manager = await requireInstitutionPeopleManager(request, request.data?.institutionId);
+  const memberUid = safeText(request.data?.memberUid);
+  const action = safeText(request.data?.action).toLowerCase();
+  const nextRole = safeText(request.data?.role).toLowerCase();
+  const nextStatus = safeText(request.data?.status).toLowerCase();
+  if (!memberUid || memberUid === manager.uid) {
+    throw new HttpsError("invalid-argument", "Choose another member. You cannot change your own institution access here.");
+  }
+  if (!["change_role", "set_status", "revoke"].includes(action)) {
+    throw new HttpsError("invalid-argument", "Unsupported member-management action.");
+  }
+  const memberRef = db.doc("institutions/" + manager.institutionId + "/members/" + memberUid);
+  const now = Timestamp.now();
+  let previous = {};
+  let changes = {};
+
+  await db.runTransaction(async transaction => {
+    const [memberSnap, institutionSnap] = await Promise.all([
+      transaction.get(memberRef),
+      transaction.get(db.doc("institutions/" + manager.institutionId))
+    ]);
+    if (!memberSnap.exists) throw new HttpsError("not-found", "Institution member not found.");
+    if (!institutionSnap.exists || institutionSnap.data().status !== "active") {
+      throw new HttpsError("failed-precondition", "Institution workspace is not active.");
+    }
+    previous = memberSnap.data();
+    const currentRole = safeText(previous.role);
+    if (["institution_owner", "owner"].includes(currentRole)) {
+      throw new HttpsError("permission-denied", "The institution owner cannot be changed from the member directory.");
+    }
+    if (manager.role !== "institution_owner" && manager.role !== "owner"
+        && INSTITUTION_ADMIN_ROLES.includes(currentRole)) {
+      throw new HttpsError("permission-denied", "Only the institution owner can manage another administrator.");
+    }
+
+    if (action === "change_role") {
+      if (!INSTITUTION_MEMBER_ROLES.includes(nextRole) || nextRole === "institution_owner") {
+        throw new HttpsError("invalid-argument", "Choose a valid non-owner institution role.");
+      }
+      if (["institution_admin", "institution_moderator", "department_manager"].includes(nextRole)
+          && manager.role !== "institution_owner" && manager.role !== "owner") {
+        throw new HttpsError("permission-denied", "Only the institution owner can assign leadership roles.");
+      }
+      changes = { role: nextRole, memberType: nextRole, updatedAt: now, updatedBy: manager.uid };
+    } else {
+      const status = action === "revoke" ? "revoked" : nextStatus;
+      if (!["active", "suspended", "revoked"].includes(status)) {
+        throw new HttpsError("invalid-argument", "Choose active, suspended or revoked.");
+      }
+      changes = {
+        status, verified: status === "active" ? true : previous.verified === true,
+        updatedAt: now, updatedBy: manager.uid,
+        ...(status === "revoked" ? { revokedAt: now, revokedBy: manager.uid } : {})
+      };
+    }
+    transaction.update(memberRef, changes);
+  });
+
+  const userRef = db.doc("users/" + memberUid);
+  if (action === "change_role") {
+    const profileSnap = await userRef.get();
+    if (profileSnap.exists()) {
+      const globalRole = nextRole === "student" ? "student"
+        : nextRole === "instructor" ? "instructor" : nextRole;
+      await userRef.set({
+        role: globalRole, institutionRole: nextRole,
+        institutionId: manager.institutionId, updatedAt: now
+      }, { merge: true });
+    }
+  }
+  const usage = await refreshInstitutionPeopleUsage(manager.institutionId);
+  await db.collection("audit_logs").add({
+    action: "institution_member_" + action,
+    actorId: manager.uid, targetId: memberUid,
+    institutionId: manager.institutionId,
+    previousRole: safeText(previous.role),
+    nextRole: action === "change_role" ? nextRole : safeText(previous.role),
+    previousStatus: safeText(previous.status),
+    nextStatus: action === "revoke" ? "revoked" : action === "set_status" ? nextStatus : safeText(previous.status),
+    createdAt: now
+  });
+  return { success: true, memberUid, changes, usage };
+});
+
 
 async function writeNotification({ event, recipientId = null, role = null, audience = "user", title, message, type = "general", priority = "normal", metadata = {} }) {
   const id = eventKey(event, recipientId || role || audience);
