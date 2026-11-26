@@ -1324,6 +1324,59 @@ exports.saveMarketplacePricing = onCall(async request => {
   return { success: true, pricingStatus: "proposed", prices };
 });
 
+exports.founderSendBroadcast = onCall(async request => {
+  const founder = await requireFounder(request);
+  const title = safeText(request.data?.title);
+  const message = safeText(request.data?.message);
+  const target = safeText(request.data?.target || "all");
+  const priority = safeText(request.data?.priority || "normal");
+  const roles = { students:"student", instructors:"instructor", admins:"admin" };
+
+  if (!title || title.length > 120) throw new HttpsError("invalid-argument","Announcement title must be 1–120 characters.");
+  if (!message || message.length > 4000) throw new HttpsError("invalid-argument","Announcement message must be 1–4,000 characters.");
+  if (!["all","students","instructors","admins"].includes(target)) throw new HttpsError("invalid-argument","Choose a valid announcement audience.");
+  if (!["normal","high","critical"].includes(priority)) throw new HttpsError("invalid-argument","Choose a valid announcement priority.");
+
+  const dayKey = new Date().toISOString().slice(0,10);
+  const limitRef = db.doc(`founderBroadcastLimits/${founder.uid}`);
+  await db.runTransaction(async tx => {
+    const snap = await tx.get(limitRef);
+    const data = snap.exists ? snap.data() : {};
+    const count = data.dayKey === dayKey ? Number(data.count || 0) : 0;
+    if (count >= 10) throw new HttpsError("resource-exhausted","Daily broadcast limit reached. Try again tomorrow.");
+    tx.set(limitRef,{dayKey,count:count+1,updatedAt:Timestamp.now()},{merge:true});
+  });
+
+  const recipientQuery = target === "all"
+    ? db.collection("users")
+    : db.collection("users").where("role","==",roles[target]);
+  const recipientSnap = await recipientQuery.get();
+  if (recipientSnap.size > 5000) throw new HttpsError("resource-exhausted","Audience exceeds the 5,000-recipient broadcast limit.");
+
+  const now = Timestamp.now();
+  const broadcastRef = db.collection("broadcasts").doc();
+  const announcementRef = db.collection("announcements").doc();
+  const audience = target === "all" ? "Everyone" : target[0].toUpperCase()+target.slice(1);
+  const notificationDocs = recipientSnap.docs.map(userDoc => ({
+    ref:db.collection("notifications").doc(),
+    data:{userId:userDoc.id,title,message,type:"broadcast",priority,read:false,broadcastId:broadcastRef.id,createdAt:now,createdBy:founder.uid}
+  }));
+
+  const firstBatch = db.batch();
+  firstBatch.create(broadcastRef,{title,message,target,priority,channels:["in-app","announcement"],status:"sent",sentBy:founder.uid,sentAt:now,recipientCount:notificationDocs.length});
+  firstBatch.create(announcementRef,{title,message,category:"System",audience,priority,important:priority!=="normal",pinned:priority==="critical",push:true,email:false,popup:priority==="critical",status:"published",createdAt:now,createdBy:founder.uid});
+  notificationDocs.slice(0,450).forEach(item=>firstBatch.create(item.ref,item.data));
+  await firstBatch.commit();
+
+  for(let index=450;index<notificationDocs.length;index+=450){
+    const batch=db.batch();
+    notificationDocs.slice(index,index+450).forEach(item=>batch.create(item.ref,item.data));
+    await batch.commit();
+  }
+  await db.collection("audit_logs").add({action:"founder_broadcast_sent",actorId:founder.uid,target,priority,recipientCount:notificationDocs.length,targetId:broadcastRef.id,createdAt:now});
+  return {success:true,broadcastId:broadcastRef.id,recipientCount:notificationDocs.length};
+});
+
 exports.founderModerateCourse = onCall(async request => {
   const founder = await requireFounder(request);
   const courseId = safeText(request.data?.courseId);
