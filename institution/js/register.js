@@ -1,6 +1,8 @@
-import { auth, db } from "../../js/firebase.js";
+import { auth } from "../../js/firebase.js";
 import { createUserWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const submitInstitutionApplication = httpsCallable(getFunctions(), "submitInstitutionApplication");
 
 const form = document.getElementById("institutionRegistrationForm");
 const button = document.getElementById("submitInstitutionApplication");
@@ -34,8 +36,7 @@ form?.addEventListener("submit", async event => {
     createdUser = credential.user;
     await updateProfile(createdUser, { displayName: value("ownerName") });
 
-    const application = {
-      institutionOwnerUid: createdUser.uid,
+    await submitInstitutionApplication({
       institutionName: value("institutionName"),
       institutionType: value("institutionType"),
       country: value("country"),
@@ -43,15 +44,10 @@ form?.addEventListener("submit", async event => {
       learnerRange: value("learnerRange"),
       institutionPhone: value("institutionPhone"),
       ownerName: value("ownerName"),
-      ownerEmail: email,
-      ownerPosition: value("ownerPosition"),
-      status: "pending_review",
-      submittedAt: serverTimestamp(),
-      source: "institution_registration"
-    };
-    await setDoc(doc(db, "institutionApplications", createdUser.uid), application);
+      ownerPosition: value("ownerPosition")
+    });
     await signOut(auth);
-    report("Application submitted. Our team will review your institution details. Your institution workspace will become available after approval.", "success");
+    report("Application submitted. A restricted provisional workspace has been reserved. Full institution access begins after Academy verification and approval.", "success");
     form.reset();
     const country = form.elements.namedItem("country");
     if (country) country.value = "Kenya";
@@ -63,7 +59,7 @@ form?.addEventListener("submit", async event => {
     const messages = {
       "auth/email-already-in-use": "An account already exists with this email. Try signing in or use another email.",
       "auth/weak-password": "Choose a stronger password with at least 8 characters.",
-      "permission-denied": "The application could not be saved because the database permission rules are not yet deployed. Please contact the Academy team; do not repeatedly submit.",
+      "permission-denied": "The Academy could not verify the institution application request. Contact support with the error code; do not repeatedly create accounts.",
       "auth/invalid-email": "Enter a valid email address."
     };
     report(messages[error.code] || "We could not submit the application. Please check your connection and try again. If an account was created, contact support before retrying.", "error");

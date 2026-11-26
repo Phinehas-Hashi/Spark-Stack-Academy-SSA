@@ -28,6 +28,7 @@ const DASHBOARDS = Object.freeze({
     admin: "admin/dashboard.html",
     instructor: "instructor/dashboard.html",
     institution: "institution/dashboard.html",
+    institution_applicant: "institution/dashboard.html",
     institution_owner: "institution/dashboard.html",
     institution_admin: "institution/dashboard.html",
     student: "student/dashboard.html"
@@ -277,6 +278,15 @@ function getAccessDecision(profile) {
         return data.active === true && data.status === "active" && data.verified === true
             ? { allowed: true }
             : { allowed: false, message: profile.failureMessage || "The Founder account is not active and verified." };
+    }
+
+    // Institution applicants may enter only the restricted provisional
+    // workspace. The institution portal independently verifies ownership
+    // and the provisional workspace record before rendering that view.
+    if (role === "institution_applicant") {
+        return data.status === "pending_review" && data.active === false && data.verified === false
+            ? { allowed: true }
+            : { allowed: false, message: "This institution application is not eligible for provisional workspace access." };
     }
 
     if (data.active === false) {

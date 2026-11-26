@@ -127,6 +127,6 @@ async function startPage(user){
 onAuthStateChanged(auth,async user=>{
   if(!user){window.ssaSecuritySignal?.("access_denied",{portal:"founder",note:"Unauthenticated access to certificate settings"});location.replace("../login.html");return;}
   try{await startPage(user);}
-  catch(error){console.error("[Founder Certificates] Access check failed:",error);setStatus(error.message||"Founder authorization failed.",true);showNotice(error.message||"Founder authorization failed.","error");location.replace("security.html");}
+  catch(error){console.error("[Founder Certificates] Access check failed:",error);setStatus(error.message||"Founder authorization failed.",true);showNotice(error.message||"Founder authorization failed.","error");/* Keep the current Founder page open; show the access/data error in place. */}
 });
 window.addEventListener("beforeunload",()=>stopCertificates?.());

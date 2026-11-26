@@ -6,7 +6,12 @@ on:
       - "founder/**"
       - "js/**"
       - "security-worker/**"
+      - "institution/**"
+      - "functions/**"
+      - "tests/**"
+      - "package.json"
       - "firestore.rules"
+      - "storage.rules"
       - ".github/workflows/founder-security-syntax.yml"
   push:
     branches: [main]
@@ -38,6 +43,10 @@ jobs:
             founder/analytics.js
             founder/students.js
             founder/instructors.js
+            founder/instructors-profile.js
+            institution/js/register.js
+            institution/js/institution-app.js
+            institution/js/institution-courses.js
             functions/index.js
             founder/courses.js
             founder/certificates.js
@@ -48,6 +57,8 @@ jobs:
             founder/wallets/payouts.js
             js/firebase.js
             js/login.js
+            js/admin-login.js
+            tests/firestore.rules.test.mjs
             js/security-config.js
             js/security-telemetry.js
             security-worker/src/index.js
@@ -56,3 +67,19 @@ jobs:
             echo "Checking ${file}"
             node --input-type=module --check < "${file}"
           done
+
+  firestore-rules-emulator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+      - name: Install test dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run Firestore rules tests in isolated emulator
+        run: npx firebase emulators:exec --only firestore,storage --project demo-spark-stack-academy-tenant-tests "npm run test:rules"

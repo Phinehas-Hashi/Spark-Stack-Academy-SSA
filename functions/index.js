@@ -130,6 +130,135 @@ async function requireInstitutionReviewer(request) {
 
 
 // ============================================================
+// INSTITUTION APPLICATION — TRUSTED PROVISIONING
+// Creates the application, restricted provisional workspace,
+// global applicant profile and pending owner membership atomically.
+// ============================================================
+
+exports.submitInstitutionApplication = onCall(async request => {
+  const uid = request.auth?.uid;
+  const email = safeText(request.auth?.token?.email).toLowerCase();
+  if (!uid || !email) {
+    throw new HttpsError("unauthenticated", "Sign in with a valid email before submitting an institution application.");
+  }
+
+  const data = request.data || {};
+  const institutionName = safeText(data.institutionName);
+  const institutionType = safeText(data.institutionType);
+  const country = safeText(data.country);
+  const website = safeText(data.website);
+  const learnerRange = safeText(data.learnerRange);
+  const institutionPhone = safeText(data.institutionPhone);
+  const ownerName = safeText(data.ownerName);
+  const ownerPosition = safeText(data.ownerPosition);
+
+  if (institutionName.length < 2 || institutionName.length > 120
+    || ownerName.length < 2 || ownerName.length > 120
+    || !institutionType || institutionType.length > 80
+    || !country || country.length > 80
+    || !institutionPhone || institutionPhone.length > 40
+    || !ownerPosition || ownerPosition.length > 80
+    || !learnerRange || learnerRange.length > 80
+    || website.length > 240
+    || (website && !/^https?:\/\//i.test(website))) {
+    throw new HttpsError("invalid-argument", "Complete the institution details with valid values before submitting.");
+  }
+
+  const applicationRef = db.doc("institutionApplications/" + uid);
+  const institutionRef = db.doc("institutions/" + uid);
+  const userRef = db.doc("users/" + uid);
+  const membershipRef = db.doc("institutions/" + uid + "/members/" + uid);
+  const now = Timestamp.now();
+
+  try {
+    await db.runTransaction(async transaction => {
+      const [applicationSnap, institutionSnap, userSnap] = await Promise.all([
+        transaction.get(applicationRef),
+        transaction.get(institutionRef),
+        transaction.get(userRef)
+      ]);
+      if (applicationSnap.exists || institutionSnap.exists) {
+        throw new HttpsError("already-exists", "An institution application or workspace already exists for this account.");
+      }
+      if (userSnap.exists) {
+        throw new HttpsError("already-exists", "This Academy account already has a profile. Sign in and contact the Academy team to link an institution application.");
+      }
+
+      transaction.create(userRef, {
+        uid,
+        email,
+        fullName: ownerName,
+        name: ownerName,
+        displayName: ownerName,
+        role: "institution_applicant",
+        status: "pending_review",
+        active: false,
+        verified: false,
+        createdAt: now,
+        updatedAt: now
+      });
+
+      transaction.create(applicationRef, {
+        institutionOwnerUid: uid,
+        institutionName,
+        institutionType,
+        country,
+        website,
+        learnerRange,
+        institutionPhone,
+        ownerName,
+        ownerEmail: email,
+        ownerPosition,
+        status: "pending_review",
+        submittedAt: now,
+        source: "institution_registration"
+      });
+
+      transaction.create(institutionRef, {
+        institutionId: uid,
+        legalName: institutionName,
+        institutionName,
+        institutionType,
+        country,
+        website,
+        contactPhone: institutionPhone,
+        ownerUid: uid,
+        ownerName,
+        ownerEmail: email,
+        estimatedLearnerRange: learnerRange,
+        status: "provisional",
+        workspaceStage: "provisional",
+        verificationStatus: "pending_review",
+        limits: { instructors: 0, courses: 0, students: 0, adminAccounts: 0 },
+        usage: { instructors: 0, courses: 0, students: 0, adminAccounts: 0 },
+        subscription: { plan: "none", status: "not_started" },
+        createdAt: now,
+        updatedAt: now
+      });
+
+      transaction.create(membershipRef, {
+        uid,
+        institutionId: uid,
+        memberType: "institution_owner",
+        role: "institution_owner",
+        status: "pending_verification",
+        verified: false,
+        email,
+        fullName: ownerName,
+        createdAt: now,
+        updatedAt: now
+      });
+    });
+
+    return { success: true, applicationId: uid, institutionId: uid, status: "pending_review", workspaceStatus: "provisional" };
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    console.error("submitInstitutionApplication failed:", error);
+    throw new HttpsError("internal", "The institution application could not be saved. Check the application status before retrying.");
+  }
+});
+
+// ============================================================
 // DARAJA — INSTITUTION ONBOARDING COLLECTION
 // STK callbacks are independently verified using STK Query.
 // ============================================================
@@ -327,6 +456,7 @@ async function completeInstitutionOnboardingPayment(paymentDoc, payment, metadat
   const institutionRef = db.doc("institutions/" + payment.institutionId);
   const applicationRef = db.doc("institutionApplications/" + payment.applicationId);
   const userRef = db.doc("users/" + payment.ownerUid);
+  const ownerMembershipRef = db.doc("institutions/" + payment.institutionId + "/members/" + payment.ownerUid);
   await db.runTransaction(async transaction => {
     const [institutionSnap, paymentSnap] = await Promise.all([
       transaction.get(institutionRef), transaction.get(paymentDoc.ref)
@@ -344,6 +474,16 @@ async function completeInstitutionOnboardingPayment(paymentDoc, payment, metadat
       paidAmount: Number(metadata.Amount),
       paidPhoneNumber: String(metadata.PhoneNumber),
       verifiedAt: now, updatedAt: now
+    }, { merge: true });
+    transaction.set(ownerMembershipRef, {
+      uid: payment.ownerUid,
+      institutionId: payment.institutionId,
+      memberType: "institution_owner",
+      role: "institution_owner",
+      status: "active",
+      verified: true,
+      activatedAt: now,
+      updatedAt: now
     }, { merge: true });
     transaction.set(institutionRef, {
       status: "active",
@@ -1175,19 +1315,52 @@ exports.reconcileStudentStkPayments = onSchedule({
 });
 
 
-function requireActiveInstitutionMember(request) {
+async function requireActiveInstitutionMember(request) {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Sign in to manage institution courses.");
-  return db.doc("users/" + uid).get().then(snap => {
-    const p = snap.exists ? snap.data() : {};
-    const role = safeText(p.role).toLowerCase();
-    if (!["institution", "institution_owner", "institution_admin"].includes(role)
-      || p.status !== "active" || p.active !== true || p.verified !== true
-      || !p.institutionId) {
-      throw new HttpsError("permission-denied", "An active, verified institution account is required.");
-    }
-    return { uid, profile: p, institutionId: p.institutionId };
-  });
+
+  const profileSnap = await db.doc("users/" + uid).get();
+  const profile = profileSnap.exists ? profileSnap.data() : {};
+  // The requested tenant is navigation context only. The canonical membership
+  // document is the authorization grant; legacy profile fields are a temporary
+  // compatibility fallback for accounts that have not yet been migrated.
+  const institutionId = safeText(request.data?.institutionId || profile.institutionId);
+  if (!institutionId || institutionId.length > 128) {
+    throw new HttpsError("permission-denied", "Choose an institution where you have an active membership.");
+  }
+
+  const [institutionSnap, membershipSnap] = await Promise.all([
+    db.doc("institutions/" + institutionId).get(),
+    db.doc("institutions/" + institutionId + "/members/" + uid).get()
+  ]);
+  const membership = membershipSnap.exists ? membershipSnap.data() : {};
+  const canonicalAllowed = membershipSnap.exists
+    && safeText(membership.uid || uid) === uid
+    && safeText(membership.institutionId || institutionId) === institutionId
+    && membership.status === "active"
+    && membership.verified === true;
+  const legacyRole = safeText(profile.role).toLowerCase();
+  const legacyAllowed = profile.institutionId === institutionId
+    && ["institution", "institution_owner", "institution_admin"].includes(legacyRole)
+    && profile.status === "active" && profile.active === true && profile.verified === true;
+
+  if (!institutionSnap.exists || institutionSnap.data().status !== "active") {
+    throw new HttpsError("failed-precondition", "Institution workspace is not active.");
+  }
+  if (!canonicalAllowed && !legacyAllowed) {
+    throw new HttpsError("permission-denied", "An active, verified membership in this institution is required.");
+  }
+  const institutionRole = canonicalAllowed
+    ? safeText(membership.role)
+    : safeText(profile.institutionRole);
+  const managerRoles = ["institution_owner", "owner", "institution_admin", "department_manager"];
+  if (canonicalAllowed && !managerRoles.includes(institutionRole)) {
+    throw new HttpsError("permission-denied", "Your institution membership does not include course-management permissions.");
+  }
+  if (legacyAllowed && !["owner", "institution_admin"].includes(institutionRole)) {
+    throw new HttpsError("permission-denied", "Your legacy institution role does not include course-management permissions.");
+  }
+  return { uid, profile, membership, institutionId, institutionRole };
 }
 
 exports.createInstitutionCourse = onCall(async request => {
@@ -1205,9 +1378,25 @@ exports.createInstitutionCourse = onCall(async request => {
   if (!Number.isFinite(price) || price < 0 || price > 10000000) throw new HttpsError("invalid-argument", "Enter a valid course price.");
   if (!["KES", "USD", "EUR", "GBP"].includes(currency)) throw new HttpsError("invalid-argument", "Unsupported course currency.");
   if (instructorId) {
-    const instructorSnap = await db.doc("users/" + instructorId).get();
+    const [instructorSnap, instructorMembershipSnap] = await Promise.all([
+      db.doc("users/" + instructorId).get(),
+      db.doc("institutions/" + member.institutionId + "/members/" + instructorId).get()
+    ]);
     const instructor = instructorSnap.exists ? instructorSnap.data() : {};
-    if (instructor.role !== "instructor" || instructor.institutionId !== member.institutionId || instructor.status !== "active" || instructor.active !== true || instructor.verified !== true) {
+    const instructorMembership = instructorMembershipSnap.exists ? instructorMembershipSnap.data() : {};
+    const canonicalInstructor = instructorMembershipSnap.exists
+      && instructorMembership.institutionId === member.institutionId
+      && instructorMembership.uid === instructorId
+      && instructorMembership.memberType === "instructor"
+      && instructorMembership.role === "instructor"
+      && instructorMembership.status === "active"
+      && instructorMembership.verified === true;
+    const legacyInstructor = instructor.role === "instructor"
+      && instructor.institutionId === member.institutionId
+      && instructor.status === "active"
+      && instructor.active === true
+      && instructor.verified === true;
+    if (!canonicalInstructor && !legacyInstructor) {
       throw new HttpsError("failed-precondition", "The selected instructor is not an active verified member of this institution.");
     }
   }
@@ -1883,6 +2072,22 @@ exports.approveInstitutionApplication = onCall({ secrets: DARAJA_SECRETS }, asyn
         updatedAt: now
       }, { merge: true });
 
+      // Canonical owner membership is the tenant authorization record.
+      // A pre-activation payment requirement keeps this membership pending.
+      transaction.set(db.doc(`institutions/${applicationId}/members/${ownerUid}`), {
+        uid: ownerUid,
+        institutionId: applicationId,
+        memberType: "institution_owner",
+        role: "institution_owner",
+        status: requiresPaymentBeforeActivation ? "pending_verification" : "active",
+        verified: !requiresPaymentBeforeActivation,
+        email: application.ownerEmail,
+        fullName: application.ownerName,
+        createdAt: institutionSnap.exists ? (institutionSnap.data().createdAt || now) : now,
+        updatedAt: now,
+        ...(requiresPaymentBeforeActivation ? {} : { activatedAt: now })
+      }, { merge: true });
+
       transaction.update(applicationRef, {
         status: requiresPaymentBeforeActivation ? "approved_awaiting_payment" : "approved",
         reviewedAt: now,
@@ -1990,11 +2195,21 @@ exports.createInstitutionTeamAccount = onCall(async request => {
   if (!callerUid) throw new HttpsError("unauthenticated", "Sign in to manage your institution team.");
   const callerSnap = await db.doc(`users/${callerUid}`).get();
   const caller = callerSnap.exists ? callerSnap.data() : {};
-  if (caller.role !== "institution" || caller.institutionRole !== "owner" || caller.status !== "active" || caller.active !== true || caller.verified !== true) {
+  const institutionId = safeText(request.data?.institutionId || caller.institutionId);
+  const [ownerMembershipSnap, institutionSnap] = await Promise.all([
+    institutionId ? db.doc(`institutions/${institutionId}/members/${callerUid}`).get() : Promise.resolve(null),
+    institutionId ? db.doc(`institutions/${institutionId}`).get() : Promise.resolve(null)
+  ]);
+  const ownerMembership = ownerMembershipSnap?.exists ? ownerMembershipSnap.data() : {};
+  const canonicalOwner = ownerMembershipSnap?.exists
+    && ownerMembership.status === "active" && ownerMembership.verified === true
+    && ["institution_owner", "owner"].includes(safeText(ownerMembership.role));
+  const legacyOwner = caller.role === "institution" && caller.institutionRole === "owner"
+    && caller.institutionId === institutionId && caller.status === "active"
+    && caller.active === true && caller.verified === true;
+  if (!institutionId || (!canonicalOwner && !legacyOwner)) {
     throw new HttpsError("permission-denied", "Only the verified institution owner can add team accounts.");
   }
-
-  const institutionId = safeText(caller.institutionId);
   const institutionRef = db.doc(`institutions/${institutionId}`);
   const email = safeText(request.data?.email).toLowerCase();
   const fullName = safeText(request.data?.fullName);
@@ -2005,8 +2220,8 @@ exports.createInstitutionTeamAccount = onCall(async request => {
     throw new HttpsError("invalid-argument", "Provide a valid email, full name and temporary password of at least 12 characters.");
   }
 
-  const institutionSnap = await institutionRef.get();
-  if (!institutionSnap.exists || institutionSnap.data().status !== "active") throw new HttpsError("failed-precondition", "Institution workspace is not active.");
+  const activeInstitutionSnap = institutionSnap;
+  if (!activeInstitutionSnap?.exists || activeInstitutionSnap.data().status !== "active") throw new HttpsError("failed-precondition", "Institution workspace is not active.");
   const institution = institutionSnap.data();
   const limitKey = role === "instructor" ? "instructors" : "adminAccounts";
   const roleQuery = db.collection("users").where("institutionId", "==", institutionId).where("institutionRole", "==", role);
@@ -2035,8 +2250,17 @@ exports.createInstitutionTeamAccount = onCall(async request => {
         createdAt: Timestamp.now(), createdBy: callerUid
       });
       transaction.create(memberRef, {
-        uid: created.uid, email, fullName, role, status: "active",
-        createdAt: Timestamp.now(), createdBy: callerUid
+        uid: created.uid,
+        institutionId,
+        email,
+        fullName,
+        memberType: role === "instructor" ? "instructor" : "institution_admin",
+        role,
+        status: "active",
+        verified: true,
+        createdAt: Timestamp.now(),
+        createdBy: callerUid,
+        updatedAt: Timestamp.now()
       });
       transaction.update(institutionRef, {
         usage: { ...(freshInstitution.data().usage || {}), [limitKey]: role === "institution_admin" ? members.size + 2 : members.size + 1 },
