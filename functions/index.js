@@ -1324,6 +1324,49 @@ exports.saveMarketplacePricing = onCall(async request => {
   return { success: true, pricingStatus: "proposed", prices };
 });
 
+exports.founderReviewWithdrawal = onCall(async request => {
+  const founder = await requireFounder(request);
+  const withdrawalId = safeText(request.data?.withdrawalId);
+  const decision = safeText(request.data?.decision).toLowerCase();
+  const reason = safeText(request.data?.reason).slice(0, 1000);
+  if (!withdrawalId || !["approve", "reject"].includes(decision)) {
+    throw new HttpsError("invalid-argument", "Choose a valid withdrawal and decision.");
+  }
+  if (decision === "reject" && reason.length < 5) {
+    throw new HttpsError("invalid-argument", "Provide a clear rejection reason of at least five characters.");
+  }
+  const ref = db.doc("withdrawals/" + withdrawalId);
+  const now = Timestamp.now();
+  let result;
+  await db.runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("not-found", "Withdrawal request was not found.");
+    const data = snap.data();
+    const status = safeText(data.status).toLowerCase();
+    if (status !== "pending") throw new HttpsError("failed-precondition", "This request is no longer pending. Refresh the queue.");
+    const nextStatus = decision === "approve" ? "approved" : "rejected";
+    tx.update(ref, {
+      status: nextStatus,
+      reviewReason: decision === "reject" ? reason : "",
+      reviewedAt: now,
+      reviewedBy: founder.uid,
+      updatedAt: now
+    });
+    result = { status: nextStatus, instructorId: safeText(data.instructorId || data.userId) };
+  });
+  await db.collection("audit_logs").add({
+    action: "founder_withdrawal_" + result.status,
+    actorId: founder.uid,
+    targetId: withdrawalId,
+    instructorId: result.instructorId || null,
+    reason: decision === "reject" ? reason : null,
+    createdAt: now
+  });
+  return { success: true, status: result.status, note: decision === "approve"
+    ? "Approved for payout processing. No funds have been transferred."
+    : "Request rejected and the reason recorded." };
+});
+
 exports.founderSendBroadcast = onCall(async request => {
   const founder = await requireFounder(request);
   const title = safeText(request.data?.title);
