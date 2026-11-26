@@ -55,9 +55,10 @@
 <div class="panel-actions"><button id="scheduleBtn" class="primary-btn"><i data-lucide="calendar-clock"></i> Schedule Maintenance</button><button id="cancelScheduleBtn" class="ghost-btn">Cancel Scheduled Window</button></div>
 <div id="scheduleInfo" class="schedule-info">No maintenance window scheduled.</div>
 </section>
+<section class="command-panel threat-panel"><div class="panel-title"><div><span class="eyebrow">THREAT INTELLIGENCE</span><h2>Security incidents</h2><p class="muted">Server-received event timeline with account attribution and approximate network location.</p></div><div class="incident-tools"><span id="securityIncidentCount" class="audit-count">Waiting for collector</span><button id="refreshSecurityIncidents" class="ghost-btn" type="button">Refresh</button></div></div><div id="securityIncidentList" class="incident-list"><div class="empty">Security edge collector is not configured yet.</div></div><p class="muted incident-disclaimer">Client-reported signals are not proof of a person’s identity. IP geolocation is approximate. Direct Firebase denials require Google Cloud audit logging.</p></section>
 <section class="command-panel live-panel">
 <div class="panel-title command-log-title">
-<div><span class="eyebrow">SECURITY AUDIT</span><h2>Command Audit Log</h2><p class="muted">Search, sort and remove audit entries when necessary.</p></div>
+<div><span class="eyebrow">SECURITY AUDIT</span><h2>Command Audit Log</h2><p class="muted">Historical command entries are read-only. New security events are collected by the trusted edge service.</p></div>
 <div class="audit-count" id="auditCount">0 entries</div>
 </div>
 <div class="audit-toolbar">
@@ -69,7 +70,7 @@
 <option value="actor">Actor A–Z</option>
 </select>
 <button id="clearAuditSearch" class="ghost-btn audit-clear" type="button">Clear</button>
-<button id="deleteFilteredAudit" class="danger-btn audit-delete-all" type="button"><i data-lucide="trash-2"></i> Delete shown</button>
+
 </div>
 <div id="commandLog" class="command-log"><div class="empty">Loading command history...</div></div>
 </section>
