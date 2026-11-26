@@ -3,49 +3,82 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Security Settings | Founder OS</title>
+<meta name="theme-color" content="#11110F">
+<meta name="description" content="Founder identity, authentication and session security controls.">
+<title>Security Command | Spark Stack Academy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="security.css">
 <link rel="stylesheet" href="founder-unified.css">
 </head>
 <body>
-<div class="dashboard-layout">
-<aside id="sidebarContainer"></aside>
-<div id="sidebarOverlay"></div>
-<main class="main-content">
-<header id="topbarContainer"></header>
-<section class="page-header glass-card"><h1>🔒 Security Settings</h1><p>Manage founder authentication, session security and platform protection.</p></section>
-<section class="glass-card section-card">
-<h2>Password</h2>
-<div class="form-grid">
-<div class="input-group"><label>Current Password</label><input type="password" id="currentPassword" autocomplete="current-password" placeholder="••••••••"></div>
-<div class="input-group"><label>New Password</label><input type="password" id="newPassword" autocomplete="new-password"></div>
-<div class="input-group"><label>Confirm Password</label><input type="password" id="confirmPassword" autocomplete="new-password"></div>
-</div>
-<div class="action-bar"><button class="primary-btn" id="changePasswordBtn">🔑 Change Password</button></div>
+<div class="founder-app security-app">
+<aside id="sidebarContainer" class="founder-sidebar"></aside>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<main class="founder-main">
+<header id="topbarContainer" class="founder-topbar"></header>
+<section class="founder-page security-page">
+<header class="security-hero">
+  <div class="security-hero-copy">
+    <span class="security-eyebrow"><span class="eyebrow-dot"></span> FOUNDER SECURITY / IDENTITY CONTROL</span>
+    <h1>Security <span>Command</span></h1>
+    <p>Protect the founder identity, strengthen sign-in and review security signals.</p>
+  </div>
+  <div class="security-posture"><span class="posture-icon">◆</span><div><small>IDENTITY POSTURE</small><strong id="securityPosture">Checking controls</strong></div></div>
+</header>
+
+<section class="security-overview">
+  <article class="security-metric"><span class="metric-label">MULTI-FACTOR AUTH</span><strong id="mfaMetric">Checking</strong><small id="mfaMetricNote">Firebase Authentication</small></article>
+  <article class="security-metric"><span class="metric-label">EMAIL VERIFICATION</span><strong id="emailMetric">Checking</strong><small id="emailMetricNote">Account ownership</small></article>
+  <article class="security-metric"><span class="metric-label">ACTIVE SESSION</span><strong id="sessionMetric">Current device</strong><small id="sessionMetricNote">This browser session</small></article>
 </section>
-<section class="glass-card section-card">
-<h2>Security Options</h2>
-<div class="toggle-list">
-<div class="toggle-item"><span>Two Factor Authentication</span><input type="checkbox" id="twoFactor"></div>
-<div class="toggle-item"><span>Email Login Alerts</span><input type="checkbox" id="loginAlerts"></div>
-<div class="toggle-item"><span>Remember Trusted Devices</span><input type="checkbox" id="trustedDevices"></div>
-<div class="toggle-item"><span>Maintenance Mode</span><input type="checkbox" id="maintenanceMode"></div>
-</div>
+
+<section class="security-layout">
+  <div class="security-main-column">
+    <article class="security-panel identity-panel">
+      <div class="panel-heading"><div><span class="panel-kicker">01 / SIGN-IN DEFENCE</span><h2>Authenticator protection</h2><p>Use a time-based one-time password from an authenticator app. Codes are verified by Firebase Authentication.</p></div><span class="panel-symbol">⌁</span></div>
+      <div class="mfa-status-row"><div class="mfa-status-icon">◎</div><div class="mfa-status-copy"><strong id="mfaStatusTitle">Checking authenticator status</strong><span id="mfaStatusText">Reading enrolled authentication factors…</span></div><span id="mfaStatusBadge" class="security-badge">CHECKING</span></div>
+      <div id="mfaSetup" class="mfa-setup" hidden>
+        <div class="setup-instructions"><strong>Connect your authenticator</strong><p>Open Google Authenticator, Microsoft Authenticator, 1Password or another TOTP-compatible app. Add an account using the setup key below.</p></div>
+        <label class="security-label" for="totpSecret">One-time setup key</label>
+        <div class="secret-field"><input id="totpSecret" type="text" readonly autocomplete="off" spellcheck="false"><button type="button" id="copySecretBtn" class="outline-btn">Copy key</button></div>
+        <p class="security-warning">Keep this key private. Anyone who obtains it can generate your sign-in codes. Do not send it to anyone or save it in shared notes.</p>
+        <label class="security-label" for="totpCode">Enter the six-digit code from your authenticator</label>
+        <div class="verify-row"><input id="totpCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"><button type="button" id="verifyTotpBtn" class="gold-btn">Verify and enable</button></div>
+      </div>
+      <div id="mfaReauth" class="reauth-box">
+        <label class="security-label" for="reauthPassword">Confirm your password to configure MFA</label>
+        <div class="verify-row"><input id="reauthPassword" type="password" autocomplete="current-password" placeholder="Founder account password"><button type="button" id="startMfaBtn" class="gold-btn">Set up authenticator</button></div>
+        <p class="security-hint">This requires a recently authenticated, verified Founder account. Google-only accounts will be prompted to reauthenticate with Google.</p>
+      </div>
+      <div id="mfaEnabled" class="mfa-enabled" hidden><span class="enabled-check">✓</span><div><strong>Authenticator factor enrolled</strong><p>Firebase will require a valid second factor during future sign-ins. Keep access to your authenticator app.</p></div></div>
+    </article>
+
+    <article class="security-panel">
+      <div class="panel-heading"><div><span class="panel-kicker">02 / CREDENTIAL HYGIENE</span><h2>Change founder password</h2><p>Use a unique password that is not reused on another service.</p></div><span class="panel-symbol">⌑</span></div>
+      <div class="password-grid">
+        <label class="security-label">Current password<input id="currentPassword" type="password" autocomplete="current-password" placeholder="Current password"></label>
+        <label class="security-label">New password<input id="newPassword" type="password" autocomplete="new-password" minlength="12" placeholder="At least 12 characters"></label>
+        <label class="security-label">Confirm new password<input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat new password"></label>
+      </div>
+      <div class="panel-footer"><span class="security-hint">Password changes require reauthentication.</span><button type="button" id="changePasswordBtn" class="outline-btn">Update password</button></div>
+    </article>
+
+    <article class="security-panel">
+      <div class="panel-heading"><div><span class="panel-kicker">03 / SESSION CONTROL</span><h2>This device</h2><p>Review the signed-in identity and end this browser session when finished.</p></div><span class="panel-symbol">⌘</span></div>
+      <div class="session-detail-grid"><div><small>ACCOUNT</small><strong id="sessionEmail">—</strong></div><div><small>AUTH PROVIDER</small><strong id="sessionProvider">—</strong></div><div><small>EMAIL VERIFIED</small><strong id="sessionVerified">—</strong></div><div><small>LAST TOKEN REFRESH</small><strong id="sessionRefresh">—</strong></div></div>
+      <div class="panel-footer"><span class="security-hint">Signing out here does not revoke every other device.</span><button type="button" id="signOutBtn" class="danger-outline-btn">Sign out this device</button></div>
+    </article>
+  </div>
+
+  <aside class="security-side-column">
+    <article class="security-panel guidance-panel"><span class="panel-kicker">SECURITY STANDARD</span><h2>Founder baseline</h2><ul class="baseline-list"><li><span>01</span><div><strong>Verified identity</strong><small>Email ownership must be confirmed.</small></div></li><li><span>02</span><div><strong>Second factor</strong><small>Authenticator verification at sign-in.</small></div></li><li><span>03</span><div><strong>Least privilege</strong><small>Every page rechecks active Founder status.</small></div></li><li><span>04</span><div><strong>Protected evidence</strong><small>Security records must be server-controlled.</small></div></li></ul></article>
+    <article class="security-panel activity-panel"><div class="panel-heading"><div><span class="panel-kicker">04 / SECURITY TELEMETRY</span><h2>Recent events</h2></div><a href="command-center.html" class="text-link">Open command centre</a></div><div id="securityActivity" class="security-activity"><p class="security-empty">Security event feed will appear when the trusted event collector is connected.</p></div><p class="security-hint">Browser activity alone is not a complete attack log. Server-side collection is required for source IP and denied-request evidence.</p></article>
+  </aside>
 </section>
-<section class="glass-card section-card">
-<h2>🖥️ Sessions</h2>
-<div class="session-card"><div class="session-info"><h3>Current Device</h3><p id="currentSessionInfo">Authenticated session • Active now</p></div><span class="status-online">Online</span></div>
-<button class="secondary-btn" id="logoutAllBtn">🚪 Sign Out</button>
-<p class="empty-state" style="margin-top:14px">Firebase client sessions cannot revoke other devices from the browser. This signs out the current device safely.</p>
+<div id="securityToast" class="security-toast" role="status" aria-live="polite"></div>
 </section>
-<section class="glass-card section-card">
-<h2>📋 Security Activity</h2>
-<div id="securityActivity"><p class="empty-state">No recent security activity.</p></div>
-</section>
-<div class="action-bar"><button class="primary-btn" id="saveSecurityBtn">💾 Save Security Settings</button></div>
 </main>
 </div>
 <script type="module" src="./js/founder-app.js"></script>
