@@ -344,12 +344,12 @@ function renderCourseHeader() {
 async function migrateLegacyCurriculum() {
     // Preserve legacy top-level records; copy only when the nested ID is absent.
     const moduleQueries = [
-        query(collection(db, "courseModules"), where("courseId", "==", courseId)),
-        query(collection(db, "courseModules"), where("courseID", "==", courseId))
+        query(collection(db, "courseModules"), where("courseId", "==", courseId), where("instructorId", "==", instructor.uid)),
+        query(collection(db, "courseModules"), where("courseID", "==", courseId), where("instructorId", "==", instructor.uid))
     ];
     const lessonQueries = [
-        query(collection(db, "courseLessons"), where("courseId", "==", courseId)),
-        query(collection(db, "courseLessons"), where("courseID", "==", courseId))
+        query(collection(db, "courseLessons"), where("courseId", "==", courseId), where("instructorId", "==", instructor.uid)),
+        query(collection(db, "courseLessons"), where("courseID", "==", courseId), where("instructorId", "==", instructor.uid))
     ];
     const [moduleResults, lessonResults] = await Promise.all([
         Promise.all(moduleQueries.map(getDocs)),
