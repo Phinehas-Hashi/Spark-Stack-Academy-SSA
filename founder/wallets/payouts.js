@@ -33,7 +33,7 @@ function toast(message, type = "success") {
 async function verifyFounder(user) {
   const snap = await getDoc(doc(db, "founder", user.uid));
   const data = snap.exists() ? snap.data() : {};
-  if (!snap.exists() || data.role !== "founder" || data.status === "suspended") {
+  if (!snap.exists() || data.role !== "founder" || data.status !== "active" || data.active === false || data.verified === false) {
     toast("Founder authorization required", "error");
     setTimeout(() => { location.href = "../dashboard.html"; }, 900);
     return false;
@@ -101,11 +101,6 @@ function render() {
   }).join("") : `<tr><td colspan="6" class="empty">No payout requests found.</td></tr>`;
 }
 
-async function recordAudit(action, target, details) {
-  await addDoc(collection(db, "audit_logs"), {
-    user: me.uid, role: "founder", action, target, details, createdAt: serverTimestamp()
-  });
-}
 
 async function action(id, type) {
   if (type === "view") {
@@ -130,6 +125,21 @@ async function action(id, type) {
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid payout amount.");
   if (amount > Number(financeSecurity.withdrawalLimit || 50000)) throw new Error(`Payout exceeds the configured limit of ${money(financeSecurity.withdrawalLimit)}.`);
 
+  let reviewReason = "";
+  if (type === "reject") {
+    const rawReason = await window.ssaPrompt?.("Provide a reason for rejecting this payout request.", { title: "Reject payout", confirmText: "Continue", placeholder: "Explain why this payout cannot proceed..." });
+    reviewReason = String(rawReason || "").trim().slice(0,500);
+    if (!reviewReason) throw new Error("A rejection reason is required.");
+  }
+  const confirmMessage = type === "paid"
+    ? `Mark ${money(amount)} as paid to ${names.get(row.instructorId) || "this instructor"}? This will debit the treasury and instructor wallet.`
+    : type === "approve"
+      ? `Approve the ${money(amount)} payout request for ${names.get(row.instructorId) || "this instructor"}?`
+      : `Reject the ${money(amount)} payout request? The reason will be recorded.`;
+  const confirmed = window.ssaConfirm
+    ? await window.ssaConfirm(confirmMessage, { title: type === "paid" ? "Confirm settlement" : type === "approve" ? "Approve payout" : "Reject payout", confirmText: type === "paid" ? "Mark paid" : type === "approve" ? "Approve" : "Reject", cancelText: "Cancel", danger: type === "reject" })
+    : window.confirm(confirmMessage);
+  if (!confirmed) return;
   const status = type === "approve" ? "approved" : type === "reject" ? "rejected" : "paid";
   const treasuryRef = doc(db, "finance", "treasury");
 
@@ -160,6 +170,7 @@ async function action(id, type) {
       status,
       reviewedBy: me.uid,
       reviewedAt: serverTimestamp(),
+      reviewReason,
       updatedAt: serverTimestamp()
     });
   }
@@ -178,7 +189,7 @@ async function action(id, type) {
     });
   }
 
-  await recordAudit(`payout_${status}`, id, `${money(amount)} • ${row.instructorId || "Instructor"}`);
+  window.ssaSecuritySignal?.("founder_action", { portal: "founder", note: `Payout request ${status}` });
   toast(`Payout ${status}.`);
 }
 
