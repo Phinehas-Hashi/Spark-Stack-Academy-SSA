@@ -1,5 +1,6 @@
 import { auth, db } from "../js/firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { onAuthStateChanged, multiFactor, TotpMultiFactorGenerator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import "./js/founder-app.js";
 import {
   collection, doc, getDoc, getDocs, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -159,6 +160,11 @@ async function changePremium(uid, action, button) {
   }
 }
 async function verifyFounder(user) {
+  if (!user.emailVerified) throw new Error("Verify the Founder email address before continuing.");
+  const tokenResult = await user.getIdTokenResult();
+  const hasTotp = multiFactor(user).enrolledFactors.some(factor => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID);
+  const mfaVerified = tokenResult.claims.firebase?.sign_in_second_factor === "totp";
+  if (!hasTotp || !mfaVerified) throw new Error("Complete authenticator-app verification before managing Premium access.");
   const founderSnap = await getDoc(doc(db, "founder", user.uid));
   const founder = founderSnap.exists() ? founderSnap.data() : {};
   if (founder.role !== "founder" || founder.status !== "active" ||
