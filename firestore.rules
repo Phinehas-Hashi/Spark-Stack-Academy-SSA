@@ -301,6 +301,10 @@ service cloud.firestore {
                'lastSeen',
                'updatedAt'
              ])
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['online'])
+          || request.resource.data.online is bool
+        )
 
       // Staff may activate a student account only as part of admission approval.
       || (
@@ -1175,12 +1179,21 @@ service cloud.firestore {
           && enrollmentId == uid() + '_' + request.resource.data.courseId
           && request.resource.data.status == 'active'
           && request.resource.data.paymentStatus == 'free'
+          && request.resource.data.keys().hasOnly([
+            'userId', 'courseId', 'courseTitle', 'paymentStatus', 'status',
+            'progress', 'completedLessons', 'enrolledAt', 'updatedAt'
+          ])
+          && request.resource.data.progress == 0
+          && request.resource.data.completedLessons is list
+          && request.resource.data.completedLessons.size() == 0
+          && publicCourse(request.resource.data.courseId)
           && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId))
           && (
             get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('isFree', false) == true
             || (
-              get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) is number
-              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.get('price', 0) <= 0
+              get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.keys().hasAny(['price'])
+              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.price is number
+              && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.price <= 0
             )
           )
         );
@@ -1656,6 +1669,8 @@ service cloud.firestore {
         && request.resource.data.quizId is string
         && exists(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId))
         && get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.get('status', 'draft') in ['published', 'active']
+        && get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.get('courseId', '') == request.resource.data.courseId
+        && activeCourseEnrollment(request.resource.data.courseId)
         && request.resource.data.instructorId == get(/databases/$(database)/documents/quizzes/$(request.resource.data.quizId)).data.instructorId
         && request.resource.data.keys().hasOnly([
           'studentId', 'quizId', 'courseId', 'instructorId',
