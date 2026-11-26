@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#081c3a">
+  <title>People & Access | Spark Stack Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/institution.css">
+  <link rel="stylesheet" href="css/members.css">
+  <link rel="stylesheet" href="../css/brand-system.css?v=20261121-brand1">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="institution-app">
+  <aside id="institutionSidebar" class="institution-sidebar"></aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <main class="institution-main">
+    <header id="institutionTopbar" class="institution-topbar"></header>
+    <section class="page-wrap members-page">
+      <div class="members-heading">
+        <div><span class="eyebrow">INSTITUTION ADMINISTRATION</span><h1>People & access</h1><p>Manage everyone connected to this institution, their roles and their access status.</p></div>
+        <button class="primary-button" id="toggleMemberForm" type="button"><i data-lucide="user-plus"></i> Add member</button>
+      </div>
+
+      <section class="people-stats" aria-label="Institution member totals">
+        <article><span>Total members</span><strong id="countTotal">—</strong><small>All membership records</small></article>
+        <article><span>Students</span><strong id="countStudents">—</strong><small>Active learner accounts</small></article>
+        <article><span>Instructors</span><strong id="countInstructors">—</strong><small>Teaching team</small></article>
+        <article><span>Administrators</span><strong id="countAdmins">—</strong><small>Institution leadership</small></article>
+        <article><span>Moderators</span><strong id="countModerators">—</strong><small>Community and conduct</small></article>
+        <article><span>Other staff</span><strong id="countStaff">—</strong><small>Operational team</small></article>
+      </section>
+
+      <section class="member-create-panel" id="memberCreatePanel" hidden>
+        <div class="panel-heading"><div><span class="eyebrow">NEW ACCOUNT</span><h2>Add an institution member</h2><p>Create a new Academy sign-in and link it to this institution.</p></div><button class="icon-button" id="closeMemberForm" type="button" aria-label="Close form"><i data-lucide="x"></i></button></div>
+        <form id="memberForm" class="member-form">
+          <label>Full name<input name="fullName" required minlength="2" maxlength="100" autocomplete="name"></label>
+          <label>Email address<input name="email" type="email" required autocomplete="email"></label>
+          <label>Institution role<select name="role" id="newMemberRole" required>
+            <option value="student">Student</option>
+            <option value="instructor">Instructor</option>
+            <option value="institution_staff">Other staff</option>
+            <option value="institution_moderator">Moderator</option>
+            <option value="department_manager">Department manager</option>
+            <option value="institution_admin">Institution administrator</option>
+          </select></label>
+          <label>Temporary password<input name="temporaryPassword" type="password" required minlength="12" autocomplete="new-password"><small>Use a one-time password of at least 12 characters. Give it to the member securely and ask them to change it after signing in.</small></label>
+          <div class="member-form-actions"><button class="primary-button" id="createMemberBtn" type="submit">Create member account</button><p id="memberFormMessage" role="status" aria-live="polite"></p></div>
+        </form>
+        <p class="security-note"><i data-lucide="shield-check"></i> Account creation and role assignment are verified by the Academy backend. Existing Academy accounts require a separate account-linking invitation.</p>
+      </section>
+
+      <section class="directory-panel">
+        <div class="directory-heading"><div><span class="eyebrow">MEMBER DIRECTORY</span><h2>Institution members</h2><p>Search, filter and manage institution-specific access.</p></div><span class="directory-total" id="directoryTotal">Loading…</span></div>
+        <div class="directory-controls">
+          <label class="search-box"><i data-lucide="search"></i><input id="memberSearch" type="search" placeholder="Search name, email or member ID"></label>
+          <select id="roleFilter" aria-label="Filter by role"><option value="">All roles</option><option value="institution_owner">Owners</option><option value="institution_admin">Administrators</option><option value="institution_moderator">Moderators</option><option value="department_manager">Department managers</option><option value="institution_staff">Other staff</option><option value="instructor">Instructors</option><option value="student">Students</option></select>
+          <select id="statusFilter" aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="suspended">Suspended</option><option value="pending_verification">Pending</option><option value="revoked">Revoked</option></select>
+        </div>
+        <div class="table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Member</th><th>Institution role</th><th>Status</th><th>Joined</th><th>Management</th></tr></thead>
+            <tbody id="membersTableBody"><tr><td colspan="5" class="table-state">Loading institution members…</td></tr></tbody>
+          </table>
+        </div>
+        <p class="directory-footnote">Suspending or revoking a membership removes access to this institution only. It does not delete the person's Academy account or other institution memberships.</p>
+      </section>
+      <footer class="page-footer">Spark Stack Academy · Institution Portal</footer>
+    </section>
+  </main>
+</div>
+<script type="module" src="js/institution-app.js?v=20261126-members1"></script>
+<script type="module" src="js/members.js?v=20261126-members1"></script>
+</body>
+</html>
