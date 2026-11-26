@@ -45,10 +45,10 @@ async function verifyFirebaseToken(request, env) {
     algorithms: ["RS256"],
   });
   if (!payload.sub || !payload.user_id) throw new Error("Invalid Firebase identity token.");
-  return { uid: payload.sub, email: typeof payload.email === "string" ? payload.email : "" };
+  return { uid: payload.sub, email: typeof payload.email === "string" ? payload.email : "", secondFactor: payload.firebase?.sign_in_second_factor || "" };
 }
 async function isFounder(identity, env) {
-  if (!identity) return false;
+  if (!identity || identity.secondFactor !== "totp") return false;
   const url = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/founder/${encodeURIComponent(identity.uid)}`;
   const response = await fetch(url, { headers: { Authorization: `Bearer ${identity.token}` } });
   if (!response.ok) return false;
@@ -115,7 +115,7 @@ async function handleEvent(request, env) {
   if (!identity && !["login_failed", "mfa_failed"].includes(eventType)) {
     return json({ error: "Authentication required for this event." }, 401, allowedOrigin(request, env));
   }
-  if (eventType === "founder_control_changed" && (portal !== "founder" || !(await isFounder(identity, env)))) {
+  if (["founder_control_changed", "founder_action"].includes(eventType) && (portal !== "founder" || !(await isFounder(identity, env)))) {
     return json({ error: "Verified Founder identity required for this event." }, 403, allowedOrigin(request, env));
   }
 
