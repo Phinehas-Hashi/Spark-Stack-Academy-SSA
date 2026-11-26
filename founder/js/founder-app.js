@@ -82,10 +82,6 @@ function loadFounder(){
       if(founder.role!=="founder"||founder.status!=="active"||founder.active===false||founder.verified===false){
         throw new Error("Founder account is not active and verified.");
       }
-      if(!user.emailVerified){
-        window.location.replace("security.html");
-        return;
-      }
       sessionStorage.setItem("founderProfile",JSON.stringify(founder));
       updateFounderUI(founder);
       listenToNotifications(user.uid); loadTopNotifications(user.uid);
