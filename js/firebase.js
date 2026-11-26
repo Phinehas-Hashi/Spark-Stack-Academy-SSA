@@ -13,14 +13,13 @@ import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gs
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBlPs-9EU_YYiP4qZ6gFF9ZorJbbktXqC4",
-    authDomain: "spark-stack-academy.firebaseapp.com",
-    databaseURL: "https://spark-stack-academy-default-rtdb.firebaseio.com",
-    projectId: "spark-stack-academy",
-    storageBucket: "spark-stack-academy.firebasestorage.app",
-    messagingSenderId: "691304828755",
-    appId: "1:691304828755:web:b78b4c47ad007a5be39ba6",
-    measurementId: "G-2CJ4RW1PNZ"
+    apiKey: "AIzaSyBAXM3aTLHSifnpidG0VAqfpSIQJjx-XcI",
+    authDomain: "spark-stack-academy-ssa.firebaseapp.com",
+    projectId: "spark-stack-academy-ssa",
+    storageBucket: "spark-stack-academy-ssa.firebasestorage.app",
+    messagingSenderId: "375725708498",
+    appId: "1:375725708498:web:828c7c1875e06c87de490b",
+    measurementId: "G-8NG22QC3SF"
 };
 
 const app = initializeApp(firebaseConfig);
