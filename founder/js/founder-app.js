@@ -78,7 +78,7 @@ function loadFounder(){
       const snapshot=await getDoc(doc(db,"founder",user.uid));
       if(!snapshot.exists()) throw new Error("Founder profile not found.");
       const founder=snapshot.data();
-      if(founder.role!=="founder"||founder.status!=="active"||founder.active!==true||founder.verified!==true){
+      if(founder.role!=="founder"||founder.status!=="active"||founder.active===false||founder.verified===false){
         throw new Error("Founder account is not active and verified.");
       }
       const currentPage=window.location.pathname.split("/").pop()||"dashboard.html";
