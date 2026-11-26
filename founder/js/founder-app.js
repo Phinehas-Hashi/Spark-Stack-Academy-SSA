@@ -85,7 +85,9 @@ function loadFounder(){
       const currentPage=window.location.pathname.split("/").pop()||"dashboard.html";
       const isSecurityPage=currentPage==="security.html";
       const hasTotp=multiFactor(user).enrolledFactors.some(f=>f.factorId===TotpMultiFactorGenerator.FACTOR_ID);
-      if(!isSecurityPage&&(!user.emailVerified||!hasTotp)){
+      const tokenResult=await user.getIdTokenResult();
+      const mfaVerified=tokenResult.claims.firebase?.sign_in_second_factor==="totp";
+      if(!isSecurityPage&&(!user.emailVerified||!hasTotp||!mfaVerified)){
         window.location.replace("security.html");
         return;
       }
