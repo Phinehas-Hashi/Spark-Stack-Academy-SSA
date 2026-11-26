@@ -6,7 +6,6 @@ const functions = getFunctions(app);
 const saveSettingsCallable = httpsCallable(functions, "saveFounderMonetizationSettings");
 
 const ref = doc(db, "settings", "monetization");
-const earningsRef = doc(db, "platformSettings", "earnings");
 const $ = id => document.getElementById(id);
 
 const defaults = {
