@@ -1245,7 +1245,6 @@ service cloud.firestore {
           isStudent()
           && studentPortalOpen()
           && resource.data.get('status', 'published') in ['published', 'active']
-          && resource.data.get('published', true) == true
           && resource.data.get('courseId', '') is string
           && activeCourseEnrollment(resource.data.courseId)
         )
