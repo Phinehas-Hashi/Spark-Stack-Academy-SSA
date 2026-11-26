@@ -302,7 +302,7 @@ function getAccessDecision(profile) {
     }
 
     // Matches the current Firestore isAdmin() rule.
-    if (role === "admin" && data.active === true && data.status === "active") {
+    if (role === "admin" && data.active !== false) {
         return { allowed: true };
     }
 
