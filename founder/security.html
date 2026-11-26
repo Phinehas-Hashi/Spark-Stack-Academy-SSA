@@ -47,7 +47,7 @@
         <label class="security-label" for="totpCode">Enter the six-digit code from your authenticator</label>
         <div class="verify-row"><input id="totpCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"><button type="button" id="verifyTotpBtn" class="gold-btn">Verify and enable</button></div>
       </div>
-      <div id="emailVerifyNotice" class="reauth-box" hidden><strong>Verify your founder email</strong><p class="security-hint">Firebase requires a verified email before TOTP enrollment.</p><button type="button" id="sendVerifyEmailBtn" class="outline-btn">Send verification email</button></div>
+      <div id="emailVerifyNotice" class="reauth-box" hidden><strong>Verify your founder email</strong><p class="security-hint">Firebase requires a verified email before TOTP enrollment.</p><div class="verify-row"><button type="button" id="sendVerifyEmailBtn" class="outline-btn">Send verification email</button><button type="button" id="refreshEmailBtn" class="outline-btn">I have verified — refresh</button></div></div>
       <div id="mfaReauth" class="reauth-box">
         <label class="security-label" for="reauthPassword">Confirm your password to configure MFA</label>
         <div class="verify-row"><input id="reauthPassword" type="password" autocomplete="current-password" placeholder="Founder account password"><button type="button" id="startMfaBtn" class="gold-btn">Set up authenticator</button></div>
