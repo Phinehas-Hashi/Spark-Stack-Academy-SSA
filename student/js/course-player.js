@@ -208,24 +208,9 @@ async function checkCourseAccess() {
 }
 
 async function loadModules() {
-    modules = [];
-    const lookups = [
-        query(collection(db, "courseModules"), where("courseId", "==", courseId)),
-        query(collection(db, "courseModules"), where("courseID", "==", courseId))
-    ];
-    const results = await Promise.allSettled(lookups.map(item => getDocs(item)));
-    const byId = new Map();
-    let successful = 0;
-    for (const result of results) {
-        if (result.status !== "fulfilled") { console.warn("A module lookup was unavailable:", result.reason); continue; }
-        successful++;
-        result.value.docs.forEach(item => { if (!byId.has(item.id)) byId.set(item.id, { id: item.id, ...(item.data() || {}) }); });
-    }
-    if (!successful) {
-        console.warn("Course module records are unavailable; lessons will be shown in a single list.");
-        return;
-    }
-    modules = [...byId.values()].sort((a,b) => Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0));
+    const snapshot = await getDocs(collection(db, "courses", courseId, "courseModules"));
+    modules = snapshot.docs.map(item => ({ id: item.id, ...(item.data() || {}) }))
+        .sort((a,b) => Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0));
 }
 
 async function loadAssignments() {
@@ -249,41 +234,8 @@ async function loadAssignments() {
 }
 
 async function loadLessons() {
-    lessons = [];
-
-    // New lessons use courseId. Older imported records may use courseID.
-    // Query both supported fields and merge by document ID.
-    const lessonQueries = [
-        query(collection(db, "courseLessons"), where("courseId", "==", courseId)),
-        query(collection(db, "courseLessons"), where("courseID", "==", courseId))
-    ];
-
-    const results = await Promise.allSettled(
-        lessonQueries.map(lessonQuery => getDocs(lessonQuery))
-    );
-
-    const byId = new Map();
-    let successfulQueries = 0;
-
-    for (const result of results) {
-        if (result.status !== "fulfilled") {
-            console.warn("A course lesson lookup was unavailable:", result.reason);
-            continue;
-        }
-
-        successfulQueries++;
-        result.value.docs.forEach(item => {
-            if (!byId.has(item.id)) {
-                byId.set(item.id, { id: item.id, ...(item.data() || {}) });
-            }
-        });
-    }
-
-    if (!successfulQueries) {
-        throw new Error("Course lessons could not be read. Check student access and Firestore rules.");
-    }
-
-    lessons = [...byId.values()];
+    const snapshot = await getDocs(collection(db, "courses", courseId, "courseLessons"));
+    lessons = snapshot.docs.map(item => ({ id: item.id, ...(item.data() || {}) }));
     lessons.sort((a, b) => {
         const orderDiff = Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0);
         return orderDiff || String(a.title || "").localeCompare(String(b.title || ""));

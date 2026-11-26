@@ -239,22 +239,8 @@ async function loadCourse() {
 
 async function loadModules() {
     try {
-        const lookups = [
-            query(collection(db, "courseModules"), where("courseId", "==", courseId)),
-            query(collection(db, "courseModules"), where("courseID", "==", courseId))
-        ];
-        const results = await Promise.allSettled(lookups.map(item => getDocs(item)));
-        const byId = new Map();
-        for (const result of results) {
-            if (result.status !== "fulfilled") {
-                console.warn("A course module lookup was unavailable:", result.reason);
-                continue;
-            }
-            result.value.docs.forEach(item => {
-                if (!byId.has(item.id)) byId.set(item.id, { id: item.id, ...item.data() });
-            });
-        }
-        modules = [...byId.values()];
+        const snapshot = await getDocs(collection(db, "courses", courseId, "courseModules"));
+        modules = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
         modules.sort((a, b) =>
             Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0)
         );
@@ -265,37 +251,10 @@ async function loadModules() {
 }
 
 async function loadLessons(hasEnrollment = false) {
-    const lessonQueries = hasEnrollment
-        ? [
-            query(collection(db, "courseLessons"), where("courseId", "==", courseId)),
-            query(collection(db, "courseLessons"), where("courseID", "==", courseId))
-        ]
-        : [
-            query(collection(db, "courseLessons"), where("courseId", "==", courseId), where("isPreview", "==", true)),
-            query(collection(db, "courseLessons"), where("courseID", "==", courseId), where("isPreview", "==", true))
-        ];
-
-    const results = await Promise.allSettled(
-        lessonQueries.map(lessonQuery => getDocs(lessonQuery))
-    );
-
-    const byId = new Map();
-    for (const result of results) {
-        if (result.status !== "fulfilled") {
-            console.warn("A course curriculum lookup was unavailable:", result.reason);
-            continue;
-        }
-        result.value.docs.forEach(lessonDoc => {
-            if (!byId.has(lessonDoc.id)) {
-                byId.set(lessonDoc.id, {
-                    id: lessonDoc.id,
-                    ...lessonDoc.data()
-                });
-            }
-        });
-    }
-
-    lessons = [...byId.values()];
+    const lessonCollection = collection(db, "courses", courseId, "courseLessons");
+    const lessonQuery = hasEnrollment ? lessonCollection : query(lessonCollection, where("isPreview", "==", true));
+    const snapshot = await getDocs(lessonQuery);
+    lessons = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
     lessons.sort((a, b) =>
         Number(a.order ?? a.position ?? 0) - Number(b.order ?? b.position ?? 0)
     );
