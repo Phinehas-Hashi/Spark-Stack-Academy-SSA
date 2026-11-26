@@ -118,9 +118,24 @@ async function resolveUserProfile(user) {
 
     if (founderSnap.exists() && founderSnap.data().role === "founder") {
         const founderData = founderSnap.data();
+        const diagnosticCode = founderData.status !== "active"
+            ? "FOUNDER_STATUS_NOT_ACTIVE"
+            : founderData.active === false
+                ? "FOUNDER_ACTIVE_FALSE"
+                : founderData.verified === false
+                    ? "FOUNDER_NOT_VERIFIED"
+                    : null;
         return {
             userRef,
             source: "founder",
+            diagnostic: {
+                code: diagnosticCode,
+                documentFound: true,
+                roleMatched: true,
+                statusActive: founderData.status === "active",
+                activeField: founderData.active === true,
+                verifiedField: founderData.verified === true
+            },
             userData: {
                 ...(userData || {}),
                 uid: user.uid,
@@ -133,11 +148,27 @@ async function resolveUserProfile(user) {
         };
     }
 
-    if (!userData) return { userRef, userData: null, source: "missing" };
+    if (!userData) {
+        return {
+            userRef,
+            userData: null,
+            source: "missing",
+            diagnostic: { code: founderSnap.exists() ? "FOUNDER_ROLE_MISMATCH" : "FOUNDER_DOC_NOT_FOUND", documentFound: founderSnap.exists() }
+        };
+    }
 
     // A users document cannot grant Founder access by itself.
     if (userData.role === "founder") {
-        return { userRef, userData: { ...userData, active: false }, source: "invalid-founder" };
+        return {
+            userRef,
+            userData: { ...userData, active: false },
+            source: "invalid-founder",
+            diagnostic: {
+                code: founderSnap.exists() ? "FOUNDER_ROLE_MISMATCH" : "FOUNDER_DOC_NOT_FOUND",
+                documentFound: founderSnap.exists(),
+                roleMatched: founderSnap.exists() && founderSnap.data().role === "founder"
+            }
+        };
     }
     return { userRef, userData, source: "users" };
 }
@@ -250,7 +281,13 @@ async function finishSignIn(user) {
     });
 
     if (!decision.allowed) {
-        await rejectSession(decision.message);
+        const diagnosticCode = profile.userData?.role === "founder"
+            ? profile.diagnostic?.code || "FOUNDER_ACCESS_REJECTED"
+            : null;
+        const userMessage = diagnosticCode
+            ? `${decision.message} Diagnostic: ${diagnosticCode}. Please share this code with support.`
+            : decision.message;
+        await rejectSession(userMessage);
         return;
     }
 
