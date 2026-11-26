@@ -38,6 +38,8 @@ jobs:
             founder/analytics.js
             founder/students.js
             founder/instructors.js
+            functions/index.js
+            founder/courses.js
             founder/instructor-admissions.js
             founder/wallets/payouts.js
             js/firebase.js
