@@ -205,7 +205,7 @@ function showTotpChallenge(error) {
         modal.setAttribute("aria-labelledby", "founderMfaTitle");
         modal.innerHTML = '<div class="loader-box" style="max-width:430px"><h2 id="founderMfaTitle">Founder verification</h2><p>Enter the current six-digit code from your authenticator app to complete sign-in.</p><label for="founderMfaCode" style="display:block;text-align:left;margin:18px 0 7px">Authenticator code</label><input id="founderMfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(214,183,121,.45);background:#171612;color:#fff;font-size:1.2rem;letter-spacing:.25em;text-align:center"><p id="founderMfaError" role="alert" style="color:#d87870;min-height:20px"></p><button type="button" id="founderMfaVerify" class="primary-btn" style="width:100%">Verify and continue</button><button type="button" id="founderMfaCancel" class="google-btn" style="width:100%;margin-top:10px">Cancel sign-in</button></div>';
         document.body.appendChild(modal);
-        document.getElementById("founderMfaCode").addEventListener("input", event => { event.target.value = event.target.value.replace(/\\D/g, "").slice(0,6); });
+        document.getElementById("founderMfaCode").addEventListener("input", event => { event.target.value = event.target.value.replace(/\D/g, "").slice(0,6); });
         document.getElementById("founderMfaCancel").addEventListener("click", async () => {
             activeMfaResolver = null;
             modal.remove();
@@ -215,7 +215,7 @@ function showTotpChallenge(error) {
             const code = document.getElementById("founderMfaCode").value.trim();
             const errorBox = document.getElementById("founderMfaError");
             const button = document.getElementById("founderMfaVerify");
-            if (!/^\\d{6}$/.test(code)) { errorBox.textContent = "Enter the six-digit code."; return; }
+            if (!/^\d{6}$/.test(code)) { errorBox.textContent = "Enter the six-digit code."; return; }
             button.disabled = true;
             button.textContent = "Verifying…";
             errorBox.textContent = "";
