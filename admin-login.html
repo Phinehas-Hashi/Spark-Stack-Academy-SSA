@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101114">
+  <meta name="description" content="Secure administrative access to Spark Stack Academy.">
+  <title>Admin &amp; Founder Access | Spark Stack Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin-login.css?v=20261126-privileged1">
+</head>
+<body>
+  <main class="access-layout">
+    <section class="access-visual">
+      <a class="brand" href="index.html">
+        <img src="assets/images/ssa-logo.png" alt="Spark Stack Academy">
+        <span><strong>SPARK STACK</strong><small>INTERNATIONAL · ACADEMY</small></span>
+      </a>
+      <div class="visual-copy">
+        <span class="eyebrow">RESTRICTED SYSTEM ACCESS</span>
+        <h1>One secure gateway.<br><em>Two privileged roles.</em></h1>
+        <p>Administrative and Founder access is verified independently from learner and instructor accounts.</p>
+      </div>
+      <div class="security-points">
+        <div><span class="point-icon">01</span><span><strong>Founder-first verification</strong><small>Canonical Founder record checked before admin profile.</small></span></div>
+        <div><span class="point-icon">02</span><span><strong>Role-bound access</strong><small>Only active, explicitly authorized accounts proceed.</small></span></div>
+        <div><span class="point-icon">03</span><span><strong>Existing Firebase identity</strong><small>No duplicate account or new authentication system.</small></span></div>
+      </div>
+      <div class="visual-footer">SPARK STACK ACADEMY <span>·</span> PRIVILEGED CONSOLE</div>
+    </section>
+
+    <section class="access-panel">
+      <div class="mobile-brand"><img src="assets/images/ssa-logo.png" alt="Spark Stack Academy"></div>
+      <div class="access-card">
+        <div class="shield-mark" aria-hidden="true">✦</div>
+        <span class="eyebrow">ADMINISTRATION / FOUNDER</span>
+        <h2>Privileged sign in</h2>
+        <p class="intro">Use your authorized Academy account. Your portal is selected automatically after verification.</p>
+
+        <form id="privilegedLoginForm" novalidate>
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="username" inputmode="email" placeholder="name@domain.com" required>
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+            <button type="button" id="togglePassword" aria-label="Show password">Show</button>
+          </div>
+          <div class="form-options">
+            <label class="remember"><input type="checkbox" id="rememberMe" checked> Keep me signed in</label>
+            <button type="button" id="forgotPassword">Forgot password?</button>
+          </div>
+          <button class="submit-btn" id="loginButton" type="submit"><span>Verify and continue</span><b aria-hidden="true">→</b></button>
+        </form>
+
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+        <div class="access-note"><span aria-hidden="true">▣</span> This gateway does not accept student or instructor accounts.</div>
+        <a class="back-link" href="login.html">← Return to Academy login</a>
+      </div>
+      <footer>Protected by Firebase Authentication &amp; Firestore authorization</footer>
+    </section>
+  </main>
+  <script type="module" src="js/admin-login.js?v=20261126-privileged1"></script>
+</body>
+</html>
