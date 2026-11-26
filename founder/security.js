@@ -2,7 +2,7 @@ import { auth, db } from "../../js/firebase.js";
 import {
   EmailAuthProvider, GoogleAuthProvider, TotpMultiFactorGenerator,
   multiFactor, reauthenticateWithCredential, reauthenticateWithPopup,
-  updatePassword, signOut
+  updatePassword, signOut, sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -27,7 +27,6 @@ function setButton(id, disabled, label) {
 
 async function verifyFounder(user) {
   if (!user) throw new Error("No authenticated account found.");
-  if (!user.emailVerified) throw new Error("Verify the founder account email before configuring multi-factor authentication.");
   const snap = await getDoc(doc(db, "founder", user.uid));
   if (!snap.exists()) throw new Error("Founder profile does not exist.");
   const profile = snap.data();
@@ -54,6 +53,7 @@ async function reauthenticateFounder(password) {
 function renderIdentity(user) {
   const factors = multiFactor(user).enrolledFactors;
   const hasTotp = factors.some(factor => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID);
+  $("emailVerifyNotice").hidden = user.emailVerified;
   $("mfaMetric").textContent = hasTotp ? "Enabled" : "Not enabled";
   $("mfaMetricNote").textContent = hasTotp ? "Authenticator factor enrolled" : "Founder setup required";
   $("emailMetric").textContent = user.emailVerified ? "Verified" : "Unverified";
@@ -76,6 +76,7 @@ function renderIdentity(user) {
 }
 
 async function startTotpEnrollment() {
+  if (!founderUser.emailVerified) return notify("Verify your founder email before enabling MFA.", "error");
   setButton("startMfaBtn", true, "Preparing…");
   try {
     await reauthenticateFounder($("reauthPassword")?.value || "");
@@ -161,6 +162,7 @@ async function initialize() {
 }
 
 $("startMfaBtn")?.addEventListener("click", startTotpEnrollment);
+$("sendVerifyEmailBtn")?.addEventListener("click", async () => { try { await sendEmailVerification(founderUser); notify("Verification email sent. Check your inbox."); } catch (error) { notify(error.message || "Could not send verification email.", "error"); } });
 $("verifyTotpBtn")?.addEventListener("click", confirmTotpEnrollment);
 $("copySecretBtn")?.addEventListener("click", async () => {
   if (!$("totpSecret")?.value) return;
