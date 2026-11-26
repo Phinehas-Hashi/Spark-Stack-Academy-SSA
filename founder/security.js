@@ -190,6 +190,7 @@ async function initialize() {
     if (!founderUser) throw new Error("Founder session not found. Sign in again.");
     await verifyFounder(founderUser);
     renderIdentity(founderUser);
+    await loadRecentSecurityEvents(founderUser);
   } catch (error) {
     console.error("[Founder Security] Initialization failed:", error);
     notify(error.message || "Unable to load founder security.", "error");
